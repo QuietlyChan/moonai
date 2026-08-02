@@ -1,0 +1,48 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/openai"
+
+import {
+  "QuietlyChan/moonai",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn create_openai(api_key~ : String, base_url? : String, provider_name? : String, headers? : Map[String, String], preserve_reasoning? : Bool, idle_timeout_ms? : Int) -> OpenAIProvider
+
+pub fn encode_chat_request(String, @moonai.ChatCallOptions, preserve_reasoning? : Bool) -> Json
+
+pub fn openai(String, api_key~ : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> OpenAICompatibleModel
+
+pub fn openai_compatible(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleModel
+
+// Errors
+
+// Types and methods
+pub(all) struct DecodeBatch {
+  events : Array[@moonai.StreamEvent]
+  consumed_event : Bool
+  done : Bool
+} derive(@debug.Debug)
+
+pub struct OpenAICompatibleModel {
+  // private fields
+}
+pub impl @moonai.ChatModel for OpenAICompatibleModel
+
+pub struct OpenAIProvider {
+  // private fields
+}
+pub fn OpenAIProvider::chat(Self, String) -> OpenAICompatibleModel
+
+pub struct OpenAIStreamDecoder {
+  // private fields
+}
+pub fn OpenAIStreamDecoder::feed_line(Self, String) -> DecodeBatch raise
+pub fn OpenAIStreamDecoder::flush_buffered(Self) -> DecodeBatch raise
+pub fn OpenAIStreamDecoder::new() -> Self
+pub fn OpenAIStreamDecoder::response(Self) -> @moonai.ChatResponse
+
+// Type aliases
+
+// Traits
+

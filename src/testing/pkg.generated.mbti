@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/testing"
+
+import {
+  "QuietlyChan/moonai",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct MockChatModel {
+  // private fields
+}
+pub fn MockChatModel::captured_messages(Self) -> Array[@moonai.Message]
+pub fn MockChatModel::new(Array[@moonai.StreamEvent], @moonai.ChatResponse, provider_name? : String, model_id? : String) -> Self
+pub impl @moonai.ChatModel for MockChatModel
+
+// Type aliases
+
+// Traits
+

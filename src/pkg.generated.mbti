@@ -1,0 +1,153 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub async fn streamText(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
+
+pub async fn stream_text(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, stop_sequences? : Array[String], provider_options? : Map[String, Json], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
+
+// Errors
+
+// Types and methods
+pub(all) struct AppliedToolCallDelta {
+  index : Int
+  stream_id : String
+  tool_name : String
+  started : Bool
+  arguments_delta : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ChatCallOptions {
+  messages : Array[Message]
+  tools : Array[ToolDefinition]
+  tool_choice : ToolChoice
+  response_format : ResponseFormat
+  max_output_tokens : Int?
+  temperature : Double?
+  top_p : Double?
+  stop_sequences : Array[String]
+  provider_options : Map[String, Json]
+} derive(@debug.Debug)
+pub fn ChatCallOptions::new(Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, stop_sequences? : Array[String], provider_options? : Map[String, Json]) -> Self
+
+pub(all) struct ChatResponse {
+  text : String
+  reasoning : String
+  tool_calls : Array[ToolCall]
+  usage : Usage
+  finish_reason : FinishReason
+} derive(Eq, @debug.Debug)
+pub fn ChatResponse::empty() -> Self
+
+pub(all) enum FinishReason {
+  Stop
+  Length
+  ToolCalls
+  ContentFilter
+  Error
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn FinishReason::from_openai(String) -> Self
+
+pub(all) struct Message {
+  role : Role
+  content : String
+  tool_calls : Array[ToolCall]
+  reasoning_content : String?
+} derive(Eq, @debug.Debug)
+pub fn Message::assistant(String, tool_calls? : Array[ToolCall], reasoning_content? : String) -> Self
+pub fn Message::new(Role, content~ : String, tool_calls? : Array[ToolCall], reasoning_content? : String) -> Self
+pub fn Message::system(String) -> Self
+pub fn Message::tool(String, String) -> Self
+pub fn Message::user(String) -> Self
+
+pub(all) enum ResponseFormat {
+  Text
+  JsonObject
+  JsonSchema(name~ : String, schema~ : Json, strict~ : Bool)
+} derive(@debug.Debug)
+
+pub(all) enum Role {
+  System
+  User
+  Assistant
+  Tool(String)
+} derive(Eq, @debug.Debug)
+pub fn Role::to_openai_string(Self) -> String
+
+pub(all) enum StreamEvent {
+  StreamStart
+  TextStart(String)
+  TextDelta(id~ : String, delta~ : String)
+  TextEnd(String)
+  ReasoningStart(String)
+  ReasoningDelta(id~ : String, delta~ : String)
+  ReasoningEnd(String)
+  ToolInputStart(id~ : String, tool_name~ : String)
+  ToolInputDelta(id~ : String, delta~ : String)
+  ToolInputEnd(String)
+  ToolCallReady(ToolCall)
+  Finish(usage~ : Usage, reason~ : FinishReason)
+  Raw(Json)
+  StreamError(String)
+} derive(@debug.Debug)
+
+pub(all) struct ToolCall {
+  id : String
+  name : String
+  arguments : String
+} derive(Eq, @debug.Debug)
+pub fn ToolCall::new(id~ : String, name~ : String, arguments~ : String) -> Self
+
+pub(all) struct ToolCallDelta {
+  index : Int
+  id : String?
+  name : String?
+  arguments_delta : String?
+} derive(Eq, @debug.Debug)
+pub fn ToolCallDelta::new(index~ : Int, id? : String, name? : String, arguments_delta? : String) -> Self
+
+pub struct ToolCallDeltaAssembler {
+  // private fields
+}
+pub fn ToolCallDeltaAssembler::apply(Self, ToolCallDelta) -> AppliedToolCallDelta raise
+pub fn ToolCallDeltaAssembler::calls(Self) -> Array[ToolCall]
+pub fn ToolCallDeltaAssembler::new() -> Self
+
+pub(all) enum ToolChoice {
+  Auto
+  NoTool
+  Required
+  Named(String)
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ToolDefinition {
+  name : String
+  description : String
+  parameters : Json
+  strict : Bool
+} derive(@debug.Debug)
+pub fn ToolDefinition::new(String, String, Json, strict? : Bool) -> Self
+
+pub(all) struct Usage {
+  input_tokens : Int
+  output_tokens : Int
+  total_tokens : Int
+  reasoning_tokens : Int
+  cached_input_tokens : Int
+} derive(Eq, @debug.Debug)
+pub fn Usage::zero() -> Self
+
+// Type aliases
+
+// Traits
+pub(open) trait ChatModel {
+  fn provider(Self) -> String
+  fn model_id(Self) -> String
+  async fn stream(Self, ChatCallOptions, async (StreamEvent) -> Unit) -> ChatResponse
+}
+

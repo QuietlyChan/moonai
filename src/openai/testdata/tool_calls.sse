@@ -1,0 +1,12 @@
+data: {"id":"chatcmpl-golden","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"checking "},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-golden","choices":[{"index":0,"delta":{"reasoning_content":"tools","tool_calls":[{"index":0,"id":"call_weather","type":"function","function":{"name":"get_weather","arguments":"{\"city\""}},{"index":1,"id":"call_time","type":"function","function":{"name":"get_time","arguments":"{\"zone\""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-golden","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":":\"Asia/Shanghai\"}"}},{"index":0,"function":{"arguments":":\"Hangzhou\"}"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-golden","choices":[{"index":0,"delta":{"content":"It is sunny."},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-golden","choices":[],"usage":{"prompt_tokens":12,"completion_tokens":7,"total_tokens":19,"completion_tokens_details":{"reasoning_tokens":2},"prompt_tokens_details":{"cached_tokens":3}}}
+
+data: [DONE]
+
