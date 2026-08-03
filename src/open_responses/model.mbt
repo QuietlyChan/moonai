@@ -61,6 +61,15 @@ pub fn OpenResponsesProvider::language_model(
 }
 
 ///|
+/// Camel-case compatibility alias for `language_model`.
+pub fn OpenResponsesProvider::languageModel(
+  self : OpenResponsesProvider,
+  model_id : String,
+) -> OpenResponsesLanguageModel {
+  self.language_model(model_id)
+}
+
+///|
 /// Select a model using the Responses API name.
 pub fn OpenResponsesProvider::responses(
   self : OpenResponsesProvider,
@@ -129,6 +138,14 @@ pub impl @moonai.ChatModel for OpenResponsesLanguageModel with fn provider(self)
 ///|
 pub impl @moonai.ChatModel for OpenResponsesLanguageModel with fn model_id(self) -> String {
   self.model_id
+}
+
+///|
+pub impl @moonai.ChatModel for OpenResponsesLanguageModel with fn generate(
+  self,
+  options,
+) {
+  self.generate_responses(options)
 }
 
 ///|

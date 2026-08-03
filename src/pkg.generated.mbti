@@ -6,9 +6,31 @@ import {
 }
 
 // Values
-pub async fn streamText(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, stop_sequences? : Array[String], provider_options? : Map[String, Json], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
+pub async fn complete(&CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json]) -> CompletionResponse
 
-pub async fn stream_text(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, stop_sequences? : Array[String], provider_options? : Map[String, Json], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
+pub async fn embed(&EmbeddingModel, String, dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json]) -> EmbeddingResponse
+
+pub async fn embedMany(&EmbeddingModel, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json]) -> EmbeddingBatchResponse
+
+pub async fn embed_many(&EmbeddingModel, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json]) -> EmbeddingBatchResponse
+
+pub async fn generateImage(&ImageModel, String, n? : Int, size? : String, headers? : Map[String, String], provider_options? : Map[String, Json]) -> ImageResponse
+
+pub async fn generateObject(&ChatModel, Json, prompt? : String, messages? : Array[Message], name? : String, strict? : Bool, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json]) -> ObjectResponse
+
+pub async fn generateText(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json]) -> ChatResponse
+
+pub async fn generate_image(&ImageModel, String, n? : Int, size? : String, headers? : Map[String, String], provider_options? : Map[String, Json]) -> ImageResponse
+
+pub async fn generate_object(&ChatModel, Json, prompt? : String, messages? : Array[Message], name? : String, strict? : Bool, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json]) -> ObjectResponse
+
+pub async fn generate_text(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json]) -> ChatResponse
+
+pub async fn streamText(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
+
+pub async fn stream_completion(&CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], on_event? : async (StreamEvent) -> Unit) -> CompletionResponse
+
+pub async fn stream_text(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
 
 // Errors
 
@@ -29,10 +51,15 @@ pub(all) struct ChatCallOptions {
   max_output_tokens : Int?
   temperature : Double?
   top_p : Double?
+  frequency_penalty : Double?
+  presence_penalty : Double?
+  seed : Int?
   stop_sequences : Array[String]
+  include_raw_chunks : Bool
+  headers : Map[String, String]
   provider_options : Map[String, Json]
 } derive(@debug.Debug)
-pub fn ChatCallOptions::new(Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, stop_sequences? : Array[String], provider_options? : Map[String, Json]) -> Self
+pub fn ChatCallOptions::new(Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json]) -> Self
 
 pub(all) struct ChatResponse {
   text : String
@@ -42,6 +69,59 @@ pub(all) struct ChatResponse {
   finish_reason : FinishReason
 } derive(Eq, @debug.Debug)
 pub fn ChatResponse::empty() -> Self
+
+pub(all) struct CompletionOptions {
+  prompt : String
+  suffix : String?
+  max_output_tokens : Int?
+  temperature : Double?
+  top_p : Double?
+  frequency_penalty : Double?
+  presence_penalty : Double?
+  seed : Int?
+  stop_sequences : Array[String]
+  include_raw_chunks : Bool
+  headers : Map[String, String]
+  provider_options : Map[String, Json]
+} derive(@debug.Debug)
+pub fn CompletionOptions::new(String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json]) -> Self
+
+pub(all) struct CompletionResponse {
+  text : String
+  usage : Usage
+  finish_reason : FinishReason
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ContentPart {
+  Text(String)
+  ImageUrl(String)
+  ImageData(data~ : String, media_type~ : String)
+  AudioData(data~ : String, format~ : String)
+  FileData(data~ : String, media_type~ : String, filename~ : String)
+} derive(Eq, @debug.Debug)
+pub fn ContentPart::audio_data(data~ : String, format~ : String) -> Self
+pub fn ContentPart::file_data(data~ : String, media_type~ : String, filename~ : String) -> Self
+pub fn ContentPart::image_data(data~ : String, media_type~ : String) -> Self
+pub fn ContentPart::image_url(String) -> Self
+pub fn ContentPart::text(String) -> Self
+
+pub(all) struct EmbeddingBatchResponse {
+  embeddings : Array[Array[Double]]
+  usage : Usage
+} derive(Eq, @debug.Debug)
+
+pub(all) struct EmbeddingOptions {
+  dimensions : Int?
+  user : String?
+  headers : Map[String, String]
+  provider_options : Map[String, Json]
+} derive(@debug.Debug)
+pub fn EmbeddingOptions::new(dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json]) -> Self
+
+pub(all) struct EmbeddingResponse {
+  embedding : Array[Double]
+  usage : Usage
+} derive(Eq, @debug.Debug)
 
 pub(all) enum FinishReason {
   Stop
@@ -53,17 +133,50 @@ pub(all) enum FinishReason {
 } derive(Eq, @debug.Debug)
 pub fn FinishReason::from_openai(String) -> Self
 
+pub(all) struct GeneratedImage {
+  data : ImageData
+  revised_prompt : String?
+} derive(Eq, @debug.Debug)
+pub fn GeneratedImage::new(ImageData, revised_prompt? : String) -> Self
+
+pub(all) struct ImageCallOptions {
+  prompt : String
+  n : Int
+  size : String?
+  headers : Map[String, String]
+  provider_options : Map[String, Json]
+} derive(@debug.Debug)
+pub fn ImageCallOptions::new(String, n? : Int, size? : String, headers? : Map[String, String], provider_options? : Map[String, Json]) -> Self
+
+pub(all) enum ImageData {
+  Base64(String)
+  Url(String)
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ImageResponse {
+  images : Array[GeneratedImage]
+  usage : Usage
+} derive(Eq, @debug.Debug)
+
 pub(all) struct Message {
   role : Role
   content : String
+  parts : Array[ContentPart]
   tool_calls : Array[ToolCall]
   reasoning_content : String?
 } derive(Eq, @debug.Debug)
 pub fn Message::assistant(String, tool_calls? : Array[ToolCall], reasoning_content? : String) -> Self
-pub fn Message::new(Role, content~ : String, tool_calls? : Array[ToolCall], reasoning_content? : String) -> Self
+pub fn Message::assistant_parts(Array[ContentPart], tool_calls? : Array[ToolCall], reasoning_content? : String) -> Self
+pub fn Message::new(Role, content~ : String, parts? : Array[ContentPart], tool_calls? : Array[ToolCall], reasoning_content? : String) -> Self
 pub fn Message::system(String) -> Self
 pub fn Message::tool(String, String) -> Self
 pub fn Message::user(String) -> Self
+pub fn Message::user_parts(Array[ContentPart]) -> Self
+
+pub(all) struct ObjectResponse {
+  object : Json
+  response : ChatResponse
+} derive(@debug.Debug)
 
 pub(all) enum ResponseFormat {
   Text
@@ -140,6 +253,7 @@ pub(all) struct Usage {
   reasoning_tokens : Int
   cached_input_tokens : Int
 } derive(Eq, @debug.Debug)
+pub fn Usage::add(Self, Self) -> Self
 pub fn Usage::zero() -> Self
 
 // Type aliases
@@ -148,6 +262,28 @@ pub fn Usage::zero() -> Self
 pub(open) trait ChatModel {
   fn provider(Self) -> String
   fn model_id(Self) -> String
+  async fn generate(Self, ChatCallOptions) -> ChatResponse
   async fn stream(Self, ChatCallOptions, async (StreamEvent) -> Unit) -> ChatResponse
+}
+
+pub(open) trait CompletionModel {
+  fn provider(Self) -> String
+  fn model_id(Self) -> String
+  async fn generate(Self, CompletionOptions) -> CompletionResponse
+  async fn stream(Self, CompletionOptions, async (StreamEvent) -> Unit) -> CompletionResponse
+}
+
+pub(open) trait EmbeddingModel {
+  fn provider(Self) -> String
+  fn model_id(Self) -> String
+  fn max_embeddings_per_call(Self) -> Int
+  async fn embed(Self, Array[String], EmbeddingOptions) -> EmbeddingBatchResponse
+}
+
+pub(open) trait ImageModel {
+  fn provider(Self) -> String
+  fn model_id(Self) -> String
+  fn max_images_per_call(Self) -> Int
+  async fn generate(Self, ImageCallOptions) -> ImageResponse
 }
 

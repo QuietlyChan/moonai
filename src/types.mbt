@@ -57,10 +57,58 @@ pub fn ToolCall::new(
 }
 
 ///|
+/// A multimodal content part in a user or assistant message.
+pub(all) enum ContentPart {
+  Text(String)
+  ImageUrl(String)
+  ImageData(data~ : String, media_type~ : String)
+  AudioData(data~ : String, format~ : String)
+  FileData(data~ : String, media_type~ : String, filename~ : String)
+} derive(Debug, Eq)
+
+///|
+/// Construct a text content part.
+pub fn ContentPart::text(value : String) -> ContentPart {
+  Text(value)
+}
+
+///|
+/// Construct an image URL content part.
+pub fn ContentPart::image_url(value : String) -> ContentPart {
+  ImageUrl(value)
+}
+
+///|
+/// Construct a base64 image content part.
+pub fn ContentPart::image_data(
+  data~ : String,
+  media_type~ : String,
+) -> ContentPart {
+  ImageData(data~, media_type~)
+}
+
+///|
+/// Construct a base64 audio content part.
+pub fn ContentPart::audio_data(data~ : String, format~ : String) -> ContentPart {
+  AudioData(data~, format~)
+}
+
+///|
+/// Construct a base64 file content part.
+pub fn ContentPart::file_data(
+  data~ : String,
+  media_type~ : String,
+  filename~ : String,
+) -> ContentPart {
+  FileData(data~, media_type~, filename~)
+}
+
+///|
 /// A provider-neutral chat message.
 pub(all) struct Message {
   role : Role
   content : String
+  parts : Array[ContentPart]
   tool_calls : Array[ToolCall]
   reasoning_content : String?
 } derive(Debug, Eq)
@@ -70,10 +118,11 @@ pub(all) struct Message {
 pub fn Message::new(
   role : Role,
   content~ : String,
+  parts? : Array[ContentPart] = [],
   tool_calls? : Array[ToolCall] = [],
   reasoning_content? : String,
 ) -> Message {
-  { role, content, tool_calls, reasoning_content }
+  { role, content, parts, tool_calls, reasoning_content }
 }
 
 ///|
@@ -89,6 +138,12 @@ pub fn Message::user(content : String) -> Message {
 }
 
 ///|
+/// Construct a user message from multimodal content parts.
+pub fn Message::user_parts(parts : Array[ContentPart]) -> Message {
+  Message::new(User, content="", parts~)
+}
+
+///|
 /// Construct an assistant message.
 pub fn Message::assistant(
   content : String,
@@ -96,6 +151,16 @@ pub fn Message::assistant(
   reasoning_content? : String,
 ) -> Message {
   Message::new(Assistant, content~, tool_calls~, reasoning_content?)
+}
+
+///|
+/// Construct an assistant message from multimodal content parts.
+pub fn Message::assistant_parts(
+  parts : Array[ContentPart],
+  tool_calls? : Array[ToolCall] = [],
+  reasoning_content? : String,
+) -> Message {
+  Message::new(Assistant, content="", parts~, tool_calls~, reasoning_content?)
 }
 
 ///|
@@ -123,6 +188,18 @@ pub fn Usage::zero() -> Usage {
     total_tokens: 0,
     reasoning_tokens: 0,
     cached_input_tokens: 0,
+  }
+}
+
+///|
+/// Add token accounting from two provider calls.
+pub fn Usage::add(self : Usage, other : Usage) -> Usage {
+  {
+    input_tokens: self.input_tokens + other.input_tokens,
+    output_tokens: self.output_tokens + other.output_tokens,
+    total_tokens: self.total_tokens + other.total_tokens,
+    reasoning_tokens: self.reasoning_tokens + other.reasoning_tokens,
+    cached_input_tokens: self.cached_input_tokens + other.cached_input_tokens,
   }
 }
 
@@ -177,7 +254,12 @@ pub(all) struct ChatCallOptions {
   max_output_tokens : Int?
   temperature : Double?
   top_p : Double?
+  frequency_penalty : Double?
+  presence_penalty : Double?
+  seed : Int?
   stop_sequences : Array[String]
+  include_raw_chunks : Bool
+  headers : Map[String, String]
   provider_options : Map[String, Json]
 } derive(Debug)
 
@@ -191,7 +273,12 @@ pub fn ChatCallOptions::new(
   max_output_tokens? : Int,
   temperature? : Double,
   top_p? : Double,
+  frequency_penalty? : Double,
+  presence_penalty? : Double,
+  seed? : Int,
   stop_sequences? : Array[String] = [],
+  include_raw_chunks? : Bool = false,
+  headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
 ) -> ChatCallOptions {
   {
@@ -202,13 +289,18 @@ pub fn ChatCallOptions::new(
     max_output_tokens,
     temperature,
     top_p,
+    frequency_penalty,
+    presence_penalty,
+    seed,
     stop_sequences,
+    include_raw_chunks,
+    headers,
     provider_options,
   }
 }
 
 ///|
-/// A fully accumulated streaming response.
+/// A fully accumulated generation response.
 pub(all) struct ChatResponse {
   text : String
   reasoning : String

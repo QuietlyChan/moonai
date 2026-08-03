@@ -7,13 +7,33 @@ import {
 }
 
 // Values
-pub fn createOpenAICompatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleProvider
+pub fn createOpenAICompatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int, max_embeddings_per_call? : Int) -> OpenAICompatibleProvider
 
-pub fn create_openai_compatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleProvider
+pub fn create_openai_compatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int, max_embeddings_per_call? : Int) -> OpenAICompatibleProvider
 
-pub fn encode_chat_request(String, @moonai.ChatCallOptions, preserve_reasoning? : Bool, include_usage? : Bool) -> Json
+pub fn decode_chat_response(Json) -> @moonai.ChatResponse raise
+
+pub fn decode_completion_response(Json) -> @moonai.CompletionResponse raise
+
+pub fn decode_embedding_response(Json) -> @moonai.EmbeddingBatchResponse raise
+
+pub fn decode_image_response(Json) -> @moonai.ImageResponse raise
+
+pub fn encode_chat_request(String, @moonai.ChatCallOptions, preserve_reasoning? : Bool, include_usage? : Bool, stream? : Bool) -> Json
+
+pub fn encode_completion_request(String, @moonai.CompletionOptions, include_usage? : Bool, stream? : Bool) -> Json
+
+pub fn encode_embedding_request(String, Array[String], @moonai.EmbeddingOptions) -> Json
+
+pub fn encode_image_request(String, @moonai.ImageCallOptions, include_response_format? : Bool) -> Json
 
 pub fn openai_compatible(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleChatModel
+
+pub fn openai_compatible_completion(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleCompletionModel
+
+pub fn openai_compatible_embedding(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int, max_embeddings_per_call? : Int) -> OpenAICompatibleEmbeddingModel
+
+pub fn openai_compatible_image(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], max_images_per_call? : Int, include_response_format? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleImageModel
 
 // Errors
 
@@ -24,19 +44,56 @@ pub struct OpenAICompatibleChatModel {
 }
 pub impl @moonai.ChatModel for OpenAICompatibleChatModel
 
+pub struct OpenAICompatibleCompletionModel {
+  // private fields
+}
+pub impl @moonai.CompletionModel for OpenAICompatibleCompletionModel
+
+pub struct OpenAICompatibleCompletionStreamDecoder {
+  // private fields
+}
+pub fn OpenAICompatibleCompletionStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
+pub fn OpenAICompatibleCompletionStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
+pub fn OpenAICompatibleCompletionStreamDecoder::new(include_raw_chunks? : Bool) -> Self
+pub fn OpenAICompatibleCompletionStreamDecoder::response(Self) -> @moonai.CompletionResponse
+
+pub struct OpenAICompatibleEmbeddingModel {
+  // private fields
+}
+pub impl @moonai.EmbeddingModel for OpenAICompatibleEmbeddingModel
+
+pub struct OpenAICompatibleImageModel {
+  // private fields
+}
+pub impl @moonai.ImageModel for OpenAICompatibleImageModel
+
 pub struct OpenAICompatibleProvider {
   // private fields
 }
 pub fn OpenAICompatibleProvider::chat(Self, String) -> OpenAICompatibleChatModel
+pub fn OpenAICompatibleProvider::chatModel(Self, String) -> OpenAICompatibleChatModel
 pub fn OpenAICompatibleProvider::chat_model(Self, String) -> OpenAICompatibleChatModel
+pub fn OpenAICompatibleProvider::completion(Self, String) -> OpenAICompatibleCompletionModel
+pub fn OpenAICompatibleProvider::completionModel(Self, String) -> OpenAICompatibleCompletionModel
+pub fn OpenAICompatibleProvider::completion_model(Self, String) -> OpenAICompatibleCompletionModel
+pub fn OpenAICompatibleProvider::embedding(Self, String) -> OpenAICompatibleEmbeddingModel
+pub fn OpenAICompatibleProvider::embeddingModel(Self, String) -> OpenAICompatibleEmbeddingModel
+pub fn OpenAICompatibleProvider::embedding_model(Self, String) -> OpenAICompatibleEmbeddingModel
+pub fn OpenAICompatibleProvider::image(Self, String) -> OpenAICompatibleImageModel
+pub fn OpenAICompatibleProvider::imageModel(Self, String) -> OpenAICompatibleImageModel
+pub fn OpenAICompatibleProvider::image_model(Self, String) -> OpenAICompatibleImageModel
+pub fn OpenAICompatibleProvider::languageModel(Self, String) -> OpenAICompatibleChatModel
 pub fn OpenAICompatibleProvider::language_model(Self, String) -> OpenAICompatibleChatModel
+pub fn OpenAICompatibleProvider::textEmbeddingModel(Self, String) -> OpenAICompatibleEmbeddingModel
+pub fn OpenAICompatibleProvider::text_embedding(Self, String) -> OpenAICompatibleEmbeddingModel
+pub fn OpenAICompatibleProvider::text_embedding_model(Self, String) -> OpenAICompatibleEmbeddingModel
 
 pub struct OpenAICompatibleStreamDecoder {
   // private fields
 }
 pub fn OpenAICompatibleStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
 pub fn OpenAICompatibleStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn OpenAICompatibleStreamDecoder::new() -> Self
+pub fn OpenAICompatibleStreamDecoder::new(include_raw_chunks? : Bool) -> Self
 pub fn OpenAICompatibleStreamDecoder::response(Self) -> @moonai.ChatResponse
 
 // Type aliases

@@ -67,6 +67,18 @@ test "terminal response event finalizes without DONE sentinel" {
 }
 
 ///|
+test "include_raw_chunks emits the provider event before normalized events" {
+  let decoder = OpenResponsesStreamDecoder::new(include_raw_chunks=true)
+  let _ = decoder.feed_line(
+    "data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\"}}",
+  )
+  let terminal = decoder.feed_line("")
+  assert_eq(terminal.done, true)
+  assert_true(terminal.events[0] is @moonai.Raw(_))
+  assert_true(terminal.events[1] is @moonai.Finish(..))
+}
+
+///|
 test "failed response closes partial tool input without making it executable" {
   let decoder = OpenResponsesStreamDecoder::new()
   let _ = decoder.feed_line(
@@ -95,4 +107,144 @@ test "failed response closes partial tool input without making it executable" {
   assert_eq(ready, 0)
   assert_eq(decoder.response().finish_reason, @moonai.Error)
   assert_eq(decoder.response().tool_calls.length(), 0)
+}
+
+///|
+test "out-of-order function call events keep metadata and stream identity" {
+  let decoder = OpenResponsesStreamDecoder::new()
+  let events : Array[@moonai.StreamEvent] = []
+  let collect = (batch : @http_sse.DecodeBatch) => {
+    for event in batch.events {
+      events.push(event)
+    }
+  }
+  // Accept argument events that arrive before output item metadata.
+  collect(
+    decoder.feed_line(
+      "data: {\"type\":\"response.function_call_arguments.delta\",\"item_id\":\"fc_late\",\"delta\":\"{\\\"city\\\":\\\"Paris\\\"}\"}",
+    ),
+  )
+  collect(decoder.feed_line(""))
+  collect(
+    decoder.feed_line(
+      "data: {\"type\":\"response.function_call_arguments.done\",\"item_id\":\"fc_late\",\"call_id\":\"call_late\",\"arguments\":\"{\\\"city\\\":\\\"Paris\\\"}\"}",
+    ),
+  )
+  collect(decoder.feed_line(""))
+  collect(
+    decoder.feed_line(
+      "data: {\"type\":\"response.output_item.added\",\"item\":{\"id\":\"fc_late\",\"type\":\"function_call\",\"call_id\":\"call_late\",\"name\":\"weather\",\"arguments\":\"\"}}",
+    ),
+  )
+  collect(decoder.feed_line(""))
+  collect(
+    decoder.feed_line(
+      "data: {\"type\":\"response.output_item.done\",\"item\":{\"id\":\"fc_late\",\"type\":\"function_call\",\"call_id\":\"call_late\",\"name\":\"weather\",\"arguments\":\"{\\\"city\\\":\\\"Paris\\\"}\"}}",
+    ),
+  )
+  collect(decoder.feed_line(""))
+  collect(
+    decoder.feed_line(
+      "data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\"}}",
+    ),
+  )
+  let response = decoder.response()
+  assert_eq(response.tool_calls, [
+    @moonai.ToolCall::new(
+      id="call_late",
+      name="weather",
+      arguments="{\"city\":\"Paris\"}",
+    ),
+  ])
+  let mut starts = 0
+  let mut deltas = 0
+  let mut ends = 0
+  for event in events {
+    match event {
+      @moonai.ToolInputStart(id="call_late", tool_name="weather") =>
+        starts = starts + 1
+      @moonai.ToolInputDelta(id="call_late", delta="{\"city\":\"Paris\"}") =>
+        deltas = deltas + 1
+      @moonai.ToolInputEnd("call_late") => ends = ends + 1
+      _ => ()
+    }
+  }
+  assert_eq(starts, 1)
+  assert_eq(deltas, 1)
+  assert_eq(ends, 1)
+}
+
+///|
+test "decode non-streaming Open Responses result" {
+  let response = decode_responses_response({
+    "id": "resp_1",
+    "status": "completed",
+    "output": [
+      {
+        "type": "reasoning",
+        "content": [{ "type": "reasoning_text", "text": "checking" }],
+      },
+      {
+        "type": "message",
+        "content": [{ "type": "output_text", "text": "Calling a tool." }],
+      },
+      {
+        "type": "function_call",
+        "call_id": "call_1",
+        "name": "lookup",
+        "arguments": "{\"query\":\"MoonBit\"}",
+      },
+    ],
+    "usage": {
+      "input_tokens": 4,
+      "output_tokens": 3,
+      "total_tokens": 7,
+      "input_tokens_details": { "cached_tokens": 1 },
+      "output_tokens_details": { "reasoning_tokens": 1 },
+    },
+  })
+  assert_eq(response.text, "Calling a tool.")
+  assert_eq(response.reasoning, "checking")
+  assert_eq(response.tool_calls, [
+    @moonai.ToolCall::new(
+      id="call_1",
+      name="lookup",
+      arguments="{\"query\":\"MoonBit\"}",
+    ),
+  ])
+  assert_eq(response.usage, {
+    input_tokens: 4,
+    output_tokens: 3,
+    total_tokens: 7,
+    reasoning_tokens: 1,
+    cached_input_tokens: 1,
+  })
+  assert_eq(response.finish_reason, @moonai.ToolCalls)
+}
+
+///|
+test "non-streaming Open Responses errors preserve provider detail" {
+  try
+    decode_responses_response({
+      "status": "failed",
+      "error": { "message": "upstream unavailable" },
+    })
+  catch {
+    Failure::Failure(message) =>
+      assert_true(message.contains("upstream unavailable"))
+    error => fail("unexpected error: \{error}")
+  } noraise {
+    _ => fail("expected provider error")
+  }
+  try
+    decode_responses_response({
+      "status": "incomplete",
+      "incomplete_details": { "reason": "content_filter" },
+    })
+  catch {
+    Failure::Failure(message) => assert_true(message.contains("content_filter"))
+    error => fail("unexpected error: \{error}")
+  } noraise {
+    _ => fail("expected missing output error")
+  }
 }

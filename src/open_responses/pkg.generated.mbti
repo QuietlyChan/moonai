@@ -11,7 +11,9 @@ pub fn createOpenResponses(name~ : String, url~ : String, api_key? : String, hea
 
 pub fn create_open_responses(provider_name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> OpenResponsesProvider
 
-pub fn encode_responses_request(String, @moonai.ChatCallOptions) -> Json
+pub fn decode_responses_response(Json) -> @moonai.ChatResponse raise
+
+pub fn encode_responses_request(String, @moonai.ChatCallOptions, stream? : Bool) -> Json raise
 
 pub fn open_responses(model_id~ : String, provider_name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> OpenResponsesLanguageModel
 
@@ -26,6 +28,7 @@ pub impl @moonai.ChatModel for OpenResponsesLanguageModel
 pub struct OpenResponsesProvider {
   // private fields
 }
+pub fn OpenResponsesProvider::languageModel(Self, String) -> OpenResponsesLanguageModel
 pub fn OpenResponsesProvider::language_model(Self, String) -> OpenResponsesLanguageModel
 pub fn OpenResponsesProvider::model(Self, String) -> OpenResponsesLanguageModel
 pub fn OpenResponsesProvider::responses(Self, String) -> OpenResponsesLanguageModel
@@ -35,7 +38,7 @@ pub struct OpenResponsesStreamDecoder {
 }
 pub fn OpenResponsesStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
 pub fn OpenResponsesStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn OpenResponsesStreamDecoder::new() -> Self
+pub fn OpenResponsesStreamDecoder::new(include_raw_chunks? : Bool) -> Self
 pub fn OpenResponsesStreamDecoder::response(Self) -> @moonai.ChatResponse
 
 // Type aliases

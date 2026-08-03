@@ -8,14 +8,50 @@ fn tool_call_to_json(call : @moonai.ToolCall) -> Json {
 }
 
 ///|
+fn data_uri(media_type : String, data : String) -> String {
+  "data:\{media_type};base64,\{data}"
+}
+
+///|
+fn content_part_to_json(part : @moonai.ContentPart) -> Json {
+  match part {
+    @moonai.Text(value) => { "type": "text", "text": value }
+    @moonai.ImageUrl(url) =>
+      { "type": "image_url", "image_url": { "url": url } }
+    @moonai.ImageData(data~, media_type~) =>
+      {
+        "type": "image_url",
+        "image_url": { "url": data_uri(media_type, data) },
+      }
+    @moonai.AudioData(data~, format~) =>
+      {
+        "type": "input_audio",
+        "input_audio": { "data": data, "format": format },
+      }
+    @moonai.FileData(data~, media_type~, filename~) =>
+      {
+        "type": "file",
+        "file": {
+          "filename": filename,
+          "file_data": data_uri(media_type, data),
+        },
+      }
+  }
+}
+
+///|
 fn message_to_json(
   message : @moonai.Message,
   preserve_reasoning : Bool,
 ) -> Json {
-  let content = match message.role {
-    @moonai.Assistant if message.tool_calls.length() > 0 &&
-      message.content == "" => Json::null()
-    _ => Json::string(message.content)
+  let content = if message.parts.length() > 0 {
+    Json::array([ for part in message.parts => content_part_to_json(part) ])
+  } else {
+    match message.role {
+      @moonai.Assistant if message.tool_calls.length() > 0 &&
+        message.content == "" => Json::null()
+      _ => Json::string(message.content)
+    }
   }
   Json::object(
     Map(
@@ -97,6 +133,7 @@ pub fn encode_chat_request(
   options : @moonai.ChatCallOptions,
   preserve_reasoning? : Bool = false,
   include_usage? : Bool = true,
+  stream? : Bool = true,
 ) -> Json {
   let fields : Map[String, Json] = Map(
     [
@@ -111,8 +148,10 @@ pub fn encode_chat_request(
           ],
         ),
       ),
-      ("stream", Json::boolean(true)),
-      ..if include_usage {
+      ..if stream {
+        [("stream", Json::boolean(true))]
+      },
+      ..if stream && include_usage {
         [("stream_options", ({ "include_usage": true } : Json))]
       },
       ..if options.max_output_tokens is Some(value) {
@@ -123,6 +162,15 @@ pub fn encode_chat_request(
       },
       ..if options.top_p is Some(value) {
         [("top_p", Json::number(value))]
+      },
+      ..if options.frequency_penalty is Some(value) {
+        [("frequency_penalty", Json::number(value))]
+      },
+      ..if options.presence_penalty is Some(value) {
+        [("presence_penalty", Json::number(value))]
+      },
+      ..if options.seed is Some(value) {
+        [("seed", Json::number(value.to_double()))]
       },
       ..if options.stop_sequences.length() > 0 {
         [

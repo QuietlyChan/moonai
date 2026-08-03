@@ -4,11 +4,16 @@ async fn OpenAICompatibleChatModel::stream_chat(
   options : @moonai.ChatCallOptions,
   on_event : async (@moonai.StreamEvent) -> Unit,
 ) -> @moonai.ChatResponse {
-  let decoder = OpenAICompatibleStreamDecoder::new()
+  let decoder = OpenAICompatibleStreamDecoder::new(
+    include_raw_chunks=options.include_raw_chunks,
+  )
   @http_sse.post_json_sse(
     provider_name=self.provider_name,
     url=self.chat_completions_url(),
-    headers=self.request_headers(),
+    headers=@provider_utils.merge_headers(
+      self.request_headers(),
+      options.headers,
+    ),
     body=encode_chat_request(
       self.model_id,
       options,

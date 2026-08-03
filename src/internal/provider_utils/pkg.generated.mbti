@@ -12,6 +12,10 @@ pub fn json_int_field_opt(Json, String) -> Int?
 
 pub fn json_string_field(Json, String) -> String?
 
+pub fn merge_headers(Map[String, String], Map[String, String]) -> Map[String, String]
+
+pub async fn post_json(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, timeout_ms? : Int) -> Json
+
 pub fn without_trailing_slash(String) -> String
 
 // Errors

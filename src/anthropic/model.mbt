@@ -216,7 +216,7 @@ fn AnthropicMessagesModel::request_headers(
   if beta_features.length() > 0 {
     headers["anthropic-beta"] = beta_features.join(",")
   }
-  headers
+  @provider_utils.merge_headers(headers, options.headers)
 }
 
 ///|
@@ -227,6 +227,16 @@ pub impl @moonai.ChatModel for AnthropicMessagesModel with fn provider(self) -> 
 ///|
 pub impl @moonai.ChatModel for AnthropicMessagesModel with fn model_id(self) -> String {
   self.model_id
+}
+
+///|
+/// Generate a complete Anthropic response. The Messages adapter currently
+/// accumulates its streaming endpoint so it shares the same normalized result.
+pub impl @moonai.ChatModel for AnthropicMessagesModel with fn generate(
+  self,
+  options,
+) {
+  self.stream_messages(options, _ => ())
 }
 
 ///|

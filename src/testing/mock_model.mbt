@@ -38,6 +38,15 @@ pub impl @moonai.ChatModel for MockChatModel with fn model_id(self) -> String {
 }
 
 ///|
+pub impl @moonai.ChatModel for MockChatModel with fn generate(self, options) {
+  self.captured_messages.clear()
+  for message in options.messages {
+    self.captured_messages.push(message)
+  }
+  self.result
+}
+
+///|
 pub impl @moonai.ChatModel for MockChatModel with fn stream(
   self,
   options,

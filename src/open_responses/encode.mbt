@@ -4,6 +4,29 @@ fn input_text(text : String) -> Json {
 }
 
 ///|
+fn data_uri(media_type : String, data : String) -> String {
+  "data:\{media_type};base64,\{data}"
+}
+
+///|
+fn content_part_to_responses_input(part : @moonai.ContentPart) -> Json raise {
+  match part {
+    @moonai.Text(value) => input_text(value)
+    @moonai.ImageUrl(url) => { "type": "input_image", "image_url": url }
+    @moonai.ImageData(data~, media_type~) =>
+      { "type": "input_image", "image_url": data_uri(media_type, data) }
+    @moonai.FileData(data~, media_type~, filename~) =>
+      {
+        "type": "input_file",
+        "filename": filename,
+        "file_data": data_uri(media_type, data),
+      }
+    @moonai.AudioData(..) =>
+      fail("Open Responses does not accept audio content in this adapter")
+  }
+}
+
+///|
 fn output_text(text : String) -> Json {
   { "type": "output_text", "text": text }
 }
@@ -17,6 +40,13 @@ fn message_item(role : String, content : Array[Json]) -> Json {
       ("content", Json::array(content)),
     ]),
   )
+}
+
+///|
+fn message_parts(parts : Array[@moonai.ContentPart]) -> Array[Json] raise {
+  [
+    for part in parts => content_part_to_responses_input(part)
+  ]
 }
 
 ///|
@@ -70,17 +100,55 @@ fn text_format_to_json(format : @moonai.ResponseFormat) -> Json? {
 /// Convert normalized messages into Open Responses input items.
 fn convert_messages(
   messages : Array[@moonai.Message],
-) -> (Array[Json], String?) {
+) -> (Array[Json], String?) raise {
   let input : Array[Json] = []
   let instructions : Array[String] = []
   for message in messages {
     match message.role {
-      @moonai.System => instructions.push(message.content)
+      @moonai.System =>
+        if message.parts.length() > 0 {
+          for part in message.parts {
+            match part {
+              @moonai.Text(value) => instructions.push(value)
+              _ => fail("Open Responses system messages support text only")
+            }
+          }
+        } else {
+          instructions.push(message.content)
+        }
       @moonai.User =>
-        input.push(message_item("user", [input_text(message.content)]))
+        input.push(
+          message_item(
+            "user",
+            if message.parts.length() > 0 {
+              message_parts(message.parts)
+            } else {
+              [input_text(message.content)]
+            },
+          ),
+        )
       @moonai.Assistant => {
-        if message.content != "" {
-          input.push(message_item("assistant", [output_text(message.content)]))
+        if message.content != "" || message.parts.length() > 0 {
+          input.push(
+            message_item(
+              "assistant",
+              if message.parts.length() > 0 {
+                [
+                  for part in message.parts => {
+                    match part {
+                      @moonai.Text(value) => output_text(value)
+                      _ =>
+                        fail(
+                          "Open Responses assistant messages support text only",
+                        )
+                    }
+                  }
+                ]
+              } else {
+                [output_text(message.content)]
+              },
+            ),
+          )
         }
         for call in message.tool_calls {
           input.push({
@@ -108,17 +176,20 @@ fn convert_messages(
 }
 
 ///|
-/// Encode normalized options as an Open Responses streaming request.
+/// Encode normalized options as an Open Responses request.
 pub fn encode_responses_request(
   model_id : String,
   options : @moonai.ChatCallOptions,
-) -> Json {
+  stream? : Bool = true,
+) -> Json raise {
   let (input, instructions) = convert_messages(options.messages)
   let fields : Map[String, Json] = Map(
     [
       ("model", Json::string(model_id)),
       ("input", Json::array(input)),
-      ("stream", Json::boolean(true)),
+      ..if stream {
+        [("stream", Json::boolean(true))]
+      },
       ..if instructions is Some(value) {
         [("instructions", Json::string(value))]
       },
@@ -130,6 +201,12 @@ pub fn encode_responses_request(
       },
       ..if options.top_p is Some(value) {
         [("top_p", Json::number(value))]
+      },
+      ..if options.frequency_penalty is Some(value) {
+        [("frequency_penalty", Json::number(value))]
+      },
+      ..if options.presence_penalty is Some(value) {
+        [("presence_penalty", Json::number(value))]
       },
       ..if options.tools.length() > 0 {
         [

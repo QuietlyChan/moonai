@@ -10,31 +10,41 @@ core that applications can build on.
 This is an independent community project and is not affiliated with Vercel.
 
 > Status: early alpha. APIs may change before `1.0.0`. The current release
-> supports the native target and provides OpenAI Responses, OpenAI-compatible
-> Chat Completions, and Anthropic Messages streaming adapters.
+> supports the native target, non-streaming and streaming text generation,
+> embeddings, legacy completions, image generation, and Anthropic Messages.
 
 ## Current milestone
 
-- Provider-neutral `ChatModel` interface.
-- `stream_text` API with a `streamText` compatibility alias.
-- Open Responses streaming over HTTP and SSE, used by the default OpenAI model.
-- OpenAI-compatible Chat Completions streaming over HTTP and SSE.
+- Provider-neutral `ChatModel`, `EmbeddingModel`, `CompletionModel`, and
+  `ImageModel` interfaces.
+- `generate_text`, `stream_text`, `generate_object`, `embed`, `embed_many`,
+  `complete`, `stream_completion`, and `generate_image` standard-layer APIs.
+- Open Responses generation over JSON and streaming over SSE, used by the
+  default OpenAI model.
+- OpenAI-compatible Chat Completions generation over JSON and SSE, plus
+  embeddings, legacy completions, and image generation.
 - Anthropic Messages streaming over HTTP and SSE, including thinking and
   `tool_use` blocks.
-- Normalized text, reasoning, tool-call, finish, error, and usage events.
+- Text, URL/base64 image, audio, and file input parts, with explicit protocol
+  validation when an adapter does not support a media type.
+- Normalized text, reasoning, tool-call, finish, error, usage, and optional raw
+  provider events.
 - Incremental assembly of interleaved and parallel tool-call deltas.
-- Mock models, golden SSE fixtures, and local HTTP integration tests.
+- Standard sampling controls, JSON Schema response formats, and per-call HTTP
+  headers that override provider defaults.
+- Deterministic mock models for each core model interface, golden SSE fixtures,
+  and local HTTP integration tests.
 
 ## Packages
 
 | Package | Purpose |
 | --- | --- |
-| `QuietlyChan/moonai` | Core model, message, tool, stream, and response types |
-| `QuietlyChan/moonai/openai` | Official OpenAI provider that composes Responses and Chat Completions |
+| `QuietlyChan/moonai` | Core language, embedding, completion, image, tool, stream, and response APIs |
+| `QuietlyChan/moonai/openai` | Official OpenAI provider composing the shared protocol implementations |
 | `QuietlyChan/moonai/open_responses` | Reusable Open Responses protocol adapter |
-| `QuietlyChan/moonai/openai_compatible` | Reusable OpenAI-compatible Chat Completions adapter |
+| `QuietlyChan/moonai/openai_compatible` | Reusable Chat Completions, embeddings, completions, and image adapter |
 | `QuietlyChan/moonai/anthropic` | Anthropic Messages API provider adapter |
-| `QuietlyChan/moonai/testing` | Deterministic mock model for application tests |
+| `QuietlyChan/moonai/testing` | Deterministic chat, embedding, completion, and image mock models |
 | `QuietlyChan/moonai/cmd/main` | Optional executable smoke test; not required by the library |
 
 ## Installation
@@ -58,6 +68,24 @@ import {
 Import `QuietlyChan/moonai/openai_compatible` or
 `QuietlyChan/moonai/open_responses` directly when building a third-party
 provider package on one of those wire protocols.
+
+## Non-streaming text
+
+```moonbit nocheck
+///|
+let model = @openai.openai(
+  "gpt-4.1-mini",
+  api_key=@env.get_env_var("OPENAI_API_KEY").unwrap(),
+)
+
+///|
+let result = @moonai.generate_text(
+  model,
+  prompt="Explain MoonBit in three sentences.",
+)
+```
+
+`generateText` is available as a compatibility alias.
 
 ## Streaming text
 
@@ -83,6 +111,11 @@ let result = @moonai.stream_text(
 
 MoonBit code should generally prefer `stream_text`. The `streamText` alias is
 provided for developers familiar with the TypeScript AI SDK API.
+
+Set `include_raw_chunks=true` to receive each parsed provider chunk as
+`StreamEvent::Raw` before its normalized events. Text, completion, embedding,
+and image calls also accept per-call `headers`; these override matching headers
+configured on the provider.
 
 `@openai.openai(...)` and `OpenAIProvider::language_model(...)` use the
 Responses API by default, matching AI SDK 7. Use `@openai.openai_chat(...)` or
@@ -161,12 +194,84 @@ let provider = @open_responses.create_open_responses(
 let model = provider.language_model("my-model")
 ```
 
+## Structured output and multimodal input
+
+```moonbit nocheck
+///|
+let object = @moonai.generate_object(
+  model,
+  {
+    "type": "object",
+    "properties": { "answer": { "type": "string" } },
+    "required": ["answer"],
+  },
+  prompt="Answer as JSON.",
+  name="answer",
+)
+
+///|
+let response = @moonai.generate_text(
+  model,
+  messages=[
+    @moonai.Message::user_parts([
+      @moonai.ContentPart::text("Describe this image."),
+      @moonai.ContentPart::image_url("https://example.com/moon.png"),
+    ]),
+  ],
+)
+```
+
+OpenAI-compatible Chat Completions accepts text, image, audio, and file parts.
+Open Responses accepts text, image, and file parts and rejects audio input
+explicitly. `generate_object` requests JSON Schema output and parses the final
+JSON value; schema validation of the returned value is not implemented yet.
+
+## Embeddings, completions, and images
+
+```moonbit nocheck
+///|
+let provider = @openai.create_openai(api_key~)
+
+///|
+let vector = @moonai.embed(
+  provider.embedding("text-embedding-3-small"),
+  "MoonBit",
+)
+
+///|
+let completion = @moonai.complete(
+  provider.completion("gpt-3.5-turbo-instruct"),
+  "MoonBit is",
+)
+
+///|
+let images = @moonai.generate_image(
+  provider.image("gpt-image-1"),
+  "A precise MoonBit language logo",
+  n=2,
+  size="1024x1024",
+)
+```
+
+`embed_many` and `generate_image` split requests at the model's per-call limit,
+preserve result order, validate response counts, and accumulate usage. Image
+payloads are tagged as `ImageData::Base64` or `ImageData::Url`.
+
+The snake-case provider selectors also have AI SDK-style camel-case aliases,
+including `languageModel`, `embeddingModel`, `completionModel`, and
+`imageModel`.
+
 The initial API intentionally follows familiar AI SDK concepts without
 requiring MoonBit code to copy TypeScript naming everywhere:
 
 | Vercel AI SDK | moonai |
 | --- | --- |
+| `generateText({ model, prompt })` | `@moonai.generate_text(model, prompt=...)` |
 | `streamText({ model, prompt })` | `@moonai.stream_text(model, prompt=...)` |
+| `generateObject({ model, schema })` | `@moonai.generate_object(model, schema, ...)` |
+| `embed({ model, value })` | `@moonai.embed(model, value)` |
+| `embedMany({ model, values })` | `@moonai.embed_many(model, values)` |
+| `generateImage({ model, prompt })` | `@moonai.generate_image(model, prompt)` |
 | `openai("gpt-4.1")` | `@openai.openai("gpt-4.1", api_key=...)` |
 | `createOpenAI({ baseURL })` | `@openai.create_openai(base_url=..., api_key=...)` |
 | `createOpenAICompatible(...)` | `@openai_compatible.create_openai_compatible(...)` |
@@ -177,8 +282,9 @@ requiring MoonBit code to copy TypeScript naming everywhere:
 
 The core library will remain provider-neutral. Provider-specific wire formats,
 authentication, and options belong in adapter packages. Planned milestones
-include non-streaming generation, structured output, more provider adapters,
-middleware, retries, telemetry hooks, and higher-level tool execution.
+include provider metadata and raw request/response details, richer generated
+content such as sources and files, image editing, middleware, retries,
+cancellation, telemetry hooks, and higher-level multi-step tool execution.
 
 Agent workflows and sandboxed tool runtimes are intentionally later layers.
 They will build on this SDK rather than being coupled to the provider protocol.

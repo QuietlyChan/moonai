@@ -42,3 +42,43 @@ async test "streamText drives an OpenAI-compatible HTTP SSE request" {
     assert_eq(response.usage.total_tokens, 4)
   }
 }
+
+///|
+async test "generateText drives an OpenAI-compatible JSON request" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (request, body, connection) => {
+          assert_eq(request.path, "/v1/chat/completions")
+          assert_true(
+            request.headers.get("x-request-id") is Some("chat-generate"),
+          )
+          let request_body = body.read_all().text()
+          assert_true(request_body.contains("\"model\":\"test-model\""))
+          assert_false(request_body.contains("\"stream\""))
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "application/json",
+          })
+          connection.write(
+            "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Hello generate\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4}}",
+          )
+        },
+        max_connections=1,
+      )
+    }
+    let model = openai_compatible(
+      provider_name="local-test",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      model_id="test-model",
+      api_key="test-key",
+      idle_timeout_ms=2_000,
+    )
+    let response = @moonai.generate_text(model, prompt="hello", headers={
+      "X-Request-Id": "chat-generate",
+    })
+    assert_eq(response.text, "Hello generate")
+    assert_eq(response.finish_reason, @moonai.Stop)
+    assert_eq(response.usage.total_tokens, 4)
+  }
+}

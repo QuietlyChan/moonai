@@ -4,11 +4,16 @@ async fn OpenResponsesLanguageModel::stream_responses(
   options : @moonai.ChatCallOptions,
   on_event : async (@moonai.StreamEvent) -> Unit,
 ) -> @moonai.ChatResponse {
-  let decoder = OpenResponsesStreamDecoder::new()
+  let decoder = OpenResponsesStreamDecoder::new(
+    include_raw_chunks=options.include_raw_chunks,
+  )
   @http_sse.post_json_sse(
     provider_name=self.provider_name,
     url=self.url,
-    headers=self.request_headers(),
+    headers=@provider_utils.merge_headers(
+      self.request_headers(),
+      options.headers,
+    ),
     body=encode_responses_request(self.model_id, options),
     idle_timeout_ms=self.idle_timeout_ms,
     expected_terminator="[DONE]",

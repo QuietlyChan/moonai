@@ -39,7 +39,7 @@ async fn emit_batch(
 ///|
 /// POST a JSON request and drive a provider-specific decoder from its SSE
 /// response. This is the shared transport layer used by provider packages.
-pub async fn post_json_sse(
+pub async fn[T] post_json_sse(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
@@ -48,9 +48,9 @@ pub async fn post_json_sse(
   expected_terminator? : String = "stream terminator",
   feed_line~ : (String) -> DecodeBatch raise,
   flush_buffered~ : () -> DecodeBatch raise,
-  response~ : () -> @moonai.ChatResponse,
+  response~ : () -> T,
   on_event~ : async (@moonai.StreamEvent) -> Unit,
-) -> @moonai.ChatResponse {
+) -> T {
   let client = @http.post_stream(url, headers~)
   defer client.close()
   client.write(body.stringify())

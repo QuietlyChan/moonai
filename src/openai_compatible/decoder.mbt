@@ -2,6 +2,7 @@
 /// Stateful decoder for OpenAI-compatible Chat Completions SSE.
 pub struct OpenAICompatibleStreamDecoder {
   priv sse : @http_sse.EventSourceBuffer
+  priv include_raw_chunks : Bool
   priv text : StringBuilder
   priv reasoning : StringBuilder
   priv tools : @moonai.ToolCallDeltaAssembler
@@ -15,9 +16,12 @@ pub struct OpenAICompatibleStreamDecoder {
 
 ///|
 /// Create an empty OpenAI-compatible stream decoder.
-pub fn OpenAICompatibleStreamDecoder::new() -> OpenAICompatibleStreamDecoder {
+pub fn OpenAICompatibleStreamDecoder::new(
+  include_raw_chunks? : Bool = false,
+) -> OpenAICompatibleStreamDecoder {
   {
     sse: @http_sse.EventSourceBuffer::new(),
+    include_raw_chunks,
     text: StringBuilder::new(),
     reasoning: StringBuilder::new(),
     tools: @moonai.ToolCallDeltaAssembler::new(),
@@ -244,9 +248,25 @@ fn OpenAICompatibleStreamDecoder::decode_data(
     for event in terminal_events {
       events.push(event)
     }
+    if self.include_raw_chunks {
+      let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
+      for event in events {
+        all_events.push(event)
+      }
+      return { events: all_events, consumed_event: true, done: true }
+    }
     return { events, consumed_event: true, done: true }
   }
-  { events: self.apply_json(json), consumed_event: true, done: false }
+  let events = self.apply_json(json)
+  if self.include_raw_chunks {
+    let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
+    for event in events {
+      all_events.push(event)
+    }
+    { events: all_events, consumed_event: true, done: false }
+  } else {
+    { events, consumed_event: true, done: false }
+  }
 }
 
 ///|

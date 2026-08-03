@@ -8,6 +8,17 @@ test "copy_headers isolates provider configuration" {
 }
 
 ///|
+test "call headers override provider headers" {
+  let merged = merge_headers(
+    { "Authorization": "provider", "X-Provider": "moonai" },
+    { "Authorization": "call", "X-Request-Id": "request-1" },
+  )
+  assert_eq(merged["Authorization"], "call")
+  assert_eq(merged["X-Provider"], "moonai")
+  assert_eq(merged["X-Request-Id"], "request-1")
+}
+
+///|
 test "append_path normalizes one trailing slash and avoids duplicates" {
   assert_eq(
     append_path("https://example.com/v1/", "/responses"),

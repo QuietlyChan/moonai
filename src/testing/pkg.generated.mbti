@@ -17,6 +17,28 @@ pub fn MockChatModel::captured_messages(Self) -> Array[@moonai.Message]
 pub fn MockChatModel::new(Array[@moonai.StreamEvent], @moonai.ChatResponse, provider_name? : String, model_id? : String) -> Self
 pub impl @moonai.ChatModel for MockChatModel
 
+pub struct MockCompletionModel {
+  // private fields
+}
+pub fn MockCompletionModel::captured_prompt(Self) -> String
+pub fn MockCompletionModel::new(Array[@moonai.StreamEvent], @moonai.CompletionResponse, provider_name? : String, model_id? : String) -> Self
+pub impl @moonai.CompletionModel for MockCompletionModel
+
+pub struct MockEmbeddingModel {
+  // private fields
+}
+pub fn MockEmbeddingModel::captured_batches(Self) -> Array[Array[String]]
+pub fn MockEmbeddingModel::captured_values(Self) -> Array[String]
+pub fn MockEmbeddingModel::new(@moonai.EmbeddingBatchResponse, provider_name? : String, model_id? : String, max_embeddings_per_call? : Int) -> Self
+pub impl @moonai.EmbeddingModel for MockEmbeddingModel
+
+pub struct MockImageModel {
+  // private fields
+}
+pub fn MockImageModel::captured_batch_sizes(Self) -> Array[Int]
+pub fn MockImageModel::new(@moonai.ImageResponse, max_images_per_call? : Int, provider_name? : String, model_id? : String) -> Self
+pub impl @moonai.ImageModel for MockImageModel
+
 // Type aliases
 
 // Traits

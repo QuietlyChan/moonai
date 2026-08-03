@@ -70,6 +70,22 @@ test "Anthropic decoder flushes a final unterminated event" {
 }
 
 ///|
+test "include_raw_chunks emits Anthropic provider events once" {
+  let decoder = AnthropicStreamDecoder::new(include_raw_chunks=true)
+  let _ = decoder.feed_line(
+    "data: {\"type\":\"message_start\",\"message\":{\"usage\":{\"input_tokens\":1}}}",
+  )
+  let chunk = decoder.feed_line("")
+  let mut raw = 0
+  for event in chunk.events {
+    if event is @moonai.Raw(_) {
+      raw = raw + 1
+    }
+  }
+  assert_eq(raw, 1)
+}
+
+///|
 test "Anthropic stream error does not publish a partial tool call" {
   let decoder = AnthropicStreamDecoder::new()
   let _ = decoder.feed_line(

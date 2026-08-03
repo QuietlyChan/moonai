@@ -4,7 +4,9 @@ async fn AnthropicMessagesModel::stream_messages(
   options : @moonai.ChatCallOptions,
   on_event : async (@moonai.StreamEvent) -> Unit,
 ) -> @moonai.ChatResponse {
-  let decoder = AnthropicStreamDecoder::new()
+  let decoder = AnthropicStreamDecoder::new(
+    include_raw_chunks=options.include_raw_chunks,
+  )
   @http_sse.post_json_sse(
     provider_name=self.provider_name,
     url=self.messages_url(),

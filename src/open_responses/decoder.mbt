@@ -2,6 +2,7 @@
 /// Stateful decoder for Open Responses SSE events.
 pub struct OpenResponsesStreamDecoder {
   priv sse : @http_sse.EventSourceBuffer
+  priv include_raw_chunks : Bool
   priv text : StringBuilder
   priv reasoning : StringBuilder
   priv text_ids : Array[String]
@@ -10,8 +11,10 @@ pub struct OpenResponsesStreamDecoder {
   priv reasoning_stopped : Array[Bool]
   priv tool_item_ids : Array[String]
   priv tool_call_ids : Array[String]
+  priv tool_stream_ids : Array[String]
   priv tool_names : Array[String]
   priv tool_arguments : Array[String]
+  priv tool_emitted_arguments : Array[String]
   priv tool_started : Array[Bool]
   priv tool_ready : Array[Bool]
   priv tool_calls : Array[@moonai.ToolCall]
@@ -22,9 +25,12 @@ pub struct OpenResponsesStreamDecoder {
 
 ///|
 /// Create an empty Open Responses stream decoder.
-pub fn OpenResponsesStreamDecoder::new() -> OpenResponsesStreamDecoder {
+pub fn OpenResponsesStreamDecoder::new(
+  include_raw_chunks? : Bool = false,
+) -> OpenResponsesStreamDecoder {
   {
     sse: @http_sse.EventSourceBuffer::new(),
+    include_raw_chunks,
     text: StringBuilder::new(),
     reasoning: StringBuilder::new(),
     text_ids: [],
@@ -33,8 +39,10 @@ pub fn OpenResponsesStreamDecoder::new() -> OpenResponsesStreamDecoder {
     reasoning_stopped: [],
     tool_item_ids: [],
     tool_call_ids: [],
+    tool_stream_ids: [],
     tool_names: [],
     tool_arguments: [],
+    tool_emitted_arguments: [],
     tool_started: [],
     tool_ready: [],
     tool_calls: [],
@@ -124,8 +132,10 @@ fn OpenResponsesStreamDecoder::ensure_tool(
     None => {
       self.tool_item_ids.push(item_id)
       self.tool_call_ids.push("")
+      self.tool_stream_ids.push("")
       self.tool_names.push("")
       self.tool_arguments.push("")
+      self.tool_emitted_arguments.push("")
       self.tool_started.push(false)
       self.tool_ready.push(false)
       self.tool_item_ids.length() - 1
@@ -168,6 +178,17 @@ fn OpenResponsesStreamDecoder::tool_id(
 }
 
 ///|
+fn OpenResponsesStreamDecoder::tool_stream_id(
+  self : OpenResponsesStreamDecoder,
+  index : Int,
+) -> String {
+  if self.tool_stream_ids[index] == "" {
+    self.tool_stream_ids[index] = self.tool_id(index)
+  }
+  self.tool_stream_ids[index]
+}
+
+///|
 fn OpenResponsesStreamDecoder::start_tool(
   self : OpenResponsesStreamDecoder,
   index : Int,
@@ -180,7 +201,24 @@ fn OpenResponsesStreamDecoder::start_tool(
     } else {
       self.tool_names[index]
     }
-    events.push(@moonai.ToolInputStart(id=self.tool_id(index), tool_name=name))
+    events.push(
+      @moonai.ToolInputStart(id=self.tool_stream_id(index), tool_name=name),
+    )
+  }
+}
+
+///|
+fn OpenResponsesStreamDecoder::emit_complete_tool_arguments_if_unseen(
+  self : OpenResponsesStreamDecoder,
+  index : Int,
+  events : Array[@moonai.StreamEvent],
+) -> Unit {
+  let arguments = self.tool_arguments[index]
+  if arguments != "" && self.tool_emitted_arguments[index] == "" {
+    self.tool_emitted_arguments[index] = arguments
+    events.push(
+      @moonai.ToolInputDelta(id=self.tool_stream_id(index), delta=arguments),
+    )
   }
 }
 
@@ -194,6 +232,7 @@ fn OpenResponsesStreamDecoder::finish_tool(
     return
   }
   self.start_tool(index, events)
+  self.emit_complete_tool_arguments_if_unseen(index, events)
   let id = self.tool_id(index)
   let name = if self.tool_names[index] == "" {
     "tool-\{index}"
@@ -215,7 +254,7 @@ fn OpenResponsesStreamDecoder::finish_tool(
   let call = @moonai.ToolCall::new(id~, name~, arguments~)
   self.tool_calls.push(call)
   self.tool_ready[index] = true
-  events.push(@moonai.ToolInputEnd(id))
+  events.push(@moonai.ToolInputEnd(self.tool_stream_id(index)))
   events.push(@moonai.ToolCallReady(call))
 }
 
@@ -325,6 +364,7 @@ fn OpenResponsesStreamDecoder::apply_json(
           } else if kind == "function_call" {
             let index = self.update_tool_from_item(Json::object(item))
             self.start_tool(index, events)
+            self.emit_complete_tool_arguments_if_unseen(index, events)
           }
         }
         _ => ()
@@ -371,11 +411,22 @@ fn OpenResponsesStreamDecoder::apply_json(
       if @provider_utils.json_string_field(json, "call_id") is Some(value) {
         self.tool_call_ids[index] = value
       }
-      self.start_tool(index, events)
       let delta = @provider_utils.json_string_field(json, "delta").unwrap_or("")
       if delta != "" {
         self.tool_arguments[index] = self.tool_arguments[index] + delta
-        events.push(@moonai.ToolInputDelta(id=self.tool_id(index), delta~))
+      }
+      if self.tool_names[index] != "" {
+        let was_started = self.tool_started[index]
+        self.start_tool(index, events)
+        if was_started && delta != "" {
+          self.tool_emitted_arguments[index] = self.tool_emitted_arguments[index] +
+            delta
+          events.push(
+            @moonai.ToolInputDelta(id=self.tool_stream_id(index), delta~),
+          )
+        } else if !was_started {
+          self.emit_complete_tool_arguments_if_unseen(index, events)
+        }
       }
     }
     "response.function_call_arguments.done" => {
@@ -385,6 +436,9 @@ fn OpenResponsesStreamDecoder::apply_json(
       let index = self.ensure_tool(item_id)
       if @provider_utils.json_string_field(json, "arguments") is Some(value) {
         self.tool_arguments[index] = value
+      }
+      if @provider_utils.json_string_field(json, "call_id") is Some(value) {
+        self.tool_call_ids[index] = value
       }
     }
     "response.output_item.done" =>
@@ -463,7 +517,7 @@ fn OpenResponsesStreamDecoder::final_events(
   for index, _ in self.tool_item_ids {
     if self.finish_reason is @moonai.Error {
       if self.tool_started[index] && !self.tool_ready[index] {
-        events.push(@moonai.ToolInputEnd(self.tool_id(index)))
+        events.push(@moonai.ToolInputEnd(self.tool_stream_id(index)))
       }
     } else {
       self.finish_tool(index, events)
@@ -495,7 +549,15 @@ fn OpenResponsesStreamDecoder::decode_data(
     error => fail("Open Responses stream decode error: \{error}; data: \{data}")
   }
   let (events, done) = self.apply_json(json)
-  { events, consumed_event: true, done }
+  if self.include_raw_chunks {
+    let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
+    for event in events {
+      all_events.push(event)
+    }
+    { events: all_events, consumed_event: true, done }
+  } else {
+    { events, consumed_event: true, done }
+  }
 }
 
 ///|

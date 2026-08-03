@@ -17,6 +17,12 @@ pub fn openai_chat(String, api_key~ : String, base_url? : String, headers? : Map
 
 pub fn openai_compatible(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> @openai_compatible.OpenAICompatibleChatModel
 
+pub fn openai_completion(String, api_key~ : String, base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int) -> @openai_compatible.OpenAICompatibleCompletionModel
+
+pub fn openai_embedding(String, api_key~ : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> @openai_compatible.OpenAICompatibleEmbeddingModel
+
+pub fn openai_image(String, api_key~ : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> @openai_compatible.OpenAICompatibleImageModel
+
 // Errors
 
 // Types and methods
@@ -24,11 +30,35 @@ pub struct OpenAIProvider {
   // private fields
 }
 pub fn OpenAIProvider::chat(Self, String) -> @openai_compatible.OpenAICompatibleChatModel
+pub fn OpenAIProvider::chatModel(Self, String) -> @openai_compatible.OpenAICompatibleChatModel
+pub fn OpenAIProvider::chat_model(Self, String) -> @openai_compatible.OpenAICompatibleChatModel
+pub fn OpenAIProvider::completion(Self, String) -> @openai_compatible.OpenAICompatibleCompletionModel
+pub fn OpenAIProvider::completionModel(Self, String) -> @openai_compatible.OpenAICompatibleCompletionModel
+pub fn OpenAIProvider::completion_model(Self, String) -> @openai_compatible.OpenAICompatibleCompletionModel
+pub fn OpenAIProvider::embedding(Self, String) -> @openai_compatible.OpenAICompatibleEmbeddingModel
+pub fn OpenAIProvider::embeddingModel(Self, String) -> @openai_compatible.OpenAICompatibleEmbeddingModel
+pub fn OpenAIProvider::embedding_model(Self, String) -> @openai_compatible.OpenAICompatibleEmbeddingModel
+pub fn OpenAIProvider::image(Self, String) -> @openai_compatible.OpenAICompatibleImageModel
+pub fn OpenAIProvider::imageModel(Self, String) -> @openai_compatible.OpenAICompatibleImageModel
+pub fn OpenAIProvider::image_model(Self, String) -> @openai_compatible.OpenAICompatibleImageModel
+pub fn OpenAIProvider::languageModel(Self, String) -> @open_responses.OpenResponsesLanguageModel
 pub fn OpenAIProvider::language_model(Self, String) -> @open_responses.OpenResponsesLanguageModel
 pub fn OpenAIProvider::responses(Self, String) -> @open_responses.OpenResponsesLanguageModel
+pub fn OpenAIProvider::responsesModel(Self, String) -> @open_responses.OpenResponsesLanguageModel
+pub fn OpenAIProvider::responses_model(Self, String) -> @open_responses.OpenResponsesLanguageModel
+pub fn OpenAIProvider::textEmbedding(Self, String) -> @openai_compatible.OpenAICompatibleEmbeddingModel
+pub fn OpenAIProvider::textEmbeddingModel(Self, String) -> @openai_compatible.OpenAICompatibleEmbeddingModel
+pub fn OpenAIProvider::text_embedding(Self, String) -> @openai_compatible.OpenAICompatibleEmbeddingModel
+pub fn OpenAIProvider::text_embedding_model(Self, String) -> @openai_compatible.OpenAICompatibleEmbeddingModel
 
 // Type aliases
 pub using @openai_compatible {type OpenAICompatibleChatModel as OpenAICompatibleModel}
+
+pub using @openai_compatible {type OpenAICompatibleCompletionModel as OpenAICompletionModel}
+
+pub using @openai_compatible {type OpenAICompatibleEmbeddingModel as OpenAIEmbeddingModel}
+
+pub using @openai_compatible {type OpenAICompatibleImageModel as OpenAIImageModel}
 
 pub using @open_responses {type OpenResponsesLanguageModel as OpenAIResponsesModel}
 

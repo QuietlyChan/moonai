@@ -7,7 +7,7 @@ import {
 }
 
 // Values
-pub async fn post_json_sse(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, idle_timeout_ms? : Int, expected_terminator? : String, feed_line~ : (String) -> DecodeBatch raise, flush_buffered~ : () -> DecodeBatch raise, response~ : () -> @moonai.ChatResponse, on_event~ : async (@moonai.StreamEvent) -> Unit) -> @moonai.ChatResponse
+pub async fn[T] post_json_sse(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, idle_timeout_ms? : Int, expected_terminator? : String, feed_line~ : (String) -> DecodeBatch raise, flush_buffered~ : () -> DecodeBatch raise, response~ : () -> T, on_event~ : async (@moonai.StreamEvent) -> Unit) -> T
 
 // Errors
 

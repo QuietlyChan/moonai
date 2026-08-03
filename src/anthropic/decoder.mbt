@@ -2,6 +2,7 @@
 /// Stateful decoder for the Anthropic Messages API event stream.
 pub struct AnthropicStreamDecoder {
   priv sse : @http_sse.EventSourceBuffer
+  priv include_raw_chunks : Bool
   priv text : StringBuilder
   priv reasoning : StringBuilder
   priv mut input_tokens : Int
@@ -23,9 +24,12 @@ pub struct AnthropicStreamDecoder {
 
 ///|
 /// Create an empty Anthropic SSE decoder.
-pub fn AnthropicStreamDecoder::new() -> AnthropicStreamDecoder {
+pub fn AnthropicStreamDecoder::new(
+  include_raw_chunks? : Bool = false,
+) -> AnthropicStreamDecoder {
   {
     sse: @http_sse.EventSourceBuffer::new(),
+    include_raw_chunks,
     text: StringBuilder::new(),
     reasoning: StringBuilder::new(),
     input_tokens: 0,
@@ -388,7 +392,7 @@ fn AnthropicStreamDecoder::apply_json(
                 @moonai.ToolInputDelta(id=self.block_id(i, "tool"), delta=value),
               )
             }
-          } else if delta_type != "signature_delta" {
+          } else if delta_type != "signature_delta" && !self.include_raw_chunks {
             events.push(@moonai.Raw(json))
           }
         }
@@ -444,7 +448,9 @@ fn AnthropicStreamDecoder::apply_json(
     }
     "ping" => (events, false)
     _ => {
-      events.push(@moonai.Raw(json))
+      if !self.include_raw_chunks {
+        events.push(@moonai.Raw(json))
+      }
       (events, false)
     }
   }
@@ -462,7 +468,15 @@ fn AnthropicStreamDecoder::decode_data(
     error => fail("Anthropic stream decode error: \{error}; data: \{data}")
   }
   let (events, done) = self.apply_json(json)
-  { events, consumed_event: true, done }
+  if self.include_raw_chunks {
+    let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
+    for event in events {
+      all_events.push(event)
+    }
+    { events: all_events, consumed_event: true, done }
+  } else {
+    { events, consumed_event: true, done }
+  }
 }
 
 ///|
