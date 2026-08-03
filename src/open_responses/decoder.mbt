@@ -20,6 +20,9 @@ pub struct OpenResponsesStreamDecoder {
   priv tool_calls : Array[@moonai.ToolCall]
   priv mut usage : @moonai.Usage
   priv mut finish_reason : @moonai.FinishReason
+  priv provider_name : String
+  priv mut response_metadata : @moonai.ResponseMetadata?
+  priv mut provider_metadata : Map[String, Json]
   priv mut finalized : Bool
 }
 
@@ -27,6 +30,7 @@ pub struct OpenResponsesStreamDecoder {
 /// Create an empty Open Responses stream decoder.
 pub fn OpenResponsesStreamDecoder::new(
   include_raw_chunks? : Bool = false,
+  provider_name? : String = "",
 ) -> OpenResponsesStreamDecoder {
   {
     sse: @http_sse.EventSourceBuffer::new(),
@@ -48,7 +52,35 @@ pub fn OpenResponsesStreamDecoder::new(
     tool_calls: [],
     usage: @moonai.Usage::zero(),
     finish_reason: @moonai.Unknown(""),
+    provider_name,
+    response_metadata: None,
+    provider_metadata: Map([]),
     finalized: false,
+  }
+}
+
+///|
+/// Retain identity and provider-specific fields carried by stream chunks.
+fn OpenResponsesStreamDecoder::record_json(
+  self : OpenResponsesStreamDecoder,
+  json : Json,
+) -> Unit {
+  let chunk_metadata = @moonai.ResponseMetadata::from_json(json)
+  if !chunk_metadata.is_empty() {
+    self.response_metadata = Some(
+      @moonai.merge_response_metadata(self.response_metadata, chunk_metadata),
+    )
+  }
+  if self.provider_name != "" {
+    self.provider_metadata = @moonai.merge_provider_metadata(
+      self.provider_metadata,
+      @provider_utils.provider_metadata_from_json(json, self.provider_name),
+    )
+  }
+  match json {
+    { "response": Object(response), .. } =>
+      self.record_json(Json::object(response))
+    _ => ()
   }
 }
 
@@ -548,6 +580,7 @@ fn OpenResponsesStreamDecoder::decode_data(
   let json = @json.parse(data) catch {
     error => fail("Open Responses stream decode error: \{error}; data: \{data}")
   }
+  self.record_json(json)
   let (events, done) = self.apply_json(json)
   if self.include_raw_chunks {
     let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
@@ -588,11 +621,11 @@ pub fn OpenResponsesStreamDecoder::flush_buffered(
 pub fn OpenResponsesStreamDecoder::response(
   self : OpenResponsesStreamDecoder,
 ) -> @moonai.ChatResponse {
-  {
-    text: self.text.to_string(),
-    reasoning: self.reasoning.to_string(),
-    tool_calls: self.tool_calls,
-    usage: self.usage,
-    finish_reason: self.finish_reason,
-  }
+  @moonai.ChatResponse::new(
+    self.text.to_string(),
+    self.reasoning.to_string(),
+    self.tool_calls,
+    self.usage,
+    self.finish_reason,
+  ).with_diagnostics(None, self.response_metadata, self.provider_metadata, [])
 }

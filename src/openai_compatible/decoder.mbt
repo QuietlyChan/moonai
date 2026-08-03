@@ -9,6 +9,9 @@ pub struct OpenAICompatibleStreamDecoder {
   priv tool_stream_ids : Array[String]
   priv mut usage : @moonai.Usage
   priv mut finish_reason : @moonai.FinishReason
+  priv provider_name : String
+  priv mut response_metadata : @moonai.ResponseMetadata?
+  priv mut provider_metadata : Map[String, Json]
   priv mut text_started : Bool
   priv mut reasoning_started : Bool
   priv mut finalized : Bool
@@ -18,6 +21,7 @@ pub struct OpenAICompatibleStreamDecoder {
 /// Create an empty OpenAI-compatible stream decoder.
 pub fn OpenAICompatibleStreamDecoder::new(
   include_raw_chunks? : Bool = false,
+  provider_name? : String = "",
 ) -> OpenAICompatibleStreamDecoder {
   {
     sse: @http_sse.EventSourceBuffer::new(),
@@ -28,9 +32,32 @@ pub fn OpenAICompatibleStreamDecoder::new(
     tool_stream_ids: [],
     usage: @moonai.Usage::zero(),
     finish_reason: @moonai.Unknown(""),
+    provider_name,
+    response_metadata: None,
+    provider_metadata: Map([]),
     text_started: false,
     reasoning_started: false,
     finalized: false,
+  }
+}
+
+///|
+/// Retain identity and provider-specific fields carried by stream chunks.
+fn OpenAICompatibleStreamDecoder::record_json(
+  self : OpenAICompatibleStreamDecoder,
+  json : Json,
+) -> Unit {
+  let chunk_metadata = @moonai.ResponseMetadata::from_json(json)
+  if !chunk_metadata.is_empty() {
+    self.response_metadata = Some(
+      @moonai.merge_response_metadata(self.response_metadata, chunk_metadata),
+    )
+  }
+  if self.provider_name != "" {
+    self.provider_metadata = @moonai.merge_provider_metadata(
+      self.provider_metadata,
+      @provider_utils.provider_metadata_from_json(json, self.provider_name),
+    )
   }
 }
 
@@ -241,6 +268,7 @@ fn OpenAICompatibleStreamDecoder::decode_data(
     error =>
       fail("OpenAI-compatible stream decode error: \{error}; data: \{data}")
   }
+  self.record_json(json)
   if stream_error_message(json) is Some(message) {
     self.finish_reason = @moonai.Error
     let events : Array[@moonai.StreamEvent] = [@moonai.StreamError(message)]
@@ -316,15 +344,15 @@ pub fn OpenAICompatibleStreamDecoder::flush_buffered(
 pub fn OpenAICompatibleStreamDecoder::response(
   self : OpenAICompatibleStreamDecoder,
 ) -> @moonai.ChatResponse {
-  {
-    text: self.text.to_string(),
-    reasoning: self.reasoning.to_string(),
-    tool_calls: if self.finish_reason is @moonai.Error {
+  @moonai.ChatResponse::new(
+    self.text.to_string(),
+    self.reasoning.to_string(),
+    if self.finish_reason is @moonai.Error {
       []
     } else {
       self.tools.calls()
     },
-    usage: self.usage,
-    finish_reason: self.finish_reason,
-  }
+    self.usage,
+    self.finish_reason,
+  ).with_diagnostics(None, self.response_metadata, self.provider_metadata, [])
 }

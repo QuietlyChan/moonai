@@ -15,6 +15,8 @@ fn prepare_chat_call_options(
   include_raw_chunks : Bool,
   headers : Map[String, String],
   provider_options : Map[String, Json],
+  retry_policy : RetryPolicy,
+  cancellation_token : CancellationToken?,
 ) -> ChatCallOptions raise {
   let all_messages = messages.copy()
   if prompt is Some(text) {
@@ -38,6 +40,8 @@ fn prepare_chat_call_options(
     include_raw_chunks~,
     headers~,
     provider_options~,
+    retry_policy~,
+    cancellation_token?,
   )
 }
 
@@ -60,12 +64,15 @@ pub async fn generate_text(
   include_raw_chunks? : Bool = false,
   headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  cancellation_token? : CancellationToken,
 ) -> ChatResponse {
+  check_cancellation(cancellation_token)
   model.generate(
     prepare_chat_call_options(
       prompt, messages, tools, tool_choice, response_format, max_output_tokens, temperature,
       top_p, frequency_penalty, presence_penalty, seed, stop_sequences, include_raw_chunks,
-      headers, provider_options,
+      headers, provider_options, retry_policy, cancellation_token,
     ),
   )
 }
@@ -89,7 +96,10 @@ pub async fn generateText(
   include_raw_chunks? : Bool = false,
   headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  cancellation_token? : CancellationToken,
 ) -> ChatResponse {
+  check_cancellation(cancellation_token)
   generate_text(
     model,
     prompt?,
@@ -107,6 +117,8 @@ pub async fn generateText(
     include_raw_chunks~,
     headers~,
     provider_options~,
+    retry_policy~,
+    cancellation_token?,
   )
 }
 
@@ -133,12 +145,15 @@ pub async fn stream_text(
   headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
   on_event? : async (StreamEvent) -> Unit = _ => (),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  cancellation_token? : CancellationToken,
 ) -> ChatResponse {
+  check_cancellation(cancellation_token)
   model.stream(
     prepare_chat_call_options(
       prompt, messages, tools, tool_choice, response_format, max_output_tokens, temperature,
       top_p, frequency_penalty, presence_penalty, seed, stop_sequences, include_raw_chunks,
-      headers, provider_options,
+      headers, provider_options, retry_policy, cancellation_token,
     ),
     on_event,
   )
@@ -164,7 +179,10 @@ pub async fn streamText(
   headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
   on_event? : async (StreamEvent) -> Unit = _ => (),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  cancellation_token? : CancellationToken,
 ) -> ChatResponse {
+  check_cancellation(cancellation_token)
   stream_text(
     model,
     prompt?,
@@ -183,5 +201,7 @@ pub async fn streamText(
     headers~,
     provider_options~,
     on_event~,
+    retry_policy~,
+    cancellation_token?,
   )
 }

@@ -78,5 +78,5 @@ pub fn decode_chat_response(json : Json) -> @moonai.ChatResponse raise {
         @moonai.Stop
       }
   }
-  { text, reasoning, tool_calls, usage, finish_reason }
+  @moonai.ChatResponse::new(text, reasoning, tool_calls, usage, finish_reason)
 }

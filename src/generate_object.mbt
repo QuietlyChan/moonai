@@ -23,6 +23,8 @@ pub async fn generate_object(
   stop_sequences? : Array[String] = [],
   headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  cancellation_token? : CancellationToken,
 ) -> ObjectResponse {
   let response = generate_text(
     model,
@@ -38,6 +40,8 @@ pub async fn generate_object(
     stop_sequences~,
     headers~,
     provider_options~,
+    retry_policy~,
+    cancellation_token?,
   )
   let object = @json.parse(response.text) catch {
     error =>
@@ -66,6 +70,8 @@ pub async fn generateObject(
   stop_sequences? : Array[String] = [],
   headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  cancellation_token? : CancellationToken,
 ) -> ObjectResponse {
   generate_object(
     model,
@@ -83,5 +89,7 @@ pub async fn generateObject(
     stop_sequences~,
     headers~,
     provider_options~,
+    retry_policy~,
+    cancellation_token?,
   )
 }

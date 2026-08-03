@@ -51,8 +51,6 @@ test "encode Open Responses streaming request" {
     "stream": true,
     "instructions": "Be concise",
     "max_output_tokens": 1024,
-    "frequency_penalty": -0.1,
-    "presence_penalty": 0.3,
     "tools": [
       {
         "type": "function",

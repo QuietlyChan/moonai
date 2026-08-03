@@ -261,6 +261,8 @@ pub(all) struct ChatCallOptions {
   include_raw_chunks : Bool
   headers : Map[String, String]
   provider_options : Map[String, Json]
+  retry_policy : RetryPolicy
+  cancellation_token : CancellationToken?
 } derive(Debug)
 
 ///|
@@ -280,6 +282,8 @@ pub fn ChatCallOptions::new(
   include_raw_chunks? : Bool = false,
   headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  cancellation_token? : CancellationToken,
 ) -> ChatCallOptions {
   {
     messages,
@@ -296,6 +300,8 @@ pub fn ChatCallOptions::new(
     include_raw_chunks,
     headers,
     provider_options,
+    retry_policy,
+    cancellation_token,
   }
 }
 
@@ -307,7 +313,33 @@ pub(all) struct ChatResponse {
   tool_calls : Array[ToolCall]
   usage : Usage
   finish_reason : FinishReason
+  request : RequestMetadata?
+  response : ResponseMetadata?
+  provider_metadata : Map[String, Json]
+  warnings : Array[Warning]
 } derive(Debug, Eq)
+
+///|
+/// Construct a response without transport diagnostics.
+pub fn ChatResponse::new(
+  text : String,
+  reasoning : String,
+  tool_calls : Array[ToolCall],
+  usage : Usage,
+  finish_reason : FinishReason,
+) -> ChatResponse {
+  {
+    text,
+    reasoning,
+    tool_calls,
+    usage,
+    finish_reason,
+    request: None,
+    response: None,
+    provider_metadata: Map([]),
+    warnings: [],
+  }
+}
 
 ///|
 /// Return an empty accumulated response.
@@ -318,6 +350,52 @@ pub fn ChatResponse::empty() -> ChatResponse {
     tool_calls: [],
     usage: Usage::zero(),
     finish_reason: Unknown(""),
+    request: None,
+    response: None,
+    provider_metadata: Map([]),
+    warnings: [],
+  }
+}
+
+///|
+/// Attach transport and provider diagnostics to an accumulated response.
+pub fn ChatResponse::with_diagnostics(
+  self : ChatResponse,
+  request : RequestMetadata?,
+  response : ResponseMetadata?,
+  provider_metadata : Map[String, Json],
+  warnings : Array[Warning],
+) -> ChatResponse {
+  {
+    text: self.text,
+    reasoning: self.reasoning,
+    tool_calls: self.tool_calls,
+    usage: self.usage,
+    finish_reason: self.finish_reason,
+    request,
+    response,
+    provider_metadata: copy_provider_metadata(provider_metadata),
+    warnings: copy_warnings(warnings),
+  }
+}
+
+///|
+/// Add HTTP metadata to a response while preserving decoder metadata.
+pub fn ChatResponse::with_transport(
+  self : ChatResponse,
+  request : RequestMetadata,
+  response : ResponseMetadata,
+) -> ChatResponse {
+  {
+    text: self.text,
+    reasoning: self.reasoning,
+    tool_calls: self.tool_calls,
+    usage: self.usage,
+    finish_reason: self.finish_reason,
+    request: Some(request),
+    response: Some(merge_response_metadata(self.response, response)),
+    provider_metadata: copy_provider_metadata(self.provider_metadata),
+    warnings: copy_warnings(self.warnings),
   }
 }
 
@@ -325,6 +403,7 @@ pub fn ChatResponse::empty() -> ChatResponse {
 /// The stable event protocol emitted by all streaming providers.
 pub(all) enum StreamEvent {
   StreamStart
+  Warning(Warning)
   TextStart(String)
   TextDelta(id~ : String, delta~ : String)
   TextEnd(String)

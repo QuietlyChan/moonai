@@ -87,11 +87,11 @@ pub fn decode_responses_response(json : Json) -> @moonai.ChatResponse raise {
     { "status": "failed", .. } => @moonai.Error
     _ => map_finish_reason(incomplete_reason, tool_calls.length() > 0)
   }
-  {
-    text: text.to_string(),
-    reasoning: reasoning.to_string(),
+  @moonai.ChatResponse::new(
+    text.to_string(),
+    reasoning.to_string(),
     tool_calls,
     usage,
     finish_reason,
-  }
+  )
 }

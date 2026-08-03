@@ -38,3 +38,12 @@ test "JSON field accessors reject mismatched values" {
   assert_eq(json_int_field_opt(value, "count"), Some(3))
   assert_eq(json_int_field(value, "missing", default=7), 7)
 }
+
+///|
+test "provider metadata preserves gateway provider keys" {
+  let value : Json = {
+    "provider_metadata": { "openai": { "trace_id": "trace-1" } },
+  }
+  let metadata = provider_metadata_from_json(value, "openai.chat")
+  json_inspect(metadata["openai"], content={ "trace_id": "trace-1" })
+}

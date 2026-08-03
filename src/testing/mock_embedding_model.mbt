@@ -80,5 +80,10 @@ pub impl @moonai.EmbeddingModel for MockEmbeddingModel with fn embed(
       self.result.embeddings[index % self.result.embeddings.length()],
     )
   }
-  { embeddings, usage: self.result.usage }
+  @moonai.EmbeddingBatchResponse::new(embeddings, self.result.usage).with_diagnostics(
+    self.result.request,
+    self.result.response,
+    self.result.provider_metadata,
+    self.result.warnings,
+  )
 }

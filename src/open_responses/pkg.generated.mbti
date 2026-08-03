@@ -38,7 +38,7 @@ pub struct OpenResponsesStreamDecoder {
 }
 pub fn OpenResponsesStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
 pub fn OpenResponsesStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn OpenResponsesStreamDecoder::new(include_raw_chunks? : Bool) -> Self
+pub fn OpenResponsesStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String) -> Self
 pub fn OpenResponsesStreamDecoder::response(Self) -> @moonai.ChatResponse
 
 // Type aliases

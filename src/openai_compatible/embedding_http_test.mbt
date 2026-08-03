@@ -22,17 +22,17 @@ async test "embed and embedMany drive OpenAI-compatible embedding requests" {
             )
             assert_true(request_body.contains("\"input\":[\"hello\"]"))
             connection.write(
-              "{\"data\":[{\"index\":0,\"embedding\":[0.1,0.2,0.3]}],\"usage\":{\"prompt_tokens\":2}}",
+              "{\"id\":\"emb-1\",\"model\":\"embedding-model\",\"created\":1700000010,\"provider_metadata\":{\"local-test.embedding\":{\"single\":true}},\"data\":[{\"index\":0,\"embedding\":[0.1,0.2,0.3]}],\"usage\":{\"prompt_tokens\":2}}",
             )
           } else if request_count == 1 {
             assert_true(request_body.contains("\"input\":[\"one\",\"two\"]"))
             connection.write(
-              "{\"data\":[{\"index\":0,\"embedding\":[1,2,3]},{\"index\":1,\"embedding\":[4,5,6]}],\"usage\":{\"prompt_tokens\":4}}",
+              "{\"id\":\"emb-2\",\"model\":\"embedding-model\",\"provider_metadata\":{\"local-test.embedding\":{\"first_batch\":true}},\"data\":[{\"index\":0,\"embedding\":[1,2,3]},{\"index\":1,\"embedding\":[4,5,6]}],\"usage\":{\"prompt_tokens\":4}}",
             )
           } else {
             assert_true(request_body.contains("\"input\":[\"three\"]"))
             connection.write(
-              "{\"data\":[{\"index\":0,\"embedding\":[7,8,9]}],\"usage\":{\"prompt_tokens\":2}}",
+              "{\"id\":\"emb-3\",\"model\":\"embedding-model\",\"provider_metadata\":{\"local-test.embedding\":{\"last_batch\":true}},\"data\":[{\"index\":0,\"embedding\":[7,8,9]}],\"usage\":{\"prompt_tokens\":2}}",
             )
           }
           request_count = request_count + 1
@@ -54,11 +54,26 @@ async test "embed and embedMany drive OpenAI-compatible embedding requests" {
     let many = @moonai.embedMany(model, ["one", "two", "three"], dimensions=3)
     assert_eq(single.embedding, [0.1, 0.2, 0.3])
     assert_eq(single.usage.input_tokens, 2)
+    match single.request {
+      Some(request) =>
+        assert_true(request.body.contains("\"input\":[\"hello\"]"))
+      None => fail("expected embedding request metadata")
+    }
+    assert_eq(single.response.unwrap().id, Some("emb-1"))
+    assert_eq(single.response.unwrap().created_at, Some(1700000010))
+    json_inspect(single.provider_metadata["local-test.embedding"], content={
+      "single": true,
+    })
     assert_eq(many.embeddings, [
       [1.0, 2.0, 3.0],
       [4.0, 5.0, 6.0],
       [7.0, 8.0, 9.0],
     ])
     assert_eq(many.usage.input_tokens, 6)
+    assert_eq(many.response.unwrap().id, Some("emb-2"))
+    json_inspect(many.provider_metadata["local-test.embedding"], content={
+      "first_batch": true,
+      "last_batch": true,
+    })
   }
 }

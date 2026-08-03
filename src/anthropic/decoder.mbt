@@ -19,6 +19,9 @@ pub struct AnthropicStreamDecoder {
   priv block_stopped : Array[Bool]
   priv block_ready : Array[Bool]
   priv tool_calls : Array[@moonai.ToolCall]
+  priv provider_name : String
+  priv mut response_metadata : @moonai.ResponseMetadata?
+  priv mut provider_metadata : Map[String, Json]
   priv mut finalized : Bool
 }
 
@@ -26,6 +29,7 @@ pub struct AnthropicStreamDecoder {
 /// Create an empty Anthropic SSE decoder.
 pub fn AnthropicStreamDecoder::new(
   include_raw_chunks? : Bool = false,
+  provider_name? : String = "",
 ) -> AnthropicStreamDecoder {
   {
     sse: @http_sse.EventSourceBuffer::new(),
@@ -46,7 +50,35 @@ pub fn AnthropicStreamDecoder::new(
     block_stopped: [],
     block_ready: [],
     tool_calls: [],
+    provider_name,
+    response_metadata: None,
+    provider_metadata: Map([]),
     finalized: false,
+  }
+}
+
+///|
+/// Retain identity and provider-specific fields carried by stream chunks.
+fn AnthropicStreamDecoder::record_json(
+  self : AnthropicStreamDecoder,
+  json : Json,
+) -> Unit {
+  let chunk_metadata = @moonai.ResponseMetadata::from_json(json)
+  if !chunk_metadata.is_empty() {
+    self.response_metadata = Some(
+      @moonai.merge_response_metadata(self.response_metadata, chunk_metadata),
+    )
+  }
+  if self.provider_name != "" {
+    self.provider_metadata = @moonai.merge_provider_metadata(
+      self.provider_metadata,
+      @provider_utils.provider_metadata_from_json(json, self.provider_name),
+    )
+  }
+  match json {
+    { "message": Object(message), .. } =>
+      self.record_json(Json::object(message))
+    _ => ()
   }
 }
 
@@ -467,6 +499,7 @@ fn AnthropicStreamDecoder::decode_data(
   let json = @json.parse(data) catch {
     error => fail("Anthropic stream decode error: \{error}; data: \{data}")
   }
+  self.record_json(json)
   let (events, done) = self.apply_json(json)
   if self.include_raw_chunks {
     let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
@@ -513,11 +546,11 @@ pub fn AnthropicStreamDecoder::response(
       @moonai.ToolCalls
     other => other
   }
-  {
-    text: self.text.to_string(),
-    reasoning: self.reasoning.to_string(),
-    tool_calls: self.tool_calls,
-    usage: self.usage(),
-    finish_reason: reason,
-  }
+  @moonai.ChatResponse::new(
+    self.text.to_string(),
+    self.reasoning.to_string(),
+    self.tool_calls,
+    self.usage(),
+    reason,
+  ).with_diagnostics(None, self.response_metadata, self.provider_metadata, [])
 }

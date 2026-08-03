@@ -198,6 +198,65 @@ fn AnthropicMessagesModel::request_beta_features(
 }
 
 ///|
+/// Return warnings for standardized settings that the Anthropic Messages
+/// protocol cannot represent faithfully.
+fn anthropic_warnings(
+  options : @moonai.ChatCallOptions,
+) -> Array[@moonai.Warning] {
+  let warnings : Array[@moonai.Warning] = []
+  if options.frequency_penalty is Some(_) {
+    warnings.push(
+      @moonai.Warning::Unsupported(
+        feature="frequencyPenalty",
+        details="Anthropic Messages does not define a frequency penalty field.",
+      ),
+    )
+  }
+  if options.presence_penalty is Some(_) {
+    warnings.push(
+      @moonai.Warning::Unsupported(
+        feature="presencePenalty",
+        details="Anthropic Messages does not define a presence penalty field.",
+      ),
+    )
+  }
+  if options.seed is Some(_) {
+    warnings.push(
+      @moonai.Warning::Unsupported(
+        feature="seed",
+        details="Anthropic Messages does not define a seed field.",
+      ),
+    )
+  }
+  match options.temperature {
+    Some(value) if value > 1.0 =>
+      warnings.push(
+        @moonai.Warning::Unsupported(
+          feature="temperature",
+          details="temperature exceeds Anthropic maximum of 1.0 and is clamped to 1.0.",
+        ),
+      )
+    Some(value) if value < 0.0 =>
+      warnings.push(
+        @moonai.Warning::Unsupported(
+          feature="temperature",
+          details="temperature is below Anthropic minimum of 0.0 and is clamped to 0.0.",
+        ),
+      )
+    _ => ()
+  }
+  if options.response_format is @moonai.JsonObject {
+    warnings.push(
+      @moonai.Warning::Unsupported(
+        feature="responseFormat",
+        details="Anthropic JSON response format requires an explicit schema and is ignored.",
+      ),
+    )
+  }
+  warnings
+}
+
+///|
 fn AnthropicMessagesModel::request_headers(
   self : AnthropicMessagesModel,
   options : @moonai.ChatCallOptions,

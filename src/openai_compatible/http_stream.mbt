@@ -6,8 +6,10 @@ async fn OpenAICompatibleChatModel::stream_chat(
 ) -> @moonai.ChatResponse {
   let decoder = OpenAICompatibleStreamDecoder::new(
     include_raw_chunks=options.include_raw_chunks,
+    provider_name=self.provider_name,
   )
-  @http_sse.post_json_sse(
+  let cancellation_token = options.cancellation_token
+  let result = @http_sse.post_json_sse(
     provider_name=self.provider_name,
     url=self.chat_completions_url(),
     headers=@provider_utils.merge_headers(
@@ -22,9 +24,19 @@ async fn OpenAICompatibleChatModel::stream_chat(
     ),
     idle_timeout_ms=self.idle_timeout_ms,
     expected_terminator="[DONE]",
+    retry_policy=options.retry_policy,
+    cancellation_token?,
     feed_line=raw => decoder.feed_line(raw),
     flush_buffered=() => decoder.flush_buffered(),
     response=() => decoder.response(),
     on_event~,
   )
+  result.value
+  .with_diagnostics(
+    None,
+    result.value.response,
+    result.value.provider_metadata,
+    [],
+  )
+  .with_transport(result.request, result.response)
 }

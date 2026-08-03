@@ -18,12 +18,12 @@ async test "generateImage batches OpenAI-compatible image requests" {
           if request_count == 0 {
             assert_true(request_body.contains("\"n\":2"))
             connection.write(
-              "{\"data\":[{\"b64_json\":\"image-1\"},{\"b64_json\":\"image-2\"}],\"usage\":{\"input_tokens\":2,\"output_tokens\":4,\"total_tokens\":6}}",
+              "{\"id\":\"image-1\",\"model\":\"image-model\",\"created\":1700000020,\"provider_metadata\":{\"local-test.image\":{\"first_batch\":true}},\"data\":[{\"b64_json\":\"image-1\"},{\"b64_json\":\"image-2\"}],\"usage\":{\"input_tokens\":2,\"output_tokens\":4,\"total_tokens\":6}}",
             )
           } else {
             assert_true(request_body.contains("\"n\":1"))
             connection.write(
-              "{\"data\":[{\"url\":\"https://example.com/image-3.png\"}],\"usage\":{\"input_tokens\":1,\"output_tokens\":2,\"total_tokens\":3}}",
+              "{\"id\":\"image-2\",\"model\":\"image-model\",\"provider_metadata\":{\"local-test.image\":{\"last_batch\":true}},\"data\":[{\"url\":\"https://example.com/image-3.png\"}],\"usage\":{\"input_tokens\":1,\"output_tokens\":2,\"total_tokens\":3}}",
             )
           }
           request_count = request_count + 1
@@ -53,5 +53,11 @@ async test "generateImage batches OpenAI-compatible image requests" {
       @moonai.ImageData::Url("https://example.com/image-3.png"),
     )
     assert_eq(response.usage.total_tokens, 9)
+    assert_eq(response.response.unwrap().id, Some("image-1"))
+    assert_eq(response.response.unwrap().created_at, Some(1700000020))
+    json_inspect(response.provider_metadata["local-test.image"], content={
+      "first_batch": true,
+      "last_batch": true,
+    })
   }
 }

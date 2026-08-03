@@ -35,7 +35,7 @@ pub struct AnthropicStreamDecoder {
 }
 pub fn AnthropicStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
 pub fn AnthropicStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn AnthropicStreamDecoder::new(include_raw_chunks? : Bool) -> Self
+pub fn AnthropicStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String) -> Self
 pub fn AnthropicStreamDecoder::response(Self) -> @moonai.ChatResponse
 
 // Type aliases

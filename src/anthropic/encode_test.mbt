@@ -72,3 +72,21 @@ test "encode Anthropic Messages request" {
     "tool_choice": { "type": "any" },
   })
 }
+
+///|
+test "Anthropic clamps temperature and omits schema-less JSON format" {
+  let high_options = @moonai.ChatCallOptions::new(
+    [@moonai.Message::user("hello")],
+    temperature=1.5,
+    response_format=@moonai.JsonObject,
+  )
+  json_inspect(encode_messages_request("claude-test", high_options), content={
+    "model": "claude-test",
+    "messages": [
+      { "role": "user", "content": [{ "type": "text", "text": "hello" }] },
+    ],
+    "max_tokens": 4096,
+    "stream": true,
+    "temperature": 1.0,
+  })
+}

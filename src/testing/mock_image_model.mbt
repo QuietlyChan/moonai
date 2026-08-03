@@ -58,5 +58,10 @@ pub impl @moonai.ImageModel for MockImageModel with fn generate(self, options) {
     images.push(self.result.images[index % self.result.images.length()])
     index = index + 1
   }
-  { images, usage: self.result.usage }
+  @moonai.ImageResponse::new(images, self.result.usage).with_diagnostics(
+    self.result.request,
+    self.result.response,
+    self.result.provider_metadata,
+    self.result.warnings,
+  )
 }

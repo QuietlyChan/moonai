@@ -26,5 +26,5 @@ pub fn decode_completion_response(
     Some(value) => @moonai.FinishReason::from_openai(value)
     None => @moonai.Stop
   }
-  { text, usage, finish_reason }
+  @moonai.CompletionResponse::new(text, usage, finish_reason)
 }

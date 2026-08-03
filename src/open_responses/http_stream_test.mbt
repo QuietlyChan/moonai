@@ -21,7 +21,7 @@ async test "streamText drives an Open Responses HTTP SSE request" {
             "Content-Type": "text/event-stream",
           })
           connection.write(
-            "data: {\"type\":\"response.output_item.added\",\"item\":{\"id\":\"msg_1\",\"type\":\"message\"}}\n\n",
+            "data: {\"type\":\"response.output_item.added\",\"item\":{\"id\":\"msg_1\",\"type\":\"message\"},\"id\":\"resp-stream\",\"model\":\"test-model\",\"created_at\":1700000003,\"provider_metadata\":{\"local-test.responses\":{\"stream_trace\":\"rs-1\"}}}\n\n",
           )
           connection.write(
             "data: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg_1\",\"delta\":\"Hello Responses\"}\n\n",
@@ -47,6 +47,18 @@ async test "streamText drives an Open Responses HTTP SSE request" {
     assert_eq(response.text, "Hello Responses")
     assert_eq(response.finish_reason, @moonai.Stop)
     assert_eq(response.usage.total_tokens, 5)
+    match response.response {
+      Some(metadata) => {
+        assert_eq(metadata.status_code, Some(200))
+        assert_eq(metadata.id, Some("resp-stream"))
+        assert_eq(metadata.model_id, Some("test-model"))
+        assert_eq(metadata.created_at, Some(1700000003))
+      }
+      None => fail("expected streaming response metadata")
+    }
+    json_inspect(response.provider_metadata["local-test.responses"], content={
+      "stream_trace": "rs-1",
+    })
   }
 }
 
@@ -68,7 +80,7 @@ async test "generateText drives an Open Responses JSON request" {
             "Content-Type": "application/json",
           })
           connection.write(
-            "{\"id\":\"resp_1\",\"status\":\"completed\",\"output\":[{\"type\":\"message\",\"content\":[{\"type\":\"output_text\",\"text\":\"Hello generate\"}]}],\"usage\":{\"input_tokens\":2,\"output_tokens\":2,\"total_tokens\":4}}",
+            "{\"id\":\"resp_1\",\"model\":\"test-model\",\"created_at\":1700000002,\"status\":\"completed\",\"provider_metadata\":{\"local-test.responses\":{\"trace_id\":\"r-1\"}},\"output\":[{\"type\":\"message\",\"content\":[{\"type\":\"output_text\",\"text\":\"Hello generate\"}]}],\"usage\":{\"input_tokens\":2,\"output_tokens\":2,\"total_tokens\":4}}",
           )
         },
         max_connections=1,
@@ -87,5 +99,24 @@ async test "generateText drives an Open Responses JSON request" {
     assert_eq(response.text, "Hello generate")
     assert_eq(response.finish_reason, @moonai.Stop)
     assert_eq(response.usage.total_tokens, 4)
+    match response.request {
+      Some(request) => {
+        assert_true(request.body.contains("\"model\":\"test-model\""))
+        assert_false(request.body.contains("\"stream\""))
+      }
+      None => fail("expected request metadata")
+    }
+    match response.response {
+      Some(metadata) => {
+        assert_eq(metadata.status_code, Some(200))
+        assert_eq(metadata.id, Some("resp_1"))
+        assert_eq(metadata.model_id, Some("test-model"))
+        assert_eq(metadata.created_at, Some(1700000002))
+      }
+      None => fail("expected response metadata")
+    }
+    json_inspect(response.provider_metadata["local-test.responses"], content={
+      "trace_id": "r-1",
+    })
   }
 }

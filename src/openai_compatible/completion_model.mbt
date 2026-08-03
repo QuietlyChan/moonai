@@ -88,17 +88,37 @@ async fn OpenAICompatibleCompletionModel::generate_completion(
   self : OpenAICompatibleCompletionModel,
   options : @moonai.CompletionOptions,
 ) -> @moonai.CompletionResponse {
+  let request_body = encode_completion_request(
+    self.model_id,
+    options,
+    stream=false,
+  )
+  let request_headers = @provider_utils.merge_headers(
+    self.request_headers(),
+    options.headers,
+  )
+  let cancellation_token = options.cancellation_token
   let response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=self.completions_url(),
-    headers=@provider_utils.merge_headers(
-      self.request_headers(),
-      options.headers,
-    ),
-    body=encode_completion_request(self.model_id, options, stream=false),
+    headers=request_headers,
+    body=request_body,
     timeout_ms=self.idle_timeout_ms,
+    retry_policy=options.retry_policy,
+    cancellation_token?,
   )
-  decode_completion_response(response)
+  let decoded = decode_completion_response(response.value)
+  decoded
+  .with_diagnostics(
+    None,
+    None,
+    @provider_utils.provider_metadata_from_json(
+      response.value,
+      self.provider_name,
+    ),
+    [],
+  )
+  .with_transport(response.request, response.response)
 }
 
 ///|
@@ -109,8 +129,10 @@ async fn OpenAICompatibleCompletionModel::stream_completion(
 ) -> @moonai.CompletionResponse {
   let decoder = OpenAICompatibleCompletionStreamDecoder::new(
     include_raw_chunks=options.include_raw_chunks,
+    provider_name=self.provider_name,
   )
-  @http_sse.post_json_sse(
+  let cancellation_token = options.cancellation_token
+  let result = @http_sse.post_json_sse(
     provider_name=self.provider_name,
     url=self.completions_url(),
     headers=@provider_utils.merge_headers(
@@ -124,9 +146,19 @@ async fn OpenAICompatibleCompletionModel::stream_completion(
     ),
     idle_timeout_ms=self.idle_timeout_ms,
     expected_terminator="[DONE]",
+    retry_policy=options.retry_policy,
+    cancellation_token?,
     feed_line=raw => decoder.feed_line(raw),
     flush_buffered=() => decoder.flush_buffered(),
     response=() => decoder.response(),
     on_event~,
   )
+  result.value
+  .with_diagnostics(
+    None,
+    result.value.response,
+    result.value.provider_metadata,
+    [],
+  )
+  .with_transport(result.request, result.response)
 }

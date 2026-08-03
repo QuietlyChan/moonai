@@ -88,15 +88,31 @@ async fn OpenAICompatibleEmbeddingModel::embed_values(
   values : Array[String],
   options : @moonai.EmbeddingOptions,
 ) -> @moonai.EmbeddingBatchResponse {
+  let request_body = encode_embedding_request(self.model_id, values, options)
+  let request_headers = @provider_utils.merge_headers(
+    self.request_headers(),
+    options.headers,
+  )
+  let cancellation_token = options.cancellation_token
   let response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=self.embeddings_url(),
-    headers=@provider_utils.merge_headers(
-      self.request_headers(),
-      options.headers,
-    ),
-    body=encode_embedding_request(self.model_id, values, options),
+    headers=request_headers,
+    body=request_body,
     timeout_ms=self.idle_timeout_ms,
+    retry_policy=options.retry_policy,
+    cancellation_token?,
   )
-  decode_embedding_response(response)
+  let decoded = decode_embedding_response(response.value)
+  decoded
+  .with_diagnostics(
+    None,
+    None,
+    @provider_utils.provider_metadata_from_json(
+      response.value,
+      self.provider_name,
+    ),
+    [],
+  )
+  .with_transport(response.request, response.response)
 }

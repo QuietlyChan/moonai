@@ -6,6 +6,9 @@ pub struct OpenAICompatibleCompletionStreamDecoder {
   priv text : StringBuilder
   priv mut usage : @moonai.Usage
   priv mut finish_reason : @moonai.FinishReason
+  priv provider_name : String
+  priv mut response_metadata : @moonai.ResponseMetadata?
+  priv mut provider_metadata : Map[String, Json]
   priv mut text_started : Bool
   priv mut finalized : Bool
 }
@@ -14,6 +17,7 @@ pub struct OpenAICompatibleCompletionStreamDecoder {
 /// Create an empty completion stream decoder.
 pub fn OpenAICompatibleCompletionStreamDecoder::new(
   include_raw_chunks? : Bool = false,
+  provider_name? : String = "",
 ) -> OpenAICompatibleCompletionStreamDecoder {
   {
     sse: @http_sse.EventSourceBuffer::new(),
@@ -21,8 +25,31 @@ pub fn OpenAICompatibleCompletionStreamDecoder::new(
     text: StringBuilder::new(),
     usage: @moonai.Usage::zero(),
     finish_reason: @moonai.Unknown(""),
+    provider_name,
+    response_metadata: None,
+    provider_metadata: Map([]),
     text_started: false,
     finalized: false,
+  }
+}
+
+///|
+/// Retain identity and provider-specific fields carried by stream chunks.
+fn OpenAICompatibleCompletionStreamDecoder::record_json(
+  self : OpenAICompatibleCompletionStreamDecoder,
+  json : Json,
+) -> Unit {
+  let chunk_metadata = @moonai.ResponseMetadata::from_json(json)
+  if !chunk_metadata.is_empty() {
+    self.response_metadata = Some(
+      @moonai.merge_response_metadata(self.response_metadata, chunk_metadata),
+    )
+  }
+  if self.provider_name != "" {
+    self.provider_metadata = @moonai.merge_provider_metadata(
+      self.provider_metadata,
+      @provider_utils.provider_metadata_from_json(json, self.provider_name),
+    )
   }
 }
 
@@ -91,6 +118,7 @@ fn OpenAICompatibleCompletionStreamDecoder::decode_data(
         "OpenAI-compatible completion stream decode error: \{error}; data: \{data}",
       )
   }
+  self.record_json(json)
   if stream_error_message(json) is Some(message) {
     let events : Array[@moonai.StreamEvent] = [@moonai.StreamError(message)]
     self.finish_reason = @moonai.Error
@@ -164,9 +192,9 @@ pub fn OpenAICompatibleCompletionStreamDecoder::flush_buffered(
 pub fn OpenAICompatibleCompletionStreamDecoder::response(
   self : OpenAICompatibleCompletionStreamDecoder,
 ) -> @moonai.CompletionResponse {
-  {
-    text: self.text.to_string(),
-    usage: self.usage,
-    finish_reason: self.finish_reason,
-  }
+  @moonai.CompletionResponse::new(
+    self.text.to_string(),
+    self.usage,
+    self.finish_reason,
+  ).with_diagnostics(None, self.response_metadata, self.provider_metadata, [])
 }

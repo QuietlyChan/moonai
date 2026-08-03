@@ -89,19 +89,35 @@ async fn OpenAICompatibleImageModel::generate_images(
   self : OpenAICompatibleImageModel,
   options : @moonai.ImageCallOptions,
 ) -> @moonai.ImageResponse {
+  let request_body = encode_image_request(
+    self.model_id,
+    options,
+    include_response_format=self.include_response_format,
+  )
+  let request_headers = @provider_utils.merge_headers(
+    self.request_headers(),
+    options.headers,
+  )
+  let cancellation_token = options.cancellation_token
   let response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=self.generations_url(),
-    headers=@provider_utils.merge_headers(
-      self.request_headers(),
-      options.headers,
-    ),
-    body=encode_image_request(
-      self.model_id,
-      options,
-      include_response_format=self.include_response_format,
-    ),
+    headers=request_headers,
+    body=request_body,
     timeout_ms=self.idle_timeout_ms,
+    retry_policy=options.retry_policy,
+    cancellation_token?,
   )
-  decode_image_response(response)
+  let decoded = decode_image_response(response.value)
+  decoded
+  .with_diagnostics(
+    None,
+    None,
+    @provider_utils.provider_metadata_from_json(
+      response.value,
+      self.provider_name,
+    ),
+    [],
+  )
+  .with_transport(response.request, response.response)
 }

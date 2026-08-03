@@ -50,5 +50,5 @@ pub fn decode_image_response(json : Json) -> @moonai.ImageResponse raise {
     { "usage": value, .. } if !(value is Null) => image_usage_from_json(value)
     _ => @moonai.Usage::zero()
   }
-  { images, usage }
+  @moonai.ImageResponse::new(images, usage)
 }

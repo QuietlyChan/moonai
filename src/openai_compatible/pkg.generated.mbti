@@ -54,7 +54,7 @@ pub struct OpenAICompatibleCompletionStreamDecoder {
 }
 pub fn OpenAICompatibleCompletionStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
 pub fn OpenAICompatibleCompletionStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn OpenAICompatibleCompletionStreamDecoder::new(include_raw_chunks? : Bool) -> Self
+pub fn OpenAICompatibleCompletionStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String) -> Self
 pub fn OpenAICompatibleCompletionStreamDecoder::response(Self) -> @moonai.CompletionResponse
 
 pub struct OpenAICompatibleEmbeddingModel {
@@ -93,7 +93,7 @@ pub struct OpenAICompatibleStreamDecoder {
 }
 pub fn OpenAICompatibleStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
 pub fn OpenAICompatibleStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn OpenAICompatibleStreamDecoder::new(include_raw_chunks? : Bool) -> Self
+pub fn OpenAICompatibleStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String) -> Self
 pub fn OpenAICompatibleStreamDecoder::response(Self) -> @moonai.ChatResponse
 
 // Type aliases

@@ -70,17 +70,20 @@ test "decode OpenAI-compatible completion stream" {
   let _ = decoder.feed_line("data: [DONE]")
   let terminal = decoder.feed_line("")
   assert_eq(terminal.done, true)
-  assert_eq(decoder.response(), {
-    text: "MoonBit",
-    usage: {
-      input_tokens: 1,
-      output_tokens: 2,
-      total_tokens: 3,
-      reasoning_tokens: 0,
-      cached_input_tokens: 0,
-    },
-    finish_reason: @moonai.Stop,
-  })
+  assert_eq(
+    decoder.response(),
+    @moonai.CompletionResponse::new(
+      "MoonBit",
+      {
+        input_tokens: 1,
+        output_tokens: 2,
+        total_tokens: 3,
+        reasoning_tokens: 0,
+        cached_input_tokens: 0,
+      },
+      @moonai.Stop,
+    ),
+  )
 }
 
 ///|

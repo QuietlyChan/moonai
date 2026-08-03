@@ -202,12 +202,6 @@ pub fn encode_responses_request(
       ..if options.top_p is Some(value) {
         [("top_p", Json::number(value))]
       },
-      ..if options.frequency_penalty is Some(value) {
-        [("frequency_penalty", Json::number(value))]
-      },
-      ..if options.presence_penalty is Some(value) {
-        [("presence_penalty", Json::number(value))]
-      },
       ..if options.tools.length() > 0 {
         [
           (

@@ -7,13 +7,7 @@ async test "streamText is provider-neutral and testable with a mock" {
     reasoning_tokens: 0,
     cached_input_tokens: 0,
   }
-  let result : @moonai.ChatResponse = {
-    text: "hello",
-    reasoning: "",
-    tool_calls: [],
-    usage,
-    finish_reason: @moonai.Stop,
-  }
+  let result = @moonai.ChatResponse::new("hello", "", [], usage, @moonai.Stop)
   let model = MockChatModel::new(
     [
       @moonai.StreamStart,
@@ -38,13 +32,13 @@ async test "streamText is provider-neutral and testable with a mock" {
 
 ///|
 async test "generateText uses the same provider-neutral options" {
-  let result : @moonai.ChatResponse = {
-    text: "hello",
-    reasoning: "",
-    tool_calls: [],
-    usage: @moonai.Usage::zero(),
-    finish_reason: @moonai.Stop,
-  }
+  let result = @moonai.ChatResponse::new(
+    "hello",
+    "",
+    [],
+    @moonai.Usage::zero(),
+    @moonai.Stop,
+  )
   let model = MockChatModel::new([], result)
   let actual = @moonai.generateText(
     model,
@@ -60,16 +54,13 @@ async test "generateText uses the same provider-neutral options" {
 
 ///|
 async test "embedding helpers use a provider-neutral mock" {
-  let result : @moonai.EmbeddingBatchResponse = {
-    embeddings: [[0.1, 0.2], [0.3, 0.4]],
-    usage: {
-      input_tokens: 2,
-      output_tokens: 0,
-      total_tokens: 2,
-      reasoning_tokens: 0,
-      cached_input_tokens: 0,
-    },
-  }
+  let result = @moonai.EmbeddingBatchResponse::new([[0.1, 0.2], [0.3, 0.4]], {
+    input_tokens: 2,
+    output_tokens: 0,
+    total_tokens: 2,
+    reasoning_tokens: 0,
+    cached_input_tokens: 0,
+  })
   let model = MockEmbeddingModel::new(result)
   let actual = @moonai.embedMany(model, ["one", "two"])
   assert_eq(actual, result)
@@ -78,16 +69,13 @@ async test "embedding helpers use a provider-neutral mock" {
 
 ///|
 async test "embedMany batches at the model limit and accumulates usage" {
-  let result : @moonai.EmbeddingBatchResponse = {
-    embeddings: [[0.1], [0.2]],
-    usage: {
-      input_tokens: 2,
-      output_tokens: 0,
-      total_tokens: 2,
-      reasoning_tokens: 0,
-      cached_input_tokens: 0,
-    },
-  }
+  let result = @moonai.EmbeddingBatchResponse::new([[0.1], [0.2]], {
+    input_tokens: 2,
+    output_tokens: 0,
+    total_tokens: 2,
+    reasoning_tokens: 0,
+    cached_input_tokens: 0,
+  })
   let model = MockEmbeddingModel::new(result, max_embeddings_per_call=2)
   let actual = @moonai.embedMany(model, ["one", "two", "three"])
   assert_eq(actual.embeddings, [[0.1], [0.2], [0.1]])
@@ -97,11 +85,11 @@ async test "embedMany batches at the model limit and accumulates usage" {
 
 ///|
 async test "completion helpers use a provider-neutral mock" {
-  let result : @moonai.CompletionResponse = {
-    text: " complete",
-    usage: @moonai.Usage::zero(),
-    finish_reason: @moonai.Stop,
-  }
+  let result = @moonai.CompletionResponse::new(
+    " complete",
+    @moonai.Usage::zero(),
+    @moonai.Stop,
+  )
   let model = MockCompletionModel::new(
     [@moonai.TextDelta(id="text-0", delta=" complete")],
     result,
@@ -120,12 +108,10 @@ async test "completion helpers use a provider-neutral mock" {
 
 ///|
 async test "generateImage batches through a provider-neutral mock" {
-  let result : @moonai.ImageResponse = {
-    images: [
-      @moonai.GeneratedImage::new(@moonai.ImageData::Base64("mock-image")),
-    ],
-    usage: @moonai.Usage::zero(),
-  }
+  let result = @moonai.ImageResponse::new(
+    [@moonai.GeneratedImage::new(@moonai.ImageData::Base64("mock-image"))],
+    @moonai.Usage::zero(),
+  )
   let model = MockImageModel::new(result, max_images_per_call=2)
   let actual = @moonai.generateImage(model, "MoonBit", n=3)
   assert_eq(actual.images.length(), 3)
@@ -134,13 +120,13 @@ async test "generateImage batches through a provider-neutral mock" {
 
 ///|
 async test "generateObject parses structured model output" {
-  let result : @moonai.ChatResponse = {
-    text: "{\"language\":\"MoonBit\",\"compiled\":true}",
-    reasoning: "",
-    tool_calls: [],
-    usage: @moonai.Usage::zero(),
-    finish_reason: @moonai.Stop,
-  }
+  let result = @moonai.ChatResponse::new(
+    "{\"language\":\"MoonBit\",\"compiled\":true}",
+    "",
+    [],
+    @moonai.Usage::zero(),
+    @moonai.Stop,
+  )
   let model = MockChatModel::new([], result)
   let actual = @moonai.generateObject(
     model,
@@ -160,4 +146,28 @@ async test "generateObject parses structured model output" {
     "compiled": true,
   })
   assert_eq(actual.response, result)
+}
+
+///|
+async test "standard helpers honor cancellation before invoking a model" {
+  let token = @moonai.CancellationToken::new()
+  token.cancel()
+  let model = MockChatModel::new(
+    [],
+    @moonai.ChatResponse::new(
+      "ignored",
+      "",
+      [],
+      @moonai.Usage::zero(),
+      @moonai.Stop,
+    ),
+  )
+  try
+    @moonai.generateText(model, prompt="cancelled", cancellation_token=token)
+  catch {
+    @moonai.CancellationError => ()
+    error => fail("unexpected cancellation error: \{error}")
+  } noraise {
+    _ => fail("expected cancellation")
+  }
 }

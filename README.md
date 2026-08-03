@@ -38,6 +38,8 @@ This is an independent community project and is not affiliated with Vercel.
 - Incremental assembly of interleaved and parallel tool-call deltas.
 - Standard sampling controls, JSON Schema response formats, and per-call HTTP
   headers that override provider defaults.
+- Request/response diagnostics, provider metadata, typed warnings,
+  configurable retries, and cooperative cancellation.
 - Deterministic mock models for each core model interface, golden SSE fixtures,
   and local HTTP integration tests.
 
@@ -122,6 +124,38 @@ Set `include_raw_chunks=true` to receive each parsed provider chunk as
 `StreamEvent::Raw` before its normalized events. Text, completion, embedding,
 and image calls also accept per-call `headers`; these override matching headers
 configured on the provider.
+
+## Diagnostics, retries, and cancellation
+
+Every normalized response exposes `request`, `response`, `provider_metadata`,
+and typed `warnings`. Non-streaming response metadata includes the original
+body; streaming bodies are not buffered, so use `include_raw_chunks=true` when
+the raw SSE payloads are required.
+
+```moonbit
+///|
+let cancellation = @moonai.CancellationToken::new()
+
+///|
+let retry_policy = @moonai.RetryPolicy::new(
+  max_retries=3,
+  initial_delay_ms=200,
+)
+
+///|
+let result = @moonai.generate_text(
+  model,
+  prompt="Explain MoonBit.",
+  retry_policy~,
+  cancellation_token=cancellation,
+)
+```
+
+The default policy retries network failures, timeouts, HTTP 408/409/425/429,
+and 5xx responses up to two times with exponential backoff. SSE calls retry
+only before `StreamStart`, preventing duplicate text or tool events. Use
+`RetryPolicy::none()` to disable retries and `cancellation.cancel()` to stop a
+cooperative operation.
 
 `@openai.openai(...)` and `OpenAIProvider::language_model(...)` use the
 Responses API by default, matching AI SDK 7. Use `@openai.openai_chat(...)` or
@@ -287,9 +321,8 @@ requiring MoonBit code to copy TypeScript naming everywhere:
 
 The core library will remain provider-neutral. Provider-specific wire formats,
 authentication, and options belong in adapter packages. Planned milestones
-include provider metadata and raw request/response details, richer generated
-content such as sources and files, image editing, middleware, retries,
-cancellation, telemetry hooks, and higher-level multi-step tool execution.
+include richer generated content such as sources and files, image editing,
+middleware, telemetry hooks, and higher-level multi-step tool execution.
 
 Agent workflows and sandboxed tool runtimes are intentionally later layers.
 They will build on this SDK rather than being coupled to the provider protocol.

@@ -60,5 +60,5 @@ pub fn decode_embedding_response(
       embedding_usage_from_json(value)
     _ => @moonai.Usage::zero()
   }
-  { embeddings, usage }
+  @moonai.EmbeddingBatchResponse::new(embeddings, usage)
 }

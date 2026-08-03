@@ -111,15 +111,24 @@ fn tool_choice_to_json(choice : @moonai.ToolChoice) -> Json {
 }
 
 ///|
-fn response_output_config(format : @moonai.ResponseFormat) -> Json? raise {
+fn response_output_config(format : @moonai.ResponseFormat) -> Json? {
   match format {
     @moonai.Text => None
-    @moonai.JsonObject =>
-      fail(
-        "Anthropic JsonObject requires an explicit schema; use JsonSchema instead",
-      )
+    @moonai.JsonObject => None
     @moonai.JsonSchema(schema~, ..) =>
       Some(({ "format": { "type": "json_schema", "schema": schema } } : Json))
+  }
+}
+
+///|
+/// Anthropic accepts temperatures in the inclusive range 0..1.
+fn normalized_temperature(value : Double) -> Double {
+  if value > 1.0 {
+    1.0
+  } else if value < 0.0 {
+    0.0
+  } else {
+    value
   }
 }
 
@@ -162,7 +171,7 @@ pub fn encode_messages_request(
         [("system", Json::array(system))]
       },
       ..if options.temperature is Some(value) {
-        [("temperature", Json::number(value))]
+        [("temperature", Json::number(normalized_temperature(value)))]
       },
       ..if options.top_p is Some(value) {
         [("top_p", Json::number(value))]

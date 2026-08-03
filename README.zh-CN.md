@@ -34,6 +34,7 @@ MoonBit，包括统一模型接口、标准化流事件、服务商适配器、�
 - 支持交错、并行 tool call delta 的增量组装。
 - 支持标准采样参数、JSON Schema 响应格式，以及可覆盖 provider 默认值的调用级
   HTTP headers。
+- 支持原始请求/响应诊断、provider metadata、typed warnings、可配置重试和协作式取消。
 - 为每类核心模型提供确定性 mock、golden SSE fixture 和本地 HTTP 集成测试。
 
 ## 包结构
@@ -115,6 +116,35 @@ TypeScript AI SDK API 的开发者理解和迁移。
 设置 `include_raw_chunks=true` 后，每个解析完成的服务商数据块会先以
 `StreamEvent::Raw` 发出，然后再发出标准化事件。文本、completion、embedding 和
 图片调用也支持调用级 `headers`，同名 header 会覆盖 provider 的默认配置。
+
+## 诊断、重试与取消
+
+每种标准化响应都提供 `request`、`response`、`provider_metadata` 和 typed
+`warnings`。非流式响应会保留原始响应 body；流式响应不会缓存完整 body，如需检查
+原始 SSE 数据，应设置 `include_raw_chunks=true`。
+
+```moonbit
+///|
+let cancellation = @moonai.CancellationToken::new()
+
+///|
+let retry_policy = @moonai.RetryPolicy::new(
+  max_retries=3,
+  initial_delay_ms=200,
+)
+
+///|
+let result = @moonai.generate_text(
+  model,
+  prompt="解释 MoonBit。",
+  retry_policy~,
+  cancellation_token=cancellation,
+)
+```
+
+默认策略会对网络错误、超时、HTTP 408/409/425/429 和 5xx 响应进行最多两次指数
+退避重试。SSE 只会在 `StreamStart` 发出前重试，避免文本或工具事件重复。可通过
+`RetryPolicy::none()` 禁用重试，通过 `cancellation.cancel()` 取消协作式操作。
 
 `@openai.openai(...)` 和 `OpenAIProvider::language_model(...)` 默认使用
 Responses API，与 AI SDK 7 保持一致。如需 Chat Completions，可使用
@@ -279,9 +309,8 @@ provider 的 snake_case 选择器同时提供 AI SDK 风格的 camelCase 别名�
 ## 设计方向
 
 核心库将保持模型服务商无关。服务商特有的协议格式、认证方式和配置应放在对应的
-适配包中。后续计划包括 provider metadata 与原始请求/响应信息、source 和生成文件等
-更丰富的输出内容、图片编辑、中间件、重试、取消、遥测接口和更高层的多步工具执行
-能力。
+适配包中。后续计划包括 source 和生成文件等更丰富的输出内容、图片编辑、中间件、
+遥测接口和更高层的多步工具执行能力。
 
 Agent 工作流和沙箱化工具运行时属于后续层次。它们会建立在该 SDK 之上，不会与
 具体服务商协议耦合。

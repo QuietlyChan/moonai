@@ -99,6 +99,48 @@ pub struct OpenResponsesLanguageModel {
 }
 
 ///|
+/// Return warnings for standardized settings that the Responses protocol
+/// cannot represent faithfully.
+fn open_responses_warnings(
+  options : @moonai.ChatCallOptions,
+) -> Array[@moonai.Warning] {
+  let warnings : Array[@moonai.Warning] = []
+  if options.stop_sequences.length() > 0 {
+    warnings.push(
+      @moonai.Warning::Unsupported(
+        feature="stopSequences",
+        details="Open Responses has no portable stop-sequences field.",
+      ),
+    )
+  }
+  if options.seed is Some(_) {
+    warnings.push(
+      @moonai.Warning::Unsupported(
+        feature="seed",
+        details="The Responses protocol does not define a seed setting.",
+      ),
+    )
+  }
+  if options.frequency_penalty is Some(_) {
+    warnings.push(
+      @moonai.Warning::Unsupported(
+        feature="frequencyPenalty",
+        details="The Responses protocol does not define frequency penalty.",
+      ),
+    )
+  }
+  if options.presence_penalty is Some(_) {
+    warnings.push(
+      @moonai.Warning::Unsupported(
+        feature="presencePenalty",
+        details="The Responses protocol does not define presence penalty.",
+      ),
+    )
+  }
+  warnings
+}
+
+///|
 /// Construct an Open Responses model directly.
 pub fn open_responses(
   model_id~ : String,
