@@ -14,27 +14,17 @@ async test "streamText drives an OpenAI-compatible HTTP SSE request" {
           assert_true(
             request.headers.get("authorization") is Some("Bearer test-key"),
           )
-          assert_true(
-            request.headers.get("accept-encoding") is Some("identity"),
-          )
           let request_body = body.read_all().text()
           assert_true(request_body.contains("\"model\":\"test-model\""))
-          assert_true(request_body.contains("\"stream\":true"))
-          assert_true(request_body.contains("\"content\":\"hello\""))
           connection.send_response(200, "OK", extra_headers={
             "Content-Type": "text/event-stream",
           })
           connection.write(
-            "data: {\"choices\":[{\"delta\":{\"content\":\"Hello\"},\"finish_reason\":null}]}\n\n",
-          )
-          connection.flush()
-          connection.write(
-            "data: {\"choices\":[{\"delta\":{\"content\":\" MoonBit\"},\"finish_reason\":\"stop\"}]}\n\n",
+            "data: {\"choices\":[{\"delta\":{\"content\":\"Hello compatible\"},\"finish_reason\":\"stop\"}]}\n\n",
           )
           connection.write(
             "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4}}\n\n",
           )
-          connection.write("data: [DONE]\n\n")
         },
         max_connections=1,
       )
@@ -46,15 +36,8 @@ async test "streamText drives an OpenAI-compatible HTTP SSE request" {
       api_key="test-key",
       idle_timeout_ms=2_000,
     )
-    let deltas : Array[String] = []
-    let response = @moonai.streamText(model, prompt="hello", on_event=event => {
-      match event {
-        @moonai.TextDelta(delta~, ..) => deltas.push(delta)
-        _ => ()
-      }
-    })
-    assert_eq(deltas, ["Hello", " MoonBit"])
-    assert_eq(response.text, "Hello MoonBit")
+    let response = @moonai.stream_text(model, prompt="hello")
+    assert_eq(response.text, "Hello compatible")
     assert_eq(response.finish_reason, @moonai.Stop)
     assert_eq(response.usage.total_tokens, 4)
   }

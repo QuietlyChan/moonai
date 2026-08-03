@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/internal/http_sse"
+
+import {
+  "QuietlyChan/moonai",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub async fn post_json_sse(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, idle_timeout_ms? : Int, expected_terminator? : String, feed_line~ : (String) -> DecodeBatch raise, flush_buffered~ : () -> DecodeBatch raise, response~ : () -> @moonai.ChatResponse, on_event~ : async (@moonai.StreamEvent) -> Unit) -> @moonai.ChatResponse
+
+// Errors
+
+// Types and methods
+pub(all) struct DecodeBatch {
+  events : Array[@moonai.StreamEvent]
+  consumed_event : Bool
+  done : Bool
+} derive(@debug.Debug)
+pub fn DecodeBatch::empty(Bool) -> Self
+
+pub struct EventSourceBuffer {
+  // private fields
+}
+pub fn EventSourceBuffer::feed_line(Self, String) -> String?
+pub fn EventSourceBuffer::flush(Self) -> String?
+pub fn EventSourceBuffer::new() -> Self
+
+// Type aliases
+
+// Traits
+

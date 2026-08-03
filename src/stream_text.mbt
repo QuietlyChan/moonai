@@ -47,7 +47,27 @@ pub async fn streamText(
   prompt? : String,
   messages? : Array[Message] = [],
   tools? : Array[ToolDefinition] = [],
+  tool_choice? : ToolChoice = Auto,
+  response_format? : ResponseFormat = Text,
+  max_output_tokens? : Int,
+  temperature? : Double,
+  top_p? : Double,
+  stop_sequences? : Array[String] = [],
+  provider_options? : Map[String, Json] = Map([]),
   on_event? : async (StreamEvent) -> Unit = _ => (),
 ) -> ChatResponse {
-  stream_text(model, prompt?, messages~, tools~, on_event~)
+  stream_text(
+    model,
+    prompt?,
+    messages~,
+    tools~,
+    tool_choice~,
+    response_format~,
+    max_output_tokens?,
+    temperature?,
+    top_p?,
+    stop_sequences~,
+    provider_options~,
+    on_event~,
+  )
 }

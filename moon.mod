@@ -14,7 +14,17 @@ repository = "https://github.com/QuietlyChan/moonai"
 
 license = "Apache-2.0"
 
-keywords = [ "ai", "ai-sdk", "llm", "openai", "streaming", "tool-calling" ]
+keywords = [
+  "ai",
+  "ai-sdk",
+  "llm",
+  "openai",
+  "openai-compatible",
+  "open-responses",
+  "anthropic",
+  "streaming",
+  "tool-calling",
+]
 
 description = "Unified, provider-neutral AI SDK for MoonBit inspired by Vercel AI SDK 7"
 

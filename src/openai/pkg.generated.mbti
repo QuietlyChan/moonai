@@ -2,47 +2,35 @@
 package "QuietlyChan/moonai/openai"
 
 import {
-  "QuietlyChan/moonai",
-  "moonbitlang/core/debug",
+  "QuietlyChan/moonai/open_responses",
+  "QuietlyChan/moonai/openai_compatible",
 }
 
 // Values
-pub fn create_openai(api_key~ : String, base_url? : String, provider_name? : String, headers? : Map[String, String], preserve_reasoning? : Bool, idle_timeout_ms? : Int) -> OpenAIProvider
+pub fn createOpenAI(api_key~ : String, base_url? : String, provider_name? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAIProvider
 
-pub fn encode_chat_request(String, @moonai.ChatCallOptions, preserve_reasoning? : Bool) -> Json
+pub fn create_openai(api_key~ : String, base_url? : String, provider_name? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAIProvider
 
-pub fn openai(String, api_key~ : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> OpenAICompatibleModel
+pub fn openai(String, api_key~ : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> @open_responses.OpenResponsesLanguageModel
 
-pub fn openai_compatible(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleModel
+pub fn openai_chat(String, api_key~ : String, base_url? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> @openai_compatible.OpenAICompatibleChatModel
+
+pub fn openai_compatible(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> @openai_compatible.OpenAICompatibleChatModel
 
 // Errors
 
 // Types and methods
-pub(all) struct DecodeBatch {
-  events : Array[@moonai.StreamEvent]
-  consumed_event : Bool
-  done : Bool
-} derive(@debug.Debug)
-
-pub struct OpenAICompatibleModel {
-  // private fields
-}
-pub impl @moonai.ChatModel for OpenAICompatibleModel
-
 pub struct OpenAIProvider {
   // private fields
 }
-pub fn OpenAIProvider::chat(Self, String) -> OpenAICompatibleModel
-
-pub struct OpenAIStreamDecoder {
-  // private fields
-}
-pub fn OpenAIStreamDecoder::feed_line(Self, String) -> DecodeBatch raise
-pub fn OpenAIStreamDecoder::flush_buffered(Self) -> DecodeBatch raise
-pub fn OpenAIStreamDecoder::new() -> Self
-pub fn OpenAIStreamDecoder::response(Self) -> @moonai.ChatResponse
+pub fn OpenAIProvider::chat(Self, String) -> @openai_compatible.OpenAICompatibleChatModel
+pub fn OpenAIProvider::language_model(Self, String) -> @open_responses.OpenResponsesLanguageModel
+pub fn OpenAIProvider::responses(Self, String) -> @open_responses.OpenResponsesLanguageModel
 
 // Type aliases
+pub using @openai_compatible {type OpenAICompatibleChatModel as OpenAICompatibleModel}
+
+pub using @open_responses {type OpenResponsesLanguageModel as OpenAIResponsesModel}
 
 // Traits
 

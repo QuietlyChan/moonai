@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/anthropic"
+
+import {
+  "QuietlyChan/moonai",
+  "QuietlyChan/moonai/internal/http_sse",
+}
+
+// Values
+pub fn anthropic(String, api_key? : String, auth_token? : String, base_url? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], idle_timeout_ms? : Int) -> AnthropicMessagesModel raise
+
+pub fn createAnthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], idle_timeout_ms? : Int) -> AnthropicProvider raise
+
+pub fn create_anthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], idle_timeout_ms? : Int) -> AnthropicProvider raise
+
+pub fn encode_messages_request(String, @moonai.ChatCallOptions) -> Json raise
+
+// Errors
+
+// Types and methods
+pub struct AnthropicMessagesModel {
+  // private fields
+}
+pub impl @moonai.ChatModel for AnthropicMessagesModel
+
+pub struct AnthropicProvider {
+  // private fields
+}
+pub fn AnthropicProvider::chat(Self, String) -> AnthropicMessagesModel
+pub fn AnthropicProvider::language_model(Self, String) -> AnthropicMessagesModel
+pub fn AnthropicProvider::messages(Self, String) -> AnthropicMessagesModel
+
+pub struct AnthropicStreamDecoder {
+  // private fields
+}
+pub fn AnthropicStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
+pub fn AnthropicStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
+pub fn AnthropicStreamDecoder::new() -> Self
+pub fn AnthropicStreamDecoder::response(Self) -> @moonai.ChatResponse
+
+// Type aliases
+
+// Traits
+

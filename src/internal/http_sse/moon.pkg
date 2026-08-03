@@ -1,0 +1,9 @@
+import {
+  "QuietlyChan/moonai",
+  "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/core/json",
+}
+
+supported_targets = "+native"

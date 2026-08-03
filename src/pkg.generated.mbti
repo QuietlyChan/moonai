@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub async fn streamText(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
+pub async fn streamText(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, stop_sequences? : Array[String], provider_options? : Map[String, Json], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
 
 pub async fn stream_text(&ChatModel, prompt? : String, messages? : Array[Message], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, max_output_tokens? : Int, temperature? : Double, top_p? : Double, stop_sequences? : Array[String], provider_options? : Map[String, Json], on_event? : async (StreamEvent) -> Unit) -> ChatResponse
 

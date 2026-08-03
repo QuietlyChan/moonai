@@ -1,0 +1,26 @@
+data: {"type":"response.output_item.added","item":{"id":"reasoning_1","type":"reasoning"}}
+
+data: {"type":"response.reasoning_text.delta","item_id":"reasoning_1","delta":"Need a tool."}
+
+data: {"type":"response.output_item.done","item":{"id":"reasoning_1","type":"reasoning"}}
+
+data: {"type":"response.output_item.added","item":{"id":"message_1","type":"message"}}
+
+data: {"type":"response.output_text.delta","item_id":"message_1","delta":"Checking weather."}
+
+data: {"type":"response.output_item.done","item":{"id":"message_1","type":"message"}}
+
+data: {"type":"response.output_item.added","item":{"id":"function_1","type":"function_call","call_id":"call_weather","name":"get_weather","arguments":""}}
+
+data: {"type":"response.function_call_arguments.delta","item_id":"function_1","call_id":"call_weather","delta":"{\"city\""}
+
+data: {"type":"response.function_call_arguments.delta","item_id":"function_1","call_id":"call_weather","delta":":\"Hangzhou\"}"}
+
+data: {"type":"response.function_call_arguments.done","item_id":"function_1","arguments":"{\"city\":\"Hangzhou\"}"}
+
+data: {"type":"response.output_item.done","item":{"id":"function_1","type":"function_call","call_id":"call_weather","name":"get_weather","arguments":"{\"city\":\"Hangzhou\"}"}}
+
+data: {"type":"response.completed","response":{"status":"completed","incomplete_details":null,"usage":{"input_tokens":12,"output_tokens":7,"total_tokens":19,"input_tokens_details":{"cached_tokens":3},"output_tokens_details":{"reasoning_tokens":2}}}}
+
+data: [DONE]
+

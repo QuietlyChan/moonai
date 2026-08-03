@@ -1,0 +1,24 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/internal/provider_utils"
+
+// Values
+pub fn append_path(String, String) -> String
+
+pub fn copy_headers(Map[String, String]) -> Map[String, String]
+
+pub fn json_int_field(Json, String, default? : Int) -> Int
+
+pub fn json_int_field_opt(Json, String) -> Int?
+
+pub fn json_string_field(Json, String) -> String?
+
+pub fn without_trailing_slash(String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

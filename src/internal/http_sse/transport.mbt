@@ -37,57 +37,57 @@ async fn emit_batch(
 }
 
 ///|
-async fn OpenAICompatibleModel::stream_chat(
-  self : OpenAICompatibleModel,
-  options : @moonai.ChatCallOptions,
-  on_event : async (@moonai.StreamEvent) -> Unit,
+/// POST a JSON request and drive a provider-specific decoder from its SSE
+/// response. This is the shared transport layer used by provider packages.
+pub async fn post_json_sse(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  body~ : Json,
+  idle_timeout_ms? : Int = 120_000,
+  expected_terminator? : String = "stream terminator",
+  feed_line~ : (String) -> DecodeBatch raise,
+  flush_buffered~ : () -> DecodeBatch raise,
+  response~ : () -> @moonai.ChatResponse,
+  on_event~ : async (@moonai.StreamEvent) -> Unit,
 ) -> @moonai.ChatResponse {
-  let body = encode_chat_request(
-    self.model_id,
-    options,
-    preserve_reasoning=self.preserve_reasoning,
-  )
-  let client = @http.post_stream(
-    self.chat_completions_url(),
-    headers=self.request_headers(),
-  )
+  let client = @http.post_stream(url, headers~)
   defer client.close()
   client.write(body.stringify())
-  let response = with_idle_timeout(
-    self.idle_timeout_ms,
-    "\{self.provider_name} response headers",
+  let http_response = with_idle_timeout(
+    idle_timeout_ms,
+    "\{provider_name} response headers",
     () => client.end_request(),
   )
-  guard response.code >= 200 && response.code < 300 else {
+  guard http_response.code >= 200 && http_response.code < 300 else {
     let error_body = client.read_all().text()
-    fail("\{self.provider_name} API error \{response.code}: \{error_body}")
+    fail("\{provider_name} API error \{http_response.code}: \{error_body}")
   }
   on_event(@moonai.StreamStart)
-  let decoder = OpenAIStreamDecoder::new()
   for ;; {
-    match read_stream_line(client, self.idle_timeout_ms) {
+    match read_stream_line(client, idle_timeout_ms) {
       Some(Some(raw)) => {
-        let batch = decoder.feed_line(raw)
+        let batch = feed_line(raw)
         emit_batch(batch, on_event)
         if batch.done {
-          return decoder.response()
+          return response()
         }
       }
       Some(None) => {
-        let batch = decoder.flush_buffered()
+        let batch = flush_buffered()
         emit_batch(batch, on_event)
         if batch.done {
-          return decoder.response()
+          return response()
         }
-        fail("\{self.provider_name} stream ended before [DONE]")
+        fail("\{provider_name} stream ended before \{expected_terminator}")
       }
       None => {
-        let batch = decoder.flush_buffered()
+        let batch = flush_buffered()
         emit_batch(batch, on_event)
         if batch.done {
-          return decoder.response()
+          return response()
         }
-        fail("\{self.provider_name} stream idle for \{self.idle_timeout_ms}ms")
+        fail("\{provider_name} stream idle for \{idle_timeout_ms}ms")
       }
     }
   }

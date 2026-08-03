@@ -1,0 +1,45 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/openai_compatible"
+
+import {
+  "QuietlyChan/moonai",
+  "QuietlyChan/moonai/internal/http_sse",
+}
+
+// Values
+pub fn createOpenAICompatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleProvider
+
+pub fn create_openai_compatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleProvider
+
+pub fn encode_chat_request(String, @moonai.ChatCallOptions, preserve_reasoning? : Bool, include_usage? : Bool) -> Json
+
+pub fn openai_compatible(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleChatModel
+
+// Errors
+
+// Types and methods
+#alias(OpenAICompatibleModel)
+pub struct OpenAICompatibleChatModel {
+  // private fields
+}
+pub impl @moonai.ChatModel for OpenAICompatibleChatModel
+
+pub struct OpenAICompatibleProvider {
+  // private fields
+}
+pub fn OpenAICompatibleProvider::chat(Self, String) -> OpenAICompatibleChatModel
+pub fn OpenAICompatibleProvider::chat_model(Self, String) -> OpenAICompatibleChatModel
+pub fn OpenAICompatibleProvider::language_model(Self, String) -> OpenAICompatibleChatModel
+
+pub struct OpenAICompatibleStreamDecoder {
+  // private fields
+}
+pub fn OpenAICompatibleStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
+pub fn OpenAICompatibleStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
+pub fn OpenAICompatibleStreamDecoder::new() -> Self
+pub fn OpenAICompatibleStreamDecoder::response(Self) -> @moonai.ChatResponse
+
+// Type aliases
+
+// Traits
+

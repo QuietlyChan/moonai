@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/open_responses"
+
+import {
+  "QuietlyChan/moonai",
+  "QuietlyChan/moonai/internal/http_sse",
+}
+
+// Values
+pub fn createOpenResponses(name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> OpenResponsesProvider
+
+pub fn create_open_responses(provider_name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> OpenResponsesProvider
+
+pub fn encode_responses_request(String, @moonai.ChatCallOptions) -> Json
+
+pub fn open_responses(model_id~ : String, provider_name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int) -> OpenResponsesLanguageModel
+
+// Errors
+
+// Types and methods
+pub struct OpenResponsesLanguageModel {
+  // private fields
+}
+pub impl @moonai.ChatModel for OpenResponsesLanguageModel
+
+pub struct OpenResponsesProvider {
+  // private fields
+}
+pub fn OpenResponsesProvider::language_model(Self, String) -> OpenResponsesLanguageModel
+pub fn OpenResponsesProvider::model(Self, String) -> OpenResponsesLanguageModel
+pub fn OpenResponsesProvider::responses(Self, String) -> OpenResponsesLanguageModel
+
+pub struct OpenResponsesStreamDecoder {
+  // private fields
+}
+pub fn OpenResponsesStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
+pub fn OpenResponsesStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
+pub fn OpenResponsesStreamDecoder::new() -> Self
+pub fn OpenResponsesStreamDecoder::response(Self) -> @moonai.ChatResponse
+
+// Type aliases
+
+// Traits
+

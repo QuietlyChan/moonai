@@ -29,10 +29,11 @@ fn message_to_json(
           [
             (
               "tool_calls",
-              (
+              Json::array(
                 [
                   for call in message.tool_calls => tool_call_to_json(call)
-                ] : Json),
+                ],
+              ),
             ),
           ]
         },
@@ -90,26 +91,30 @@ fn response_format_to_json(format : @moonai.ResponseFormat) -> Json? {
 }
 
 ///|
-/// Encode normalized call options as an OpenAI Chat Completions request.
+/// Encode normalized options as an OpenAI-compatible Chat Completions request.
 pub fn encode_chat_request(
   model_id : String,
   options : @moonai.ChatCallOptions,
   preserve_reasoning? : Bool = false,
+  include_usage? : Bool = true,
 ) -> Json {
   let fields : Map[String, Json] = Map(
     [
       ("model", Json::string(model_id)),
       (
         "messages",
-        (
+        Json::array(
           [
             for message in options.messages => {
               message_to_json(message, preserve_reasoning)
             }
-          ] : Json),
+          ],
+        ),
       ),
       ("stream", Json::boolean(true)),
-      ("stream_options", ({ "include_usage": true } : Json)),
+      ..if include_usage {
+        [("stream_options", ({ "include_usage": true } : Json))]
+      },
       ..if options.max_output_tokens is Some(value) {
         [("max_tokens", Json::number(value.to_double()))]
       },
@@ -123,7 +128,11 @@ pub fn encode_chat_request(
         [
           (
             "stop",
-            ([ for stop in options.stop_sequences => Json::string(stop) ] : Json),
+            Json::array(
+              [
+                for stop in options.stop_sequences => Json::string(stop)
+              ],
+            ),
           ),
         ]
       },
@@ -131,10 +140,11 @@ pub fn encode_chat_request(
         [
           (
             "tools",
-            (
+            Json::array(
               [
                 for tool in options.tools => tool_definition_to_json(tool)
-              ] : Json),
+              ],
+            ),
           ),
           ("tool_choice", tool_choice_to_json(options.tool_choice)),
         ]
