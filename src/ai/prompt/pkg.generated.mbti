@@ -1,0 +1,104 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/ai/prompt"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub async fn convert_to_language_model_prompt(StandardizedPrompt, &@provider.ChatModel, (async (Array[DownloadRequest]) -> Array[DownloadedAsset?])?, @provider.RetryPolicy, @provider.CancellationToken?) -> Array[@provider.LanguageModelMessage]
+
+pub async fn convert_to_language_model_prompt_with_context(StandardizedPrompt, PromptModelContext, (async (Array[DownloadRequest]) -> Array[DownloadedAsset?])?, @provider.RetryPolicy, @provider.CancellationToken?) -> Array[@provider.LanguageModelMessage]
+
+pub async fn download_prompt_assets(Array[@provider_utils.ModelMessage], &@provider.ChatModel, (async (Array[DownloadRequest]) -> Array[DownloadedAsset?])?, @provider.RetryPolicy, @provider.CancellationToken?) -> Array[@provider_utils.ModelMessage]
+
+pub async fn download_prompt_assets_with_context(Array[@provider_utils.ModelMessage], PromptModelContext, (async (Array[DownloadRequest]) -> Array[DownloadedAsset?])?, @provider.RetryPolicy, @provider.CancellationToken?) -> Array[@provider_utils.ModelMessage]
+
+pub fn prepareLanguageModelCallOptions(LanguageModelCallOptions) -> LanguageModelCallOptions raise
+
+pub async fn prepareLanguageModelV4CallOptions(&@provider.LanguageModelV4, String?, Array[@provider_utils.ModelMessage], Instructions?, Bool, Array[@provider.ToolDefinition], @provider.ToolChoice, @provider.ResponseFormat, @provider.ReasoningEffort, Int?, Double?, Double?, Double?, Double?, Double?, Int?, Array[String], Bool, Map[String, String], Map[String, Json], (async (Array[DownloadRequest]) -> Array[DownloadedAsset?])?, @provider.RetryPolicy, @provider.CancellationToken?) -> @provider.LanguageModelV4CallOptions
+
+pub async fn prepare_chat_call_options(&@provider.ChatModel, String?, Array[@provider_utils.ModelMessage], Instructions?, Bool, Array[@provider.ToolDefinition], @provider.ToolChoice, @provider.ResponseFormat, @provider.ReasoningEffort, Int?, Double?, Double?, Double?, Double?, Double?, Int?, Array[String], Bool, Map[String, String], Map[String, Json], (async (Array[DownloadRequest]) -> Array[DownloadedAsset?])?, @provider.RetryPolicy, @provider.CancellationToken?) -> @provider.ChatCallOptions
+
+pub fn prepare_language_model_call_options(LanguageModelCallOptions) -> LanguageModelCallOptions raise
+
+pub async fn prepare_language_model_v4_call_options(&@provider.LanguageModelV4, String?, Array[@provider_utils.ModelMessage], Instructions?, Bool, Array[@provider.ToolDefinition], @provider.ToolChoice, @provider.ResponseFormat, @provider.ReasoningEffort, Int?, Double?, Double?, Double?, Double?, Double?, Int?, Array[String], Bool, Map[String, String], Map[String, Json], (async (Array[DownloadRequest]) -> Array[DownloadedAsset?])?, @provider.RetryPolicy, @provider.CancellationToken?) -> @provider.LanguageModelV4CallOptions
+
+pub fn standardizePrompt(String?, Array[@provider_utils.ModelMessage], instructions? : Instructions, allow_system_in_messages? : Bool) -> StandardizedPrompt raise
+
+pub fn standardize_prompt(String?, Array[@provider_utils.ModelMessage], instructions? : Instructions, allow_system_in_messages? : Bool) -> StandardizedPrompt raise
+
+// Errors
+
+// Types and methods
+pub(all) struct DownloadRequest {
+  url : String
+  is_url_supported_by_model : Bool
+} derive(Eq, @debug.Debug)
+pub fn DownloadRequest::new(url~ : String, is_url_supported_by_model~ : Bool) -> Self
+
+pub(all) struct DownloadedAsset {
+  data : Bytes
+  media_type : String?
+} derive(Eq, @debug.Debug)
+pub fn DownloadedAsset::new(data~ : Bytes, media_type? : String) -> Self
+
+pub(all) enum Instructions {
+  InstructionText(String)
+  InstructionMessage(@provider_utils.ModelMessage)
+  InstructionMessages(Array[@provider_utils.ModelMessage])
+} derive(Eq, @debug.Debug)
+pub fn Instructions::as_messages(Self) -> Array[@provider_utils.ModelMessage] raise @provider.InvalidPromptError
+pub fn Instructions::message(@provider_utils.ModelMessage) -> Self raise @provider.InvalidPromptError
+pub fn Instructions::messages(Array[@provider_utils.ModelMessage]) -> Self raise @provider.InvalidPromptError
+pub fn Instructions::text(String) -> Self
+
+pub(all) struct LanguageModelCallOptions {
+  max_output_tokens : Int?
+  temperature : Double?
+  top_p : Double?
+  top_k : Double?
+  presence_penalty : Double?
+  frequency_penalty : Double?
+  stop_sequences : Array[String]
+  seed : Int?
+  reasoning_effort : @provider.ReasoningEffort
+} derive(@debug.Debug)
+pub fn LanguageModelCallOptions::new(max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, presence_penalty? : Double, frequency_penalty? : Double, stop_sequences? : Array[String], seed? : Int, reasoning_effort? : @provider.ReasoningEffort) -> Self
+
+pub(all) struct Prompt {
+  input : PromptInput
+  instructions : Instructions?
+  allow_system_in_messages : Bool
+} derive(@debug.Debug)
+pub fn Prompt::messages(Array[@provider_utils.ModelMessage], instructions? : Instructions, allow_system_in_messages? : Bool) -> Self raise
+pub fn Prompt::new(PromptInput, instructions? : Instructions, allow_system_in_messages? : Bool) -> Self raise
+pub fn Prompt::standardize(Self) -> StandardizedPrompt raise
+pub fn Prompt::text(String, instructions? : Instructions, allow_system_in_messages? : Bool) -> Self raise
+pub fn Prompt::with_instructions(Self, Instructions) -> Self raise
+
+pub(all) enum PromptInput {
+  Text(String)
+  Messages(Array[@provider_utils.ModelMessage])
+} derive(@debug.Debug)
+
+pub(all) struct PromptModelContext {
+  provider_name : String
+  supported_urls : Array[@provider.SupportedUrlRule]
+}
+pub fn PromptModelContext::from_chat_model(&@provider.ChatModel) -> Self
+pub fn PromptModelContext::from_language_model_v4(&@provider.LanguageModelV4) -> Self
+pub fn PromptModelContext::new(provider_name~ : String, supported_urls~ : Array[@provider.SupportedUrlRule]) -> Self
+
+pub(all) struct StandardizedPrompt {
+  instructions : Instructions?
+  messages : Array[@provider_utils.ModelMessage]
+} derive(@debug.Debug)
+
+// Type aliases
+pub type DownloadFunction = async (Array[DownloadRequest]) -> Array[DownloadedAsset?]
+
+// Traits
+

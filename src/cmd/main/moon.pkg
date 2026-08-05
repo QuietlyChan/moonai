@@ -1,8 +1,8 @@
 import {
-  "QuietlyChan/moonai",
+  "QuietlyChan/moonai/ai",
   "QuietlyChan/moonai/openai",
+  "QuietlyChan/moonai/provider",
   "moonbitlang/async",
-  "moonbitlang/async/io",
   "moonbitlang/async/stdio",
   "moonbitlang/core/env",
 }

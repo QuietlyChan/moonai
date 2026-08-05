@@ -1,0 +1,18 @@
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/anthropic",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/json",
+}
+
+import {
+  "QuietlyChan/moonai/ai",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+} for "test"
+
+import {
+  "moonbitlang/async",
+} for "wbtest"
+
+supported_targets = "+native"

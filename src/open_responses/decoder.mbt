@@ -1,10 +1,22 @@
 ///|
+enum ResponsesContentRef {
+  ResponsesText(Int)
+  ResponsesReasoning(Int)
+  ResponsesTool(Int)
+}
+
+///|
 /// Stateful decoder for Open Responses SSE events.
 pub struct OpenResponsesStreamDecoder {
-  priv sse : @http_sse.EventSourceBuffer
+  priv sse : @provider_utils.EventSourceBuffer
   priv include_raw_chunks : Bool
+  priv progressive_tool_calls : Bool
+  priv emit_failed_error : Bool
   priv text : StringBuilder
   priv reasoning : StringBuilder
+  priv text_parts : Array[StringBuilder]
+  priv reasoning_parts : Array[StringBuilder]
+  priv content_order : Array[ResponsesContentRef]
   priv text_ids : Array[String]
   priv text_stopped : Array[Bool]
   priv reasoning_ids : Array[String]
@@ -17,11 +29,21 @@ pub struct OpenResponsesStreamDecoder {
   priv tool_emitted_arguments : Array[String]
   priv tool_started : Array[Bool]
   priv tool_ready : Array[Bool]
-  priv tool_calls : Array[@moonai.ToolCall]
-  priv mut usage : @moonai.Usage
-  priv mut finish_reason : @moonai.FinishReason
+  priv tool_calls : Array[@provider.ToolCall]
+  priv mut usage : @provider.Usage
+  priv mut raw_usage : Json?
+  priv mut finish_reason : @provider.FinishReason
+  priv mut finish_reason_raw : String?
   priv provider_name : String
-  priv mut response_metadata : @moonai.ResponseMetadata?
+  priv generate_id : @provider_utils.IdGenerator
+  priv observe_json : (Json) -> Unit
+  priv validate_json : ((Json) -> Unit raise)?
+  priv observe_events : (Json) -> Array[@provider.StreamEvent]
+  priv build_provider_metadata : () -> Map[String, Json]
+  priv build_content : () -> Array[@provider.GeneratedContent]
+  priv use_built_content : Bool
+  priv has_extra_tool_calls : () -> Bool
+  priv mut response_metadata : @provider.ResponseMetadata?
   priv mut provider_metadata : Map[String, Json]
   priv mut finalized : Bool
 }
@@ -30,13 +52,28 @@ pub struct OpenResponsesStreamDecoder {
 /// Create an empty Open Responses stream decoder.
 pub fn OpenResponsesStreamDecoder::new(
   include_raw_chunks? : Bool = false,
+  progressive_tool_calls? : Bool = false,
+  emit_failed_error? : Bool = false,
   provider_name? : String = "",
+  id_generator? : @provider_utils.IdGenerator,
+  observe_json? : (Json) -> Unit = ignore_responses_json,
+  validate_json? : (Json) -> Unit raise,
+  observe_events? : (Json) -> Array[@provider.StreamEvent] = empty_responses_events,
+  build_provider_metadata? : () -> Map[String, Json] = empty_responses_metadata,
+  build_content? : () -> Array[@provider.GeneratedContent] = empty_responses_content,
+  use_built_content? : Bool = false,
+  has_extra_tool_calls? : () -> Bool = no_extra_responses_tool_calls,
 ) -> OpenResponsesStreamDecoder {
   {
-    sse: @http_sse.EventSourceBuffer::new(),
+    sse: @provider_utils.EventSourceBuffer::new(),
     include_raw_chunks,
+    progressive_tool_calls,
+    emit_failed_error,
     text: StringBuilder::new(),
     reasoning: StringBuilder::new(),
+    text_parts: [],
+    reasoning_parts: [],
+    content_order: [],
     text_ids: [],
     text_stopped: [],
     reasoning_ids: [],
@@ -50,13 +87,68 @@ pub fn OpenResponsesStreamDecoder::new(
     tool_started: [],
     tool_ready: [],
     tool_calls: [],
-    usage: @moonai.Usage::zero(),
-    finish_reason: @moonai.Unknown(""),
+    usage: @provider.Usage::zero(),
+    raw_usage: None,
+    finish_reason: @provider.Unknown(""),
+    finish_reason_raw: None,
     provider_name,
+    generate_id: id_generator.unwrap_or(@provider_utils.generate_id),
+    observe_json,
+    validate_json,
+    observe_events,
+    build_provider_metadata,
+    build_content,
+    use_built_content,
+    has_extra_tool_calls,
     response_metadata: None,
     provider_metadata: Map([]),
     finalized: false,
   }
+}
+
+///|
+fn ignore_responses_json(_json : Json) -> Unit {
+  ()
+}
+
+///|
+fn empty_responses_events(_json : Json) -> Array[@provider.StreamEvent] {
+  []
+}
+
+///|
+fn empty_responses_content() -> Array[@provider.GeneratedContent] {
+  []
+}
+
+///|
+fn no_extra_responses_tool_calls() -> Bool {
+  false
+}
+
+///|
+fn OpenResponsesStreamDecoder::has_provider_extension_tool_calls(
+  self : OpenResponsesStreamDecoder,
+) -> Bool {
+  if (self.has_extra_tool_calls)() {
+    return true
+  }
+  if !self.use_built_content {
+    return false
+  }
+  for part in (self.build_content)() {
+    match part {
+      @provider.GeneratedToolCallOutput(call) if !call.provider_executed =>
+        return true
+      _ => ()
+    }
+  }
+  false
+}
+
+///|
+fn empty_responses_metadata() -> Map[String, Json] {
+  Map([])
 }
 
 ///|
@@ -65,14 +157,14 @@ fn OpenResponsesStreamDecoder::record_json(
   self : OpenResponsesStreamDecoder,
   json : Json,
 ) -> Unit {
-  let chunk_metadata = @moonai.ResponseMetadata::from_json(json)
+  let chunk_metadata = @provider.ResponseMetadata::from_json(json)
   if !chunk_metadata.is_empty() {
     self.response_metadata = Some(
-      @moonai.merge_response_metadata(self.response_metadata, chunk_metadata),
+      @provider.merge_response_metadata(self.response_metadata, chunk_metadata),
     )
   }
   if self.provider_name != "" {
-    self.provider_metadata = @moonai.merge_provider_metadata(
+    self.provider_metadata = @provider.merge_provider_metadata(
       self.provider_metadata,
       @provider_utils.provider_metadata_from_json(json, self.provider_name),
     )
@@ -95,17 +187,47 @@ fn find_id(values : Array[String], id : String) -> Int? {
 }
 
 ///|
+/// OpenAI Responses identifies reasoning summary parts by the parent item and
+/// summary index. Keep those parts separate in the normalized stream so a
+/// later summary does not merge into the previous one.
+fn reasoning_summary_id(json : Json) -> String {
+  let item_id = @provider_utils.json_string_field(json, "item_id").unwrap_or(
+    "reasoning-0",
+  )
+  let summary_index = @provider_utils.json_int_field(json, "summary_index")
+  "\{item_id}:\{summary_index}"
+}
+
+///|
+/// Prefer the summary-part identity when the output item has already opened
+/// the first summary part. This keeps legacy reasoning events usable while
+/// avoiding a second `item_id` stream for summary text.
+fn OpenResponsesStreamDecoder::reasoning_event_id(
+  self : OpenResponsesStreamDecoder,
+  item_id : String,
+) -> String {
+  let first_summary_id = "\{item_id}:0"
+  if find_id(self.reasoning_ids, first_summary_id) is Some(_) {
+    first_summary_id
+  } else {
+    item_id
+  }
+}
+
+///|
 fn OpenResponsesStreamDecoder::start_text(
   self : OpenResponsesStreamDecoder,
   id : String,
-  events : Array[@moonai.StreamEvent],
+  events : Array[@provider.StreamEvent],
 ) -> Int {
   match find_id(self.text_ids, id) {
     Some(index) => index
     None => {
       self.text_ids.push(id)
       self.text_stopped.push(false)
-      events.push(@moonai.TextStart(id))
+      self.text_parts.push(StringBuilder::new())
+      self.content_order.push(ResponsesText(self.text_ids.length() - 1))
+      events.push(@provider.TextStart(id))
       self.text_ids.length() - 1
     }
   }
@@ -115,12 +237,12 @@ fn OpenResponsesStreamDecoder::start_text(
 fn OpenResponsesStreamDecoder::finish_text(
   self : OpenResponsesStreamDecoder,
   id : String,
-  events : Array[@moonai.StreamEvent],
+  events : Array[@provider.StreamEvent],
 ) -> Unit {
   let index = self.start_text(id, events)
   if !self.text_stopped[index] {
     self.text_stopped[index] = true
-    events.push(@moonai.TextEnd(id))
+    events.push(@provider.TextEnd(id))
   }
 }
 
@@ -128,14 +250,18 @@ fn OpenResponsesStreamDecoder::finish_text(
 fn OpenResponsesStreamDecoder::start_reasoning(
   self : OpenResponsesStreamDecoder,
   id : String,
-  events : Array[@moonai.StreamEvent],
+  events : Array[@provider.StreamEvent],
 ) -> Int {
   match find_id(self.reasoning_ids, id) {
     Some(index) => index
     None => {
       self.reasoning_ids.push(id)
       self.reasoning_stopped.push(false)
-      events.push(@moonai.ReasoningStart(id))
+      self.reasoning_parts.push(StringBuilder::new())
+      self.content_order.push(
+        ResponsesReasoning(self.reasoning_ids.length() - 1),
+      )
+      events.push(@provider.ReasoningStart(id))
       self.reasoning_ids.length() - 1
     }
   }
@@ -145,12 +271,12 @@ fn OpenResponsesStreamDecoder::start_reasoning(
 fn OpenResponsesStreamDecoder::finish_reasoning(
   self : OpenResponsesStreamDecoder,
   id : String,
-  events : Array[@moonai.StreamEvent],
+  events : Array[@provider.StreamEvent],
 ) -> Unit {
   let index = self.start_reasoning(id, events)
   if !self.reasoning_stopped[index] {
     self.reasoning_stopped[index] = true
-    events.push(@moonai.ReasoningEnd(id))
+    events.push(@provider.ReasoningEnd(id))
   }
 }
 
@@ -202,11 +328,7 @@ fn OpenResponsesStreamDecoder::tool_id(
   self : OpenResponsesStreamDecoder,
   index : Int,
 ) -> String {
-  if self.tool_call_ids[index] == "" {
-    self.tool_item_ids[index]
-  } else {
-    self.tool_call_ids[index]
-  }
+  self.tool_stream_id(index)
 }
 
 ///|
@@ -215,7 +337,16 @@ fn OpenResponsesStreamDecoder::tool_stream_id(
   index : Int,
 ) -> String {
   if self.tool_stream_ids[index] == "" {
-    self.tool_stream_ids[index] = self.tool_id(index)
+    self.tool_stream_ids[index] = if self.tool_call_ids[index] != "" {
+      self.tool_call_ids[index]
+    } else {
+      let generated = (self.generate_id)()
+      if generated == "" {
+        "tool-{index}"
+      } else {
+        generated
+      }
+    }
   }
   self.tool_stream_ids[index]
 }
@@ -224,7 +355,7 @@ fn OpenResponsesStreamDecoder::tool_stream_id(
 fn OpenResponsesStreamDecoder::start_tool(
   self : OpenResponsesStreamDecoder,
   index : Int,
-  events : Array[@moonai.StreamEvent],
+  events : Array[@provider.StreamEvent],
 ) -> Unit {
   if !self.tool_started[index] {
     self.tool_started[index] = true
@@ -234,7 +365,7 @@ fn OpenResponsesStreamDecoder::start_tool(
       self.tool_names[index]
     }
     events.push(
-      @moonai.ToolInputStart(id=self.tool_stream_id(index), tool_name=name),
+      @provider.ToolInputStart(id=self.tool_stream_id(index), tool_name=name),
     )
   }
 }
@@ -243,13 +374,13 @@ fn OpenResponsesStreamDecoder::start_tool(
 fn OpenResponsesStreamDecoder::emit_complete_tool_arguments_if_unseen(
   self : OpenResponsesStreamDecoder,
   index : Int,
-  events : Array[@moonai.StreamEvent],
+  events : Array[@provider.StreamEvent],
 ) -> Unit {
   let arguments = self.tool_arguments[index]
   if arguments != "" && self.tool_emitted_arguments[index] == "" {
     self.tool_emitted_arguments[index] = arguments
     events.push(
-      @moonai.ToolInputDelta(id=self.tool_stream_id(index), delta=arguments),
+      @provider.ToolInputDelta(id=self.tool_stream_id(index), delta=arguments),
     )
   }
 }
@@ -258,40 +389,35 @@ fn OpenResponsesStreamDecoder::emit_complete_tool_arguments_if_unseen(
 fn OpenResponsesStreamDecoder::finish_tool(
   self : OpenResponsesStreamDecoder,
   index : Int,
-  events : Array[@moonai.StreamEvent],
-) -> Unit raise {
+  events : Array[@provider.StreamEvent],
+) -> Unit {
   if self.tool_ready[index] {
     return
   }
-  self.start_tool(index, events)
-  self.emit_complete_tool_arguments_if_unseen(index, events)
+  if self.progressive_tool_calls {
+    self.start_tool(index, events)
+    self.emit_complete_tool_arguments_if_unseen(index, events)
+  }
   let id = self.tool_id(index)
   let name = if self.tool_names[index] == "" {
     "tool-\{index}"
   } else {
     self.tool_names[index]
   }
-  let arguments = if self.tool_arguments[index].trim().is_empty() {
-    "{}"
-  } else {
-    self.tool_arguments[index]
-  }
-  let parsed = @json.parse(arguments) catch {
-    error =>
-      fail("Open Responses tool call \'\{name}\' has invalid JSON: \{error}")
-  }
-  guard parsed is Object(_) else {
-    fail("Open Responses tool call \'\{name}\' input must be a JSON object")
-  }
-  let call = @moonai.ToolCall::new(id~, name~, arguments~)
+  let arguments = self.tool_arguments[index]
+  let call = @provider.ToolCall::new(id~, name~, arguments~)
+  let call_index = self.tool_calls.length()
   self.tool_calls.push(call)
+  self.content_order.push(ResponsesTool(call_index))
   self.tool_ready[index] = true
-  events.push(@moonai.ToolInputEnd(self.tool_stream_id(index)))
-  events.push(@moonai.ToolCallReady(call))
+  if self.progressive_tool_calls {
+    events.push(@provider.ToolInputEnd(self.tool_stream_id(index)))
+  }
+  events.push(@provider.ToolCallReady(call))
 }
 
 ///|
-fn usage_from_json(json : Json) -> @moonai.Usage {
+fn usage_from_json(json : Json) -> @provider.Usage {
   let input_tokens = @provider_utils.json_int_field(json, "input_tokens")
   let output_tokens = @provider_utils.json_int_field(json, "output_tokens")
   let total_tokens = @provider_utils.json_int_field(
@@ -302,6 +428,13 @@ fn usage_from_json(json : Json) -> @moonai.Usage {
   let cached_input_tokens = match json {
     { "input_tokens_details": { "cached_tokens": Number(value, ..), .. }, .. } =>
       value.to_int()
+    _ => 0
+  }
+  let cache_write_input_tokens = match json {
+    {
+      "input_tokens_details": { "cache_write_tokens": Number(value, ..), .. },
+      ..
+    } => value.to_int()
     _ => 0
   }
   let reasoning_tokens = match json {
@@ -317,6 +450,7 @@ fn usage_from_json(json : Json) -> @moonai.Usage {
     total_tokens,
     reasoning_tokens,
     cached_input_tokens,
+    cache_write_input_tokens,
   }
 }
 
@@ -324,16 +458,16 @@ fn usage_from_json(json : Json) -> @moonai.Usage {
 fn map_finish_reason(
   reason : String,
   has_tool_calls : Bool,
-) -> @moonai.FinishReason {
+) -> @provider.FinishReason {
   match reason {
-    "" => if has_tool_calls { @moonai.ToolCalls } else { @moonai.Stop }
-    "max_output_tokens" => @moonai.Length
-    "content_filter" => @moonai.ContentFilter
+    "" => if has_tool_calls { @provider.ToolCalls } else { @provider.Stop }
+    "max_output_tokens" => @provider.Length
+    "content_filter" => @provider.ContentFilter
     other =>
       if has_tool_calls {
-        @moonai.ToolCalls
+        @provider.ToolCalls
       } else {
-        @moonai.Unknown(other)
+        @provider.Unknown(other)
       }
   }
 }
@@ -343,11 +477,13 @@ fn OpenResponsesStreamDecoder::apply_response_state(
   self : OpenResponsesStreamDecoder,
   event_type : String,
   response : Json,
-  events : Array[@moonai.StreamEvent],
+  events : Array[@provider.StreamEvent],
 ) -> Unit {
   match response {
-    { "usage": usage, .. } if !(usage is Null) =>
+    { "usage": usage, .. } if !(usage is Null) => {
       self.usage = usage_from_json(usage)
+      self.raw_usage = Some(usage)
+    }
     _ => ()
   }
   let reason = match response {
@@ -355,16 +491,24 @@ fn OpenResponsesStreamDecoder::apply_response_state(
     _ => ""
   }
   if event_type == "response.failed" {
-    self.finish_reason = @moonai.Error
-    let message = match response {
-      { "error": { "message": String(value), .. }, .. } => value
-      _ => "Open Responses request failed"
+    self.finish_reason = @provider.Error
+    self.finish_reason_raw = match response {
+      { "error": { "code": String(value), .. }, .. } => Some(value)
+      { "status": String(value), .. } => Some(value)
+      _ => None
     }
-    events.push(@moonai.StreamError(message))
+    if self.emit_failed_error {
+      let message = match response {
+        { "error": { "message": String(value), .. }, .. } => value
+        _ => "Open Responses request failed"
+      }
+      events.push(@provider.StreamError(message))
+    }
   } else {
+    self.finish_reason_raw = if reason == "" { None } else { Some(reason) }
     self.finish_reason = map_finish_reason(
       reason,
-      self.tool_item_ids.length() > 0,
+      self.tool_calls.length() > 0 || self.has_provider_extension_tool_calls(),
     )
   }
 }
@@ -373,11 +517,21 @@ fn OpenResponsesStreamDecoder::apply_response_state(
 fn OpenResponsesStreamDecoder::apply_json(
   self : OpenResponsesStreamDecoder,
   json : Json,
-) -> (Array[@moonai.StreamEvent], Bool) raise {
-  let events : Array[@moonai.StreamEvent] = []
+) -> (Array[@provider.StreamEvent], Bool) {
+  let events : Array[@provider.StreamEvent] = []
   let mut done = false
   let event_type = @provider_utils.json_string_field(json, "type").unwrap_or("")
   match event_type {
+    "response.created" =>
+      match json {
+        { "response": response, .. } => {
+          let metadata = @provider.ResponseMetadata::from_json(response)
+          if !metadata.is_empty() {
+            events.push(@provider.ResponseMetadataReady(metadata))
+          }
+        }
+        _ => ()
+      }
     "response.output_item.added" =>
       match json {
         { "item": Object(item), .. } => {
@@ -392,11 +546,13 @@ fn OpenResponsesStreamDecoder::apply_json(
           if kind == "message" {
             let _ = self.start_text(id, events)
           } else if kind == "reasoning" {
-            let _ = self.start_reasoning(id, events)
+            let _ = self.start_reasoning("\{id}:0", events)
           } else if kind == "function_call" {
             let index = self.update_tool_from_item(Json::object(item))
-            self.start_tool(index, events)
-            self.emit_complete_tool_arguments_if_unseen(index, events)
+            if self.progressive_tool_calls {
+              self.start_tool(index, events)
+              self.emit_complete_tool_arguments_if_unseen(index, events)
+            }
           }
         }
         _ => ()
@@ -409,7 +565,9 @@ fn OpenResponsesStreamDecoder::apply_json(
       let _ = self.start_text(id, events)
       if delta != "" {
         self.text.write_string(delta)
-        events.push(@moonai.TextDelta(id~, delta~))
+        let index = self.start_text(id, events)
+        self.text_parts[index].write_string(delta)
+        events.push(@provider.TextDelta(id~, delta~))
       }
     }
     "response.output_text.done" | "response.refusal.done" => {
@@ -418,21 +576,48 @@ fn OpenResponsesStreamDecoder::apply_json(
       )
       self.finish_text(id, events)
     }
-    "response.reasoning_text.delta" | "response.reasoning_summary_text.delta" => {
+    "response.reasoning_text.delta" => {
       let id = @provider_utils.json_string_field(json, "item_id").unwrap_or(
         "reasoning-0",
       )
       let delta = @provider_utils.json_string_field(json, "delta").unwrap_or("")
+      let id = self.reasoning_event_id(id)
       let _ = self.start_reasoning(id, events)
       if delta != "" {
         self.reasoning.write_string(delta)
-        events.push(@moonai.ReasoningDelta(id~, delta~))
+        let index = self.start_reasoning(id, events)
+        self.reasoning_parts[index].write_string(delta)
+        events.push(@provider.ReasoningDelta(id~, delta~))
       }
     }
-    "response.reasoning_text.done" | "response.reasoning_summary_text.done" => {
+    "response.reasoning_summary_text.delta" => {
+      let id = reasoning_summary_id(json)
+      let delta = @provider_utils.json_string_field(json, "delta").unwrap_or("")
+      let _ = self.start_reasoning(id, events)
+      if delta != "" {
+        self.reasoning.write_string(delta)
+        let index = self.start_reasoning(id, events)
+        self.reasoning_parts[index].write_string(delta)
+        events.push(@provider.ReasoningDelta(id~, delta~))
+      }
+    }
+    "response.reasoning_text.done" => {
       let id = @provider_utils.json_string_field(json, "item_id").unwrap_or(
         "reasoning-0",
       )
+      let id = self.reasoning_event_id(id)
+      self.finish_reasoning(id, events)
+    }
+    "response.reasoning_summary_text.done" => {
+      let id = reasoning_summary_id(json)
+      self.finish_reasoning(id, events)
+    }
+    "response.reasoning_summary_part.added" => {
+      let id = reasoning_summary_id(json)
+      let _ = self.start_reasoning(id, events)
+    }
+    "response.reasoning_summary_part.done" => {
+      let id = reasoning_summary_id(json)
       self.finish_reasoning(id, events)
     }
     "response.function_call_arguments.delta" => {
@@ -447,14 +632,14 @@ fn OpenResponsesStreamDecoder::apply_json(
       if delta != "" {
         self.tool_arguments[index] = self.tool_arguments[index] + delta
       }
-      if self.tool_names[index] != "" {
+      if self.progressive_tool_calls && self.tool_names[index] != "" {
         let was_started = self.tool_started[index]
         self.start_tool(index, events)
         if was_started && delta != "" {
           self.tool_emitted_arguments[index] = self.tool_emitted_arguments[index] +
             delta
           events.push(
-            @moonai.ToolInputDelta(id=self.tool_stream_id(index), delta~),
+            @provider.ToolInputDelta(id=self.tool_stream_id(index), delta~),
           )
         } else if !was_started {
           self.emit_complete_tool_arguments_if_unseen(index, events)
@@ -487,6 +672,7 @@ fn OpenResponsesStreamDecoder::apply_json(
           if kind == "message" {
             self.finish_text(id, events)
           } else if kind == "reasoning" {
+            let id = self.reasoning_event_id(id)
             self.finish_reasoning(id, events)
           } else if kind == "function_call" {
             let index = self.update_tool_from_item(Json::object(item))
@@ -512,8 +698,13 @@ fn OpenResponsesStreamDecoder::apply_json(
         { "error": { "message": String(value), .. }, .. } => value
         _ => json.stringify()
       }
-      self.finish_reason = @moonai.Error
-      events.push(@moonai.StreamError(message))
+      self.finish_reason = @provider.Error
+      self.finish_reason_raw = match json {
+        { "error": { "code": String(value), .. }, .. } => Some(value)
+        { "error": { "type": String(value), .. }, .. } => Some(value)
+        _ => Some("error")
+      }
+      events.push(@provider.StreamError(message))
       let terminal_events = self.final_events()
       for event in terminal_events {
         events.push(event)
@@ -528,44 +719,32 @@ fn OpenResponsesStreamDecoder::apply_json(
 ///|
 fn OpenResponsesStreamDecoder::final_events(
   self : OpenResponsesStreamDecoder,
-) -> Array[@moonai.StreamEvent] raise {
+) -> Array[@provider.StreamEvent] {
   if self.finalized {
     return []
   }
   self.finalized = true
-  let events : Array[@moonai.StreamEvent] = []
+  let events : Array[@provider.StreamEvent] = []
   for index, id in self.text_ids {
     if !self.text_stopped[index] {
       self.text_stopped[index] = true
-      events.push(@moonai.TextEnd(id))
+      events.push(@provider.TextEnd(id))
     }
   }
   for index, id in self.reasoning_ids {
     if !self.reasoning_stopped[index] {
       self.reasoning_stopped[index] = true
-      events.push(@moonai.ReasoningEnd(id))
+      events.push(@provider.ReasoningEnd(id))
     }
   }
   for index, _ in self.tool_item_ids {
-    if self.finish_reason is @moonai.Error {
-      if self.tool_started[index] && !self.tool_ready[index] {
-        events.push(@moonai.ToolInputEnd(self.tool_stream_id(index)))
-      }
-    } else {
-      self.finish_tool(index, events)
+    if self.progressive_tool_calls &&
+      self.tool_started[index] &&
+      !self.tool_ready[index] {
+      events.push(@provider.ToolInputEnd(self.tool_stream_id(index)))
     }
   }
-  let reason = match self.finish_reason {
-    @moonai.Unknown(value) if value == "" =>
-      if self.tool_calls.length() > 0 {
-        @moonai.ToolCalls
-      } else {
-        @moonai.Stop
-      }
-    other => other
-  }
-  self.finish_reason = reason
-  events.push(@moonai.Finish(usage=self.usage, reason~))
+  events.push(@provider.Finish(usage=self.usage, reason=self.finish_reason))
   events
 }
 
@@ -573,23 +752,44 @@ fn OpenResponsesStreamDecoder::final_events(
 fn OpenResponsesStreamDecoder::decode_data(
   self : OpenResponsesStreamDecoder,
   data : String,
-) -> @http_sse.DecodeBatch raise {
+) -> @provider_utils.DecodeBatch raise {
   if data.trim() == "[DONE]" {
     return { events: self.final_events(), consumed_event: true, done: true }
   }
   let json = @json.parse(data) catch {
-    error => fail("Open Responses stream decode error: \{error}; data: \{data}")
+    error =>
+      return {
+        events: [
+          @provider.StreamError(
+            "Open Responses stream decode error: \{error}; data: \{data}",
+          ),
+        ],
+        consumed_event: true,
+        done: false,
+      }
   }
   self.record_json(json)
+  (self.observe_json)(json)
+  if self.validate_json is Some(validate) {
+    validate(json)
+  }
+  let provider_events = (self.observe_events)(json)
   let (events, done) = self.apply_json(json)
+  let combined_events : Array[@provider.StreamEvent] = []
+  for event in provider_events {
+    combined_events.push(event)
+  }
+  for event in events {
+    combined_events.push(event)
+  }
   if self.include_raw_chunks {
-    let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
-    for event in events {
+    let all_events : Array[@provider.StreamEvent] = [@provider.Raw(json)]
+    for event in combined_events {
       all_events.push(event)
     }
     { events: all_events, consumed_event: true, done }
   } else {
-    { events, consumed_event: true, done }
+    { events: combined_events, consumed_event: true, done }
   }
 }
 
@@ -598,10 +798,10 @@ fn OpenResponsesStreamDecoder::decode_data(
 pub fn OpenResponsesStreamDecoder::feed_line(
   self : OpenResponsesStreamDecoder,
   raw : String,
-) -> @http_sse.DecodeBatch raise {
+) -> @provider_utils.DecodeBatch raise {
   match self.sse.feed_line(raw) {
     Some(data) => self.decode_data(data)
-    None => @http_sse.DecodeBatch::empty(self.finalized)
+    None => @provider_utils.DecodeBatch::empty(self.finalized)
   }
 }
 
@@ -609,10 +809,10 @@ pub fn OpenResponsesStreamDecoder::feed_line(
 /// Flush a final unterminated SSE payload.
 pub fn OpenResponsesStreamDecoder::flush_buffered(
   self : OpenResponsesStreamDecoder,
-) -> @http_sse.DecodeBatch raise {
+) -> @provider_utils.DecodeBatch raise {
   match self.sse.flush() {
     Some(data) => self.decode_data(data)
-    None => @http_sse.DecodeBatch::empty(self.finalized)
+    None => @provider_utils.DecodeBatch::empty(self.finalized)
   }
 }
 
@@ -620,12 +820,69 @@ pub fn OpenResponsesStreamDecoder::flush_buffered(
 /// Return the accumulated normalized response.
 pub fn OpenResponsesStreamDecoder::response(
   self : OpenResponsesStreamDecoder,
-) -> @moonai.ChatResponse {
-  @moonai.ChatResponse::new(
-    self.text.to_string(),
-    self.reasoning.to_string(),
-    self.tool_calls,
-    self.usage,
-    self.finish_reason,
-  ).with_diagnostics(None, self.response_metadata, self.provider_metadata, [])
+) -> @provider.ChatResponse {
+  let provider_metadata = @provider.merge_provider_metadata(
+    self.provider_metadata,
+    (self.build_provider_metadata)(),
+  )
+  let normalized : Array[@provider.GeneratedContent] = []
+  for item in self.content_order {
+    match item {
+      ResponsesText(index) => {
+        let value = self.text_parts[index].to_string()
+        if value != "" {
+          normalized.push(@provider.GeneratedContent::text(value))
+        }
+      }
+      ResponsesReasoning(index) => {
+        let value = self.reasoning_parts[index].to_string()
+        if value != "" {
+          normalized.push(@provider.GeneratedContent::reasoning(value))
+        }
+      }
+      ResponsesTool(index) =>
+        if index < self.tool_calls.length() {
+          normalized.push(
+            @provider.GeneratedContent::tool_call(self.tool_calls[index]),
+          )
+        }
+    }
+  }
+  let built = if self.use_built_content { (self.build_content)() } else { [] }
+  let content = if built.length() > 0 { built } else { normalized }
+  @provider.ChatResponse::from_content(content, self.usage, self.finish_reason).with_diagnostics(
+    None,
+    self.response_metadata,
+    provider_metadata,
+    [],
+  )
+}
+
+///|
+/// Return the accumulated V4 token usage, preserving provider-native fields.
+pub fn OpenResponsesStreamDecoder::v4_usage(
+  self : OpenResponsesStreamDecoder,
+) -> @provider.LanguageModelV4Usage {
+  open_responses_v4_usage_from_json(self.raw_usage)
+}
+
+///|
+/// Return the accumulated V4 finish reason and provider-native value.
+pub fn OpenResponsesStreamDecoder::v4_finish_reason(
+  self : OpenResponsesStreamDecoder,
+) -> @provider.LanguageModelV4FinishReason {
+  @provider.LanguageModelV4FinishReason::from_finish_reason(self.finish_reason).with_raw(
+    self.finish_reason_raw,
+  )
+}
+
+///|
+/// Return provider metadata collected from response chunks and extensions.
+pub fn OpenResponsesStreamDecoder::provider_metadata_snapshot(
+  self : OpenResponsesStreamDecoder,
+) -> Map[String, Json] {
+  @provider.merge_provider_metadata(
+    self.provider_metadata,
+    (self.build_provider_metadata)(),
+  )
 }

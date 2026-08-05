@@ -2,16 +2,25 @@
 type ApiKey = String
 
 ///|
+/// The default versioned endpoint used by Anthropic Messages, Files, and
+/// Skills when no explicit or environment setting is supplied.
+const ANTHROPIC_DEFAULT_BASE_URL : String = "https://api.anthropic.com/v1"
+
+///|
 /// Configuration shared by models created from one Anthropic endpoint.
 pub struct AnthropicProvider {
   priv provider_name : String
   priv api_key : ApiKey
   priv auth_token : String
+  priv api_key_environment_variable : String?
   priv base_url : String
   priv headers : Map[String, String]
   priv anthropic_version : String
   priv beta_features : Array[String]
+  priv supported_url_rules : Array[@provider.SupportedUrlRule]
   priv idle_timeout_ms : Int
+  priv id_generator : @provider_utils.IdGenerator
+  priv http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
@@ -42,46 +51,100 @@ fn normalize_base_url(base_url : String) -> String {
 }
 
 ///|
+/// Resolve the explicit base URL, `ANTHROPIC_BASE_URL`, and the official
+/// default in that order. The normalization also turns the bare official URL
+/// into the versioned `/v1` endpoint used by all Anthropic APIs.
+fn resolve_anthropic_base_url(base_url : String) -> String {
+  normalize_base_url(
+    @provider_utils.load_optional_setting(
+      base_url,
+      environment_variable_name="ANTHROPIC_BASE_URL",
+    ).unwrap_or(ANTHROPIC_DEFAULT_BASE_URL),
+  )
+}
+
+///|
+fn anthropic_authentication_headers(
+  api_key : String,
+  auth_token : String,
+  api_key_environment_variable : String?,
+) -> Map[String, String] raise @provider.LoadAPIKeyError {
+  if auth_token != "" {
+    { "Authorization": "Bearer \{auth_token}" }
+  } else {
+    {
+      "x-api-key": @provider_utils.load_api_key(
+        api_key,
+        environment_variable_name=api_key_environment_variable.unwrap_or(
+          "ANTHROPIC_API_KEY",
+        ),
+        description="Anthropic",
+      ),
+    }
+  }
+}
+
+///|
 /// Create a reusable Anthropic provider factory.
 pub fn create_anthropic(
   api_key? : String = "",
   auth_token? : String = "",
-  base_url? : String = "https://api.anthropic.com/v1",
+  base_url? : String = "",
   provider_name? : String = "anthropic.messages",
   headers? : Map[String, String] = Map([]),
   anthropic_version? : String = "2023-06-01",
   beta_features? : Array[String] = [],
+  supported_urls? : Array[@provider.SupportedUrlRule] = [
+    @provider.SupportedUrlRule::http("image/*"),
+    @provider.SupportedUrlRule::http("application/pdf"),
+  ],
   idle_timeout_ms? : Int = 120_000,
+  http_transport? : &@provider_utils.HttpTransport,
+  api_key_environment_variable? : String,
+  id_generator? : @provider_utils.IdGenerator,
 ) -> AnthropicProvider raise {
   guard api_key == "" || auth_token == "" else {
-    fail("Anthropic accepts either api_key or auth_token, not both")
-  }
-  guard api_key != "" || auth_token != "" else {
-    fail("Anthropic requires api_key or auth_token")
+    raise @provider.InvalidArgumentError(
+      argument="api_key/auth_token",
+      message="Both api_key and auth_token were provided. Please use only one authentication method.",
+    )
   }
   {
     provider_name,
     api_key,
     auth_token,
-    base_url: normalize_base_url(base_url),
+    api_key_environment_variable,
+    base_url: resolve_anthropic_base_url(base_url),
     headers: @provider_utils.copy_headers(headers),
     anthropic_version,
     beta_features: copy_strings(beta_features),
+    supported_url_rules: supported_urls.copy(),
     idle_timeout_ms,
+    id_generator: id_generator.unwrap_or(@provider_utils.generate_id),
+    http_transport: http_transport.unwrap_or(
+      @provider_utils.native_http_transport(),
+    ),
   }
 }
 
 ///|
-/// Camel-case compatibility alias for AI SDK users.
+/// AI SDK-style camel-case spelling for `create_anthropic`.
 pub fn createAnthropic(
   api_key? : String = "",
   auth_token? : String = "",
-  base_url? : String = "https://api.anthropic.com/v1",
+  base_url? : String = "",
   provider_name? : String = "anthropic.messages",
   headers? : Map[String, String] = Map([]),
   anthropic_version? : String = "2023-06-01",
   beta_features? : Array[String] = [],
+  supported_urls? : Array[@provider.SupportedUrlRule] = [
+    @provider.SupportedUrlRule::http("image/*"),
+    @provider.SupportedUrlRule::http("application/pdf"),
+  ],
   idle_timeout_ms? : Int = 120_000,
+  http_transport? : &@provider_utils.HttpTransport,
+  api_key_environment_variable? : String,
+  id_generator? : @provider_utils.IdGenerator,
 ) -> AnthropicProvider raise {
   create_anthropic(
     api_key~,
@@ -91,13 +154,17 @@ pub fn createAnthropic(
     headers~,
     anthropic_version~,
     beta_features~,
+    supported_urls~,
     idle_timeout_ms~,
+    http_transport?,
+    api_key_environment_variable?,
+    id_generator?,
   )
 }
 
 ///|
-/// Select a Messages API model from this provider.
-pub fn AnthropicProvider::chat(
+/// Select the protocol-level Messages model used by provider adapters.
+pub fn AnthropicProvider::messages_wire(
   self : AnthropicProvider,
   model_id : String,
 ) -> AnthropicMessagesModel {
@@ -105,13 +172,35 @@ pub fn AnthropicProvider::chat(
     provider_name: self.provider_name,
     api_key: self.api_key,
     auth_token: self.auth_token,
+    api_key_environment_variable: self.api_key_environment_variable,
     base_url: self.base_url,
     model_id,
     headers: @provider_utils.copy_headers(self.headers),
     anthropic_version: self.anthropic_version,
     beta_features: copy_strings(self.beta_features),
+    supported_url_rules: self.supported_url_rules.copy(),
     idle_timeout_ms: self.idle_timeout_ms,
+    id_generator: self.id_generator,
+    http_transport: self.http_transport,
   }
+}
+
+///|
+/// Select a Messages API language model.
+pub fn AnthropicProvider::chat(
+  self : AnthropicProvider,
+  model_id : String,
+) -> AnthropicLanguageModelV4 {
+  AnthropicLanguageModelV4::new(self.messages_wire(model_id))
+}
+
+///|
+/// Explicit wire alias for code that extends the Messages protocol adapter.
+pub fn AnthropicProvider::chat_wire(
+  self : AnthropicProvider,
+  model_id : String,
+) -> AnthropicMessagesModel {
+  self.messages_wire(model_id)
 }
 
 ///|
@@ -119,7 +208,7 @@ pub fn AnthropicProvider::chat(
 pub fn AnthropicProvider::messages(
   self : AnthropicProvider,
   model_id : String,
-) -> AnthropicMessagesModel {
+) -> AnthropicLanguageModelV4 {
   self.chat(model_id)
 }
 
@@ -128,8 +217,8 @@ pub fn AnthropicProvider::messages(
 pub fn AnthropicProvider::language_model(
   self : AnthropicProvider,
   model_id : String,
-) -> AnthropicMessagesModel {
-  self.chat(model_id)
+) -> AnthropicLanguageModelV4 {
+  self.messages(model_id)
 }
 
 ///|
@@ -138,25 +227,36 @@ pub struct AnthropicMessagesModel {
   priv provider_name : String
   priv api_key : ApiKey
   priv auth_token : String
+  priv api_key_environment_variable : String?
   priv base_url : String
   priv model_id : String
   priv headers : Map[String, String]
   priv anthropic_version : String
   priv beta_features : Array[String]
+  priv supported_url_rules : Array[@provider.SupportedUrlRule]
   priv idle_timeout_ms : Int
+  priv id_generator : @provider_utils.IdGenerator
+  priv http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
-/// Construct an official Anthropic model directly.
-pub fn anthropic(
+/// Construct the low-level Anthropic Messages wire model directly.
+pub fn anthropic_messages(
   model_id : String,
   api_key? : String = "",
   auth_token? : String = "",
-  base_url? : String = "https://api.anthropic.com/v1",
+  base_url? : String = "",
   headers? : Map[String, String] = Map([]),
   anthropic_version? : String = "2023-06-01",
   beta_features? : Array[String] = [],
+  supported_urls? : Array[@provider.SupportedUrlRule] = [
+    @provider.SupportedUrlRule::http("image/*"),
+    @provider.SupportedUrlRule::http("application/pdf"),
+  ],
   idle_timeout_ms? : Int = 120_000,
+  http_transport? : &@provider_utils.HttpTransport,
+  api_key_environment_variable? : String,
+  id_generator? : @provider_utils.IdGenerator,
 ) -> AnthropicMessagesModel raise {
   create_anthropic(
     api_key~,
@@ -165,8 +265,49 @@ pub fn anthropic(
     headers~,
     anthropic_version~,
     beta_features~,
+    supported_urls~,
     idle_timeout_ms~,
-  ).chat(model_id)
+    http_transport?,
+    api_key_environment_variable?,
+    id_generator?,
+  ).messages_wire(model_id)
+}
+
+///|
+/// Construct the default V4 Anthropic language model directly.
+pub fn anthropic(
+  model_id : String,
+  api_key? : String = "",
+  auth_token? : String = "",
+  base_url? : String = "",
+  headers? : Map[String, String] = Map([]),
+  anthropic_version? : String = "2023-06-01",
+  beta_features? : Array[String] = [],
+  supported_urls? : Array[@provider.SupportedUrlRule] = [
+    @provider.SupportedUrlRule::http("image/*"),
+    @provider.SupportedUrlRule::http("application/pdf"),
+  ],
+  idle_timeout_ms? : Int = 120_000,
+  http_transport? : &@provider_utils.HttpTransport,
+  api_key_environment_variable? : String,
+  id_generator? : @provider_utils.IdGenerator,
+) -> AnthropicLanguageModelV4 raise {
+  AnthropicLanguageModelV4::new(
+    anthropic_messages(
+      model_id,
+      api_key~,
+      auth_token~,
+      base_url~,
+      headers~,
+      anthropic_version~,
+      beta_features~,
+      supported_urls~,
+      idle_timeout_ms~,
+      http_transport?,
+      api_key_environment_variable?,
+      id_generator?,
+    ),
+  )
 }
 
 ///|
@@ -179,127 +320,82 @@ fn AnthropicMessagesModel::messages_url(
 ///|
 fn AnthropicMessagesModel::request_beta_features(
   self : AnthropicMessagesModel,
-  options : @moonai.ChatCallOptions,
+  request_features : Array[String],
 ) -> Array[String] {
   let features = copy_strings(self.beta_features)
-  let mut structured = options.response_format is @moonai.JsonSchema(..)
-  if !structured {
-    for tool in options.tools {
-      if tool.strict {
-        structured = true
-        break
-      }
-    }
-  }
-  if structured {
-    append_unique(features, "structured-outputs-2025-11-13")
+  for feature in request_features {
+    append_unique(features, feature)
   }
   features
 }
 
 ///|
-/// Return warnings for standardized settings that the Anthropic Messages
-/// protocol cannot represent faithfully.
-fn anthropic_warnings(
-  options : @moonai.ChatCallOptions,
-) -> Array[@moonai.Warning] {
-  let warnings : Array[@moonai.Warning] = []
-  if options.frequency_penalty is Some(_) {
-    warnings.push(
-      @moonai.Warning::Unsupported(
-        feature="frequencyPenalty",
-        details="Anthropic Messages does not define a frequency penalty field.",
-      ),
-    )
-  }
-  if options.presence_penalty is Some(_) {
-    warnings.push(
-      @moonai.Warning::Unsupported(
-        feature="presencePenalty",
-        details="Anthropic Messages does not define a presence penalty field.",
-      ),
-    )
-  }
-  if options.seed is Some(_) {
-    warnings.push(
-      @moonai.Warning::Unsupported(
-        feature="seed",
-        details="Anthropic Messages does not define a seed field.",
-      ),
-    )
-  }
-  match options.temperature {
-    Some(value) if value > 1.0 =>
-      warnings.push(
-        @moonai.Warning::Unsupported(
-          feature="temperature",
-          details="temperature exceeds Anthropic maximum of 1.0 and is clamped to 1.0.",
-        ),
-      )
-    Some(value) if value < 0.0 =>
-      warnings.push(
-        @moonai.Warning::Unsupported(
-          feature="temperature",
-          details="temperature is below Anthropic minimum of 0.0 and is clamped to 0.0.",
-        ),
-      )
-    _ => ()
-  }
-  if options.response_format is @moonai.JsonObject {
-    warnings.push(
-      @moonai.Warning::Unsupported(
-        feature="responseFormat",
-        details="Anthropic JSON response format requires an explicit schema and is ignored.",
-      ),
-    )
-  }
-  warnings
-}
-
-///|
 fn AnthropicMessagesModel::request_headers(
   self : AnthropicMessagesModel,
-  options : @moonai.ChatCallOptions,
-) -> Map[String, String] {
-  let headers = @provider_utils.copy_headers(self.headers)
+  call_headers : Map[String, String],
+  request_beta_features~ : Array[String],
+) -> Map[String, String] raise @provider.LoadAPIKeyError {
+  let headers : Map[String, String] = Map([])
   headers["Content-Type"] = "application/json"
   headers["Accept-Encoding"] = "identity"
   headers["anthropic-version"] = self.anthropic_version
-  if self.api_key != "" {
-    headers["x-api-key"] = self.api_key
+  for
+    entry in anthropic_authentication_headers(
+      self.api_key,
+      self.auth_token,
+      self.api_key_environment_variable,
+    ).iter2() {
+    let (key, value) = entry
+    headers[key] = value
   }
-  if self.auth_token != "" {
-    headers["Authorization"] = "Bearer \{self.auth_token}"
-  }
-  let beta_features = self.request_beta_features(options)
+  let beta_features = self.request_beta_features(request_beta_features)
   if beta_features.length() > 0 {
     headers["anthropic-beta"] = beta_features.join(",")
   }
-  @provider_utils.merge_headers(headers, options.headers)
+  @provider_utils.merge_headers(
+    @provider_utils.with_user_agent_suffix(
+      @provider_utils.merge_headers(headers, self.headers),
+      [
+        if self.provider_name.has_prefix("minimax") {
+          "moonai/minimax/\{VERSION}"
+        } else {
+          "moonai/anthropic/\{VERSION}"
+        },
+      ],
+    ),
+    call_headers,
+  )
 }
 
 ///|
-pub impl @moonai.ChatModel for AnthropicMessagesModel with fn provider(self) -> String {
+pub impl @provider.ChatModel for AnthropicMessagesModel with fn provider(self) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @moonai.ChatModel for AnthropicMessagesModel with fn model_id(self) -> String {
+pub impl @provider.ChatModel for AnthropicMessagesModel with fn model_id(self) -> String {
   self.model_id
+}
+
+///|
+pub impl @provider.ChatModel for AnthropicMessagesModel with fn supported_urls(
+  self,
+) -> Array[@provider.SupportedUrlRule] {
+  self.supported_url_rules.copy()
 }
 
 ///|
 /// Generate a complete Anthropic response. The Messages adapter currently
 /// accumulates its streaming endpoint so it shares the same normalized result.
-pub impl @moonai.ChatModel for AnthropicMessagesModel with fn generate(
+pub impl @provider.ChatModel for AnthropicMessagesModel with fn generate(
   self,
   options,
 ) {
-  self.stream_messages(options, _ => ())
+  self.generate_messages(options)
 }
 
 ///|
-pub impl @moonai.ChatModel for AnthropicMessagesModel with fn stream(
+pub impl @provider.ChatModel for AnthropicMessagesModel with fn stream(
   self,
   options,
   on_event,

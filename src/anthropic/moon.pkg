@@ -1,11 +1,12 @@
 import {
-  "QuietlyChan/moonai",
-  "QuietlyChan/moonai/internal/http_sse",
-  "QuietlyChan/moonai/internal/provider_utils",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/env",
   "moonbitlang/core/json",
 }
 
 import {
+  "QuietlyChan/moonai/ai",
   "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/async/http",

@@ -1,0 +1,21 @@
+import {
+  "QuietlyChan/moonai/provider",
+  "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/io",
+  "moonbitlang/async/websocket",
+  "moonbitlang/core/buffer",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/random",
+  "moonbitlang/core/string",
+}
+
+import {
+  "moonbitlang/async/socket",
+} for "test"
+
+supported_targets = "+native"

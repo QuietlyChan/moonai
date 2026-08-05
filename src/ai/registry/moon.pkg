@@ -1,0 +1,21 @@
+import {
+  "QuietlyChan/moonai/ai/model",
+  "QuietlyChan/moonai/provider",
+}
+
+import {
+  "QuietlyChan/moonai/alibaba",
+  "QuietlyChan/moonai/anthropic",
+  "QuietlyChan/moonai/deepseek",
+  "QuietlyChan/moonai/minimax",
+  "QuietlyChan/moonai/open_responses",
+  "QuietlyChan/moonai/openai",
+  "QuietlyChan/moonai/openai_compatible",
+  "QuietlyChan/moonai/testing",
+} for "test"
+
+import {
+  "QuietlyChan/moonai/open_responses",
+} for "wbtest"
+
+supported_targets = "+native"

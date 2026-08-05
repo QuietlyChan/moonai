@@ -1,5 +1,5 @@
 ///|
-async test "complete and stream_completion drive OpenAI-compatible requests" {
+async test "V4 generate_text and stream_text drive compatible completions" {
   @async.with_task_group() <| group => {
     let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
     let mut request_count = 0
@@ -8,7 +8,11 @@ async test "complete and stream_completion drive OpenAI-compatible requests" {
         (request, body, connection) => {
           assert_eq(request.path, "/v1/completions")
           let request_body = body.read_all().text()
-          assert_true(request_body.contains("\"prompt\":\"MoonBit is\""))
+          match @json.parse(request_body) {
+            { "prompt": String(value), .. } =>
+              assert_eq(value, "user:\nMoonBit is\n\nassistant:\n")
+            _ => fail("completion request has no prompt")
+          }
           if request_count == 0 {
             assert_true(
               request.headers.get("x-request-id") is Some("completion-generate"),
@@ -47,13 +51,19 @@ async test "complete and stream_completion drive OpenAI-compatible requests" {
       api_key="test-key",
       idle_timeout_ms=2_000,
     ).completion_model("completion-model")
-    let generated = @moonai.complete(model, "MoonBit is", headers={
+    let generated = @ai.generate_text(model, prompt="MoonBit is", headers={
       "X-Request-Id": "completion-generate",
     })
-    let streamed = @moonai.stream_completion(model, "MoonBit is")
-    assert_eq(generated.text, " productive")
-    assert_eq(generated.usage.total_tokens, 3)
-    assert_eq(streamed.text, " fast.")
-    assert_eq(streamed.usage.total_tokens, 4)
+    let deltas : Array[String] = []
+    let streamed = @ai.stream_text(model, prompt="MoonBit is", on_event=event => {
+      match event {
+        @provider.V4TextDelta(delta~, ..) => deltas.push(delta)
+        _ => ()
+      }
+    })
+    assert_eq(generated.text(), " productive")
+    assert_eq(generated.usage.input_tokens.total, Some(2))
+    assert_eq(deltas.join(""), " fast.")
+    assert_eq(streamed.usage.output_tokens.total, Some(2))
   }
 }

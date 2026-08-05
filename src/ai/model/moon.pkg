@@ -1,0 +1,10 @@
+import {
+  "QuietlyChan/moonai/provider",
+}
+
+import {
+  "QuietlyChan/moonai/testing",
+  "moonbitlang/async",
+} for "test"
+
+supported_targets = "+native"

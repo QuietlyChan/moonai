@@ -2,7 +2,7 @@
 package "QuietlyChan/moonai/testing"
 
 import {
-  "QuietlyChan/moonai",
+  "QuietlyChan/moonai/provider",
 }
 
 // Values
@@ -13,31 +13,80 @@ import {
 pub struct MockChatModel {
   // private fields
 }
-pub fn MockChatModel::captured_messages(Self) -> Array[@moonai.Message]
-pub fn MockChatModel::new(Array[@moonai.StreamEvent], @moonai.ChatResponse, provider_name? : String, model_id? : String) -> Self
-pub impl @moonai.ChatModel for MockChatModel
+pub fn MockChatModel::captured_messages(Self) -> Array[@provider.LanguageModelMessage]
+pub fn MockChatModel::captured_tool_choice(Self) -> @provider.ToolChoice?
+pub fn MockChatModel::new(Array[@provider.StreamEvent], @provider.ChatResponse, provider_name? : String, model_id? : String, supported_urls? : Array[@provider.SupportedUrlRule]) -> Self
+pub impl @provider.ChatModel for MockChatModel
 
 pub struct MockCompletionModel {
   // private fields
 }
 pub fn MockCompletionModel::captured_prompt(Self) -> String
-pub fn MockCompletionModel::new(Array[@moonai.StreamEvent], @moonai.CompletionResponse, provider_name? : String, model_id? : String) -> Self
-pub impl @moonai.CompletionModel for MockCompletionModel
+pub fn MockCompletionModel::new(Array[@provider.StreamEvent], @provider.CompletionResponse, provider_name? : String, model_id? : String) -> Self
+pub impl @provider.CompletionModel for MockCompletionModel
 
 pub struct MockEmbeddingModel {
   // private fields
 }
 pub fn MockEmbeddingModel::captured_batches(Self) -> Array[Array[String]]
 pub fn MockEmbeddingModel::captured_values(Self) -> Array[String]
-pub fn MockEmbeddingModel::new(@moonai.EmbeddingBatchResponse, provider_name? : String, model_id? : String, max_embeddings_per_call? : Int) -> Self
-pub impl @moonai.EmbeddingModel for MockEmbeddingModel
+pub fn MockEmbeddingModel::new(@provider.EmbeddingBatchResponse, provider_name? : String, model_id? : String, max_embeddings_per_call? : Int, supports_parallel_calls? : Bool) -> Self
+pub impl @provider.EmbeddingModelV4 for MockEmbeddingModel
+pub impl @provider.EmbeddingWireModel for MockEmbeddingModel
 
 pub struct MockImageModel {
   // private fields
 }
 pub fn MockImageModel::captured_batch_sizes(Self) -> Array[Int]
-pub fn MockImageModel::new(@moonai.ImageResponse, max_images_per_call? : Int, provider_name? : String, model_id? : String) -> Self
-pub impl @moonai.ImageModel for MockImageModel
+pub fn MockImageModel::new(@provider.ImageResponse, max_images_per_call? : Int, provider_name? : String, model_id? : String) -> Self
+pub impl @provider.ImageModelV4 for MockImageModel
+pub impl @provider.ImageWireModel for MockImageModel
+
+pub struct MockRealtimeModel {
+  // private fields
+}
+pub fn MockRealtimeModel::new(provider_name? : String, model_id? : String, client_secret? : @provider.RealtimeClientSecretResult, websocket_config? : @provider.RealtimeWebSocketConfig, parsed_events? : Array[@provider.RealtimeServerEvent]) -> Self
+pub impl @provider.RealtimeModelV4 for MockRealtimeModel
+
+pub struct MockRerankingModel {
+  // private fields
+}
+pub fn MockRerankingModel::captured_options(Self) -> @provider.RerankingCallOptions?
+pub fn MockRerankingModel::new(@provider.RerankingResponse, provider_name? : String, model_id? : String) -> Self
+pub impl @provider.RerankingModel for MockRerankingModel
+
+pub struct MockSpeechModel {
+  // private fields
+}
+pub fn MockSpeechModel::captured_options(Self) -> @provider.SpeechCallOptions?
+pub fn MockSpeechModel::new(@provider.SpeechResponse, provider_name? : String, model_id? : String) -> Self
+pub impl @provider.SpeechModelV4 for MockSpeechModel
+pub impl @provider.SpeechWireModel for MockSpeechModel
+
+pub struct MockSpeechTranslationModel {
+  // private fields
+}
+pub fn MockSpeechTranslationModel::captured_target_language(Self) -> String?
+pub fn MockSpeechTranslationModel::new(Array[@provider.SpeechTranslationStreamEvent], @provider.SpeechTranslationResponse, provider_name? : String, model_id? : String) -> Self
+pub impl @provider.SpeechTranslationModelV4 for MockSpeechTranslationModel
+pub impl @provider.SpeechTranslationWireModel for MockSpeechTranslationModel
+
+pub struct MockTranscriptionModel {
+  // private fields
+}
+pub fn MockTranscriptionModel::captured_options(Self) -> @provider.TranscriptionCallOptions?
+pub fn MockTranscriptionModel::captured_stream_options(Self) -> @provider.TranscriptionStreamOptions?
+pub fn MockTranscriptionModel::new(@provider.TranscriptionResponse, stream_events? : Array[@provider.TranscriptionStreamEvent], stream_result? : @provider.TranscriptionResponse, provider_name? : String, model_id? : String) -> Self
+pub impl @provider.TranscriptionModelV4 for MockTranscriptionModel
+pub impl @provider.TranscriptionWireModel for MockTranscriptionModel
+
+pub struct MockVideoModel {
+  // private fields
+}
+pub fn MockVideoModel::captured_batch_sizes(Self) -> Array[Int]
+pub fn MockVideoModel::new(@provider.VideoResponse, max_videos_per_call? : Int, provider_name? : String, model_id? : String) -> Self
+pub impl @provider.VideoModelV4 for MockVideoModel
+pub impl @provider.VideoWireModel for MockVideoModel
 
 // Type aliases
 

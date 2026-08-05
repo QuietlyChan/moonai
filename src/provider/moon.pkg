@@ -1,0 +1,7 @@
+import {
+  "moonbitlang/async/io",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+}
+
+supported_targets = "+native"

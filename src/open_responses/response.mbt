@@ -1,32 +1,4 @@
 ///|
-fn append_response_text_parts(
-  parts : Array[Json],
-  output : StringBuilder,
-) -> Unit {
-  for part in parts {
-    match part {
-      { "type": "output_text", "text": String(value), .. } =>
-        output.write_string(value)
-      { "type": "refusal", "refusal": String(value), .. } =>
-        output.write_string(value)
-      _ => ()
-    }
-  }
-}
-
-///|
-fn append_reasoning_parts(parts : Array[Json], output : StringBuilder) -> Unit {
-  for part in parts {
-    match part {
-      { "type": "reasoning_text", "text": String(value), .. }
-      | { "type": "summary_text", "text": String(value), .. } =>
-        output.write_string(value)
-      _ => ()
-    }
-  }
-}
-
-///|
 fn response_error_message(json : Json) -> String? {
   match json {
     { "error": { "message": String(message), .. }, .. } => Some(message)
@@ -35,63 +7,159 @@ fn response_error_message(json : Json) -> String? {
 }
 
 ///|
-/// Decode one non-streaming Open Responses response into the normalized result.
-pub fn decode_responses_response(json : Json) -> @moonai.ChatResponse raise {
+fn missing_responses_output_message(json : Json) -> String? {
+  match json {
+    { "output": Array(_), .. } => None
+    { "incomplete_details": { "reason": String(reason), .. }, .. } =>
+      Some("Responses API returned no output (\{reason})")
+    { "status": String(status), .. } if status != "" =>
+      Some("Responses API returned no output (\{status})")
+    _ => Some("Responses API returned no output")
+  }
+}
+
+///|
+priv struct DecodedOpenResponsesResponse {
+  content : Array[@provider.GeneratedContent]
+  usage : @provider.Usage
+  raw_usage : Json?
+  finish_reason : @provider.FinishReason
+  finish_reason_raw : String?
+  response_metadata : @provider.ResponseMetadata?
+}
+
+///|
+/// Preserve the optional counters used by the V4 contract instead of
+/// collapsing a missing Open Responses usage object into zeroes.
+fn open_responses_v4_usage_from_json(
+  raw_usage : Json?,
+) -> @provider.LanguageModelV4Usage {
+  @provider.LanguageModelV4Usage::from_token_usage_json(raw_usage)
+}
+
+///|
+fn decode_open_responses_response_data(
+  json : Json,
+  id_generator? : @provider_utils.IdGenerator,
+) -> DecodedOpenResponsesResponse raise {
   if response_error_message(json) is Some(message) {
-    fail("Open Responses request failed: \{message}")
+    raise @provider.InvalidResponseDataError(
+      message="Open Responses request failed: \{message}",
+      data=json,
+    )
   }
   let incomplete_reason = match json {
     { "incomplete_details": { "reason": String(reason), .. }, .. } => reason
     _ => ""
   }
-  let no_output_detail = if incomplete_reason != "" {
-    incomplete_reason
-  } else {
-    match json {
-      { "status": String(status), .. } => status
-      _ => ""
-    }
-  }
   let output = match json {
     { "output": Array(items), .. } => items
-    _ if no_output_detail != "" =>
-      fail("Open Responses returned no output (\{no_output_detail})")
-    _ => fail("Open Responses returned no output")
+    _ =>
+      raise @provider.InvalidResponseDataError(
+        message=missing_responses_output_message(json).unwrap(),
+        data=json,
+      )
   }
-  let text = StringBuilder::new()
-  let reasoning = StringBuilder::new()
-  let tool_calls : Array[@moonai.ToolCall] = []
+  let content : Array[@provider.GeneratedContent] = []
+  let mut has_tool_calls = false
+  let generate_id = id_generator.unwrap_or(@provider_utils.generate_id)
   for item in output {
     match item {
       { "type": "message", "content": Array(parts), .. } =>
-        append_response_text_parts(parts, text)
+        for part in parts {
+          match part {
+            { "type": "output_text", "text": String(value), .. }
+            | { "type": "refusal", "refusal": String(value), .. } =>
+              content.push(@provider.GeneratedContent::text(value))
+            _ => ()
+          }
+        }
       { "type": "reasoning", "content": Array(parts), .. } =>
-        append_reasoning_parts(parts, reasoning)
+        for part in parts {
+          match part {
+            { "type": "reasoning_text", "text": String(value), .. }
+            | { "type": "summary_text", "text": String(value), .. } =>
+              content.push(@provider.GeneratedContent::reasoning(value))
+            _ => ()
+          }
+        }
       { "type": "reasoning", "summary": Array(parts), .. } =>
-        append_reasoning_parts(parts, reasoning)
+        for part in parts {
+          match part {
+            { "type": "reasoning_text", "text": String(value), .. }
+            | { "type": "summary_text", "text": String(value), .. } =>
+              content.push(@provider.GeneratedContent::reasoning(value))
+            _ => ()
+          }
+        }
       {
         "type": "function_call",
         "call_id": String(call_id),
         "name": String(name),
         "arguments": String(arguments),
         ..
-      } => tool_calls.push(@moonai.ToolCall::new(id=call_id, name~, arguments~))
+      } => {
+        let call = @provider.ToolCall::new(id=call_id, name~, arguments~)
+        content.push(@provider.GeneratedContent::tool_call(call))
+        has_tool_calls = true
+      }
+      {
+        "type": "function_call",
+        "name": String(name),
+        "arguments": String(arguments),
+        ..
+      } => {
+        let call_id = generate_id()
+        let call = @provider.ToolCall::new(id=call_id, name~, arguments~)
+        content.push(@provider.GeneratedContent::tool_call(call))
+        has_tool_calls = true
+      }
       _ => ()
     }
   }
-  let usage = match json {
-    { "usage": value, .. } if !(value is Null) => usage_from_json(value)
-    _ => @moonai.Usage::zero()
+  let raw_usage = match json {
+    { "usage": value, .. } if !(value is Null) => Some(value)
+    _ => None
+  }
+  let usage = match raw_usage {
+    Some(value) => usage_from_json(value)
+    None => @provider.Usage::zero()
   }
   let finish_reason = match json {
-    { "status": "failed", .. } => @moonai.Error
-    _ => map_finish_reason(incomplete_reason, tool_calls.length() > 0)
+    { "status": "failed", .. } => @provider.Error
+    _ => map_finish_reason(incomplete_reason, has_tool_calls)
   }
-  @moonai.ChatResponse::new(
-    text.to_string(),
-    reasoning.to_string(),
-    tool_calls,
+  let finish_reason_raw = match json {
+    { "status": "failed", "error": { "code": String(value), .. }, .. } =>
+      Some(value)
+    { "status": "failed", .. } => Some("failed")
+    _ => if incomplete_reason == "" { None } else { Some(incomplete_reason) }
+  }
+  let response_metadata = @provider.ResponseMetadata::from_json(json)
+  {
+    content,
     usage,
+    raw_usage,
     finish_reason,
-  )
+    finish_reason_raw,
+    response_metadata: if response_metadata.is_empty() {
+      None
+    } else {
+      Some(response_metadata)
+    },
+  }
+}
+
+///|
+/// Decode one non-streaming Open Responses response into the normalized result.
+pub fn decode_responses_response(
+  json : Json,
+  id_generator? : @provider_utils.IdGenerator,
+) -> @provider.ChatResponse raise {
+  let decoded = decode_open_responses_response_data(json, id_generator?)
+  @provider.ChatResponse::from_content(
+    decoded.content,
+    decoded.usage,
+    decoded.finish_reason,
+  ).with_diagnostics(None, decoded.response_metadata, Map([]), [])
 }

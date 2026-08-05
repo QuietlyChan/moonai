@@ -2,43 +2,387 @@
 package "QuietlyChan/moonai/anthropic"
 
 import {
-  "QuietlyChan/moonai",
-  "QuietlyChan/moonai/internal/http_sse",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
 }
 
 // Values
-pub fn anthropic(String, api_key? : String, auth_token? : String, base_url? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], idle_timeout_ms? : Int) -> AnthropicMessagesModel raise
+pub const VERSION : String = "0.1.0"
 
-pub fn createAnthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], idle_timeout_ms? : Int) -> AnthropicProvider raise
+pub fn advisor_20260301_tool(Json, name? : String) -> @provider.ToolDefinition
 
-pub fn create_anthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], idle_timeout_ms? : Int) -> AnthropicProvider raise
+pub fn anthropic(String, api_key? : String, auth_token? : String, base_url? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> AnthropicLanguageModelV4 raise
 
-pub fn encode_messages_request(String, @moonai.ChatCallOptions) -> Json raise
+pub fn anthropic_files(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String) -> AnthropicFiles raise
+
+pub fn anthropic_messages(String, api_key? : String, auth_token? : String, base_url? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> AnthropicMessagesModel raise
+
+pub fn bash_20241022_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn bash_20250124_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn code_execution_20250522_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn code_execution_20250825_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn code_execution_20260120_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn computer_20241022_tool(Json, name? : String) -> @provider.ToolDefinition
+
+pub fn computer_20250124_tool(Json, name? : String) -> @provider.ToolDefinition
+
+pub fn computer_20251124_tool(Json, name? : String) -> @provider.ToolDefinition
+
+pub fn createAnthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> AnthropicProvider raise
+
+pub fn create_anthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> AnthropicProvider raise
+
+pub fn decodeAnthropicMessageMetadata(Json) -> AnthropicMessageMetadata?
+
+pub fn decode_anthropic_message_metadata(Json) -> AnthropicMessageMetadata?
+
+pub fn decode_messages_response(Json, provider_name? : String, tool_name_mapping? : @provider_utils.ToolNameMapping, id_generator? : () -> String) -> @provider.ChatResponse raise
+
+pub fn encode_messages_request(String, @provider.ChatCallOptions, provider_name? : String, stream? : Bool) -> Json raise
+
+pub fn encode_messages_v4_request(String, @provider.LanguageModelV4CallOptions, provider_name? : String, stream? : Bool) -> Json raise
+
+pub fn forwardAnthropicContainerIdFromLastStep(Array[Map[String, Json]]) -> Map[String, Json]?
+
+pub fn forward_anthropic_container_id_from_last_step(Array[Map[String, Json]]) -> Map[String, Json]?
+
+pub fn memory_20250818_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn sanitizeJsonSchema(Json) -> Json
+
+pub fn sanitize_json_schema(Json) -> Json
+
+pub fn text_editor_20241022_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn text_editor_20250124_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn text_editor_20250429_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn text_editor_20250728_tool(args? : Json, name? : String) -> @provider.ToolDefinition
+
+pub fn tool_search_bm25_20251119_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn tool_search_regex_20251119_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn web_fetch_20250910_tool(args? : Json, name? : String) -> @provider.ToolDefinition
+
+pub fn web_fetch_20260209_tool(args? : Json, name? : String) -> @provider.ToolDefinition
+
+pub fn web_search_20250305_tool(args? : Json, name? : String) -> @provider.ToolDefinition
+
+pub fn web_search_20260209_tool(args? : Json, name? : String) -> @provider.ToolDefinition
 
 // Errors
 
 // Types and methods
+pub(all) struct AnthropicCacheControl {
+  ttl : AnthropicCacheTtl?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicCacheControl::new(ttl? : AnthropicCacheTtl) -> Self
+
+pub(all) enum AnthropicCacheTtl {
+  AnthropicCacheFiveMinutes
+  AnthropicCacheOneHour
+} derive(Eq, @debug.Debug)
+
+pub(all) struct AnthropicCitations {
+  enabled : Bool
+} derive(Eq, @debug.Debug)
+pub fn AnthropicCitations::new(enabled~ : Bool) -> Self
+
+pub(all) struct AnthropicCompactionTrigger {
+  value : Double
+} derive(Eq, @debug.Debug)
+pub fn AnthropicCompactionTrigger::new(value~ : Double) -> Self
+
+pub(all) struct AnthropicContainer {
+  id : String?
+  skills : Array[AnthropicContainerSkill]
+} derive(Eq, @debug.Debug)
+pub fn AnthropicContainer::new(id? : String, skills? : Array[AnthropicContainerSkill]) -> Self
+
+pub(all) struct AnthropicContainerMetadata {
+  expires_at : String?
+  id : String
+  skills : Array[AnthropicContainerSkillMetadata]?
+} derive(Eq, @debug.Debug)
+
+pub(all) enum AnthropicContainerSkill {
+  AnthropicBuiltInSkill(skill_id~ : String, version~ : String?)
+  AnthropicCustomSkill(provider_reference~ : @provider.ProviderReference, version~ : String?)
+} derive(Eq, @debug.Debug)
+pub fn AnthropicContainerSkill::built_in(skill_id~ : String, version? : String) -> Self
+pub fn AnthropicContainerSkill::custom(provider_reference~ : @provider.ProviderReference, version? : String) -> Self
+
+pub(all) struct AnthropicContainerSkillMetadata {
+  kind : String
+  skill_id : String
+  version : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct AnthropicContextManagement {
+  edits : Array[AnthropicContextManagementEdit]
+} derive(Eq, @debug.Debug)
+pub fn AnthropicContextManagement::new(edits~ : Array[AnthropicContextManagementEdit]) -> Self
+
+pub(all) enum AnthropicContextManagementEdit {
+  AnthropicClearToolUses(trigger~ : AnthropicContextTrigger?, keep~ : AnthropicToolUseKeep?, clear_at_least~ : AnthropicInputTokenClearAtLeast?, clear_tool_inputs~ : Bool?, exclude_tools~ : Array[String])
+  AnthropicClearThinking(keep~ : AnthropicThinkingKeep?)
+  AnthropicCompactContext(trigger~ : AnthropicCompactionTrigger?, pause_after_compaction~ : Bool?, instructions~ : String?)
+} derive(Eq, @debug.Debug)
+pub fn AnthropicContextManagementEdit::clear_thinking(keep? : AnthropicThinkingKeep) -> Self
+pub fn AnthropicContextManagementEdit::clear_tool_uses(trigger? : AnthropicContextTrigger, keep? : AnthropicToolUseKeep, clear_at_least? : AnthropicInputTokenClearAtLeast, clear_tool_inputs? : Bool, exclude_tools? : Array[String]) -> Self
+pub fn AnthropicContextManagementEdit::compact(trigger? : AnthropicCompactionTrigger, pause_after_compaction? : Bool, instructions? : String) -> Self
+
+pub(all) struct AnthropicContextManagementEditMetadata {
+  kind : String
+  cleared_tool_uses : Int?
+  cleared_input_tokens : Int?
+  cleared_thinking_turns : Int?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct AnthropicContextManagementMetadata {
+  applied_edits : Array[AnthropicContextManagementEditMetadata]
+} derive(Eq, @debug.Debug)
+
+pub(all) enum AnthropicContextTrigger {
+  AnthropicContextInputTokens(Double)
+  AnthropicContextToolUses(Double)
+} derive(Eq, @debug.Debug)
+pub fn AnthropicContextTrigger::input_tokens(Double) -> Self
+pub fn AnthropicContextTrigger::tool_uses(Double) -> Self
+
+pub(all) enum AnthropicEffort {
+  AnthropicEffortLow
+  AnthropicEffortMedium
+  AnthropicEffortHigh
+  AnthropicEffortXHigh
+  AnthropicEffortMax
+} derive(Eq, @debug.Debug)
+
+pub(all) struct AnthropicFallback {
+  model : String
+  max_tokens : Int?
+  thinking : Map[String, Json]?
+  output_config : Map[String, Json]?
+  speed : AnthropicSpeed?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicFallback::new(model~ : String, max_tokens? : Int, thinking? : Map[String, Json], output_config? : Map[String, Json], speed? : AnthropicSpeed) -> Self
+
+pub(all) enum AnthropicFallbacks {
+  AnthropicDefaultFallback
+  AnthropicFallbackChain(Array[AnthropicFallback])
+} derive(Eq, @debug.Debug)
+pub fn AnthropicFallbacks::chain(Array[AnthropicFallback]) -> Self
+pub fn AnthropicFallbacks::default_fallback() -> Self
+
+pub(all) struct AnthropicFilePartProviderOptions {
+  container_upload : Bool?
+  citations : AnthropicCitations?
+  title : String?
+  context : String?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicFilePartProviderOptions::new(container_upload? : Bool, citations? : AnthropicCitations, title? : String, context? : String) -> Self
+pub fn AnthropicFilePartProviderOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+
+pub struct AnthropicFiles {
+  // private fields
+}
+pub impl @provider.Files for AnthropicFiles
+
+pub(all) enum AnthropicInferenceGeo {
+  AnthropicInferenceUs
+  AnthropicInferenceGlobal
+} derive(Eq, @debug.Debug)
+
+pub(all) struct AnthropicInputTokenClearAtLeast {
+  value : Double
+} derive(Eq, @debug.Debug)
+pub fn AnthropicInputTokenClearAtLeast::new(value~ : Double) -> Self
+
+pub(all) struct AnthropicLanguageModelOptions {
+  send_reasoning : Bool?
+  structured_output_mode : AnthropicStructuredOutputMode?
+  thinking : AnthropicThinking?
+  disable_parallel_tool_use : Bool?
+  cache_control : AnthropicCacheControl?
+  metadata : AnthropicMetadata?
+  mcp_servers : Array[AnthropicMcpServer]
+  container : AnthropicContainer?
+  tool_streaming : Bool?
+  effort : AnthropicEffort?
+  task_budget : AnthropicTaskBudget?
+  speed : AnthropicSpeed?
+  inference_geo : AnthropicInferenceGeo?
+  fallbacks : AnthropicFallbacks?
+  anthropic_beta : Array[String]
+  context_management : AnthropicContextManagement?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicLanguageModelOptions::new(send_reasoning? : Bool, structured_output_mode? : AnthropicStructuredOutputMode, thinking? : AnthropicThinking, disable_parallel_tool_use? : Bool, cache_control? : AnthropicCacheControl, metadata? : AnthropicMetadata, mcp_servers? : Array[AnthropicMcpServer], container? : AnthropicContainer, tool_streaming? : Bool, effort? : AnthropicEffort, task_budget? : AnthropicTaskBudget, speed? : AnthropicSpeed, inference_geo? : AnthropicInferenceGeo, fallbacks? : AnthropicFallbacks, anthropic_beta? : Array[String], context_management? : AnthropicContextManagement) -> Self
+pub fn AnthropicLanguageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+
+pub struct AnthropicLanguageModelV4 {
+  model : AnthropicMessagesModel
+}
+pub fn AnthropicLanguageModelV4::new(AnthropicMessagesModel) -> Self
+pub impl @provider.LanguageModelV4 for AnthropicLanguageModelV4
+
+pub(all) struct AnthropicMcpServer {
+  name : String
+  url : String
+  authorization_token : String?
+  tool_configuration : AnthropicMcpToolConfiguration?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicMcpServer::new(name~ : String, url~ : String, authorization_token? : String, tool_configuration? : AnthropicMcpToolConfiguration) -> Self
+
+pub(all) struct AnthropicMcpToolConfiguration {
+  enabled : Bool?
+  allowed_tools : Array[String]?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicMcpToolConfiguration::new(enabled? : Bool, allowed_tools? : Array[String]) -> Self
+
+pub(all) struct AnthropicMessageMetadata {
+  usage : Json?
+  stop_sequence : String?
+  stop_details : AnthropicStopDetails?
+  iterations : Array[AnthropicUsageIteration]?
+  container : AnthropicContainerMetadata?
+  context_management : AnthropicContextManagementMetadata?
+  raw : Json
+} derive(@debug.Debug)
+
 pub struct AnthropicMessagesModel {
   // private fields
 }
-pub impl @moonai.ChatModel for AnthropicMessagesModel
+pub impl @provider.ChatModel for AnthropicMessagesModel
+
+pub(all) struct AnthropicMetadata {
+  user_id : String?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicMetadata::new(user_id? : String) -> Self
 
 pub struct AnthropicProvider {
   // private fields
 }
-pub fn AnthropicProvider::chat(Self, String) -> AnthropicMessagesModel
-pub fn AnthropicProvider::language_model(Self, String) -> AnthropicMessagesModel
-pub fn AnthropicProvider::messages(Self, String) -> AnthropicMessagesModel
+pub fn AnthropicProvider::chat(Self, String) -> AnthropicLanguageModelV4
+pub fn AnthropicProvider::chat_wire(Self, String) -> AnthropicMessagesModel
+pub fn AnthropicProvider::files(Self) -> AnthropicFiles raise
+pub fn AnthropicProvider::language_model(Self, String) -> AnthropicLanguageModelV4
+pub fn AnthropicProvider::messages(Self, String) -> AnthropicLanguageModelV4
+pub fn AnthropicProvider::messages_wire(Self, String) -> AnthropicMessagesModel
+pub fn AnthropicProvider::skills(Self) -> AnthropicSkills
+pub impl @provider.Provider for AnthropicProvider
+
+pub struct AnthropicSkills {
+  // private fields
+}
+pub impl @provider.Skills for AnthropicSkills
+
+pub(all) enum AnthropicSpeed {
+  AnthropicSpeedFast
+  AnthropicSpeedStandard
+} derive(Eq, @debug.Debug)
+
+pub(all) struct AnthropicStopDetails {
+  kind : String
+  category : String?
+  explanation : String?
+  recommended_model : String?
+} derive(Eq, @debug.Debug)
 
 pub struct AnthropicStreamDecoder {
   // private fields
 }
-pub fn AnthropicStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
-pub fn AnthropicStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn AnthropicStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String) -> Self
-pub fn AnthropicStreamDecoder::response(Self) -> @moonai.ChatResponse
+pub fn AnthropicStreamDecoder::feed_line(Self, String) -> @provider_utils.DecodeBatch raise
+pub fn AnthropicStreamDecoder::flush_buffered(Self) -> @provider_utils.DecodeBatch raise
+pub fn AnthropicStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String, tool_name_mapping? : @provider_utils.ToolNameMapping, id_generator? : () -> String) -> Self
+pub fn AnthropicStreamDecoder::provider_metadata_snapshot(Self) -> Map[String, Json]
+pub fn AnthropicStreamDecoder::response(Self) -> @provider.ChatResponse
+pub fn AnthropicStreamDecoder::v4_finish_reason(Self) -> @provider.LanguageModelV4FinishReason
+pub fn AnthropicStreamDecoder::v4_usage(Self) -> @provider.LanguageModelV4Usage
+
+pub(all) enum AnthropicStructuredOutputMode {
+  AnthropicStructuredOutputFormat
+  AnthropicStructuredOutputJsonTool
+  AnthropicStructuredOutputAuto
+} derive(Eq, @debug.Debug)
+
+pub(all) struct AnthropicSystemMessageProviderOptions {
+  tool_changes : Array[AnthropicToolChange]
+} derive(Eq, @debug.Debug)
+pub fn AnthropicSystemMessageProviderOptions::new(tool_changes? : Array[AnthropicToolChange]) -> Self
+pub fn AnthropicSystemMessageProviderOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+
+pub(all) struct AnthropicTaskBudget {
+  total : Int
+  remaining : Int?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicTaskBudget::new(total~ : Int, remaining? : Int) -> Self raise
+
+pub(all) enum AnthropicThinking {
+  AnthropicThinkingAdaptive(AnthropicThinkingDisplay?)
+  AnthropicThinkingEnabled(Int?)
+  AnthropicThinkingDisabled
+} derive(Eq, @debug.Debug)
+pub fn AnthropicThinking::adaptive(display? : AnthropicThinkingDisplay) -> Self
+pub fn AnthropicThinking::disabled() -> Self
+pub fn AnthropicThinking::enabled(budget_tokens? : Int) -> Self
+
+pub(all) enum AnthropicThinkingDisplay {
+  AnthropicThinkingOmitted
+  AnthropicThinkingSummarized
+} derive(Eq, @debug.Debug)
+
+pub(all) enum AnthropicThinkingKeep {
+  AnthropicKeepAllThinking
+  AnthropicKeepThinkingTurns(Double)
+} derive(Eq, @debug.Debug)
+pub fn AnthropicThinkingKeep::all() -> Self
+pub fn AnthropicThinkingKeep::turns(Double) -> Self
+
+pub(all) enum AnthropicToolAllowedCaller {
+  AnthropicToolDirect
+  AnthropicToolCodeExecution20250825
+  AnthropicToolCodeExecution20260120
+} derive(Eq, @debug.Debug)
+
+pub(all) enum AnthropicToolChange {
+  AnthropicToolAddition(String)
+  AnthropicToolRemoval(String)
+} derive(Eq, @debug.Debug)
+pub fn AnthropicToolChange::addition(String) -> Self
+pub fn AnthropicToolChange::removal(String) -> Self
+
+pub(all) struct AnthropicToolOptions {
+  defer_loading : Bool?
+  allowed_callers : Array[AnthropicToolAllowedCaller]
+  eager_input_streaming : Bool?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicToolOptions::new(defer_loading? : Bool, allowed_callers? : Array[AnthropicToolAllowedCaller], eager_input_streaming? : Bool) -> Self
+pub fn AnthropicToolOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+
+pub(all) struct AnthropicToolUseKeep {
+  value : Double
+} derive(Eq, @debug.Debug)
+pub fn AnthropicToolUseKeep::new(value~ : Double) -> Self
+
+pub(all) struct AnthropicUsageIteration {
+  kind : String
+  model : String?
+  input_tokens : Int
+  output_tokens : Int
+  cache_creation_input_tokens : Int?
+  cache_read_input_tokens : Int?
+} derive(Eq, @debug.Debug)
 
 // Type aliases
+pub type AnthropicModelId = String
 
 // Traits
 

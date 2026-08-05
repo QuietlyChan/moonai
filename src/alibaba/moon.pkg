@@ -1,0 +1,20 @@
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "QuietlyChan/moonai/openai_compatible",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+import {
+  "QuietlyChan/moonai/ai",
+  "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/socket",
+} for "test"
+
+import {
+  "moonbitlang/async",
+} for "wbtest"
+
+supported_targets = "+native"

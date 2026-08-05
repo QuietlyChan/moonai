@@ -1,0 +1,260 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/ai"
+
+import {
+  "QuietlyChan/moonai/ai/model",
+  "QuietlyChan/moonai/ai/prompt",
+  "QuietlyChan/moonai/ai/registry",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn asLanguageModelV4(&@provider.ChatModel) -> &@provider.LanguageModelV4
+
+pub fn as_language_model_v4(&@provider.ChatModel) -> &@provider.LanguageModelV4
+
+pub async fn complete(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
+
+pub fn createProviderRegistry(Map[String, &@provider.Provider], separator? : String, language_model_middleware? : @model.LanguageModelV4Middleware, image_model_middleware? : @model.ImageModelV4Middleware) -> @registry.ProviderRegistry raise @provider.InvalidArgumentError
+
+pub async fn createRealtimeClientSecret(&@provider.RealtimeModelV4, options? : @provider.RealtimeClientSecretOptions) -> @provider.RealtimeClientSecretResult
+
+pub fn create_provider_registry(Map[String, &@provider.Provider], separator? : String, language_model_middleware? : @model.LanguageModelV4Middleware, image_model_middleware? : @model.ImageModelV4Middleware) -> @registry.ProviderRegistry raise @provider.InvalidArgumentError
+
+pub async fn create_realtime_client_secret(&@provider.RealtimeModelV4, options? : @provider.RealtimeClientSecretOptions) -> @provider.RealtimeClientSecretResult
+
+pub fn customProvider(provider_name? : String, language_models? : Map[String, &@provider.LanguageModelV4], completion_models? : Map[String, &@provider.CompletionModel], embedding_models? : Map[String, &@provider.EmbeddingModelV4], reranking_models? : Map[String, &@provider.RerankingModel], image_models? : Map[String, &@provider.ImageModelV4], video_models? : Map[String, &@provider.VideoModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_translation_models? : Map[String, &@provider.SpeechTranslationModelV4], realtime_models? : Map[String, &@provider.RealtimeModelV4], files? : &@provider.Files, skills? : &@provider.Skills, fallback_provider? : &@provider.Provider) -> @registry.CustomProvider raise @provider.InvalidArgumentError
+
+pub fn custom_provider(provider_name? : String, language_models? : Map[String, &@provider.LanguageModelV4], completion_models? : Map[String, &@provider.CompletionModel], embedding_models? : Map[String, &@provider.EmbeddingModelV4], reranking_models? : Map[String, &@provider.RerankingModel], image_models? : Map[String, &@provider.ImageModelV4], video_models? : Map[String, &@provider.VideoModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_translation_models? : Map[String, &@provider.SpeechTranslationModelV4], realtime_models? : Map[String, &@provider.RealtimeModelV4], files? : &@provider.Files, skills? : &@provider.Skills, fallback_provider? : &@provider.Provider) -> @registry.CustomProvider raise @provider.InvalidArgumentError
+
+pub async fn embed(&@provider.EmbeddingModelV4, String, dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.EmbeddingResponse
+
+pub async fn embedMany(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int) -> @provider.EmbeddingBatchResponse
+
+pub async fn embed_many(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int) -> @provider.EmbeddingBatchResponse
+
+pub async fn experimental_streamTranscribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+
+pub async fn generateImage(&@provider.ImageModelV4, String, n? : Int, max_images_per_call? : Int, size? : String, aspect_ratio? : String, seed? : Int, files? : Array[@provider.ImageModelV4File], mask? : @provider.ImageModelV4File, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.ImageResponse
+
+pub async fn generateObject(&@provider.LanguageModelV4, Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> ObjectResponse
+
+pub async fn generateSpeech(&@provider.SpeechModelV4, String, voice? : String, output_format? : String, instructions? : String, speed? : Double, language? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechResponse
+
+pub async fn generateText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Array[@provider.ToolDefinition], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.LanguageModelV4GenerateResult
+
+pub async fn generateVideo(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4Result
+
+pub async fn generate_image(&@provider.ImageModelV4, String, n? : Int, max_images_per_call? : Int, size? : String, aspect_ratio? : String, seed? : Int, files? : Array[@provider.ImageModelV4File], mask? : @provider.ImageModelV4File, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.ImageResponse
+
+pub async fn generate_object(&@provider.LanguageModelV4, Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> ObjectResponse
+
+pub async fn generate_speech(&@provider.SpeechModelV4, String, voice? : String, output_format? : String, instructions? : String, speed? : Double, language? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechResponse
+
+pub async fn generate_text(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Array[@provider.ToolDefinition], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.LanguageModelV4GenerateResult
+
+pub async fn generate_video(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4Result
+
+pub fn model_id_of_language_model(&@provider.LanguageModelV4) -> @model.ModelId
+
+pub fn parse_model_id(String) -> @model.ModelId raise @model.InvalidModelIdError
+
+pub async fn rerank(&@provider.RerankingModel, @provider.RerankingDocuments, String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
+
+pub async fn rerankText(&@provider.RerankingModel, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
+
+pub async fn rerank_text(&@provider.RerankingModel, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
+
+pub async fn streamSpeechTranslation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
+
+pub async fn streamText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Array[@provider.ToolDefinition], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.LanguageModelV4StreamResult
+
+pub async fn streamTranscribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+
+pub async fn stream_completion(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], on_event? : async (@provider.StreamEvent) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
+
+pub async fn stream_speech_translation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
+
+pub async fn stream_text(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Array[@provider.ToolDefinition], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.LanguageModelV4StreamResult
+
+pub async fn stream_transcribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+
+pub async fn transcribe(&@provider.TranscriptionModelV4, audio~ : @provider.TranscriptionAudio, media_type~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+
+pub async fn uploadFile(&@provider.Files, data~ : @provider.UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> @provider.FileUploadResult
+
+pub async fn uploadSkill(&@provider.Skills, files~ : Array[@provider.SkillFile], display_title? : String, provider_options? : Map[String, Json]) -> @provider.SkillUploadResult
+
+pub async fn upload_file(&@provider.Files, data~ : @provider.UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> @provider.FileUploadResult
+
+pub async fn upload_skill(&@provider.Skills, files~ : Array[@provider.SkillFile], display_title? : String, provider_options? : Map[String, Json]) -> @provider.SkillUploadResult
+
+pub fn validateObject(Json, Json) -> Unit raise ObjectValidationError
+
+pub fn validate_object(Json, Json) -> Unit raise ObjectValidationError
+
+pub fn wrapEmbeddingModel(&@provider.EmbeddingModelV4, @model.EmbeddingModelV4Middleware) -> &@provider.EmbeddingModelV4
+
+pub fn wrapEmbeddingModelChain(&@provider.EmbeddingModelV4, Array[@model.EmbeddingModelV4Middleware]) -> &@provider.EmbeddingModelV4
+
+pub fn wrapImageModel(&@provider.ImageModelV4, @model.ImageModelV4Middleware) -> &@provider.ImageModelV4
+
+pub fn wrapImageModelChain(&@provider.ImageModelV4, Array[@model.ImageModelV4Middleware]) -> &@provider.ImageModelV4
+
+pub fn wrapLanguageModel(&@provider.LanguageModelV4, @model.LanguageModelV4Middleware) -> &@provider.LanguageModelV4
+
+pub fn wrapLanguageModelChain(&@provider.LanguageModelV4, Array[@model.LanguageModelV4Middleware]) -> &@provider.LanguageModelV4
+
+pub fn wrapLanguageModelV4(&@provider.LanguageModelV4, @model.LanguageModelV4Middleware) -> &@provider.LanguageModelV4
+
+pub fn wrapLanguageModelV4Chain(&@provider.LanguageModelV4, Array[@model.LanguageModelV4Middleware]) -> &@provider.LanguageModelV4
+
+pub fn wrap_embedding_model_v4(&@provider.EmbeddingModelV4, @model.EmbeddingModelV4Middleware) -> &@provider.EmbeddingModelV4
+
+pub fn wrap_embedding_model_v4_chain(&@provider.EmbeddingModelV4, Array[@model.EmbeddingModelV4Middleware]) -> &@provider.EmbeddingModelV4
+
+pub fn wrap_image_model_v4(&@provider.ImageModelV4, @model.ImageModelV4Middleware) -> &@provider.ImageModelV4
+
+pub fn wrap_image_model_v4_chain(&@provider.ImageModelV4, Array[@model.ImageModelV4Middleware]) -> &@provider.ImageModelV4
+
+pub fn wrap_language_model_v4(&@provider.LanguageModelV4, @model.LanguageModelV4Middleware) -> &@provider.LanguageModelV4
+
+pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[@model.LanguageModelV4Middleware]) -> &@provider.LanguageModelV4
+
+// Errors
+pub suberror NoObjectGeneratedError {
+  NoObjectGeneratedError(message~ : String, text~ : String?, response~ : @provider.LanguageModelV4GenerateResult, failure~ : ObjectGenerationFailure)
+} derive(@debug.Debug)
+
+pub suberror ObjectValidationError {
+  ObjectValidationError(path~ : String, message~ : String)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub(all) enum ObjectGenerationFailure {
+  EmptyResponse
+  InvalidJson(message~ : String)
+  SchemaMismatch(path~ : String, message~ : String)
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ObjectResponse {
+  object : Json
+  response : @provider.LanguageModelV4GenerateResult
+} derive(@debug.Debug)
+
+pub(all) struct RerankItem {
+  original_index : Int
+  score : Double
+  document : RerankingDocument
+} derive(Eq, @debug.Debug)
+
+pub(all) struct RerankResult {
+  original_documents : @provider.RerankingDocuments
+  reranked_documents : @provider.RerankingDocuments
+  ranking : Array[RerankItem]
+  usage : @provider.Usage
+  response : @provider.ResponseMetadata
+  provider_metadata : Map[String, Json]
+  warnings : Array[@provider.Warning]
+} derive(Eq, @debug.Debug)
+
+pub(all) enum RerankingDocument {
+  TextDocument(String)
+  ObjectDocument(Json)
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+pub using @model {type CompletionModelReference}
+
+pub using @registry {type CustomProvider}
+
+pub type DownloadFunction = async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?]
+
+pub using @prompt {type DownloadRequest}
+
+pub using @prompt {type DownloadedAsset}
+
+pub using @model {type EmbeddingModelReference}
+
+pub using @model {type EmbeddingModelV4Middleware}
+
+pub using @model {type EmbeddingModelV4MiddlewareContext}
+
+pub using @model {type ImageModelReference}
+
+pub using @model {type ImageModelV4Middleware}
+
+pub using @model {type ImageModelV4MiddlewareContext}
+
+pub using @prompt {type Instructions}
+
+pub using @model {type InvalidModelIdError}
+
+pub using @registry {type InvalidRegistryModelIdError}
+
+pub using @prompt {type LanguageModelCallOptions}
+
+pub using @model {type LanguageModelV4Middleware}
+
+pub using @model {type LanguageModelV4MiddlewareContext}
+
+pub using @model {type LanguageModelV4MiddlewareOperation}
+
+pub using @model {type LanguageModelV4Reference}
+
+pub using @model {type LanguageModelV4TransformContext}
+
+pub using @provider_utils {type ModelContentPart}
+
+pub using @model {type ModelId}
+
+pub using @provider_utils {type ModelMessage}
+
+pub using @provider_utils {type ModelMessageRole}
+
+pub using @model {type ModelRegistry}
+
+pub using @provider_utils {type ModelToolApprovalRequest}
+
+pub using @provider_utils {type ModelToolApprovalResponse}
+
+pub using @provider_utils {type ModelToolCall}
+
+pub using @provider_utils {type ModelToolResult}
+
+pub using @provider_utils {type ModelToolResultContentPart}
+
+pub using @provider_utils {type ModelToolResultOutput}
+
+pub using @model {type ModelType}
+
+pub using @model {type NoSuchModelError}
+
+pub using @registry {type NoSuchProviderCapabilityError}
+
+pub using @registry {type NoSuchProviderError}
+
+pub using @prompt {type Prompt}
+
+pub using @prompt {type PromptInput}
+
+pub using @registry {type ProviderRegistry}
+
+pub using @model {type RealtimeModelReference}
+
+pub using @model {type RerankingModelReference}
+
+pub using @model {type SpeechModelReference}
+
+pub using @model {type SpeechTranslationModelReference}
+
+pub using @prompt {type StandardizedPrompt}
+
+pub using @model {type TranscriptionModelReference}
+
+pub using @model {type VideoModelReference}
+
+// Traits
+

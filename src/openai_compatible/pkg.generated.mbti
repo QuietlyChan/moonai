@@ -2,101 +2,213 @@
 package "QuietlyChan/moonai/openai_compatible"
 
 import {
-  "QuietlyChan/moonai",
-  "QuietlyChan/moonai/internal/http_sse",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
 }
 
 // Values
-pub fn createOpenAICompatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int, max_embeddings_per_call? : Int) -> OpenAICompatibleProvider
+pub const VERSION : String = "0.1.0"
 
-pub fn create_openai_compatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int, max_embeddings_per_call? : Int) -> OpenAICompatibleProvider
+pub fn convert_openai_compatible_chat_usage(Json) -> @provider.Usage
 
-pub fn decode_chat_response(Json) -> @moonai.ChatResponse raise
+pub fn createOpenAICompatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], query_params? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, supports_structured_outputs? : Bool, prompt_converter? : (Array[@provider.LanguageModelMessage], Bool, String) -> OpenAICompatiblePromptConversion raise, transform_request_body? : (Json) -> Json, error_structure? : OpenAICompatibleErrorStructure, metadata_extractor? : OpenAICompatibleMetadataExtractor, convert_usage? : (Json) -> @provider.Usage, idle_timeout_ms? : Int, max_embeddings_per_call? : Int, supports_parallel_calls? : Bool, supports_top_k? : Bool, supports_frequency_penalty? : Bool, supported_urls? : Array[@provider.SupportedUrlRule], http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> OpenAICompatibleProvider
 
-pub fn decode_completion_response(Json) -> @moonai.CompletionResponse raise
+pub fn create_openai_compatible(provider_name~ : String, base_url~ : String, api_key? : String, headers? : Map[String, String], query_params? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, supports_structured_outputs? : Bool, prompt_converter? : (Array[@provider.LanguageModelMessage], Bool, String) -> OpenAICompatiblePromptConversion raise, transform_request_body? : (Json) -> Json, error_structure? : OpenAICompatibleErrorStructure, metadata_extractor? : OpenAICompatibleMetadataExtractor, convert_usage? : (Json) -> @provider.Usage, idle_timeout_ms? : Int, max_embeddings_per_call? : Int, supports_parallel_calls? : Bool, supports_top_k? : Bool, supports_frequency_penalty? : Bool, supported_urls? : Array[@provider.SupportedUrlRule], http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> OpenAICompatibleProvider
 
-pub fn decode_embedding_response(Json) -> @moonai.EmbeddingBatchResponse raise
+pub fn decode_chat_response(Json, error_structure? : OpenAICompatibleErrorStructure, convert_usage? : (Json) -> @provider.Usage, metadata_key? : String, id_generator? : () -> String) -> @provider.ChatResponse raise
 
-pub fn decode_image_response(Json) -> @moonai.ImageResponse raise
+pub fn decode_completion_response(Json, error_structure? : OpenAICompatibleErrorStructure) -> @provider.CompletionResponse raise
 
-pub fn encode_chat_request(String, @moonai.ChatCallOptions, preserve_reasoning? : Bool, include_usage? : Bool, stream? : Bool) -> Json
+pub fn decode_embedding_response(Json, error_structure? : OpenAICompatibleErrorStructure) -> @provider.EmbeddingBatchResponse raise
 
-pub fn encode_completion_request(String, @moonai.CompletionOptions, include_usage? : Bool, stream? : Bool) -> Json
+pub fn decode_image_response(Json, error_structure? : OpenAICompatibleErrorStructure) -> @provider.ImageResponse raise
 
-pub fn encode_embedding_request(String, Array[String], @moonai.EmbeddingOptions) -> Json
+pub fn decode_openai_compatible_error_data(Json) -> OpenAICompatibleErrorData?
 
-pub fn encode_image_request(String, @moonai.ImageCallOptions, include_response_format? : Bool) -> Json
+pub fn default_openai_compatible_error_structure() -> OpenAICompatibleErrorStructure
 
-pub fn openai_compatible(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleChatModel
+pub fn default_openai_compatible_prompt_converter(Array[@provider.LanguageModelMessage], Bool, String) -> OpenAICompatiblePromptConversion raise
 
-pub fn openai_compatible_completion(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleCompletionModel
+pub fn encode_chat_request(String, @provider.ChatCallOptions, preserve_reasoning? : Bool, include_usage? : Bool, stream? : Bool, provider_name? : String, supports_structured_outputs? : Bool, supports_top_k? : Bool, supports_frequency_penalty? : Bool, prompt_converter? : (Array[@provider.LanguageModelMessage], Bool, String) -> OpenAICompatiblePromptConversion raise) -> Json raise
 
-pub fn openai_compatible_embedding(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int, max_embeddings_per_call? : Int) -> OpenAICompatibleEmbeddingModel
+pub fn encode_completion_request(String, @provider.CompletionOptions, include_usage? : Bool, stream? : Bool, provider_name? : String) -> Json
 
-pub fn openai_compatible_image(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], max_images_per_call? : Int, include_response_format? : Bool, idle_timeout_ms? : Int) -> OpenAICompatibleImageModel
+pub fn encode_embedding_request(String, Array[String], @provider.EmbeddingOptions, provider_name? : String) -> Json
+
+pub fn encode_image_request(String, @provider.ImageCallOptions, include_response_format? : Bool, provider_name? : String) -> Json
+
+pub fn openai_compatible(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], query_params? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, supports_structured_outputs? : Bool, prompt_converter? : (Array[@provider.LanguageModelMessage], Bool, String) -> OpenAICompatiblePromptConversion raise, transform_request_body? : (Json) -> Json, error_structure? : OpenAICompatibleErrorStructure, metadata_extractor? : OpenAICompatibleMetadataExtractor, convert_usage? : (Json) -> @provider.Usage, idle_timeout_ms? : Int, supports_top_k? : Bool, supports_frequency_penalty? : Bool, supported_urls? : Array[@provider.SupportedUrlRule], http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> OpenAICompatibleLanguageModelV4
+
+pub fn openai_compatible_completion(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], query_params? : Map[String, String], include_usage? : Bool, error_structure? : OpenAICompatibleErrorStructure, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String) -> OpenAICompatibleCompletionLanguageModelV4
+
+pub fn openai_compatible_completion_wire(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], query_params? : Map[String, String], include_usage? : Bool, error_structure? : OpenAICompatibleErrorStructure, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String) -> OpenAICompatibleCompletionModel
+
+pub fn openai_compatible_embedding(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], query_params? : Map[String, String], error_structure? : OpenAICompatibleErrorStructure, idle_timeout_ms? : Int, max_embeddings_per_call? : Int, supports_parallel_calls? : Bool, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String) -> OpenAICompatibleEmbeddingModel
+
+pub fn openai_compatible_image(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], query_params? : Map[String, String], max_images_per_call? : Int, include_response_format? : Bool, error_structure? : OpenAICompatibleErrorStructure, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String) -> OpenAICompatibleImageModel
+
+pub fn openai_compatible_wire(provider_name~ : String, base_url~ : String, model_id~ : String, api_key? : String, headers? : Map[String, String], query_params? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, supports_structured_outputs? : Bool, prompt_converter? : (Array[@provider.LanguageModelMessage], Bool, String) -> OpenAICompatiblePromptConversion raise, transform_request_body? : (Json) -> Json, error_structure? : OpenAICompatibleErrorStructure, metadata_extractor? : OpenAICompatibleMetadataExtractor, convert_usage? : (Json) -> @provider.Usage, idle_timeout_ms? : Int, supports_top_k? : Bool, supports_frequency_penalty? : Bool, supported_urls? : Array[@provider.SupportedUrlRule], http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String, generate_reasoning_ids? : Bool) -> OpenAICompatibleChatModel
 
 // Errors
 
 // Types and methods
-#alias(OpenAICompatibleModel)
 pub struct OpenAICompatibleChatModel {
   // private fields
 }
-pub impl @moonai.ChatModel for OpenAICompatibleChatModel
+pub impl @provider.ChatModel for OpenAICompatibleChatModel
+
+pub struct OpenAICompatibleCompletionLanguageModelV4 {
+  model : OpenAICompatibleCompletionModel
+}
+pub fn OpenAICompatibleCompletionLanguageModelV4::new(OpenAICompatibleCompletionModel) -> Self
+pub impl @provider.LanguageModelV4 for OpenAICompatibleCompletionLanguageModelV4
 
 pub struct OpenAICompatibleCompletionModel {
   // private fields
 }
-pub impl @moonai.CompletionModel for OpenAICompatibleCompletionModel
+pub impl @provider.CompletionModel for OpenAICompatibleCompletionModel
 
 pub struct OpenAICompatibleCompletionStreamDecoder {
   // private fields
 }
-pub fn OpenAICompatibleCompletionStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
-pub fn OpenAICompatibleCompletionStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn OpenAICompatibleCompletionStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String) -> Self
-pub fn OpenAICompatibleCompletionStreamDecoder::response(Self) -> @moonai.CompletionResponse
+pub fn OpenAICompatibleCompletionStreamDecoder::feed_line(Self, String) -> @provider_utils.DecodeBatch
+pub fn OpenAICompatibleCompletionStreamDecoder::flush_buffered(Self) -> @provider_utils.DecodeBatch
+pub fn OpenAICompatibleCompletionStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String, error_structure? : OpenAICompatibleErrorStructure) -> Self
+pub fn OpenAICompatibleCompletionStreamDecoder::response(Self) -> @provider.CompletionResponse
 
 pub struct OpenAICompatibleEmbeddingModel {
   // private fields
 }
-pub impl @moonai.EmbeddingModel for OpenAICompatibleEmbeddingModel
+pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel
+pub impl @provider.EmbeddingWireModel for OpenAICompatibleEmbeddingModel
+
+pub(all) struct OpenAICompatibleEmbeddingModelOptions {
+  dimensions : Int?
+  user : String?
+} derive(Eq, @debug.Debug)
+pub fn OpenAICompatibleEmbeddingModelOptions::new(dimensions? : Int, user? : String) -> Self
+pub fn OpenAICompatibleEmbeddingModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+
+pub(all) struct OpenAICompatibleErrorData {
+  error : OpenAICompatibleErrorDetail
+} derive(Eq, @debug.Debug)
+
+pub(all) struct OpenAICompatibleErrorDetail {
+  message : String
+  error_type : String?
+  param : Json?
+  code : Json?
+} derive(Eq, @debug.Debug)
+pub fn OpenAICompatibleErrorDetail::new(message~ : String, error_type? : String, param? : Json, code? : Json) -> Self
+
+#alias(ProviderErrorStructure)
+pub struct OpenAICompatibleErrorStructure {
+  // private fields
+}
+pub fn OpenAICompatibleErrorStructure::new(error_to_message~ : (Json) -> String?, is_retryable? : (Int, Json?) -> Bool?) -> Self
 
 pub struct OpenAICompatibleImageModel {
   // private fields
 }
-pub impl @moonai.ImageModel for OpenAICompatibleImageModel
+pub impl @provider.ImageModelV4 for OpenAICompatibleImageModel
+pub impl @provider.ImageWireModel for OpenAICompatibleImageModel
+
+pub(all) struct OpenAICompatibleImageModelOptions {
+  size : String?
+  quality : String?
+  output_format : String?
+  output_compression : Int?
+  background : String?
+  extensions : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn OpenAICompatibleImageModelOptions::new(size? : String, quality? : String, output_format? : String, output_compression? : Int, background? : String, extensions? : Map[String, Json]) -> Self raise
+pub fn OpenAICompatibleImageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+
+pub(all) struct OpenAICompatibleLanguageModelChatOptions {
+  user : String?
+  reasoning_effort : String?
+  text_verbosity : String?
+  strict_json_schema : Bool?
+} derive(Eq, @debug.Debug)
+pub fn OpenAICompatibleLanguageModelChatOptions::new(user? : String, reasoning_effort? : String, text_verbosity? : String, strict_json_schema? : Bool) -> Self
+pub fn OpenAICompatibleLanguageModelChatOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+
+pub(all) struct OpenAICompatibleLanguageModelCompletionOptions {
+  echo : Bool?
+  logit_bias : Map[String, Double]?
+  suffix : String?
+  user : String?
+} derive(Eq, @debug.Debug)
+pub fn OpenAICompatibleLanguageModelCompletionOptions::new(echo? : Bool, logit_bias? : Map[String, Double], suffix? : String, user? : String) -> Self
+pub fn OpenAICompatibleLanguageModelCompletionOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+
+pub struct OpenAICompatibleLanguageModelV4 {
+  model : OpenAICompatibleChatModel
+}
+pub fn OpenAICompatibleLanguageModelV4::new(OpenAICompatibleChatModel) -> Self
+pub impl @provider.LanguageModelV4 for OpenAICompatibleLanguageModelV4
+
+#alias(MetadataExtractor)
+pub struct OpenAICompatibleMetadataExtractor {
+  // private fields
+}
+pub fn OpenAICompatibleMetadataExtractor::extract_metadata(Self, Json) -> Map[String, Json]
+pub fn OpenAICompatibleMetadataExtractor::new(extract_metadata~ : (Json) -> Map[String, Json], create_stream_extractor~ : () -> OpenAICompatibleStreamMetadataExtractor) -> Self
+
+pub(all) struct OpenAICompatiblePromptConversion {
+  messages : Array[Json]
+  warnings : Array[@provider.Warning]
+}
 
 pub struct OpenAICompatibleProvider {
   // private fields
 }
-pub fn OpenAICompatibleProvider::chat(Self, String) -> OpenAICompatibleChatModel
-pub fn OpenAICompatibleProvider::chatModel(Self, String) -> OpenAICompatibleChatModel
-pub fn OpenAICompatibleProvider::chat_model(Self, String) -> OpenAICompatibleChatModel
-pub fn OpenAICompatibleProvider::completion(Self, String) -> OpenAICompatibleCompletionModel
-pub fn OpenAICompatibleProvider::completionModel(Self, String) -> OpenAICompatibleCompletionModel
-pub fn OpenAICompatibleProvider::completion_model(Self, String) -> OpenAICompatibleCompletionModel
+pub fn OpenAICompatibleProvider::chat(Self, String) -> OpenAICompatibleLanguageModelV4
+pub fn OpenAICompatibleProvider::chatModel(Self, String) -> OpenAICompatibleLanguageModelV4
+pub fn OpenAICompatibleProvider::chat_model(Self, String) -> OpenAICompatibleLanguageModelV4
+pub fn OpenAICompatibleProvider::chat_model_wire(Self, String) -> OpenAICompatibleChatModel
+pub fn OpenAICompatibleProvider::completion(Self, String) -> OpenAICompatibleCompletionLanguageModelV4
+pub fn OpenAICompatibleProvider::completionModel(Self, String) -> OpenAICompatibleCompletionLanguageModelV4
+pub fn OpenAICompatibleProvider::completion_model(Self, String) -> OpenAICompatibleCompletionLanguageModelV4
+pub fn OpenAICompatibleProvider::completion_model_wire(Self, String) -> OpenAICompatibleCompletionModel
 pub fn OpenAICompatibleProvider::embedding(Self, String) -> OpenAICompatibleEmbeddingModel
 pub fn OpenAICompatibleProvider::embeddingModel(Self, String) -> OpenAICompatibleEmbeddingModel
 pub fn OpenAICompatibleProvider::embedding_model(Self, String) -> OpenAICompatibleEmbeddingModel
 pub fn OpenAICompatibleProvider::image(Self, String) -> OpenAICompatibleImageModel
 pub fn OpenAICompatibleProvider::imageModel(Self, String) -> OpenAICompatibleImageModel
 pub fn OpenAICompatibleProvider::image_model(Self, String) -> OpenAICompatibleImageModel
-pub fn OpenAICompatibleProvider::languageModel(Self, String) -> OpenAICompatibleChatModel
-pub fn OpenAICompatibleProvider::language_model(Self, String) -> OpenAICompatibleChatModel
+pub fn OpenAICompatibleProvider::languageModel(Self, String) -> OpenAICompatibleLanguageModelV4
+pub fn OpenAICompatibleProvider::language_model(Self, String) -> OpenAICompatibleLanguageModelV4
 pub fn OpenAICompatibleProvider::textEmbeddingModel(Self, String) -> OpenAICompatibleEmbeddingModel
 pub fn OpenAICompatibleProvider::text_embedding(Self, String) -> OpenAICompatibleEmbeddingModel
 pub fn OpenAICompatibleProvider::text_embedding_model(Self, String) -> OpenAICompatibleEmbeddingModel
+pub impl @provider.Provider for OpenAICompatibleProvider
 
 pub struct OpenAICompatibleStreamDecoder {
   // private fields
 }
-pub fn OpenAICompatibleStreamDecoder::feed_line(Self, String) -> @http_sse.DecodeBatch raise
-pub fn OpenAICompatibleStreamDecoder::flush_buffered(Self) -> @http_sse.DecodeBatch raise
-pub fn OpenAICompatibleStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String) -> Self
-pub fn OpenAICompatibleStreamDecoder::response(Self) -> @moonai.ChatResponse
+pub fn OpenAICompatibleStreamDecoder::feed_line(Self, String) -> @provider_utils.DecodeBatch raise
+pub fn OpenAICompatibleStreamDecoder::flush_buffered(Self) -> @provider_utils.DecodeBatch raise
+pub fn OpenAICompatibleStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String, metadata_key? : String, error_structure? : OpenAICompatibleErrorStructure, metadata_extractor? : OpenAICompatibleMetadataExtractor, convert_usage? : (Json) -> @provider.Usage, id_generator? : () -> String, generate_reasoning_ids? : Bool) -> Self
+pub fn OpenAICompatibleStreamDecoder::provider_metadata_snapshot(Self) -> Map[String, Json]
+pub fn OpenAICompatibleStreamDecoder::response(Self) -> @provider.ChatResponse
+pub fn OpenAICompatibleStreamDecoder::v4_finish_reason(Self) -> @provider.LanguageModelV4FinishReason
+pub fn OpenAICompatibleStreamDecoder::v4_usage(Self) -> @provider.LanguageModelV4Usage
+
+pub struct OpenAICompatibleStreamMetadataExtractor {
+  // private fields
+}
+pub fn OpenAICompatibleStreamMetadataExtractor::new(process_chunk~ : (Json) -> Unit, build_metadata~ : () -> Map[String, Json]) -> Self
 
 // Type aliases
+pub type OpenAICompatibleChatModelId = String
+
+pub type OpenAICompatibleCompletionModelId = String
+
+pub type OpenAICompatibleEmbeddingModelId = String
+
+pub type OpenAICompatiblePromptConverter = (Array[@provider.LanguageModelMessage], Bool, String) -> OpenAICompatiblePromptConversion raise
 
 // Traits
 

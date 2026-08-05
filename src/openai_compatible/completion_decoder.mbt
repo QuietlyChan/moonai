@@ -1,15 +1,17 @@
 ///|
 /// Stateful decoder for legacy OpenAI completion SSE.
 pub struct OpenAICompatibleCompletionStreamDecoder {
-  priv sse : @http_sse.EventSourceBuffer
+  priv sse : @provider_utils.EventSourceBuffer
   priv include_raw_chunks : Bool
   priv text : StringBuilder
-  priv mut usage : @moonai.Usage
-  priv mut finish_reason : @moonai.FinishReason
+  priv mut usage : @provider.Usage
+  priv mut finish_reason : @provider.FinishReason
   priv provider_name : String
-  priv mut response_metadata : @moonai.ResponseMetadata?
+  priv error_structure : OpenAICompatibleErrorStructure
+  priv mut response_metadata : @provider.ResponseMetadata?
   priv mut provider_metadata : Map[String, Json]
   priv mut text_started : Bool
+  priv mut metadata_emitted : Bool
   priv mut finalized : Bool
 }
 
@@ -18,17 +20,20 @@ pub struct OpenAICompatibleCompletionStreamDecoder {
 pub fn OpenAICompatibleCompletionStreamDecoder::new(
   include_raw_chunks? : Bool = false,
   provider_name? : String = "",
+  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
 ) -> OpenAICompatibleCompletionStreamDecoder {
   {
-    sse: @http_sse.EventSourceBuffer::new(),
+    sse: @provider_utils.EventSourceBuffer::new(),
     include_raw_chunks,
     text: StringBuilder::new(),
-    usage: @moonai.Usage::zero(),
-    finish_reason: @moonai.Unknown(""),
+    usage: @provider.Usage::zero(),
+    finish_reason: @provider.Unknown(""),
     provider_name,
+    error_structure,
     response_metadata: None,
     provider_metadata: Map([]),
     text_started: false,
+    metadata_emitted: false,
     finalized: false,
   }
 }
@@ -38,15 +43,20 @@ pub fn OpenAICompatibleCompletionStreamDecoder::new(
 fn OpenAICompatibleCompletionStreamDecoder::record_json(
   self : OpenAICompatibleCompletionStreamDecoder,
   json : Json,
+  events : Array[@provider.StreamEvent],
 ) -> Unit {
-  let chunk_metadata = @moonai.ResponseMetadata::from_json(json)
+  let chunk_metadata = @provider.ResponseMetadata::from_json(json)
   if !chunk_metadata.is_empty() {
     self.response_metadata = Some(
-      @moonai.merge_response_metadata(self.response_metadata, chunk_metadata),
+      @provider.merge_response_metadata(self.response_metadata, chunk_metadata),
     )
   }
+  if !self.metadata_emitted {
+    self.metadata_emitted = true
+    events.push(@provider.ResponseMetadataReady(chunk_metadata))
+  }
   if self.provider_name != "" {
-    self.provider_metadata = @moonai.merge_provider_metadata(
+    self.provider_metadata = @provider.merge_provider_metadata(
       self.provider_metadata,
       @provider_utils.provider_metadata_from_json(json, self.provider_name),
     )
@@ -57,27 +67,28 @@ fn OpenAICompatibleCompletionStreamDecoder::record_json(
 fn OpenAICompatibleCompletionStreamDecoder::apply_json(
   self : OpenAICompatibleCompletionStreamDecoder,
   json : Json,
-) -> Array[@moonai.StreamEvent] {
-  let events : Array[@moonai.StreamEvent] = []
+) -> Array[@provider.StreamEvent] {
+  let events : Array[@provider.StreamEvent] = []
   match json {
     { "usage": Null, .. } => ()
-    { "usage": value, .. } => self.usage = usage_from_json(value)
+    { "usage": value, .. } =>
+      self.usage = convert_openai_compatible_chat_usage(value)
     _ => ()
   }
   match json {
     { "choices": [{ "text": String(value), .. }, ..], .. } if value != "" => {
       if !self.text_started {
         self.text_started = true
-        events.push(@moonai.TextStart("text-0"))
+        events.push(@provider.TextStart("text-0"))
       }
       self.text.write_string(value)
-      events.push(@moonai.TextDelta(id="text-0", delta=value))
+      events.push(@provider.TextDelta(id="text-0", delta=value))
     }
     _ => ()
   }
   match json {
     { "choices": [{ "finish_reason": String(reason), .. }, ..], .. } =>
-      self.finish_reason = @moonai.FinishReason::from_openai(reason)
+      self.finish_reason = @provider.FinishReason::from_openai(reason)
     _ => ()
   }
   events
@@ -86,21 +97,21 @@ fn OpenAICompatibleCompletionStreamDecoder::apply_json(
 ///|
 fn OpenAICompatibleCompletionStreamDecoder::final_events(
   self : OpenAICompatibleCompletionStreamDecoder,
-) -> Array[@moonai.StreamEvent] {
+) -> Array[@provider.StreamEvent] {
   if self.finalized {
     return []
   }
   self.finalized = true
-  let events : Array[@moonai.StreamEvent] = []
+  let events : Array[@provider.StreamEvent] = []
   if self.text_started {
-    events.push(@moonai.TextEnd("text-0"))
+    events.push(@provider.TextEnd("text-0"))
   }
   let reason = match self.finish_reason {
-    @moonai.Unknown(_) => @moonai.Stop
+    @provider.Unknown(_) => @provider.Stop
     other => other
   }
   self.finish_reason = reason
-  events.push(@moonai.Finish(usage=self.usage, reason~))
+  events.push(@provider.Finish(usage=self.usage, reason~))
   events
 }
 
@@ -108,25 +119,32 @@ fn OpenAICompatibleCompletionStreamDecoder::final_events(
 fn OpenAICompatibleCompletionStreamDecoder::decode_data(
   self : OpenAICompatibleCompletionStreamDecoder,
   data : String,
-) -> @http_sse.DecodeBatch raise {
+) -> @provider_utils.DecodeBatch {
   if data.trim() == "[DONE]" {
     return { events: self.final_events(), consumed_event: true, done: true }
   }
   let json = @json.parse(data) catch {
-    error =>
-      fail(
-        "OpenAI-compatible completion stream decode error: \{error}; data: \{data}",
-      )
+    error => {
+      self.finish_reason = @provider.Error
+      return {
+        events: [
+          @provider.StreamError(
+            "OpenAI-compatible completion stream decode error: \{error}; data: \{data}",
+          ),
+        ],
+        consumed_event: true,
+        done: false,
+      }
+    }
   }
-  self.record_json(json)
-  if stream_error_message(json) is Some(message) {
-    let events : Array[@moonai.StreamEvent] = [@moonai.StreamError(message)]
-    self.finish_reason = @moonai.Error
+  if self.error_structure.message(json) is Some(message) {
+    let events : Array[@provider.StreamEvent] = [@provider.StreamError(message)]
+    self.finish_reason = @provider.Error
     for event in self.final_events() {
       events.push(event)
     }
     if self.include_raw_chunks {
-      let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
+      let all_events : Array[@provider.StreamEvent] = [@provider.Raw(json)]
       for event in events {
         all_events.push(event)
       }
@@ -134,9 +152,14 @@ fn OpenAICompatibleCompletionStreamDecoder::decode_data(
     }
     return { events, consumed_event: true, done: true }
   }
-  let events = self.apply_json(json)
+  let events : Array[@provider.StreamEvent] = []
+  self.record_json(json, events)
+  let decoded_events = self.apply_json(json)
+  for event in decoded_events {
+    events.push(event)
+  }
   if self.include_raw_chunks {
-    let all_events : Array[@moonai.StreamEvent] = [@moonai.Raw(json)]
+    let all_events : Array[@provider.StreamEvent] = [@provider.Raw(json)]
     for event in events {
       all_events.push(event)
     }
@@ -151,10 +174,10 @@ fn OpenAICompatibleCompletionStreamDecoder::decode_data(
 pub fn OpenAICompatibleCompletionStreamDecoder::feed_line(
   self : OpenAICompatibleCompletionStreamDecoder,
   raw : String,
-) -> @http_sse.DecodeBatch raise {
+) -> @provider_utils.DecodeBatch {
   match self.sse.feed_line(raw) {
     Some(data) => self.decode_data(data)
-    None => @http_sse.DecodeBatch::empty(self.finalized)
+    None => @provider_utils.DecodeBatch::empty(self.finalized)
   }
 }
 
@@ -162,7 +185,7 @@ pub fn OpenAICompatibleCompletionStreamDecoder::feed_line(
 /// Flush a final unterminated SSE payload.
 pub fn OpenAICompatibleCompletionStreamDecoder::flush_buffered(
   self : OpenAICompatibleCompletionStreamDecoder,
-) -> @http_sse.DecodeBatch raise {
+) -> @provider_utils.DecodeBatch {
   match self.sse.flush() {
     Some(data) => {
       let batch = self.decode_data(data)
@@ -178,11 +201,11 @@ pub fn OpenAICompatibleCompletionStreamDecoder::flush_buffered(
     }
     None =>
       if self.finalized {
-        @http_sse.DecodeBatch::empty(true)
+        @provider_utils.DecodeBatch::empty(true)
       } else if finish_reason_is_known(self.finish_reason) {
         { events: self.final_events(), consumed_event: false, done: true }
       } else {
-        @http_sse.DecodeBatch::empty(false)
+        @provider_utils.DecodeBatch::empty(false)
       }
   }
 }
@@ -191,8 +214,8 @@ pub fn OpenAICompatibleCompletionStreamDecoder::flush_buffered(
 /// Return the accumulated completion response.
 pub fn OpenAICompatibleCompletionStreamDecoder::response(
   self : OpenAICompatibleCompletionStreamDecoder,
-) -> @moonai.CompletionResponse {
-  @moonai.CompletionResponse::new(
+) -> @provider.CompletionResponse {
+  @provider.CompletionResponse::new(
     self.text.to_string(),
     self.usage,
     self.finish_reason,

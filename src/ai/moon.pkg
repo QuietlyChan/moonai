@@ -1,0 +1,17 @@
+import {
+  "QuietlyChan/moonai/ai/model",
+  "QuietlyChan/moonai/ai/prompt",
+  "QuietlyChan/moonai/ai/registry",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/async",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/json",
+}
+
+import {
+  "QuietlyChan/moonai/testing",
+} for "test"
+
+supported_targets = "+native"

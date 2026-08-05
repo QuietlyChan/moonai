@@ -4,11 +4,9 @@ test "encode OpenAI-compatible embedding request" {
     encode_embedding_request(
       "text-embedding-test",
       ["first", "second"],
-      @moonai.EmbeddingOptions::new(
-        dimensions=256,
-        user="user-1",
-        provider_options=Map([("vendor_option", (true : Json))]),
-      ),
+      @provider.EmbeddingOptions::new(dimensions=256, user="user-1", provider_options={
+        "openaiCompatible": { "vendor_option": true },
+      }),
     ),
     content={
       "model": "text-embedding-test",
@@ -37,6 +35,7 @@ test "decode OpenAI-compatible embedding response" {
     total_tokens: 7,
     reasoning_tokens: 0,
     cached_input_tokens: 0,
+    cache_write_input_tokens: 0,
   })
 }
 
@@ -45,7 +44,8 @@ test "embedding decoder rejects provider errors and malformed vectors" {
   try
     decode_embedding_response({ "error": { "message": "quota exceeded" } })
   catch {
-    Failure::Failure(message) => assert_true(message.contains("quota exceeded"))
+    @provider.InvalidResponseDataError(message~, ..) =>
+      assert_true(message.contains("quota exceeded"))
     error => fail("unexpected error: \{error}")
   } noraise {
     _ => fail("expected embedding provider error")
@@ -53,9 +53,38 @@ test "embedding decoder rejects provider errors and malformed vectors" {
   try
     decode_embedding_response({ "data": [{ "embedding": [0.1, "bad"] }] })
   catch {
-    Failure::Failure(message) => assert_true(message.contains("non-number"))
+    @provider.InvalidResponseDataError(message~, ..) =>
+      assert_true(message.contains("non-number"))
     error => fail("unexpected error: \{error}")
   } noraise {
     _ => fail("expected malformed embedding vector")
+  }
+}
+
+///|
+async test "OpenAI-compatible embedding enforces its configured batch limit" {
+  let model = openai_compatible_embedding(
+    provider_name="local-test",
+    base_url="https://example.invalid/v1",
+    model_id="embedding-model",
+    max_embeddings_per_call=2,
+  )
+  try
+    model.embed(["one", "two", "three"], @provider.EmbeddingOptions::new())
+  catch {
+    @provider.TooManyEmbeddingValuesForCallError(
+      provider~,
+      model_id~,
+      max_embeddings_per_call~,
+      values~
+    ) => {
+      assert_eq(provider, "local-test.embedding")
+      assert_eq(model_id, "embedding-model")
+      assert_eq(max_embeddings_per_call, 2)
+      assert_eq(values, ["one", "two", "three"])
+    }
+    error => fail("unexpected embedding limit error: \{error}")
+  } noraise {
+    _ => fail("expected the configured embedding limit to be enforced")
   }
 }

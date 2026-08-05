@@ -48,10 +48,10 @@ async test "embed and embedMany drive OpenAI-compatible embedding requests" {
       max_embeddings_per_call=2,
     )
     let model = provider.embedding_model("embedding-model")
-    let single = @moonai.embed(model, "hello", dimensions=3, headers={
+    let single = @ai.embed(model, "hello", dimensions=3, headers={
       "X-Request-Id": "embedding-single",
     })
-    let many = @moonai.embedMany(model, ["one", "two", "three"], dimensions=3)
+    let many = @ai.embedMany(model, ["one", "two", "three"], dimensions=3)
     assert_eq(single.embedding, [0.1, 0.2, 0.3])
     assert_eq(single.usage.input_tokens, 2)
     match single.request {

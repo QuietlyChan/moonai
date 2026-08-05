@@ -47,32 +47,36 @@ async test "streamText drives an Anthropic Messages SSE request" {
         max_connections=1,
       )
     }
-    let model = @anthropic.anthropic(
-      "test-model",
-      api_key="test-key",
-      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
-      idle_timeout_ms=2_000,
-    )
+    let model = AnthropicLanguageModelV4::new(
+        @anthropic.anthropic_messages(
+          "test-model",
+          api_key="test-key",
+          base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+          idle_timeout_ms=2_000,
+        ),
+      )
+      as &@provider.LanguageModelV4
     let deltas : Array[String] = []
-    let response = @moonai.streamText(
+    let response = @ai.streamText(
       model,
       prompt="hello",
       frequency_penalty=0.2,
       presence_penalty=0.3,
       seed=7,
       temperature=1.5,
-      response_format=@moonai.JsonObject,
+      response_format=@provider.ResponseFormat::json(),
       on_event=event => {
         match event {
-          @moonai.TextDelta(delta~, ..) => deltas.push(delta)
+          @provider.V4TextDelta(delta~, ..) => deltas.push(delta)
           _ => ()
         }
       },
     )
     assert_eq(deltas, ["Hello Anthropic"])
-    assert_eq(response.text, "Hello Anthropic")
-    assert_eq(response.finish_reason, @moonai.Stop)
-    assert_eq(response.usage.total_tokens, 5)
+    assert_eq(deltas.join(""), "Hello Anthropic")
+    assert_eq(response.finish_reason.unified, @provider.V4FinishStop)
+    assert_eq(response.usage.input_tokens.total, Some(2))
+    assert_eq(response.usage.output_tokens.total, Some(3))
     match response.response {
       Some(metadata) => {
         assert_eq(metadata.status_code, Some(200))
@@ -82,28 +86,33 @@ async test "streamText drives an Anthropic Messages SSE request" {
       None => fail("expected streaming response metadata")
     }
     json_inspect(response.provider_metadata["anthropic.messages"], content={
+      "usage": { "input_tokens": 2, "output_tokens": 3 },
       "trace_id": "a-1",
     })
     assert_eq(response.warnings, [
-      @moonai.Warning::Unsupported(
+      @provider.Warning::Unsupported(
         feature="frequencyPenalty",
         details="Anthropic Messages does not define a frequency penalty field.",
       ),
-      @moonai.Warning::Unsupported(
+      @provider.Warning::Unsupported(
         feature="presencePenalty",
         details="Anthropic Messages does not define a presence penalty field.",
       ),
-      @moonai.Warning::Unsupported(
+      @provider.Warning::Unsupported(
         feature="seed",
         details="Anthropic Messages does not define a seed field.",
       ),
-      @moonai.Warning::Unsupported(
+      @provider.Warning::Unsupported(
         feature="temperature",
         details="temperature exceeds Anthropic maximum of 1.0 and is clamped to 1.0.",
       ),
-      @moonai.Warning::Unsupported(
+      @provider.Warning::Unsupported(
         feature="responseFormat",
         details="Anthropic JSON response format requires an explicit schema and is ignored.",
+      ),
+      @provider.Warning::Compatibility(
+        feature="maxOutputTokens",
+        details="The model 'test-model' is unknown; max output tokens defaulted to 4096.",
       ),
     ])
   }

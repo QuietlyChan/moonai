@@ -3,16 +3,16 @@
 pub struct MockCompletionModel {
   priv provider_name : String
   priv model_id : String
-  priv events : Array[@moonai.StreamEvent]
-  priv result : @moonai.CompletionResponse
+  priv events : Array[@provider.StreamEvent]
+  priv result : @provider.CompletionResponse
   priv mut captured_prompt : String
 }
 
 ///|
 /// Construct a deterministic completion model.
 pub fn MockCompletionModel::new(
-  events : Array[@moonai.StreamEvent],
-  result : @moonai.CompletionResponse,
+  events : Array[@provider.StreamEvent],
+  result : @provider.CompletionResponse,
   provider_name? : String = "mock",
   model_id? : String = "mock-completion-model",
 ) -> MockCompletionModel {
@@ -28,17 +28,21 @@ pub fn MockCompletionModel::captured_prompt(
 }
 
 ///|
-pub impl @moonai.CompletionModel for MockCompletionModel with fn provider(self) -> String {
+pub impl @provider.CompletionModel for MockCompletionModel with fn provider(
+  self,
+) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @moonai.CompletionModel for MockCompletionModel with fn model_id(self) -> String {
+pub impl @provider.CompletionModel for MockCompletionModel with fn model_id(
+  self,
+) -> String {
   self.model_id
 }
 
 ///|
-pub impl @moonai.CompletionModel for MockCompletionModel with fn generate(
+pub impl @provider.CompletionModel for MockCompletionModel with fn generate(
   self,
   options,
 ) {
@@ -47,7 +51,7 @@ pub impl @moonai.CompletionModel for MockCompletionModel with fn generate(
 }
 
 ///|
-pub impl @moonai.CompletionModel for MockCompletionModel with fn stream(
+pub impl @provider.CompletionModel for MockCompletionModel with fn stream(
   self,
   options,
   on_event,

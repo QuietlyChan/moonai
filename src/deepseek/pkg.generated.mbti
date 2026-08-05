@@ -1,0 +1,88 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/deepseek"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn convert_deepseek_usage(Json) -> @provider.Usage
+
+pub fn createDeepSeek(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekProvider
+
+pub fn create_deepseek(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekProvider
+
+pub fn decode_deepseek_chat_response(Json, provider_name? : String, id_generator? : () -> String) -> @provider.ChatResponse raise
+
+pub fn decode_deepseek_error_data(Json) -> DeepSeekErrorData?
+
+pub fn deepSeek(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekLanguageModelV4
+
+pub fn deepseek(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekLanguageModelV4
+
+pub fn deepseek_chat(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekChatModel
+
+pub fn encode_deepseek_chat_request(String, @provider.ChatCallOptions, stream? : Bool, provider_name? : String, supports_thinking? : Bool, supports_structured_outputs? : Bool) -> Json
+
+// Errors
+
+// Types and methods
+pub struct DeepSeekChatModel {
+  // private fields
+}
+pub impl @provider.ChatModel for DeepSeekChatModel
+
+pub(all) struct DeepSeekErrorData {
+  error : DeepSeekErrorDetail
+} derive(Eq, @debug.Debug)
+
+pub(all) struct DeepSeekErrorDetail {
+  message : String
+  error_type : String?
+  param : Json?
+  code : Json?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct DeepSeekLanguageModelChatOptions {
+  thinking_type : String?
+  reasoning_effort : String?
+  strict_json_schema : Bool
+} derive(Eq, @debug.Debug)
+pub fn DeepSeekLanguageModelChatOptions::new(thinking_type? : String, reasoning_effort? : String, strict_json_schema? : Bool) -> Self raise
+pub fn DeepSeekLanguageModelChatOptions::to_provider_options(Self) -> Map[String, Json]
+
+pub struct DeepSeekLanguageModelV4 {
+  model : DeepSeekChatModel
+}
+pub fn DeepSeekLanguageModelV4::new(DeepSeekChatModel) -> Self
+pub impl @provider.LanguageModelV4 for DeepSeekLanguageModelV4
+
+pub struct DeepSeekProvider {
+  // private fields
+}
+pub fn DeepSeekProvider::chat(Self, String) -> DeepSeekLanguageModelV4
+pub fn DeepSeekProvider::chat_wire(Self, String) -> DeepSeekChatModel
+pub fn DeepSeekProvider::languageModel(Self, String) -> DeepSeekLanguageModelV4
+pub fn DeepSeekProvider::language_model(Self, String) -> DeepSeekLanguageModelV4
+pub impl @provider.Provider for DeepSeekProvider
+
+pub struct DeepSeekStreamDecoder {
+  // private fields
+}
+pub fn DeepSeekStreamDecoder::feed_line(Self, String) -> @provider_utils.DecodeBatch raise
+pub fn DeepSeekStreamDecoder::flush_buffered(Self) -> @provider_utils.DecodeBatch raise
+pub fn DeepSeekStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String, id_generator? : () -> String) -> Self
+pub fn DeepSeekStreamDecoder::provider_metadata_snapshot(Self) -> Map[String, Json]
+pub fn DeepSeekStreamDecoder::response(Self) -> @provider.ChatResponse
+pub fn DeepSeekStreamDecoder::v4_finish_reason(Self) -> @provider.LanguageModelV4FinishReason
+pub fn DeepSeekStreamDecoder::v4_usage(Self) -> @provider.LanguageModelV4Usage
+
+// Type aliases
+pub type DeepSeekChatModelId = String
+
+// Traits
+

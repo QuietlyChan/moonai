@@ -1,0 +1,462 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/provider_utils"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn append_path(String, String) -> String
+
+pub fn append_query(String, Map[String, String]) -> String
+
+pub fn convert_to_completion_prompt(@provider.LanguageModelV4Prompt, user? : String, assistant? : String) -> CompletionPrompt raise
+
+pub fn copy_headers(Map[String, String]) -> Map[String, String]
+
+pub fn createIdGenerator(prefix? : String, separator? : String, size? : Int, alphabet? : String) -> (() -> String) raise @provider.InvalidArgumentError
+
+pub fn createToolNameMapping(Array[@provider.ToolDefinition], Map[String, String]) -> ToolNameMapping
+
+pub fn create_id_generator(prefix? : String, separator? : String, size? : Int, alphabet? : String) -> (() -> String) raise @provider.InvalidArgumentError
+
+pub fn create_tool_name_mapping(Array[@provider.ToolDefinition], Map[String, String]) -> ToolNameMapping
+
+pub fn decode_base64_text(String) -> String raise
+
+pub fn detect_media_type(String, top_level_type? : String) -> String?
+
+pub async fn download_file(provider_name~ : String, url~ : String, headers? : Map[String, String], timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, transport? : &HttpTransport) -> DownloadedFile
+
+pub fn encode_multipart_form_data(Array[MultipartField], boundary? : String) -> MultipartFormData raise
+
+pub fn generateId() -> String
+
+pub fn generate_id() -> String
+
+pub async fn get_json(provider_name~ : String, url~ : String, headers~ : Map[String, String], timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String?, is_retryable_response? : (Int, Json?) -> Bool?, transport? : &HttpTransport) -> JsonHttpResponse
+
+pub fn get_top_level_media_type(String) -> String
+
+pub fn initial_retry_delay(@provider.RetryPolicy) -> Int
+
+pub fn isUrlSupported(media_type~ : String, url~ : String, supported_urls~ : Array[@provider.SupportedUrlRule]) -> Bool
+
+pub fn is_full_media_type(String) -> Bool
+
+pub fn is_retryable_status(Int) -> Bool
+
+pub fn is_url_supported(media_type~ : String, url~ : String, supported_urls~ : Array[@provider.SupportedUrlRule]) -> Bool
+
+pub fn jsonSchemaMatches(Json, Json) -> Bool
+
+pub fn json_int_field(Json, String, default? : Int) -> Int
+
+pub fn json_int_field_opt(Json, String) -> Int?
+
+pub fn json_number_as_int(Double) -> Int?
+
+pub fn json_schema_matches(Json, Json) -> Bool
+
+pub fn json_string_field(Json, String) -> String?
+
+pub fn load_api_key(String, environment_variable_name~ : String, api_key_parameter_name? : String, description~ : String) -> String raise @provider.LoadAPIKeyError
+
+pub fn load_optional_setting(String, environment_variable_name~ : String) -> String?
+
+pub fn load_setting(String, environment_variable_name~ : String, setting_name~ : String, description~ : String) -> String raise @provider.LoadSettingError
+
+pub fn media_type_to_extension(String) -> String
+
+pub fn merge_headers(Map[String, String], Map[String, String]) -> Map[String, String]
+
+pub fn merge_provider_options_resolutions(ProviderOptionsResolution, ProviderOptionsResolution) -> ProviderOptionsResolution
+
+pub fn native_http_transport() -> &HttpTransport
+
+pub fn native_websocket_connector() -> &WebSocketConnector
+
+pub fn next_retry_delay(@provider.RetryPolicy, Int) -> Int
+
+pub async fn post_json(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String?, is_retryable_response? : (Int, Json?) -> Bool?, transport? : &HttpTransport) -> JsonHttpResponse
+
+pub async fn post_json_binary(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String?, is_retryable_response? : (Int, Json?) -> Bool?, transport? : &HttpTransport) -> BinaryHttpResponse
+
+pub async fn[T] post_json_sse(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, idle_timeout_ms? : Int, expected_terminator? : String, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String?, is_retryable_response? : (Int, Json?) -> Bool?, warnings? : Array[@provider.Warning], feed_line~ : (String) -> DecodeBatch raise, flush_buffered~ : () -> DecodeBatch raise, response~ : () -> T, transport? : &HttpTransport, on_event~ : async (@provider.StreamEvent) -> Unit) -> SseHttpResponse[T]
+
+pub async fn post_multipart(provider_name~ : String, url~ : String, headers~ : Map[String, String], form_data~ : MultipartFormData, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String?, is_retryable_response? : (Int, Json?) -> Bool?, transport? : &HttpTransport) -> JsonHttpResponse
+
+pub fn provider_metadata_from_json(Json, String) -> Map[String, Json]
+
+pub fn resolve_full_media_type(String, String) -> String raise
+
+pub async fn resolve_image_file(@provider.ImageFile, provider_name~ : String, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, transport? : &HttpTransport) -> ResolvedImageFile
+
+pub fn resolve_provider_options(Map[String, Json], provider_name? : String, aliases? : Array[String], reserved_fields? : Array[String], prefer_exact_provider_name? : Bool) -> ProviderOptionsResolution
+
+pub fn resolve_provider_options_key(String, Map[String, Json]) -> String
+
+pub fn resolve_provider_reference(@provider.ProviderReference, String) -> String raise @provider.NoSuchProviderReferenceError
+
+pub fn resolve_transcription_audio(@provider.TranscriptionAudio) -> Bytes raise
+
+pub fn resolve_upload_file_data(@provider.UploadFileData) -> Bytes raise
+
+pub async fn sleep_with_cancellation(Int, @provider.CancellationToken?) -> Unit
+
+pub fn toWebSocketUrl(String) -> String
+
+pub fn to_websocket_url(String) -> String
+
+pub fn url_authority(String) -> String?
+
+pub fn validateJsonSchema(Json, Json) -> Unit raise JsonSchemaValidationError
+
+pub fn validate_json_schema(Json, Json) -> Unit raise JsonSchemaValidationError
+
+pub fn with_user_agent_suffix(Map[String, String], Array[String]) -> Map[String, String]
+
+pub fn without_trailing_slash(String) -> String
+
+// Errors
+type HttpDecodeError derive(@debug.Debug)
+
+type HttpTimeoutError derive(@debug.Debug)
+
+type HttpTransportError derive(@debug.Debug)
+
+pub suberror JsonSchemaValidationError {
+  JsonSchemaValidationError(path~ : String, message~ : String)
+} derive(@debug.Debug)
+
+type SseProtocolError derive(@debug.Debug)
+
+pub(all) suberror SseProviderError {
+  SseProviderError(message~ : String, status_code~ : Int, response_body~ : String, is_retryable~ : Bool)
+} derive(@debug.Debug)
+
+type SseTimeoutError derive(@debug.Debug)
+
+type SseTransportError derive(@debug.Debug)
+
+// Types and methods
+pub(all) struct AppliedToolCallDelta {
+  index : Int
+  stream_id : String
+  tool_name : String
+  started : Bool
+  arguments_delta : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct BinaryHttpResponse {
+  value : Bytes
+  request : @provider.RequestMetadata
+  response : @provider.ResponseMetadata
+} derive(@debug.Debug)
+
+pub(all) struct CompletionPrompt {
+  prompt : String
+  stop_sequences : Array[String]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct DecodeBatch {
+  events : Array[@provider.StreamEvent]
+  consumed_event : Bool
+  done : Bool
+} derive(@debug.Debug)
+pub fn DecodeBatch::empty(Bool) -> Self
+
+pub(all) struct DownloadedFile {
+  data : Bytes
+  media_type : String
+  response : @provider.ResponseMetadata
+} derive(Eq, @debug.Debug)
+
+pub struct EventSourceBuffer {
+  // private fields
+}
+pub fn EventSourceBuffer::feed_line(Self, String) -> String?
+pub fn EventSourceBuffer::flush(Self) -> String?
+pub fn EventSourceBuffer::new() -> Self
+
+pub(all) enum HttpMethod {
+  HttpGet
+  HttpPost
+} derive(Eq, @debug.Debug)
+
+pub(all) struct HttpRequest {
+  meth : HttpMethod
+  url : String
+  headers : Map[String, String]
+  body : Bytes
+} derive(Eq, @debug.Debug)
+pub fn HttpRequest::body_text(Self) -> String raise
+pub fn HttpRequest::get(url~ : String, headers? : Map[String, String]) -> Self
+pub fn HttpRequest::new(meth~ : HttpMethod, url~ : String, headers? : Map[String, String], body? : Bytes) -> Self
+pub fn HttpRequest::post(url~ : String, headers? : Map[String, String], body~ : Bytes) -> Self
+
+pub(all) struct HttpResponse {
+  status_code : Int
+  reason : String
+  headers : Map[String, String]
+  body : Bytes
+} derive(Eq, @debug.Debug)
+pub fn HttpResponse::body_text(Self) -> String raise
+pub fn HttpResponse::is_success(Self) -> Bool
+pub fn HttpResponse::new(status_code~ : Int, body~ : Bytes, reason? : String, headers? : Map[String, String]) -> Self
+pub fn HttpResponse::text(status_code~ : Int, body~ : String, reason? : String, headers? : Map[String, String]) -> Self
+
+pub(all) struct JsonHttpResponse {
+  value : Json
+  request : @provider.RequestMetadata
+  response : @provider.ResponseMetadata
+} derive(@debug.Debug)
+
+pub(all) enum ModelContentPart {
+  ModelText(String)
+  ModelImageUrl(String)
+  ModelImageData(data~ : String, media_type~ : String)
+  ModelAudioData(data~ : String, format~ : String)
+  ModelFileUrl(url~ : String, media_type~ : String, filename~ : String)
+  ModelFileData(data~ : String, media_type~ : String, filename~ : String)
+  ModelFileReference(reference~ : @provider.ProviderReference, media_type~ : String, filename~ : String)
+  ModelReasoning(String)
+  ModelReasoningFileUrl(url~ : String, media_type~ : String)
+  ModelReasoningFileData(data~ : String, media_type~ : String)
+  ModelCustom(kind~ : String)
+  ModelToolCallPart(call~ : ModelToolCall)
+  ModelToolResultPart(result~ : ModelToolResult)
+  ModelToolApprovalRequestPart(request~ : ModelToolApprovalRequest)
+  ModelToolApprovalResponsePart(response~ : ModelToolApprovalResponse)
+  ModelPartProviderOptions(part~ : ModelContentPart, options~ : Map[String, Json])
+} derive(Eq, @debug.Debug)
+pub fn ModelContentPart::audio_data(data~ : String, format~ : String) -> Self
+pub fn ModelContentPart::custom(String) -> Self
+pub fn ModelContentPart::file_data(data~ : String, media_type~ : String, filename~ : String) -> Self
+pub fn ModelContentPart::file_reference(reference~ : @provider.ProviderReference, media_type? : String, filename? : String) -> Self
+pub fn ModelContentPart::file_url(url~ : String, media_type? : String, filename? : String) -> Self
+pub fn ModelContentPart::image_data(data~ : String, media_type~ : String) -> Self
+pub fn ModelContentPart::image_url(String) -> Self
+pub fn ModelContentPart::provider_options(Self) -> Map[String, Json]
+pub fn ModelContentPart::reasoning(String) -> Self
+pub fn ModelContentPart::reasoning_file_data(data~ : String, media_type~ : String) -> Self
+pub fn ModelContentPart::reasoning_file_url(url~ : String, media_type~ : String) -> Self
+pub fn ModelContentPart::text(String) -> Self
+pub fn ModelContentPart::tool_approval_request(ModelToolApprovalRequest) -> Self
+pub fn ModelContentPart::tool_approval_response(ModelToolApprovalResponse) -> Self
+pub fn ModelContentPart::tool_call(ModelToolCall) -> Self
+pub fn ModelContentPart::tool_result(ModelToolResult) -> Self
+pub fn ModelContentPart::with_provider_options(Self, Map[String, Json]) -> Self
+pub fn ModelContentPart::without_provider_options(Self) -> Self
+
+pub(all) struct ModelMessage {
+  role : ModelMessageRole
+  content : String
+  parts : Array[ModelContentPart]
+  tool_calls : Array[ModelToolCall]
+  reasoning_content : String?
+  provider_options : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn ModelMessage::assistant(String, tool_calls? : Array[ModelToolCall], reasoning_content? : String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelMessage::assistant_parts(Array[ModelContentPart], tool_calls? : Array[ModelToolCall], reasoning_content? : String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelMessage::copy(Self) -> Self
+pub fn ModelMessage::system(String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelMessage::tool(String, String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelMessage::tool_content(Array[ModelContentPart], provider_options? : Map[String, Json]) -> Self
+pub fn ModelMessage::tool_parts(String, Array[ModelContentPart], provider_options? : Map[String, Json]) -> Self
+pub fn ModelMessage::user(String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelMessage::user_parts(Array[ModelContentPart], provider_options? : Map[String, Json]) -> Self
+pub fn ModelMessage::with_parts(Self, Array[ModelContentPart]) -> Self
+pub fn ModelMessage::with_provider_options(Self, Map[String, Json]) -> Self
+
+pub(all) enum ModelMessageRole {
+  ModelSystem
+  ModelUser
+  ModelAssistant
+  ModelTool(String)
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ModelToolApprovalRequest {
+  approval_id : String
+  tool_call_id : String
+  is_automatic : Bool
+  signature : String?
+} derive(Eq, @debug.Debug)
+pub fn ModelToolApprovalRequest::new(approval_id~ : String, tool_call_id~ : String, is_automatic? : Bool, signature? : String) -> Self
+
+pub(all) struct ModelToolApprovalResponse {
+  approval_id : String
+  approved : Bool
+  reason : String?
+  provider_executed : Bool
+  provider_options : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn ModelToolApprovalResponse::new(approval_id~ : String, approved~ : Bool, reason? : String, provider_executed? : Bool, provider_options? : Map[String, Json]) -> Self
+
+pub(all) struct ModelToolCall {
+  id : String
+  name : String
+  input : Json
+  provider_executed : Bool
+  dynamic : Bool
+  provider_options : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn ModelToolCall::new(id~ : String, name~ : String, input~ : Json, provider_executed? : Bool, dynamic? : Bool, provider_options? : Map[String, Json]) -> Self
+
+pub(all) struct ModelToolResult {
+  tool_call_id : String
+  tool_name : String
+  output : ModelToolResultOutput
+  provider_options : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn ModelToolResult::content(tool_call_id~ : String, tool_name~ : String, value~ : Array[ModelToolResultContentPart], provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResult::error_json(tool_call_id~ : String, tool_name~ : String, value~ : Json, provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResult::error_text(tool_call_id~ : String, tool_name~ : String, value~ : String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResult::execution_denied(tool_call_id~ : String, tool_name~ : String, reason? : String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResult::json(tool_call_id~ : String, tool_name~ : String, value~ : Json, provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResult::text(tool_call_id~ : String, tool_name~ : String, value~ : String, provider_options? : Map[String, Json]) -> Self
+
+pub(all) enum ModelToolResultContentPart {
+  ModelToolResultText(text~ : String, provider_options~ : Map[String, Json])
+  ModelToolResultFileUrl(url~ : String, media_type~ : String, filename~ : String, provider_options~ : Map[String, Json])
+  ModelToolResultFileData(data~ : String, media_type~ : String, filename~ : String, provider_options~ : Map[String, Json])
+  ModelToolResultFileReference(reference~ : @provider.ProviderReference, media_type~ : String, filename~ : String, provider_options~ : Map[String, Json])
+  ModelToolResultCustom(provider_options~ : Map[String, Json])
+} derive(Eq, @debug.Debug)
+pub fn ModelToolResultContentPart::custom(provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResultContentPart::file_data(data~ : String, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResultContentPart::file_reference(reference~ : @provider.ProviderReference, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResultContentPart::file_url(url~ : String, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> Self
+pub fn ModelToolResultContentPart::text(String, provider_options? : Map[String, Json]) -> Self
+
+pub(all) enum ModelToolResultOutput {
+  ModelToolText(value~ : String, provider_options~ : Map[String, Json])
+  ModelToolJson(value~ : Json, provider_options~ : Map[String, Json])
+  ModelToolExecutionDenied(reason~ : String?, provider_options~ : Map[String, Json])
+  ModelToolErrorText(value~ : String, provider_options~ : Map[String, Json])
+  ModelToolErrorJson(value~ : Json, provider_options~ : Map[String, Json])
+  ModelToolContent(value~ : Array[ModelToolResultContentPart], provider_options~ : Map[String, Json])
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MultipartField {
+  name : String
+  value : MultipartValue
+} derive(Eq, @debug.Debug)
+pub fn MultipartField::file(name~ : String, filename~ : String, media_type~ : String, data~ : Bytes) -> Self
+pub fn MultipartField::text(name~ : String, value~ : String) -> Self
+
+pub(all) struct MultipartFormData {
+  boundary : String
+  content_type : String
+  body : Bytes
+  diagnostic_body : String
+} derive(Eq, @debug.Debug)
+
+pub(all) enum MultipartValue {
+  MultipartText(String)
+  MultipartFile(filename~ : String, media_type~ : String, data~ : Bytes)
+} derive(Eq, @debug.Debug)
+
+pub struct NativeHttpTransport {
+}
+pub fn NativeHttpTransport::new() -> Self
+
+pub struct NativeWebSocketConnector {
+}
+pub fn NativeWebSocketConnector::new() -> Self
+
+pub struct ProviderOptionsReader {
+  // private fields
+}
+pub fn ProviderOptionsReader::add_warning(Self, @provider.Warning) -> Unit
+pub fn ProviderOptionsReader::diagnostics(Self) -> Array[@provider.Warning]
+pub fn ProviderOptionsReader::new(ProviderOptionsResolution, path? : String) -> Self
+pub fn ProviderOptionsReader::remaining_values(Self) -> Map[String, Json]
+pub fn ProviderOptionsReader::take_array(Self, String, aliases? : Array[String]) -> Array[Json]?
+pub fn ProviderOptionsReader::take_bool(Self, String, aliases? : Array[String]) -> Bool?
+pub fn ProviderOptionsReader::take_double(Self, String, aliases? : Array[String], min? : Double, max? : Double) -> Double?
+pub fn ProviderOptionsReader::take_int(Self, String, aliases? : Array[String], min? : Int, max? : Int) -> Int?
+pub fn ProviderOptionsReader::take_json(Self, String, aliases? : Array[String]) -> Json?
+pub fn ProviderOptionsReader::take_object(Self, String, aliases? : Array[String]) -> Map[String, Json]?
+pub fn ProviderOptionsReader::take_string(Self, String, aliases? : Array[String], allowed? : Array[String]) -> String?
+
+pub(all) struct ProviderOptionsResolution {
+  values : Map[String, Json]
+  warnings : Array[@provider.Warning]
+  namespace_key : String?
+} derive(@debug.Debug)
+
+pub(all) struct ResolvedImageFile {
+  filename : String
+  media_type : String
+  data : Bytes
+} derive(Eq, @debug.Debug)
+
+pub(all) struct SseHttpResponse[T] {
+  value : T
+  request : @provider.RequestMetadata
+  response : @provider.ResponseMetadata
+} derive(@debug.Debug)
+
+pub(all) struct ToolCallDelta {
+  index : Int
+  id : String?
+  name : String?
+  arguments_delta : String?
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn ToolCallDelta::new(index~ : Int, id? : String, name? : String, arguments_delta? : String, provider_metadata? : Map[String, Json]) -> Self
+
+pub struct ToolCallDeltaAssembler {
+  // private fields
+}
+pub fn ToolCallDeltaAssembler::apply(Self, ToolCallDelta) -> AppliedToolCallDelta raise
+pub fn ToolCallDeltaAssembler::calls(Self) -> Array[@provider.ToolCall]
+pub fn ToolCallDeltaAssembler::new(id_generator? : () -> String) -> Self
+
+pub struct ToolNameMapping {
+  // private fields
+}
+pub fn ToolNameMapping::identity() -> Self
+pub fn ToolNameMapping::toCustomToolName(Self, String) -> String
+pub fn ToolNameMapping::toProviderToolName(Self, String) -> String
+pub fn ToolNameMapping::to_custom_tool_name(Self, String) -> String
+pub fn ToolNameMapping::to_provider_tool_name(Self, String) -> String
+
+pub(all) enum WebSocketReceive {
+  WebSocketText(String)
+  WebSocketBinary(Bytes)
+  WebSocketClosed(code~ : Int?, reason~ : String?)
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+pub type IdGenerator = () -> String
+
+// Traits
+pub(open) trait HttpStreamResponse {
+  fn status_code(Self) -> Int
+  fn reason(Self) -> String
+  fn headers(Self) -> Map[String, String]
+  async fn read_until(Self, String) -> String?
+  async fn read_all(Self) -> Bytes
+  fn close(Self) -> Unit
+}
+
+pub(open) trait HttpTransport {
+  async fn fetch(Self, HttpRequest) -> HttpResponse
+  async fn fetch_stream(Self, HttpRequest) -> &HttpStreamResponse
+}
+
+pub(open) trait WebSocketConnection {
+  async fn send_text(Self, String) -> Unit
+  async fn send_binary(Self, Bytes) -> Unit
+  async fn receive(Self) -> WebSocketReceive
+  async fn send_close(Self, Int, String?) -> Unit
+  fn close(Self) -> Unit
+}
+
+pub(open) trait WebSocketConnector {
+  async fn connect(Self, String, Array[String], Map[String, String]) -> &WebSocketConnection
+}
+

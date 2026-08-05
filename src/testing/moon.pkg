@@ -1,9 +1,11 @@
 import {
-  "QuietlyChan/moonai",
+  "QuietlyChan/moonai/provider",
 }
 
 import {
+  "QuietlyChan/moonai/ai",
   "moonbitlang/async",
+  "moonbitlang/core/encoding/utf8",
 } for "test"
 
 supported_targets = "+native"
