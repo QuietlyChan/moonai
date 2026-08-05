@@ -4,9 +4,10 @@ async fn OpenAICompatibleChatModel::stream_chat(
   options : @provider.ChatCallOptions,
   on_event : async (@provider.StreamEvent) -> Unit,
 ) -> @provider.ChatResponse {
+  let effective_options = (self.transform_chat_options)(options)
   let prepared = prepare_compatible_chat_request(
     self.model_id,
-    options,
+    effective_options,
     self.preserve_reasoning,
     self.include_usage,
     true,
@@ -18,7 +19,7 @@ async fn OpenAICompatibleChatModel::stream_chat(
   )
   let metadata_extractor = self.metadata_extractor
   let decoder = OpenAICompatibleStreamDecoder::new(
-    include_raw_chunks=options.include_raw_chunks,
+    include_raw_chunks=effective_options.include_raw_chunks,
     provider_name=self.provider_name,
     metadata_key=prepared.metadata_key,
     error_structure=self.error_structure,
@@ -27,7 +28,7 @@ async fn OpenAICompatibleChatModel::stream_chat(
     id_generator=self.id_generator,
     generate_reasoning_ids=self.generate_reasoning_ids,
   )
-  let cancellation_token = options.cancellation_token
+  let cancellation_token = effective_options.cancellation_token
   let warnings = prepared.warnings
   let request_body = (self.transform_request_body)(prepared.body)
   let result = @provider_utils.post_json_sse(
@@ -35,12 +36,12 @@ async fn OpenAICompatibleChatModel::stream_chat(
     url=self.chat_completions_url(),
     headers=@provider_utils.merge_headers(
       self.request_headers(),
-      options.headers,
+      effective_options.headers,
     ),
     body=request_body,
     idle_timeout_ms=self.idle_timeout_ms,
     expected_terminator="[DONE]",
-    retry_policy=options.retry_policy,
+    retry_policy=effective_options.retry_policy,
     cancellation_token?,
     error_to_message=json => self.error_structure.message(json),
     is_retryable_response=(status_code, error) => {

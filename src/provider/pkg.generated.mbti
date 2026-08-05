@@ -111,6 +111,8 @@ pub(all) struct ChatCallOptions {
   cancellation_token : CancellationToken?
 } derive(@debug.Debug)
 pub fn ChatCallOptions::new(Array[LanguageModelMessage], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, reasoning_effort? : ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
+pub fn ChatCallOptions::with_provider_options(Self, Map[String, Json]) -> Self
+pub fn ChatCallOptions::with_reasoning_effort(Self, ReasoningEffort) -> Self
 
 pub(all) struct ChatResponse {
   content : Array[GeneratedContent]
@@ -549,6 +551,8 @@ pub(all) struct LanguageModelV4CallOptions {
 pub fn LanguageModelV4CallOptions::from_language_model_prompt(Array[LanguageModelMessage], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, reasoning_effort? : ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 pub fn LanguageModelV4CallOptions::new(LanguageModelV4Prompt, tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, reasoning_effort? : ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 pub fn LanguageModelV4CallOptions::to_chat_call_options(Self) -> ChatCallOptions
+pub fn LanguageModelV4CallOptions::with_provider_options(Self, Map[String, Json]) -> Self
+pub fn LanguageModelV4CallOptions::with_reasoning_effort(Self, ReasoningEffort) -> Self
 
 pub(all) enum LanguageModelV4FileData {
   V4FileData(String)

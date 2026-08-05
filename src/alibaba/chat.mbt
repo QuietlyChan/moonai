@@ -49,9 +49,10 @@ pub fn encode_alibaba_chat_request(
   options : @provider.ChatCallOptions,
   stream? : Bool = false,
 ) -> Json raise {
+  let effective_options = alibaba_apply_reasoning(options)
   let body = @openai_compatible.encode_chat_request(
     model_id,
-    options,
+    effective_options,
     preserve_reasoning=true,
     include_usage=true,
     stream~,
@@ -96,5 +97,6 @@ pub fn alibaba_chat(
     api_key_environment_variable="ALIBABA_API_KEY",
     id_generator?,
     generate_reasoning_ids=true,
+    transform_chat_options=alibaba_apply_reasoning,
   )
 }

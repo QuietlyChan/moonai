@@ -23,6 +23,44 @@ test "Alibaba chat maps provider-specific options and capabilities" {
 }
 
 ///|
+test "Alibaba maps normalized reasoning to thinking controls" {
+  let options = @provider.ChatCallOptions::new(
+    [@provider.LanguageModelMessage::user("think")],
+    reasoning_effort=@provider.High,
+    max_output_tokens=16_384,
+  )
+  json_inspect(encode_alibaba_chat_request("qwen3-max", options), content={
+    "model": "qwen3-max",
+    "messages": [
+      { "role": "user", "content": [{ "type": "text", "text": "think" }] },
+    ],
+    "max_tokens": 16384,
+    "enable_thinking": true,
+    "thinking_budget": 9830,
+  })
+}
+
+///|
+test "Alibaba provider reasoning options take precedence over normalized reasoning" {
+  let options = @provider.ChatCallOptions::new(
+    [@provider.LanguageModelMessage::user("think")],
+    reasoning_effort=@provider.Disabled,
+    provider_options=AlibabaLanguageModelChatOptions::new(
+      enable_thinking=true,
+      thinking_budget=2048,
+    ).to_provider_options(),
+  )
+  json_inspect(encode_alibaba_chat_request("qwen3-max", options), content={
+    "model": "qwen3-max",
+    "messages": [
+      { "role": "user", "content": [{ "type": "text", "text": "think" }] },
+    ],
+    "enable_thinking": true,
+    "thinking_budget": 2048,
+  })
+}
+
+///|
 test "Alibaba chat forwards content-part cache control" {
   let cache_control = AlibabaCacheControl::new(cache_type="ephemeral")
   let cached = @provider.LanguageModelContentPart::text("cached").with_provider_options(
@@ -262,7 +300,7 @@ async test "Alibaba HTTP chat uses its provider-specific prompt converter" {
           provider_options=cache,
         ),
       ],
-      provider_options={ "alibaba": { "enableThinking": true } },
+      reasoning_effort=@provider.High,
     )
     assert_eq(response.text(), "ok")
     match response.content[1] {

@@ -30,6 +30,32 @@ test "messages and content parts retain provider-specific options" {
 }
 
 ///|
+test "chat call options merge provider values without mutating the source" {
+  let original = ChatCallOptions::new([LanguageModelMessage::user("hello")], provider_options={
+    "alibaba": { "enableThinking": true, "custom": "keep" },
+  })
+  let derived = original.with_provider_options({
+    "alibaba": { "thinkingBudget": 1024 },
+  })
+  assert_true(
+    original.provider_options
+    is { "alibaba": { "enableThinking": true, "custom": "keep", .. }, .. },
+  )
+  assert_true(
+    derived.provider_options
+    is {
+      "alibaba": {
+        "enableThinking": true,
+        "custom": "keep",
+        "thinkingBudget": 1024,
+        ..
+      },
+      ..
+    },
+  )
+}
+
+///|
 test "assistant tool calls are normalized from content parts without duplicates" {
   let call = ToolCall::new(id="call-1", name="lookup", arguments="{}")
   let message = LanguageModelMessage::assistant_parts(

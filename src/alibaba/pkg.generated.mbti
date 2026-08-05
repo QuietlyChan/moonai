@@ -13,6 +13,8 @@ pub const VERSION : String = "0.1.0"
 
 pub fn alibaba(String, api_key? : String, base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> AlibabaLanguageModelV4
 
+pub fn alibaba_apply_reasoning(@provider.ChatCallOptions) -> @provider.ChatCallOptions
+
 pub fn alibaba_chat(String, api_key? : String, base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> @openai_compatible.OpenAICompatibleChatModel
 
 pub fn alibaba_embedding(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> AlibabaEmbeddingModel

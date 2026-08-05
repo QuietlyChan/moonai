@@ -128,3 +128,22 @@ test "V4 prompt bridge preserves text and normalizes wire tool content" {
     _ => fail("expected a V4 tool-result part")
   }
 }
+
+///|
+test "V4 call options merge provider values without mutating the source" {
+  let original = LanguageModelV4CallOptions::new(
+    LanguageModelV4Prompt::new([]),
+    provider_options={ "provider": { "keep": true } },
+  )
+  let derived = original.with_provider_options({ "provider": { "added": 1 } })
+  let changed = original.with_reasoning_effort(High)
+  assert_true(
+    original.provider_options is { "provider": { "keep": true, .. }, .. },
+  )
+  assert_true(
+    derived.provider_options
+    is { "provider": { "keep": true, "added": 1, .. }, .. },
+  )
+  assert_eq(original.reasoning_effort, ProviderDefault)
+  assert_eq(changed.reasoning_effort, High)
+}

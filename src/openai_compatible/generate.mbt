@@ -3,9 +3,10 @@ async fn OpenAICompatibleChatModel::generate_chat(
   self : OpenAICompatibleChatModel,
   options : @provider.ChatCallOptions,
 ) -> @provider.ChatResponse {
+  let effective_options = (self.transform_chat_options)(options)
   let prepared = prepare_compatible_chat_request(
     self.model_id,
-    options,
+    effective_options,
     self.preserve_reasoning,
     self.include_usage,
     false,
@@ -19,16 +20,16 @@ async fn OpenAICompatibleChatModel::generate_chat(
   let warnings = prepared.warnings
   let request_headers = @provider_utils.merge_headers(
     self.request_headers(),
-    options.headers,
+    effective_options.headers,
   )
-  let cancellation_token = options.cancellation_token
+  let cancellation_token = effective_options.cancellation_token
   let response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=self.chat_completions_url(),
     headers=request_headers,
     body=request_body,
     timeout_ms=self.idle_timeout_ms,
-    retry_policy=options.retry_policy,
+    retry_policy=effective_options.retry_policy,
     cancellation_token?,
     error_to_message=json => self.error_structure.message(json),
     is_retryable_response=(status_code, error) => {

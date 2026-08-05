@@ -1,4 +1,20 @@
 ///|
+/// Provider-specific normalization hook for a Chat Completions call.
+///
+/// Most OpenAI-compatible providers can use the normalized call options as-is.
+/// Providers with a compatible wire protocol but different semantics (for
+/// example Alibaba's thinking controls) can translate top-level options into
+/// their namespace before the shared encoder runs.
+pub type OpenAICompatibleChatOptionsTransformer = (@provider.ChatCallOptions) -> @provider.ChatCallOptions
+
+///|
+fn identity_chat_options(
+  options : @provider.ChatCallOptions,
+) -> @provider.ChatCallOptions {
+  options
+}
+
+///|
 /// Configuration shared by models served by one OpenAI-compatible endpoint.
 pub struct OpenAICompatibleProvider {
   priv provider_name : String
@@ -23,6 +39,7 @@ pub struct OpenAICompatibleProvider {
   priv idle_timeout_ms : Int
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
+  priv transform_chat_options : OpenAICompatibleChatOptionsTransformer
 }
 
 ///|
@@ -63,6 +80,7 @@ pub fn create_openai_compatible(
   http_transport? : &@provider_utils.HttpTransport,
   api_key_environment_variable? : String,
   id_generator? : @provider_utils.IdGenerator,
+  transform_chat_options? : OpenAICompatibleChatOptionsTransformer = identity_chat_options,
 ) -> OpenAICompatibleProvider {
   {
     provider_name,
@@ -89,6 +107,7 @@ pub fn create_openai_compatible(
     http_transport: http_transport.unwrap_or(
       @provider_utils.native_http_transport(),
     ),
+    transform_chat_options,
   }
 }
 
@@ -117,6 +136,7 @@ pub fn createOpenAICompatible(
   http_transport? : &@provider_utils.HttpTransport,
   api_key_environment_variable? : String,
   id_generator? : @provider_utils.IdGenerator,
+  transform_chat_options? : OpenAICompatibleChatOptionsTransformer = identity_chat_options,
 ) -> OpenAICompatibleProvider {
   create_openai_compatible(
     provider_name~,
@@ -141,6 +161,7 @@ pub fn createOpenAICompatible(
     http_transport?,
     api_key_environment_variable?,
     id_generator?,
+    transform_chat_options~,
   )
 }
 
@@ -182,6 +203,7 @@ fn OpenAICompatibleProvider::chat_model_wire_with_reasoning_ids(
     id_generator: self.id_generator,
     generate_reasoning_ids,
     http_transport: self.http_transport,
+    transform_chat_options: self.transform_chat_options,
   }
 }
 
@@ -410,6 +432,7 @@ pub struct OpenAICompatibleChatModel {
   priv id_generator : @provider_utils.IdGenerator
   priv generate_reasoning_ids : Bool
   priv http_transport : &@provider_utils.HttpTransport
+  priv transform_chat_options : OpenAICompatibleChatOptionsTransformer
 }
 
 ///|
@@ -437,6 +460,7 @@ pub fn openai_compatible_wire(
   api_key_environment_variable? : String,
   id_generator? : @provider_utils.IdGenerator,
   generate_reasoning_ids? : Bool = false,
+  transform_chat_options? : OpenAICompatibleChatOptionsTransformer = identity_chat_options,
 ) -> OpenAICompatibleChatModel {
   create_openai_compatible(
     provider_name~,
@@ -459,6 +483,7 @@ pub fn openai_compatible_wire(
     http_transport?,
     api_key_environment_variable?,
     id_generator?,
+    transform_chat_options~,
   ).chat_model_wire_with_reasoning_ids(model_id, generate_reasoning_ids)
 }
 
@@ -486,6 +511,7 @@ pub fn openai_compatible(
   http_transport? : &@provider_utils.HttpTransport,
   api_key_environment_variable? : String,
   id_generator? : @provider_utils.IdGenerator,
+  transform_chat_options? : OpenAICompatibleChatOptionsTransformer = identity_chat_options,
 ) -> OpenAICompatibleLanguageModelV4 {
   OpenAICompatibleLanguageModelV4::new(
     openai_compatible_wire(
@@ -510,6 +536,7 @@ pub fn openai_compatible(
       http_transport?,
       api_key_environment_variable?,
       id_generator?,
+      transform_chat_options~,
     ),
   )
 }

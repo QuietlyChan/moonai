@@ -128,7 +128,9 @@ pub impl @provider.LanguageModelV4 for OpenAICompatibleLanguageModelV4 with fn d
   options,
   on_event,
 ) {
-  let chat_options = compatible_v4_chat_options(options)
+  let chat_options = (self.model.transform_chat_options)(
+    compatible_v4_chat_options(options),
+  )
   let prepared = prepare_compatible_chat_request(
     self.model.model_id,
     chat_options,

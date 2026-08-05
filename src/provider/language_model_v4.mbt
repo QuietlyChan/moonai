@@ -93,6 +93,75 @@ pub fn LanguageModelV4CallOptions::new(
 }
 
 ///|
+/// Return a copy of V4 call options with provider-specific values merged.
+///
+/// This is the versioned counterpart of `ChatCallOptions::with_provider_options`
+/// and is useful to provider-owned adapters that translate standardized V4
+/// controls into a namespaced wire option.
+pub fn LanguageModelV4CallOptions::with_provider_options(
+  self : LanguageModelV4CallOptions,
+  options : Map[String, Json],
+) -> LanguageModelV4CallOptions {
+  {
+    prompt: self.prompt,
+    tools: self.tools.copy(),
+    tool_choice: self.tool_choice,
+    response_format: self.response_format,
+    reasoning_effort: self.reasoning_effort,
+    max_output_tokens: self.max_output_tokens,
+    temperature: self.temperature,
+    top_p: self.top_p,
+    top_k: self.top_k,
+    frequency_penalty: self.frequency_penalty,
+    presence_penalty: self.presence_penalty,
+    seed: self.seed,
+    stop_sequences: self.stop_sequences.copy(),
+    include_raw_chunks: self.include_raw_chunks,
+    headers: copy_v4_headers(self.headers),
+    provider_options: merge_provider_metadata(self.provider_options, options),
+    retry_policy: self.retry_policy,
+    cancellation_token: self.cancellation_token,
+  }
+}
+
+///|
+/// Return a copy with the normalized reasoning setting replaced.
+pub fn LanguageModelV4CallOptions::with_reasoning_effort(
+  self : LanguageModelV4CallOptions,
+  reasoning_effort : ReasoningEffort,
+) -> LanguageModelV4CallOptions {
+  {
+    prompt: self.prompt,
+    tools: self.tools.copy(),
+    tool_choice: self.tool_choice,
+    response_format: self.response_format,
+    reasoning_effort,
+    max_output_tokens: self.max_output_tokens,
+    temperature: self.temperature,
+    top_p: self.top_p,
+    top_k: self.top_k,
+    frequency_penalty: self.frequency_penalty,
+    presence_penalty: self.presence_penalty,
+    seed: self.seed,
+    stop_sequences: self.stop_sequences.copy(),
+    include_raw_chunks: self.include_raw_chunks,
+    headers: copy_v4_headers(self.headers),
+    provider_options: merge_provider_metadata(self.provider_options, Map([])),
+    retry_policy: self.retry_policy,
+    cancellation_token: self.cancellation_token,
+  }
+}
+
+///|
+fn copy_v4_headers(headers : Map[String, String]) -> Map[String, String] {
+  let result : Map[String, String] = Map([])
+  for entry in headers.iter2() {
+    result[entry.0] = entry.1
+  }
+  result
+}
+
+///|
 /// Construct V4 call options from the normalized prompt used by wire
 /// adapters. New provider-facing code should call
 /// `LanguageModelV4CallOptions::new` with a V4 prompt directly.

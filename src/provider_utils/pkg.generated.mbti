@@ -41,7 +41,11 @@ pub fn get_top_level_media_type(String) -> String
 
 pub fn initial_retry_delay(@provider.RetryPolicy) -> Int
 
+pub fn isCustomReasoning(@provider.ReasoningEffort) -> Bool
+
 pub fn isUrlSupported(media_type~ : String, url~ : String, supported_urls~ : Array[@provider.SupportedUrlRule]) -> Bool
+
+pub fn is_custom_reasoning(@provider.ReasoningEffort) -> Bool
 
 pub fn is_full_media_type(String) -> Bool
 
@@ -66,6 +70,14 @@ pub fn load_api_key(String, environment_variable_name~ : String, api_key_paramet
 pub fn load_optional_setting(String, environment_variable_name~ : String) -> String?
 
 pub fn load_setting(String, environment_variable_name~ : String, setting_name~ : String, description~ : String) -> String raise @provider.LoadSettingError
+
+pub fn mapReasoningToProviderBudget(@provider.ReasoningEffort, Int, Int, Array[@provider.Warning], min_reasoning_budget? : Int, budget_percentages? : Map[String, Double]) -> Int?
+
+pub fn mapReasoningToProviderEffort(@provider.ReasoningEffort, Map[String, String], Array[@provider.Warning]) -> String?
+
+pub fn map_reasoning_to_provider_budget(@provider.ReasoningEffort, Int, Int, Array[@provider.Warning], min_reasoning_budget? : Int, budget_percentages? : Map[String, Double]) -> Int?
+
+pub fn map_reasoning_to_provider_effort(@provider.ReasoningEffort, Map[String, String], Array[@provider.Warning]) -> String?
 
 pub fn media_type_to_extension(String) -> String
 

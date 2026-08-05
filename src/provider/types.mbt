@@ -677,6 +677,79 @@ pub fn ChatCallOptions::new(
 }
 
 ///|
+/// Return a copy of these call options with provider-specific values merged.
+///
+/// Provider adapters use this when a normalized top-level option needs to be
+/// represented in the provider namespace before the wire encoder runs. The
+/// original options remain unchanged, which keeps middleware composition
+/// deterministic.
+pub fn ChatCallOptions::with_provider_options(
+  self : ChatCallOptions,
+  options : Map[String, Json],
+) -> ChatCallOptions {
+  {
+    messages: self.messages.copy(),
+    tools: self.tools.copy(),
+    tool_choice: self.tool_choice,
+    response_format: self.response_format,
+    reasoning_effort: self.reasoning_effort,
+    max_output_tokens: self.max_output_tokens,
+    temperature: self.temperature,
+    top_p: self.top_p,
+    top_k: self.top_k,
+    frequency_penalty: self.frequency_penalty,
+    presence_penalty: self.presence_penalty,
+    seed: self.seed,
+    stop_sequences: self.stop_sequences.copy(),
+    include_raw_chunks: self.include_raw_chunks,
+    headers: copy_string_headers(self.headers),
+    provider_options: merge_provider_metadata(self.provider_options, options),
+    retry_policy: self.retry_policy,
+    cancellation_token: self.cancellation_token,
+  }
+}
+
+///|
+/// Return a copy with the normalized reasoning setting replaced.
+///
+/// Provider adapters call this after consuming a top-level reasoning control so
+/// the generic encoder does not emit a second, provider-incompatible field.
+pub fn ChatCallOptions::with_reasoning_effort(
+  self : ChatCallOptions,
+  reasoning_effort : ReasoningEffort,
+) -> ChatCallOptions {
+  {
+    messages: self.messages.copy(),
+    tools: self.tools.copy(),
+    tool_choice: self.tool_choice,
+    response_format: self.response_format,
+    reasoning_effort,
+    max_output_tokens: self.max_output_tokens,
+    temperature: self.temperature,
+    top_p: self.top_p,
+    top_k: self.top_k,
+    frequency_penalty: self.frequency_penalty,
+    presence_penalty: self.presence_penalty,
+    seed: self.seed,
+    stop_sequences: self.stop_sequences.copy(),
+    include_raw_chunks: self.include_raw_chunks,
+    headers: copy_string_headers(self.headers),
+    provider_options: merge_provider_metadata(self.provider_options, Map([])),
+    retry_policy: self.retry_policy,
+    cancellation_token: self.cancellation_token,
+  }
+}
+
+///|
+fn copy_string_headers(headers : Map[String, String]) -> Map[String, String] {
+  let result : Map[String, String] = Map([])
+  for entry in headers.iter2() {
+    result[entry.0] = entry.1
+  }
+  result
+}
+
+///|
 /// A fully accumulated generation response.
 pub(all) struct ChatResponse {
   content : Array[GeneratedContent]
