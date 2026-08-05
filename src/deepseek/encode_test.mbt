@@ -135,3 +135,89 @@ test "DeepSeek encodes assistant tool-call content parts" {
     ],
   })
 }
+
+///|
+test "DeepSeek encodes structured and text tool results" {
+  let call = @provider.ToolCall::new(
+    id="call-result",
+    name="lookup",
+    arguments="{\"city\":\"Shanghai\"}",
+  )
+  let json_result = @provider.LanguageModelToolResult::json(
+    tool_call_id="call-result",
+    tool_name="lookup",
+    value={ "temperature": 18 },
+  )
+  let text_result = @provider.LanguageModelToolResult::text(
+    tool_call_id="call-result",
+    tool_name="lookup",
+    value="sunny",
+  )
+  let options = @provider.ChatCallOptions::new([
+    @provider.LanguageModelMessage::assistant_parts([
+      @provider.LanguageModelContentPart::tool_call(call),
+    ]),
+    @provider.LanguageModelMessage::tool_parts("call-result", [
+      @provider.LanguageModelContentPart::tool_result(json_result),
+      @provider.LanguageModelContentPart::tool_result(text_result),
+    ]),
+  ])
+  let body = encode_deepseek_chat_request("deepseek-chat", options)
+  match body {
+    {
+      "messages": [
+        _,
+        { "role": "tool", "content": String(json_value), .. },
+        { "role": "tool", "content": String(text_value), .. },
+        ..,
+      ],
+      ..
+    } => {
+      assert_eq(json_value, "{\"temperature\":18}")
+      assert_eq(text_value, "sunny")
+    }
+    _ => fail("expected a serialized DeepSeek tool result")
+  }
+}
+
+///|
+test "DeepSeek preserves reasoning content parts on assistant turns" {
+  let options = @provider.ChatCallOptions::new([
+    @provider.LanguageModelMessage::user("think then answer"),
+    @provider.LanguageModelMessage::assistant_parts([
+      @provider.LanguageModelContentPart::reasoning("first inspect the data"),
+      @provider.LanguageModelContentPart::text("the answer is 42"),
+    ]),
+  ])
+  json_inspect(encode_deepseek_chat_request("deepseek-chat", options), content={
+    "model": "deepseek-chat",
+    "messages": [
+      { "role": "user", "content": "think then answer" },
+      {
+        "role": "assistant",
+        "content": "the answer is 42",
+        "reasoning_content": "first inspect the data",
+      },
+    ],
+  })
+  json_inspect(
+    encode_deepseek_chat_request(
+      "deepseek-v4-pro",
+      @provider.ChatCallOptions::new([
+        @provider.LanguageModelMessage::assistant_parts([
+          @provider.LanguageModelContentPart::text("prior answer"),
+        ]),
+      ]),
+    ),
+    content={
+      "model": "deepseek-v4-pro",
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "prior answer",
+          "reasoning_content": "",
+        },
+      ],
+    },
+  )
+}

@@ -21,6 +21,77 @@ fn deepseek_message_content(message : @provider.LanguageModelMessage) -> String 
 }
 
 ///|
+/// Read reasoning carried either by the legacy message field or by V4
+/// assistant content parts. Content parts take precedence when present so a
+/// prompt bridge cannot duplicate the same reasoning text.
+fn deepseek_assistant_reasoning(
+  message : @provider.LanguageModelMessage,
+) -> String? {
+  let parts_reasoning = StringBuilder::new()
+  let mut has_part_reasoning = false
+  for part in message.parts {
+    match part.without_provider_options() {
+      @provider.Reasoning(value) => {
+        has_part_reasoning = true
+        parts_reasoning.write_string(value)
+      }
+      _ => ()
+    }
+  }
+  if has_part_reasoning {
+    Some(parts_reasoning.to_string())
+  } else {
+    message.reasoning_content
+  }
+}
+
+///|
+/// Serialize a structured tool result using DeepSeek's textual tool output
+/// contract. JSON and multimodal outputs are represented as compact JSON.
+fn deepseek_tool_result_text(
+  output : @provider.LanguageModelToolResultOutput,
+) -> String {
+  match output {
+    @provider.LanguageModelToolTextOutput(value~, ..)
+    | @provider.LanguageModelToolErrorText(value~, ..) => value
+    @provider.LanguageModelToolExecutionDenied(reason~, ..) =>
+      reason.unwrap_or("Tool call execution denied.")
+    @provider.LanguageModelToolJsonOutput(value~, ..)
+    | @provider.LanguageModelToolErrorJson(value~, ..) => value.stringify()
+    @provider.LanguageModelToolContent(..) => output.to_json().stringify()
+  }
+}
+
+///|
+fn deepseek_tool_result_message(
+  result : @provider.LanguageModelToolResult,
+) -> Json {
+  {
+    "role": "tool",
+    "tool_call_id": result.tool_call_id,
+    "content": deepseek_tool_result_text(result.output),
+  }
+}
+
+///|
+/// Expand all structured tool results carried by one normalized tool message.
+/// The Chat Completions wire format permits only one call id per message.
+fn deepseek_tool_messages(
+  message : @provider.LanguageModelMessage,
+) -> Array[Json] {
+  let result : Array[Json] = []
+  for part in message.parts {
+    match part.without_provider_options() {
+      @provider.ToolResultPart(value) =>
+        result.push(deepseek_tool_result_message(value))
+      @provider.ToolApprovalResponsePart(_) => ()
+      _ => ()
+    }
+  }
+  result
+}
+
+///|
 fn deepseek_tool_call_json(call : @provider.ToolCall) -> Json {
   {
     "id": call.id,
@@ -51,7 +122,7 @@ fn deepseek_message_json(
         ("role", Json::string("assistant")),
         ("content", Json::string(deepseek_message_content(message))),
       ])
-      if message.reasoning_content is Some(reasoning) &&
+      if deepseek_assistant_reasoning(message) is Some(reasoning) &&
         (is_v4 || index > last_user_index) {
         fields["reasoning_content"] = Json::string(reasoning)
       } else if is_v4 {
@@ -142,7 +213,11 @@ fn prepare_deepseek_request(
     for part in message.parts {
       let supported = match part.without_provider_options() {
         @provider.Text(_) => true
+        @provider.Reasoning(_) => message.role is @provider.Assistant
         @provider.ToolCallPart(_) => message.role is @provider.Assistant
+        @provider.ToolResultPart(_) => message.role is @provider.Tool(_)
+        @provider.ToolApprovalResponsePart(_) =>
+          message.role is @provider.Tool(_)
         _ => false
       }
       if !supported {
@@ -195,6 +270,15 @@ fn prepare_deepseek_request(
     _ => ()
   }
   for index, message in options.messages {
+    if message.role is @provider.Tool(_) && message.parts.length() > 0 {
+      let tool_messages = deepseek_tool_messages(message)
+      if tool_messages.length() > 0 {
+        for tool_message in tool_messages {
+          messages.push(tool_message)
+        }
+        continue
+      }
+    }
     messages.push(deepseek_message_json(message, index, last_user_index, is_v4))
   }
   let thinking_type = if !supports_thinking {
