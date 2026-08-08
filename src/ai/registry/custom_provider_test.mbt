@@ -11,7 +11,6 @@ test "custom provider prefers registered models and delegates fallback models" {
   )
   let fallback = @openai.create_openai(api_key="test-key")
   let custom = custom_provider(
-    provider_name="composed",
     language_models=Map([("local-chat", custom_language_model)]),
     fallback_provider=fallback,
   )
@@ -30,11 +29,11 @@ test "custom provider prefers registered models and delegates fallback models" {
 
 ///|
 test "custom provider exposes typed missing-model failures" {
-  let custom = custom_provider(provider_name="composed")
-  try custom.require_language_model("missing") catch {
-    @model.NoSuchModelError(model_id~, model_type~) => {
-      assert_eq(model_id.key(), "composed:missing")
-      assert_eq(model_type, @model.Chat)
+  let custom = custom_provider()
+  try custom.language_model("missing") catch {
+    @provider.NoSuchModelError(model_id~, model_type~) => {
+      assert_eq(model_id, "missing")
+      assert_eq(model_type, @provider.LanguageModel)
     }
     _ => fail("unexpected error")
   } noraise {
@@ -43,14 +42,11 @@ test "custom provider exposes typed missing-model failures" {
 }
 
 ///|
-test "custom provider rejects an empty provider name" {
-  let empty_name : String = ""
-  try custom_provider(provider_name=empty_name) catch {
-    @provider.InvalidArgumentError(argument~, message~) => {
-      assert_eq(argument, "provider_name")
-      assert_true(message.contains("empty"))
-    }
-  } noraise {
-    _ => fail("expected invalid provider name")
+test "custom provider omits an unconfigured files capability" {
+  let custom = custom_provider()
+  let provider = custom as &@provider.ProviderV4
+  match provider.files() {
+    Some(_) => fail("files should be absent")
+    None => ()
   }
 }

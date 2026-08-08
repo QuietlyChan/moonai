@@ -1,0 +1,41 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/ai/tool"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn prepareToolsForToolCallers(Map[String, @provider_utils.Tool], Map[String, Array[ToolCallerReference]]?) -> PreparedToolsForToolCallers
+
+pub fn prepare_tools_for_tool_callers(Map[String, @provider_utils.Tool], Map[String, Array[ToolCallerReference]]?) -> PreparedToolsForToolCallers
+
+pub fn resolveToolCallerConfiguration(Map[String, @provider_utils.Tool], Map[String, Array[ToolCallerReference]]?) -> Map[String, Array[ToolCallerReference]]? raise @provider.InvalidArgumentError
+
+pub fn resolve_tool_caller_configuration(Map[String, @provider_utils.Tool], Map[String, Array[ToolCallerReference]]?) -> Map[String, Array[ToolCallerReference]]? raise @provider.InvalidArgumentError
+
+// Errors
+
+// Types and methods
+pub struct PreparedToolsForToolCallers {
+  // private fields
+}
+pub fn PreparedToolsForToolCallers::execution_tools(Self) -> Map[String, @provider_utils.Tool]
+pub fn PreparedToolsForToolCallers::model_tools(Self) -> Map[String, @provider_utils.Tool]
+
+pub(all) enum ToolCallerReference {
+  DirectToolCaller
+  NamedToolCaller(String)
+} derive(Eq, @debug.Debug)
+pub fn ToolCallerReference::direct() -> Self
+pub fn ToolCallerReference::tool(String) -> Self
+
+// Type aliases
+pub type ResolvedToolCallers = Map[String, Array[ToolCallerReference]]
+
+pub type ToolCallerConfiguration = Map[String, Array[ToolCallerReference]]
+
+// Traits
+

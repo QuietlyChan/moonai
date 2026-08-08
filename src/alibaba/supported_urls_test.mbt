@@ -1,6 +1,6 @@
 ///|
 test "Alibaba chat supports native HTTP image URLs" {
-  let model = alibaba_chat("qwen-test")
+  let model = create_alibaba(api_key="test-key").chat("qwen-test")
   assert_true(
     @provider_utils.is_url_supported(
       media_type="image/webp",

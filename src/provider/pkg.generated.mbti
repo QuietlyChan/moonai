@@ -27,10 +27,15 @@ pub fn resolve_provider_reference(ProviderReference, String) -> String raise NoS
 
 // Errors
 pub(all) suberror APICallError {
-  APICallError(message~ : String, url~ : String, request_body~ : String, request_headers~ : Map[String, String], status_code~ : Int, response_headers~ : Map[String, String], response_body~ : String, is_retryable~ : Bool)
+  APICallError(message~ : String, url~ : String, request_body~ : String, request_headers~ : Map[String, String], status_code~ : Int?, response_headers~ : Map[String, String], response_body~ : String, is_retryable~ : Bool, data~ : Json?, cause~ : String?)
 } derive(@debug.Debug)
 
 pub suberror CancellationError derive(@debug.Debug)
+
+pub(all) suberror EmptyResponseBodyError {
+  EmptyResponseBodyError(message~ : String)
+} derive(Eq, @debug.Debug)
+pub fn EmptyResponseBodyError::new(message? : String) -> Self
 
 pub(all) suberror InvalidArgumentError {
   InvalidArgumentError(argument~ : String, message~ : String)
@@ -44,6 +49,12 @@ pub(all) suberror InvalidResponseDataError {
   InvalidResponseDataError(message~ : String, data~ : Json)
 } derive(@debug.Debug)
 
+pub(all) suberror JSONParseError {
+  JSONParseError(text~ : String, cause~ : String)
+} derive(Eq, @debug.Debug)
+pub fn JSONParseError::message(Self) -> String
+pub fn JSONParseError::new(text~ : String, cause~ : String) -> Self
+
 pub(all) suberror LoadAPIKeyError {
   LoadAPIKeyError(environment_variable_name~ : String, api_key_parameter_name~ : String, description~ : String, message~ : String)
 } derive(Eq, @debug.Debug)
@@ -51,6 +62,21 @@ pub(all) suberror LoadAPIKeyError {
 pub(all) suberror LoadSettingError {
   LoadSettingError(environment_variable_name~ : String, setting_name~ : String, description~ : String, message~ : String)
 } derive(Eq, @debug.Debug)
+
+pub(all) suberror MissingToolResultsError {
+  MissingToolResultsError(tool_call_ids~ : Array[String])
+} derive(Eq, @debug.Debug)
+
+pub(all) suberror NoContentGeneratedError {
+  NoContentGeneratedError(message~ : String)
+} derive(Eq, @debug.Debug)
+pub fn NoContentGeneratedError::new(message? : String) -> Self
+
+pub(all) suberror NoSuchModelError {
+  NoSuchModelError(model_id~ : String, model_type~ : NoSuchModelType)
+} derive(Eq, @debug.Debug)
+pub fn NoSuchModelError::model_id(Self) -> String
+pub fn NoSuchModelError::model_type(Self) -> NoSuchModelType
 
 pub suberror NoSuchProviderReferenceError {
   NoSuchProviderReferenceError(provider~ : String, available_providers~ : Array[String])
@@ -63,6 +89,12 @@ pub(all) suberror ProviderTimeoutError {
 pub(all) suberror TooManyEmbeddingValuesForCallError {
   TooManyEmbeddingValuesForCallError(provider~ : String, model_id~ : String, max_embeddings_per_call~ : Int, values~ : Array[String])
 } derive(Eq, @debug.Debug)
+
+pub(all) suberror TypeValidationError {
+  TypeValidationError(value~ : Json, cause~ : String, context~ : TypeValidationContext?)
+} derive(@debug.Debug)
+pub fn TypeValidationError::message(Self) -> String
+pub fn TypeValidationError::new(value~ : Json, cause~ : String, context? : TypeValidationContext) -> Self
 
 pub(all) suberror UnsupportedFunctionalityError {
   UnsupportedFunctionalityError(functionality~ : String)
@@ -185,6 +217,25 @@ pub(all) struct EmbeddingModelV4CallOptions {
 } derive(@debug.Debug)
 pub fn EmbeddingModelV4CallOptions::new(Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 
+pub(all) struct EmbeddingModelV4Middleware {
+  transform_params : (async (EmbeddingModelV4CallOptions, &EmbeddingModelV4) -> EmbeddingModelV4CallOptions)?
+  override_provider : ((&EmbeddingModelV4) -> String)?
+  override_model_id : ((&EmbeddingModelV4) -> String)?
+  override_max_embeddings_per_call : ((&EmbeddingModelV4) -> Int?)?
+  override_supports_parallel_calls : ((&EmbeddingModelV4) -> Bool)?
+  wrap_embed : (async (EmbeddingModelV4MiddlewareContext) -> EmbeddingModelV4Result)?
+}
+pub fn EmbeddingModelV4Middleware::new(transform_params? : async (EmbeddingModelV4CallOptions, &EmbeddingModelV4) -> EmbeddingModelV4CallOptions, override_provider? : (&EmbeddingModelV4) -> String, override_model_id? : (&EmbeddingModelV4) -> String, override_max_embeddings_per_call? : (&EmbeddingModelV4) -> Int?, override_supports_parallel_calls? : (&EmbeddingModelV4) -> Bool, wrap_embed? : async (EmbeddingModelV4MiddlewareContext) -> EmbeddingModelV4Result) -> Self
+pub fn EmbeddingModelV4Middleware::specification_version(Self) -> String
+pub async fn EmbeddingModelV4Middleware::transform(Self, &EmbeddingModelV4, EmbeddingModelV4CallOptions) -> EmbeddingModelV4CallOptions
+
+pub(all) struct EmbeddingModelV4MiddlewareContext {
+  params : EmbeddingModelV4CallOptions
+  model : &EmbeddingModelV4
+  do_embed : async () -> EmbeddingModelV4Result
+}
+pub async fn EmbeddingModelV4MiddlewareContext::embed(Self) -> EmbeddingModelV4Result
+
 pub(all) struct EmbeddingModelV4Result {
   embeddings : Array[Array[Double]]
   usage : EmbeddingModelV4Usage?
@@ -222,22 +273,22 @@ pub(all) struct EmbeddingResponse {
 } derive(Eq, @debug.Debug)
 pub fn EmbeddingResponse::new(Array[Double], Usage) -> Self
 
-pub(all) struct FileUploadOptions {
+pub(all) struct FilesV4UploadFileCallOptions {
   data : UploadFileData
   media_type : String
   filename : String?
   provider_options : Map[String, Json]
 } derive(Eq, @debug.Debug)
-pub fn FileUploadOptions::new(data~ : UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> Self
+pub fn FilesV4UploadFileCallOptions::new(data~ : UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> Self
 
-pub(all) struct FileUploadResult {
+pub(all) struct FilesV4UploadFileResult {
   provider_reference : ProviderReference
   media_type : String?
   filename : String?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
 } derive(Eq, @debug.Debug)
-pub fn FileUploadResult::new(provider_reference~ : ProviderReference, media_type? : String, filename? : String, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
+pub fn FilesV4UploadFileResult::new(provider_reference~ : ProviderReference, media_type? : String, filename? : String, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
 
 pub(all) enum FinishReason {
   Stop
@@ -249,7 +300,6 @@ pub(all) enum FinishReason {
 } derive(Eq, @debug.Debug)
 pub fn FinishReason::from_openai(String) -> Self
 
-#alias(LanguageModelV4Content)
 pub(all) enum GeneratedContent {
   GeneratedTextOutput(GeneratedText)
   GeneratedReasoningOutput(GeneratedReasoning)
@@ -364,6 +414,7 @@ pub(all) struct ImageModelV4CallOptions {
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
 } derive(@debug.Debug)
+pub fn ImageModelV4CallOptions::from_image_call_options(ImageCallOptions) -> Self
 pub fn ImageModelV4CallOptions::new(prompt? : String, n? : Int, size? : String, aspect_ratio? : String, seed? : Int, files? : Array[ImageModelV4File], mask? : ImageModelV4File, provider_options? : Map[String, Json], headers? : Map[String, String], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 
 pub(all) enum ImageModelV4File {
@@ -376,6 +427,24 @@ pub fn ImageModelV4File::bytes(data~ : Bytes, media_type~ : String) -> Self
 pub fn ImageModelV4File::from_image_file(ImageFile) -> Self
 pub fn ImageModelV4File::to_image_file(Self, filename? : String) -> ImageFile
 pub fn ImageModelV4File::url(String) -> Self
+
+pub(all) struct ImageModelV4Middleware {
+  transform_params : (async (ImageModelV4CallOptions, &ImageModelV4) -> ImageModelV4CallOptions)?
+  override_provider : ((&ImageModelV4) -> String)?
+  override_model_id : ((&ImageModelV4) -> String)?
+  override_max_images_per_call : ((&ImageModelV4) -> Int?)?
+  wrap_generate : (async (ImageModelV4MiddlewareContext) -> ImageModelV4Result)?
+}
+pub fn ImageModelV4Middleware::new(transform_params? : async (ImageModelV4CallOptions, &ImageModelV4) -> ImageModelV4CallOptions, override_provider? : (&ImageModelV4) -> String, override_model_id? : (&ImageModelV4) -> String, override_max_images_per_call? : (&ImageModelV4) -> Int?, wrap_generate? : async (ImageModelV4MiddlewareContext) -> ImageModelV4Result) -> Self
+pub fn ImageModelV4Middleware::specification_version(Self) -> String
+pub async fn ImageModelV4Middleware::transform(Self, &ImageModelV4, ImageModelV4CallOptions) -> ImageModelV4CallOptions
+
+pub(all) struct ImageModelV4MiddlewareContext {
+  params : ImageModelV4CallOptions
+  model : &ImageModelV4
+  do_generate : async () -> ImageModelV4Result
+}
+pub async fn ImageModelV4MiddlewareContext::generate(Self) -> ImageModelV4Result
 
 pub(all) struct ImageModelV4Result {
   images : Array[GeneratedImage]
@@ -530,10 +599,10 @@ pub fn LanguageModelToolResultOutput::to_json(Self) -> Json
 
 pub(all) struct LanguageModelV4CallOptions {
   prompt : LanguageModelV4Prompt
-  tools : Array[ToolDefinition]
-  tool_choice : ToolChoice?
-  response_format : ResponseFormat
-  reasoning_effort : ReasoningEffort
+  tools : Array[LanguageModelV4Tool]
+  tool_choice : LanguageModelV4ToolChoice?
+  response_format : LanguageModelV4ResponseFormat
+  reasoning : LanguageModelV4ReasoningEffort
   max_output_tokens : Int?
   temperature : Double?
   top_p : Double?
@@ -549,13 +618,53 @@ pub(all) struct LanguageModelV4CallOptions {
   cancellation_token : CancellationToken?
 } derive(@debug.Debug)
 pub fn LanguageModelV4CallOptions::from_language_model_prompt(Array[LanguageModelMessage], tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, reasoning_effort? : ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
-pub fn LanguageModelV4CallOptions::new(LanguageModelV4Prompt, tools? : Array[ToolDefinition], tool_choice? : ToolChoice, response_format? : ResponseFormat, reasoning_effort? : ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
+pub fn LanguageModelV4CallOptions::new(LanguageModelV4Prompt, tools? : Array[LanguageModelV4Tool], tool_choice? : LanguageModelV4ToolChoice, response_format? : LanguageModelV4ResponseFormat, reasoning? : LanguageModelV4ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 pub fn LanguageModelV4CallOptions::to_chat_call_options(Self) -> ChatCallOptions
 pub fn LanguageModelV4CallOptions::with_provider_options(Self, Map[String, Json]) -> Self
-pub fn LanguageModelV4CallOptions::with_reasoning_effort(Self, ReasoningEffort) -> Self
+pub fn LanguageModelV4CallOptions::with_reasoning(Self, LanguageModelV4ReasoningEffort) -> Self
+
+pub(all) enum LanguageModelV4Content {
+  V4TextOutput(LanguageModelV4Text)
+  V4ReasoningOutput(LanguageModelV4Reasoning)
+  V4CustomOutput(LanguageModelV4CustomContent)
+  V4ReasoningFileOutput(LanguageModelV4ReasoningFile)
+  V4FileOutput(LanguageModelV4File)
+  V4ToolApprovalRequestOutput(LanguageModelV4ToolApprovalRequest)
+  V4SourceOutput(LanguageModelV4Source)
+  V4ToolCallOutput(LanguageModelV4ToolCall)
+  V4ToolResultOutput(LanguageModelV4ToolResult)
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4Content::custom(kind~ : String, provider_metadata? : Map[String, Json]) -> Self
+pub fn LanguageModelV4Content::document_source(id~ : String, media_type~ : String, title~ : String, filename? : String, provider_metadata? : Map[String, Json]) -> Self
+pub fn LanguageModelV4Content::file(media_type~ : String, data~ : LanguageModelV4GeneratedFileData, provider_metadata? : Map[String, Json]) -> Self
+pub fn LanguageModelV4Content::from_generated_content(GeneratedContent) -> Self
+pub fn LanguageModelV4Content::from_generated_content_array(Array[GeneratedContent]) -> Array[Self]
+pub fn LanguageModelV4Content::reasoning(String, provider_metadata? : Map[String, Json]) -> Self
+pub fn LanguageModelV4Content::reasoning_file(media_type~ : String, data~ : LanguageModelV4GeneratedFileData, provider_metadata? : Map[String, Json]) -> Self
+pub fn LanguageModelV4Content::text(String, provider_metadata? : Map[String, Json]) -> Self
+pub fn LanguageModelV4Content::to_generated_content(Self) -> GeneratedContent
+pub fn LanguageModelV4Content::to_generated_content_array(Array[Self]) -> Array[GeneratedContent]
+pub fn LanguageModelV4Content::tool_approval_request(LanguageModelV4ToolApprovalRequest) -> Self
+pub fn LanguageModelV4Content::tool_call(LanguageModelV4ToolCall) -> Self
+pub fn LanguageModelV4Content::tool_result(LanguageModelV4ToolResult) -> Self
+pub fn LanguageModelV4Content::url_source(id~ : String, url~ : String, title? : String, provider_metadata? : Map[String, Json]) -> Self
+
+pub(all) struct LanguageModelV4CustomContent {
+  kind : String
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct LanguageModelV4File {
+  media_type : String
+  data : LanguageModelV4GeneratedFileData
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4File::from_generated_file(GeneratedFile) -> Self
+pub fn LanguageModelV4File::to_generated_file(Self) -> GeneratedFile
 
 pub(all) enum LanguageModelV4FileData {
   V4FileData(String)
+  V4FileBytes(Bytes)
   V4FileUrl(String)
   V4FileReference(ProviderReference)
   V4FileText(String)
@@ -570,8 +679,22 @@ pub fn LanguageModelV4FinishReason::to_finish_reason(Self) -> FinishReason
 pub fn LanguageModelV4FinishReason::unknown() -> Self
 pub fn LanguageModelV4FinishReason::with_raw(Self, String?) -> Self
 
+pub(all) struct LanguageModelV4FunctionTool {
+  name : String
+  description : String?
+  input_schema : Json
+  input_examples : Array[LanguageModelV4FunctionToolInputExample]
+  strict : Bool?
+  provider_options : Map[String, Json]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct LanguageModelV4FunctionToolInputExample {
+  input : Json
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4FunctionToolInputExample::new(Json) -> Self
+
 pub(all) struct LanguageModelV4GenerateResult {
-  content : Array[GeneratedContent]
+  content : Array[LanguageModelV4Content]
   finish_reason : LanguageModelV4FinishReason
   usage : LanguageModelV4Usage
   provider_metadata : Map[String, Json]
@@ -586,6 +709,14 @@ pub fn LanguageModelV4GenerateResult::text(Self) -> String
 pub fn LanguageModelV4GenerateResult::to_chat_response(Self) -> ChatResponse
 pub fn LanguageModelV4GenerateResult::with_usage_and_finish_reason(Self, LanguageModelV4Usage, LanguageModelV4FinishReason) -> Self
 
+pub(all) enum LanguageModelV4GeneratedFileData {
+  V4GeneratedFileBase64(String)
+  V4GeneratedFileBytes(Bytes)
+  V4GeneratedFileUrl(String)
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4GeneratedFileData::from_generated_file_data(GeneratedFileData) -> Self
+pub fn LanguageModelV4GeneratedFileData::to_generated_file_data(Self) -> GeneratedFileData
+
 pub(all) struct LanguageModelV4InputTokens {
   total : Int?
   no_cache : Int?
@@ -593,11 +724,43 @@ pub(all) struct LanguageModelV4InputTokens {
   cache_write : Int?
 } derive(Eq, @debug.Debug)
 
+pub(all) struct LanguageModelV4JsonResponseFormat {
+  schema : Json?
+  name : String?
+  description : String?
+} derive(@debug.Debug)
+
 pub(all) enum LanguageModelV4Message {
   V4SystemMessage(content~ : String, provider_options~ : Map[String, Json])
   V4UserMessage(content~ : Array[LanguageModelV4PromptPart], provider_options~ : Map[String, Json])
   V4AssistantMessage(content~ : Array[LanguageModelV4PromptPart], provider_options~ : Map[String, Json])
   V4ToolMessage(content~ : Array[LanguageModelV4PromptPart], provider_options~ : Map[String, Json])
+} derive(Eq, @debug.Debug)
+
+pub(all) struct LanguageModelV4Middleware {
+  transform_params : (async (LanguageModelV4TransformContext) -> LanguageModelV4CallOptions)?
+  override_provider : ((&LanguageModelV4) -> String)?
+  override_model_id : ((&LanguageModelV4) -> String)?
+  override_supported_urls : ((&LanguageModelV4) -> Array[SupportedUrlRule])?
+  wrap_generate : (async (LanguageModelV4MiddlewareContext) -> LanguageModelV4GenerateResult)?
+  wrap_stream : (async (LanguageModelV4MiddlewareContext) -> LanguageModelV4StreamResult)?
+}
+pub fn LanguageModelV4Middleware::new(transform_params? : async (LanguageModelV4TransformContext) -> LanguageModelV4CallOptions, override_provider? : (&LanguageModelV4) -> String, override_model_id? : (&LanguageModelV4) -> String, override_supported_urls? : (&LanguageModelV4) -> Array[SupportedUrlRule], wrap_generate? : async (LanguageModelV4MiddlewareContext) -> LanguageModelV4GenerateResult, wrap_stream? : async (LanguageModelV4MiddlewareContext) -> LanguageModelV4StreamResult) -> Self
+pub fn LanguageModelV4Middleware::specification_version(Self) -> String
+pub async fn LanguageModelV4Middleware::transform(Self, LanguageModelV4MiddlewareOperation, &LanguageModelV4, LanguageModelV4CallOptions) -> LanguageModelV4CallOptions
+
+pub(all) struct LanguageModelV4MiddlewareContext {
+  params : LanguageModelV4CallOptions
+  model : &LanguageModelV4
+  do_generate : async () -> LanguageModelV4GenerateResult
+  do_stream : async () -> LanguageModelV4StreamResult
+}
+pub async fn LanguageModelV4MiddlewareContext::generate(Self) -> LanguageModelV4GenerateResult
+pub async fn LanguageModelV4MiddlewareContext::stream(Self) -> LanguageModelV4StreamResult
+
+pub(all) enum LanguageModelV4MiddlewareOperation {
+  Generate
+  Stream
 } derive(Eq, @debug.Debug)
 
 pub(all) struct LanguageModelV4OutputTokens {
@@ -619,15 +782,60 @@ pub(all) enum LanguageModelV4PromptPart {
   V4PromptReasoningFile(data~ : LanguageModelV4FileData, media_type~ : String, provider_options~ : Map[String, Json])
   V4PromptCustom(kind~ : String, provider_options~ : Map[String, Json])
   V4PromptFile(data~ : LanguageModelV4FileData, media_type~ : String, filename~ : String?, provider_options~ : Map[String, Json])
-  V4PromptToolCall(ToolCall)
-  V4PromptToolResult(LanguageModelToolResult)
-  V4PromptToolApprovalRequest(LanguageModelToolApprovalRequest)
-  V4PromptToolApprovalResponse(LanguageModelToolApprovalResponse)
+  V4PromptToolCall(LanguageModelV4ToolCallPart)
+  V4PromptToolResult(LanguageModelV4ToolResultPart)
+  V4PromptToolApprovalResponse(LanguageModelV4ToolApprovalResponsePart)
 } derive(Eq, @debug.Debug)
+
+pub(all) struct LanguageModelV4ProviderTool {
+  id : String
+  name : String
+  args : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct LanguageModelV4Reasoning {
+  text : String
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+
+pub(all) enum LanguageModelV4ReasoningEffort {
+  V4ReasoningProviderDefault
+  V4ReasoningNone
+  V4ReasoningMinimal
+  V4ReasoningLow
+  V4ReasoningMedium
+  V4ReasoningHigh
+  V4ReasoningXHigh
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ReasoningEffort::from_reasoning_effort(ReasoningEffort) -> Self
+pub fn LanguageModelV4ReasoningEffort::to_reasoning_effort(Self) -> ReasoningEffort
+
+pub(all) struct LanguageModelV4ReasoningFile {
+  media_type : String
+  data : LanguageModelV4GeneratedFileData
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ReasoningFile::from_generated_file(GeneratedFile) -> Self
+pub fn LanguageModelV4ReasoningFile::to_generated_file(Self) -> GeneratedFile
+
+pub(all) enum LanguageModelV4ResponseFormat {
+  V4ResponseText
+  V4ResponseJson(LanguageModelV4JsonResponseFormat)
+} derive(@debug.Debug)
+pub fn LanguageModelV4ResponseFormat::from_response_format(ResponseFormat) -> Self
+pub fn LanguageModelV4ResponseFormat::json(schema? : Json, name? : String, description? : String) -> Self
+pub fn LanguageModelV4ResponseFormat::json_object() -> Self
+pub fn LanguageModelV4ResponseFormat::to_response_format(Self) -> ResponseFormat
+
+pub(all) enum LanguageModelV4Source {
+  V4UrlSource(id~ : String, url~ : String, title~ : String?, provider_metadata~ : Map[String, Json])
+  V4DocumentSource(id~ : String, media_type~ : String, title~ : String, filename~ : String?, provider_metadata~ : Map[String, Json])
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4Source::from_generated_source(GeneratedSource) -> Self
+pub fn LanguageModelV4Source::to_generated_source(Self) -> GeneratedSource
 
 pub(all) enum LanguageModelV4StreamPart {
   V4StreamStart(warnings~ : Array[Warning])
-  V4Warning(Warning)
   V4TextStart(id~ : String, provider_metadata~ : Map[String, Json])
   V4TextDelta(id~ : String, delta~ : String, provider_metadata~ : Map[String, Json])
   V4TextEnd(id~ : String, provider_metadata~ : Map[String, Json])
@@ -637,29 +845,139 @@ pub(all) enum LanguageModelV4StreamPart {
   V4ToolInputStart(id~ : String, tool_name~ : String, provider_executed~ : Bool, dynamic~ : Bool, title~ : String?, provider_metadata~ : Map[String, Json])
   V4ToolInputDelta(id~ : String, delta~ : String, provider_metadata~ : Map[String, Json])
   V4ToolInputEnd(id~ : String, provider_metadata~ : Map[String, Json])
-  V4ToolCallReady(ToolCall)
-  V4ToolResultReady(ToolResult)
-  V4ToolApprovalRequestReady(ToolApprovalRequest)
-  V4FileReady(GeneratedFile)
-  V4ReasoningFileReady(GeneratedFile)
-  V4SourceReady(GeneratedSource)
-  V4CustomContentReady(GeneratedCustomContent)
+  V4ToolCallReady(LanguageModelV4ToolCall)
+  V4ToolResultReady(LanguageModelV4ToolResult)
+  V4ToolApprovalRequestReady(LanguageModelV4ToolApprovalRequest)
+  V4FileReady(LanguageModelV4File)
+  V4ReasoningFileReady(LanguageModelV4ReasoningFile)
+  V4SourceReady(LanguageModelV4Source)
+  V4CustomContentReady(LanguageModelV4CustomContent)
   V4ResponseMetadataReady(ResponseMetadata)
   V4Finish(usage~ : LanguageModelV4Usage, reason~ : LanguageModelV4FinishReason, provider_metadata~ : Map[String, Json])
   V4Raw(Json)
-  V4Error(String)
+  V4Error(StreamErrorInfo)
 } derive(@debug.Debug)
-pub fn LanguageModelV4StreamPart::from_stream_event(StreamEvent) -> Self
+pub fn LanguageModelV4StreamPart::from_stream_event(StreamEvent) -> Self?
 
 pub(all) struct LanguageModelV4StreamResult {
   request : RequestMetadata?
   response : ResponseMetadata?
-  usage : LanguageModelV4Usage
-  finish_reason : LanguageModelV4FinishReason
-  provider_metadata : Map[String, Json]
-  warnings : Array[Warning]
 } derive(@debug.Debug)
-pub fn LanguageModelV4StreamResult::new(RequestMetadata?, ResponseMetadata?, usage? : LanguageModelV4Usage, finish_reason? : LanguageModelV4FinishReason, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
+pub fn LanguageModelV4StreamResult::new(RequestMetadata?, ResponseMetadata?) -> Self
+
+pub(all) struct LanguageModelV4Text {
+  text : String
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+
+pub(all) enum LanguageModelV4Tool {
+  V4FunctionTool(LanguageModelV4FunctionTool)
+  V4ProviderTool(LanguageModelV4ProviderTool)
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4Tool::description(Self) -> String?
+pub fn LanguageModelV4Tool::from_tool_definition(ToolDefinition) -> Self
+pub fn LanguageModelV4Tool::from_tool_definitions(Array[ToolDefinition]) -> Array[Self]
+pub fn LanguageModelV4Tool::function(String, Json, description? : String, input_examples? : Array[Json], strict? : Bool, provider_options? : Map[String, Json]) -> Self
+pub fn LanguageModelV4Tool::name(Self) -> String
+pub fn LanguageModelV4Tool::provider(id~ : String, name~ : String, args? : Json) -> Self
+pub fn LanguageModelV4Tool::strict(Self) -> Bool
+pub fn LanguageModelV4Tool::strict_setting(Self) -> Bool?
+pub fn LanguageModelV4Tool::to_tool_definition(Self) -> ToolDefinition
+pub fn LanguageModelV4Tool::to_tool_definitions(Array[Self]) -> Array[ToolDefinition]
+
+pub(all) struct LanguageModelV4ToolApprovalRequest {
+  approval_id : String
+  tool_call_id : String
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ToolApprovalRequest::from_tool_approval_request(ToolApprovalRequest) -> Self
+pub fn LanguageModelV4ToolApprovalRequest::to_tool_approval_request(Self) -> ToolApprovalRequest
+
+pub(all) struct LanguageModelV4ToolApprovalResponsePart {
+  approval_id : String
+  approved : Bool
+  reason : String?
+  provider_options : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ToolApprovalResponsePart::new(approval_id~ : String, approved~ : Bool, reason? : String, provider_options? : Map[String, Json]) -> Self
+
+pub(all) struct LanguageModelV4ToolCall {
+  tool_call_id : String
+  tool_name : String
+  input : String
+  provider_executed : Bool
+  dynamic : Bool
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ToolCall::from_tool_call(ToolCall) -> Self
+pub fn LanguageModelV4ToolCall::to_tool_call(Self) -> ToolCall
+
+pub(all) struct LanguageModelV4ToolCallPart {
+  tool_call_id : String
+  tool_name : String
+  input : Json
+  provider_executed : Bool
+  provider_options : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ToolCallPart::new(tool_call_id~ : String, tool_name~ : String, input~ : Json, provider_executed? : Bool, provider_options? : Map[String, Json]) -> Self
+
+pub(all) enum LanguageModelV4ToolChoice {
+  V4ToolChoiceAuto
+  V4ToolChoiceNone
+  V4ToolChoiceRequired
+  V4ToolChoiceTool(String)
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ToolChoice::from_tool_choice(ToolChoice) -> Self
+pub fn LanguageModelV4ToolChoice::to_tool_choice(Self) -> ToolChoice
+
+pub(all) struct LanguageModelV4ToolResult {
+  tool_call_id : String
+  tool_name : String
+  result : Json
+  is_error : Bool
+  preliminary : Bool
+  dynamic : Bool
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ToolResult::from_tool_result(ToolResult) -> Self
+pub fn LanguageModelV4ToolResult::to_tool_result(Self) -> ToolResult
+
+pub(all) enum LanguageModelV4ToolResultContentPart {
+  V4ToolResultTextContent(text~ : String, provider_options~ : Map[String, Json])
+  V4ToolResultFileContent(data~ : LanguageModelV4FileData, media_type~ : String, filename~ : String?, provider_options~ : Map[String, Json])
+  V4ToolResultCustomContent(provider_options~ : Map[String, Json])
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ToolResultContentPart::custom(provider_options? : Map[String, Json]) -> Self
+pub fn LanguageModelV4ToolResultContentPart::file(data~ : LanguageModelV4FileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> Self
+pub fn LanguageModelV4ToolResultContentPart::text(String, provider_options? : Map[String, Json]) -> Self
+
+pub(all) enum LanguageModelV4ToolResultOutput {
+  V4ToolResultTextOutput(value~ : String, provider_options~ : Map[String, Json])
+  V4ToolResultJsonOutput(value~ : Json, provider_options~ : Map[String, Json])
+  V4ToolResultExecutionDenied(reason~ : String?, provider_options~ : Map[String, Json])
+  V4ToolResultErrorText(value~ : String, provider_options~ : Map[String, Json])
+  V4ToolResultErrorJson(value~ : Json, provider_options~ : Map[String, Json])
+  V4ToolResultContentOutput(value~ : Array[LanguageModelV4ToolResultContentPart], provider_options~ : Map[String, Json])
+} derive(Eq, @debug.Debug)
+
+pub(all) struct LanguageModelV4ToolResultPart {
+  tool_call_id : String
+  tool_name : String
+  output : LanguageModelV4ToolResultOutput
+  provider_options : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn LanguageModelV4ToolResultPart::content(tool_call_id~ : String, tool_name~ : String, value~ : Array[LanguageModelV4ToolResultContentPart], provider_options? : Map[String, Json]) -> Self
+pub fn LanguageModelV4ToolResultPart::error_json(tool_call_id~ : String, tool_name~ : String, value~ : Json, provider_options? : Map[String, Json]) -> Self
+pub fn LanguageModelV4ToolResultPart::error_text(tool_call_id~ : String, tool_name~ : String, value~ : String, provider_options? : Map[String, Json]) -> Self
+pub fn LanguageModelV4ToolResultPart::execution_denied(tool_call_id~ : String, tool_name~ : String, reason? : String, provider_options? : Map[String, Json]) -> Self
+pub fn LanguageModelV4ToolResultPart::json(tool_call_id~ : String, tool_name~ : String, value~ : Json, provider_options? : Map[String, Json]) -> Self
+pub fn LanguageModelV4ToolResultPart::text(tool_call_id~ : String, tool_name~ : String, value~ : String, provider_options? : Map[String, Json]) -> Self
+
+pub(all) struct LanguageModelV4TransformContext {
+  operation : LanguageModelV4MiddlewareOperation
+  params : LanguageModelV4CallOptions
+  model : &LanguageModelV4
+}
 
 pub(all) enum LanguageModelV4UnifiedFinishReason {
   V4FinishStop
@@ -681,6 +999,16 @@ pub fn LanguageModelV4Usage::to_usage(Self) -> Usage
 pub fn LanguageModelV4Usage::unknown() -> Self
 pub fn LanguageModelV4Usage::with_raw(Self, Json?) -> Self
 pub fn LanguageModelV4Usage::zero() -> Self
+
+pub(all) enum NoSuchModelType {
+  LanguageModel
+  EmbeddingModel
+  ImageModel
+  TranscriptionModel
+  SpeechModel
+  RerankingModel
+  VideoModel
+} derive(Eq, @debug.Debug)
 
 pub(all) struct ProviderReference {
   entries : Map[String, String]
@@ -838,8 +1166,8 @@ pub(all) struct RequestMetadata {
 } derive(Eq, @debug.Debug)
 pub fn RequestMetadata::new(url~ : String, headers~ : Map[String, String], body~ : String) -> Self
 
-pub(all) struct RerankingCallOptions {
-  documents : RerankingDocuments
+pub(all) struct RerankingModelV4CallOptions {
+  documents : RerankingModelV4Documents
   query : String
   top_n : Int?
   headers : Map[String, String]
@@ -847,31 +1175,29 @@ pub(all) struct RerankingCallOptions {
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
 } derive(@debug.Debug)
-pub fn RerankingCallOptions::new(RerankingDocuments, String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
+pub fn RerankingModelV4CallOptions::new(RerankingModelV4Documents, String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 
-pub(all) enum RerankingDocuments {
+pub(all) enum RerankingModelV4Documents {
   TextDocuments(Array[String])
   ObjectDocuments(Array[Json])
 } derive(Eq, @debug.Debug)
-pub fn RerankingDocuments::length(Self) -> Int
-pub fn RerankingDocuments::objects(Array[Json]) -> Self
-pub fn RerankingDocuments::text(Array[String]) -> Self
+pub fn RerankingModelV4Documents::length(Self) -> Int
+pub fn RerankingModelV4Documents::objects(Array[Json]) -> Self
+pub fn RerankingModelV4Documents::text(Array[String]) -> Self
 
-pub(all) struct RerankingEntry {
+pub(all) struct RerankingModelV4Ranking {
   index : Int
   relevance_score : Double
 } derive(Eq, @debug.Debug)
-pub fn RerankingEntry::new(Int, Double) -> Self
+pub fn RerankingModelV4Ranking::new(Int, Double) -> Self
 
-pub(all) struct RerankingResponse {
-  ranking : Array[RerankingEntry]
-  usage : Usage
-  request : RequestMetadata?
+pub(all) struct RerankingModelV4Result {
+  ranking : Array[RerankingModelV4Ranking]
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
 } derive(Eq, @debug.Debug)
-pub fn RerankingResponse::new(Array[RerankingEntry], usage? : Usage, request? : RequestMetadata, response? : ResponseMetadata, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
+pub fn RerankingModelV4Result::new(Array[RerankingModelV4Ranking], response? : ResponseMetadata, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
 
 pub(all) enum ResponseFormat {
   Text
@@ -890,7 +1216,6 @@ pub(all) struct ResponseMetadata {
   body : String?
 } derive(Eq, @debug.Debug)
 pub fn ResponseMetadata::empty() -> Self
-pub fn ResponseMetadata::from_json(Json) -> Self
 pub fn ResponseMetadata::is_empty(Self) -> Bool
 pub fn ResponseMetadata::new(id? : String, model_id? : String, created_at? : Int, status_code? : Int, headers? : Map[String, String], body? : String) -> Self
 
@@ -905,20 +1230,20 @@ pub fn RetryPolicy::new(max_retries? : Int, initial_delay_ms? : Int, max_delay_m
 pub fn RetryPolicy::none() -> Self
 pub fn RetryPolicy::standard() -> Self
 
-pub(all) struct SkillFile {
+pub(all) struct SkillsV4File {
   path : String
   data : UploadFileData
 } derive(Eq, @debug.Debug)
-pub fn SkillFile::new(path~ : String, data~ : UploadFileData) -> Self
+pub fn SkillsV4File::new(path~ : String, data~ : UploadFileData) -> Self
 
-pub(all) struct SkillUploadOptions {
-  files : Array[SkillFile]
+pub(all) struct SkillsV4UploadSkillCallOptions {
+  files : Array[SkillsV4File]
   display_title : String?
   provider_options : Map[String, Json]
 } derive(Eq, @debug.Debug)
-pub fn SkillUploadOptions::new(files~ : Array[SkillFile], display_title? : String, provider_options? : Map[String, Json]) -> Self
+pub fn SkillsV4UploadSkillCallOptions::new(files~ : Array[SkillsV4File], display_title? : String, provider_options? : Map[String, Json]) -> Self
 
-pub(all) struct SkillUploadResult {
+pub(all) struct SkillsV4UploadSkillResult {
   provider_reference : ProviderReference
   display_title : String?
   name : String?
@@ -927,7 +1252,7 @@ pub(all) struct SkillUploadResult {
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
 } derive(Eq, @debug.Debug)
-pub fn SkillUploadResult::new(provider_reference~ : ProviderReference, display_title? : String, name? : String, description? : String, latest_version? : String, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
+pub fn SkillsV4UploadSkillResult::new(provider_reference~ : ProviderReference, display_title? : String, name? : String, description? : String, latest_version? : String, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
 
 pub(all) enum SpeechAudioData {
   SpeechAudioBytes(Bytes)
@@ -963,6 +1288,7 @@ pub(all) struct SpeechModelV4CallOptions {
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
 } derive(@debug.Debug)
+pub fn SpeechModelV4CallOptions::from_speech_call_options(SpeechCallOptions) -> Self
 pub fn SpeechModelV4CallOptions::new(text~ : String, voice? : String, output_format? : String, instructions? : String, speed? : Double, language? : String, provider_options? : Map[String, Json], headers? : Map[String, String], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 pub fn SpeechModelV4CallOptions::to_speech_call_options(Self) -> SpeechCallOptions
 
@@ -1002,7 +1328,7 @@ pub struct SpeechTranslationCallOptions {
 }
 pub fn SpeechTranslationCallOptions::new(audio~ : &AudioStream, input_audio_format~ : AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, cancellation_token? : CancellationToken) -> Self
 
-pub struct SpeechTranslationModelV4StreamOptions {
+pub(all) struct SpeechTranslationModelV4StreamOptions {
   audio : &AudioStream
   input_audio_format : AudioFormat
   target_language : String
@@ -1013,6 +1339,7 @@ pub struct SpeechTranslationModelV4StreamOptions {
   include_raw_chunks : Bool
   cancellation_token : CancellationToken?
 }
+pub fn SpeechTranslationModelV4StreamOptions::from_speech_translation_call_options(SpeechTranslationCallOptions) -> Self
 pub fn SpeechTranslationModelV4StreamOptions::new(audio~ : &AudioStream, input_audio_format~ : AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, cancellation_token? : CancellationToken) -> Self
 pub fn SpeechTranslationModelV4StreamOptions::to_speech_translation_call_options(Self) -> SpeechTranslationCallOptions
 
@@ -1083,6 +1410,12 @@ pub(all) struct SpeechTranslationUsage {
 } derive(Eq, @debug.Debug)
 pub fn SpeechTranslationUsage::new(input_audio_seconds? : Double, input_audio_tokens? : Int, output_audio_tokens? : Int, input_text_tokens? : Int, output_text_tokens? : Int) -> Self
 
+pub(all) struct StreamErrorInfo {
+  message : String
+  data : Json?
+} derive(Eq, @debug.Debug)
+pub fn StreamErrorInfo::new(String, data? : Json) -> Self
+
 pub(all) enum StreamEvent {
   StreamStart
   Warning(Warning)
@@ -1105,7 +1438,7 @@ pub(all) enum StreamEvent {
   ResponseMetadataReady(ResponseMetadata)
   Finish(usage~ : Usage, reason~ : FinishReason)
   Raw(Json)
-  StreamError(String)
+  StreamError(StreamErrorInfo)
 } derive(@debug.Debug)
 
 pub struct SupportedUrlRule {
@@ -1189,6 +1522,7 @@ pub(all) struct TranscriptionModelV4CallOptions {
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
 } derive(@debug.Debug)
+pub fn TranscriptionModelV4CallOptions::from_transcription_call_options(TranscriptionCallOptions) -> Self
 pub fn TranscriptionModelV4CallOptions::new(audio~ : TranscriptionAudio, media_type~ : String, provider_options? : Map[String, Json], headers? : Map[String, String], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 pub fn TranscriptionModelV4CallOptions::to_transcription_call_options(Self) -> TranscriptionCallOptions
 
@@ -1206,7 +1540,7 @@ pub fn TranscriptionModelV4Result::from_transcription_response(TranscriptionResp
 pub fn TranscriptionModelV4Result::new(text~ : String, segments? : Array[TranscriptionSegment], language? : String, duration_in_seconds? : Double, warnings? : Array[Warning], request? : RequestMetadata, response? : ResponseMetadata, provider_metadata? : Map[String, Json]) -> Self
 pub fn TranscriptionModelV4Result::to_transcription_response(Self) -> TranscriptionResponse
 
-pub struct TranscriptionModelV4StreamOptions {
+pub(all) struct TranscriptionModelV4StreamOptions {
   audio : &AudioStream
   input_audio_format : AudioFormat
   provider_options : Map[String, Json]
@@ -1214,6 +1548,7 @@ pub struct TranscriptionModelV4StreamOptions {
   include_raw_chunks : Bool
   cancellation_token : CancellationToken?
 }
+pub fn TranscriptionModelV4StreamOptions::from_transcription_stream_options(TranscriptionStreamOptions) -> Self
 pub fn TranscriptionModelV4StreamOptions::new(audio~ : &AudioStream, input_audio_format~ : AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, cancellation_token? : CancellationToken) -> Self
 pub fn TranscriptionModelV4StreamOptions::to_transcription_stream_options(Self) -> TranscriptionStreamOptions
 
@@ -1225,7 +1560,7 @@ pub(all) enum TranscriptionModelV4StreamPart {
   TranscriptionV4ResponseMetadata(ResponseMetadata)
   TranscriptionV4Finish(text~ : String, segments~ : Array[TranscriptionSegment], language~ : String?, duration_in_seconds~ : Double?, provider_metadata~ : Map[String, Json])
   TranscriptionV4Raw(Json)
-  TranscriptionV4Error(String)
+  TranscriptionV4Error(StreamErrorInfo)
 } derive(Eq, @debug.Debug)
 pub fn TranscriptionModelV4StreamPart::from_stream_event(TranscriptionStreamEvent) -> Self
 pub fn TranscriptionModelV4StreamPart::to_stream_event(Self) -> TranscriptionStreamEvent
@@ -1265,7 +1600,7 @@ pub(all) enum TranscriptionStreamEvent {
   TranscriptionResponseMetadata(ResponseMetadata)
   TranscriptionFinish(text~ : String, segments~ : Array[TranscriptionSegment], language~ : String?, duration_seconds~ : Double?, provider_metadata~ : Map[String, Json])
   TranscriptionRaw(Json)
-  TranscriptionStreamError(String)
+  TranscriptionStreamError(StreamErrorInfo)
 } derive(Eq, @debug.Debug)
 
 pub struct TranscriptionStreamOptions {
@@ -1277,6 +1612,13 @@ pub struct TranscriptionStreamOptions {
   cancellation_token : CancellationToken?
 }
 pub fn TranscriptionStreamOptions::new(audio~ : &AudioStream, input_audio_format~ : AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, cancellation_token? : CancellationToken) -> Self
+
+pub(all) struct TypeValidationContext {
+  field : String?
+  entity_name : String?
+  entity_id : String?
+} derive(Eq, @debug.Debug)
+pub fn TypeValidationContext::new(field? : String, entity_name? : String, entity_id? : String) -> Self
 
 pub(all) enum UploadFileData {
   UploadFileBytes(Bytes)
@@ -1353,6 +1695,7 @@ pub(all) struct VideoModelV4CallOptions {
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
 } derive(@debug.Debug)
+pub fn VideoModelV4CallOptions::from_video_call_options(VideoCallOptions) -> Self
 pub fn VideoModelV4CallOptions::new(prompt? : String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : VideoModelV4File, frame_images? : Array[VideoModelV4FrameImage], input_references? : Array[VideoModelV4File], generate_audio? : Bool, provider_options? : Map[String, Json], headers? : Map[String, String], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 pub fn VideoModelV4CallOptions::to_video_call_options(Self) -> VideoCallOptions
 
@@ -1410,7 +1753,6 @@ pub fn VideoResponse::new(Array[GeneratedVideo]) -> Self
 pub fn VideoResponse::with_diagnostics(Self, RequestMetadata?, ResponseMetadata?, Map[String, Json], Array[Warning]) -> Self
 pub fn VideoResponse::with_transport(Self, RequestMetadata, ResponseMetadata) -> Self
 
-#alias(LanguageModelV4Warning)
 pub(all) enum Warning {
   Unsupported(feature~ : String, details~ : String)
   Compatibility(feature~ : String, details~ : String)
@@ -1461,9 +1803,10 @@ pub(open) trait EmbeddingWireModel {
   async fn embed(Self, Array[String], EmbeddingOptions) -> EmbeddingBatchResponse
 }
 
-pub(open) trait Files {
+pub(open) trait FilesV4 {
+  fn specification_version(Self) -> String
   fn provider(Self) -> String
-  async fn upload_file(Self, FileUploadOptions) -> FileUploadResult
+  async fn upload_file(Self, FilesV4UploadFileCallOptions) -> FilesV4UploadFileResult
 }
 
 pub(open) trait ImageModelV4 {
@@ -1490,21 +1833,16 @@ pub(open) trait LanguageModelV4 {
   async fn do_stream(Self, LanguageModelV4CallOptions, async (LanguageModelV4StreamPart) -> Unit) -> LanguageModelV4StreamResult
 }
 
-pub(open) trait Provider {
+pub(open) trait ProviderV4 {
   fn specification_version(Self) -> String
-  fn provider_name(Self) -> String
-  fn language_model(Self, String) -> &LanguageModelV4? raise
-  fn completion_model(Self, String) -> &CompletionModel? raise
-  fn embedding_model(Self, String) -> &EmbeddingModelV4? raise
-  fn reranking_model(Self, String) -> &RerankingModel? raise
-  fn image_model(Self, String) -> &ImageModelV4? raise
-  fn video_model(Self, String) -> &VideoModelV4? raise
-  fn speech_model(Self, String) -> &SpeechModelV4? raise
+  fn language_model(Self, String) -> &LanguageModelV4 raise
+  fn embedding_model(Self, String) -> &EmbeddingModelV4 raise
+  fn image_model(Self, String) -> &ImageModelV4 raise
   fn transcription_model(Self, String) -> &TranscriptionModelV4? raise
-  fn speech_translation_model(Self, String) -> &SpeechTranslationModelV4? raise
-  fn realtime_model(Self, String) -> &RealtimeModelV4? raise
-  fn files(Self) -> &Files? raise
-  fn skills(Self) -> &Skills? raise
+  fn speech_model(Self, String) -> &SpeechModelV4? raise
+  fn reranking_model(Self, String) -> &RerankingModelV4? raise
+  fn files(Self) -> &FilesV4? raise
+  fn skills(Self) -> &SkillsV4? raise
 }
 
 pub(open) trait RealtimeFactoryV4 {
@@ -1535,15 +1873,17 @@ pub(open) trait RealtimeWireModel {
   fn build_session_config(Self, RealtimeSessionConfig) -> Json
 }
 
-pub(open) trait RerankingModel {
+pub(open) trait RerankingModelV4 {
+  fn specification_version(Self) -> String
   fn provider(Self) -> String
   fn model_id(Self) -> String
-  async fn rerank(Self, RerankingCallOptions) -> RerankingResponse
+  async fn do_rerank(Self, RerankingModelV4CallOptions) -> RerankingModelV4Result
 }
 
-pub(open) trait Skills {
+pub(open) trait SkillsV4 {
+  fn specification_version(Self) -> String
   fn provider(Self) -> String
-  async fn upload_skill(Self, SkillUploadOptions) -> SkillUploadResult
+  async fn upload_skill(Self, SkillsV4UploadSkillCallOptions) -> SkillsV4UploadSkillResult
 }
 
 pub(open) trait SpeechModelV4 {

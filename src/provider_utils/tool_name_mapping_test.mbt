@@ -66,3 +66,20 @@ test "tool name mapping matches AI SDK last-write collision behavior" {
   assert_eq(mapping.to_provider_tool_name("second-custom"), "same")
   assert_eq(mapping.to_custom_tool_name("same"), "second-custom")
 }
+
+///|
+test "V4 tool name mapping stays in the versioned provider contract" {
+  let mapping = create_v4_tool_name_mapping(
+    [
+      @provider.LanguageModelV4Tool::provider(
+        id="anthropic.computer-use",
+        name="custom-computer-tool",
+      ),
+      @provider.LanguageModelV4Tool::function("lookup", { "type": "object" }),
+    ],
+    Map([("anthropic.computer-use", "computer_use")]),
+  )
+  assert_eq(mapping.toProviderToolName("custom-computer-tool"), "computer_use")
+  assert_eq(mapping.toProviderToolName("lookup"), "lookup")
+  assert_eq(mapping.toCustomToolName("computer_use"), "custom-computer-tool")
+}

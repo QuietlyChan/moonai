@@ -26,6 +26,7 @@ async test "V4 generate_text and stream_text drive compatible completions" {
             )
           } else {
             assert_true(request_body.contains("\"stream\":true"))
+            assert_false(request_body.contains("\"top_k\""))
             connection.send_response(200, "OK", extra_headers={
               "Content-Type": "text/event-stream",
             })
@@ -55,14 +56,24 @@ async test "V4 generate_text and stream_text drive compatible completions" {
       "X-Request-Id": "completion-generate",
     })
     let deltas : Array[String] = []
-    let streamed = @ai.stream_text(model, prompt="MoonBit is", on_event=event => {
+    let mut starts = 0
+    let streamed = @ai.stream_text(model, prompt="MoonBit is", top_k=20.0, on_event=event => {
       match event {
+        @provider.V4StreamStart(warnings~) => {
+          starts = starts + 1
+          assert_true(
+            warnings.any(warning => {
+              warning is @provider.Unsupported(feature="topK", ..)
+            }),
+          )
+        }
         @provider.V4TextDelta(delta~, ..) => deltas.push(delta)
         _ => ()
       }
     })
     assert_eq(generated.text(), " productive")
     assert_eq(generated.usage.input_tokens.total, Some(2))
+    assert_eq(starts, 1)
     assert_eq(deltas.join(""), " fast.")
     assert_eq(streamed.usage.output_tokens.total, Some(2))
   }

@@ -106,6 +106,38 @@ pub fn ImageModelV4CallOptions::new(
 }
 
 ///|
+/// Lift the normalized image options used by the legacy wire contract into
+/// the V4 model call shape.
+pub fn ImageModelV4CallOptions::from_image_call_options(
+  options : ImageCallOptions,
+) -> ImageModelV4CallOptions {
+  ImageModelV4CallOptions::new(
+    prompt=options.prompt,
+    n=options.n,
+    size?=options.size,
+    aspect_ratio?=options.aspect_ratio,
+    seed?=options.seed,
+    files?=if options.files.length() == 0 {
+      None
+    } else {
+      Some(
+        [
+          for file in options.files => ImageModelV4File::from_image_file(file)
+        ],
+      )
+    },
+    mask?=match options.mask {
+      Some(file) => Some(ImageModelV4File::from_image_file(file))
+      None => None
+    },
+    provider_options=options.provider_options,
+    headers=options.headers,
+    retry_policy=options.retry_policy,
+    cancellation_token?=options.cancellation_token,
+  )
+}
+
+///|
 /// Image token usage in the V4 contract.
 pub(all) struct ImageModelV4Usage {
   input_tokens : Int?

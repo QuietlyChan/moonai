@@ -16,7 +16,7 @@ impl @provider_utils.HttpTransport for MiniMaxReasoningMockTransport with fn fet
   self.requests.push(request)
   @provider_utils.HttpResponse::text(
     status_code=200,
-    body="{\"id\":\"msg_minimax_reasoning\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"Counting the letters...\",\"signature\":\"sig_123\"},{\"type\":\"text\",\"text\":\"There are 3 r characters.\",\"citations\":[{\"type\":\"web_search_result_location\",\"url\":\"https://example.com\",\"title\":\"Example\"}]}],\"model\":\"minimax-m3\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":4,\"output_tokens\":30}}",
+    body="{\"id\":\"msg_minimax_reasoning\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"Counting the letters...\",\"signature\":\"sig_123\"},{\"type\":\"text\",\"text\":\"There are 3 r characters.\",\"citations\":[{\"type\":\"web_search_result_location\",\"cited_text\":\"There are 3 r characters.\",\"url\":\"https://example.com\",\"title\":\"Example\",\"encrypted_index\":\"enc-1\"}]}],\"model\":\"minimax-m3\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":4,\"output_tokens\":30}}",
   )
 }
 
@@ -31,12 +31,9 @@ impl @provider_utils.HttpTransport for MiniMaxReasoningMockTransport with fn fet
 ///|
 async test "MiniMax forwards typed thinking options through Anthropic Messages" {
   let transport = MiniMaxReasoningMockTransport::new()
-  let model = MiniMaxLanguageModelV4::new(
-      create_minimax(api_key="test-key", http_transport=transport, id_generator=() => {
-        "minimax-source-id"
-      }).chat_wire("minimax-m3"),
-    )
-    as &@provider.LanguageModelV4
+  let model = create_minimax(api_key="test-key", http_transport=transport, id_generator=() => {
+    "minimax-source-id"
+  }).chat("minimax-m3")
   let result = @ai.generate_text(
     model,
     prompt="Count the letter r.",
@@ -48,12 +45,12 @@ async test "MiniMax forwards typed thinking options through Anthropic Messages" 
   assert_eq(result.usage.input_tokens.total, Some(4))
   assert_eq(result.usage.output_tokens.total, Some(30))
   assert_eq(result.finish_reason.raw, Some("end_turn"))
-  match result.content[2] {
-    @provider.GeneratedSourceOutput(@provider.GeneratedUrlSource(id~, ..)) =>
-      assert_eq(id, "minimax-source-id")
+  assert_eq(result.sources.length(), 1)
+  match result.sources[0] {
+    @provider.V4UrlSource(id~, ..) => assert_eq(id, "minimax-source-id")
     _ => fail("expected MiniMax citation source")
   }
-  assert_true(result.usage.raw is Some({ "output_tokens": 30, .. }))
+  assert_true(result.final_step.usage.raw is Some({ "output_tokens": 30, .. }))
   assert_eq(transport.requests.length(), 1)
   let request = transport.requests[0]
   assert_eq(request.url, "https://api.minimax.io/anthropic/v1/messages")
@@ -81,10 +78,7 @@ async test "MiniMax uses MINIMAX_API_KEY for its Anthropic-compatible model" {
   })
   @env.set_env_var(environment_name, "environment-key")
   let transport = MiniMaxReasoningMockTransport::new()
-  let model = MiniMaxLanguageModelV4::new(
-      create_minimax(http_transport=transport).chat_wire("minimax-m3"),
-    )
-    as &@provider.LanguageModelV4
+  let model = create_minimax(http_transport=transport).chat("minimax-m3")
   let result = @ai.generate_text(
     model,
     prompt="Count the letter r.",

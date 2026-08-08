@@ -62,27 +62,6 @@ pub fn ResponseMetadata::new(
 }
 
 ///|
-/// Extract the standard identity fields that providers commonly include in a
-/// JSON response or stream chunk.
-pub fn ResponseMetadata::from_json(json : Json) -> ResponseMetadata {
-  let id = match json {
-    { "id": String(value), .. } => Some(value)
-    _ => None
-  }
-  let model_id = match json {
-    { "model": String(value), .. } => Some(value)
-    { "model_id": String(value), .. } => Some(value)
-    _ => None
-  }
-  let created_at = match json {
-    { "created_at": Number(value, ..), .. } => Some(value.to_int())
-    { "created": Number(value, ..), .. } => Some(value.to_int())
-    _ => None
-  }
-  ResponseMetadata::new(id?, model_id?, created_at?)
-}
-
-///|
 /// Return whether this metadata value contains no transport or provider data.
 pub fn ResponseMetadata::is_empty(self : ResponseMetadata) -> Bool {
   self.id is None &&
@@ -112,22 +91,145 @@ pub suberror NoSuchProviderReferenceError {
 } derive(Debug)
 
 ///|
-/// A non-successful HTTP response returned by a provider API.
+/// A provider API call failure, including invalid successful responses.
 ///
 /// This mirrors AI SDK's structured API call error boundary. Credentials can
 /// be present in `request_headers`; callers should redact them before logging.
+/// `status_code` is `None` when the transport never received an HTTP response.
 pub(all) suberror APICallError {
   APICallError(
     message~ : String,
     url~ : String,
     request_body~ : String,
     request_headers~ : Map[String, String],
-    status_code~ : Int,
+    status_code~ : Int?,
     response_headers~ : Map[String, String],
     response_body~ : String,
-    is_retryable~ : Bool
+    is_retryable~ : Bool,
+    data~ : Json?,
+    cause~ : String?
   )
 } derive(Debug)
+
+///|
+/// Raised when a response or event payload cannot be parsed as JSON.
+///
+/// MoonBit JSON values do not have JavaScript prototypes, so the security
+/// filtering in AI SDK's `secureJsonParse` is unnecessary here. The typed
+/// parse boundary and original text are still preserved.
+pub(all) suberror JSONParseError {
+  JSONParseError(text~ : String, cause~ : String)
+} derive(Debug, Eq)
+
+///|
+/// Construct a JSON parse error from the original text and parser diagnostic.
+pub fn JSONParseError::new(text~ : String, cause~ : String) -> JSONParseError {
+  JSONParseError(text~, cause~)
+}
+
+///|
+/// Return the AI SDK-style human-readable JSON parse diagnostic.
+pub fn JSONParseError::message(self : JSONParseError) -> String {
+  match self {
+    JSONParseError(text~, cause~) =>
+      "JSON parsing failed: Text: \{text}.\nError message: \{cause}"
+  }
+}
+
+///|
+/// Optional location and entity information for a type validation failure.
+pub(all) struct TypeValidationContext {
+  field : String?
+  entity_name : String?
+  entity_id : String?
+} derive(Debug, Eq)
+
+///|
+/// Construct validation context using AI SDK's field/entity vocabulary.
+pub fn TypeValidationContext::new(
+  field? : String,
+  entity_name? : String,
+  entity_id? : String,
+) -> TypeValidationContext {
+  { field, entity_name, entity_id }
+}
+
+///|
+/// Raised when a parsed JSON value does not satisfy a typed boundary.
+pub(all) suberror TypeValidationError {
+  TypeValidationError(
+    value~ : Json,
+    cause~ : String,
+    context~ : TypeValidationContext?
+  )
+} derive(Debug)
+
+///|
+/// Construct a typed validation error.
+pub fn TypeValidationError::new(
+  value~ : Json,
+  cause~ : String,
+  context? : TypeValidationContext,
+) -> TypeValidationError {
+  TypeValidationError(value~, cause~, context~)
+}
+
+///|
+/// Return the AI SDK-style human-readable type validation diagnostic.
+pub fn TypeValidationError::message(self : TypeValidationError) -> String {
+  match self {
+    TypeValidationError(value~, cause~, context~) => {
+      let mut prefix = "Type validation failed"
+      match context {
+        Some(value) => {
+          if value.field is Some(field) {
+            prefix = prefix + " for " + field
+          }
+          let entities : Array[String] = []
+          if value.entity_name is Some(name) {
+            entities.push(name)
+          }
+          if value.entity_id is Some(id) {
+            entities.push("id: \"" + id + "\"")
+          }
+          if entities.length() > 0 {
+            prefix = prefix + " (" + entities.join(", ") + ")"
+          }
+        }
+        None => ()
+      }
+      prefix + ": Value: " + value.stringify() + ".\nError message: " + cause
+    }
+  }
+}
+
+///|
+/// Raised when a streaming HTTP response has no readable body.
+pub(all) suberror EmptyResponseBodyError {
+  EmptyResponseBodyError(message~ : String)
+} derive(Debug, Eq)
+
+///|
+/// Construct an empty-body error with AI SDK's default message.
+pub fn EmptyResponseBodyError::new(
+  message? : String = "Empty response body",
+) -> EmptyResponseBodyError {
+  EmptyResponseBodyError(message~)
+}
+
+///|
+/// Raised when a provider completes without generating any content.
+pub(all) suberror NoContentGeneratedError {
+  NoContentGeneratedError(message~ : String)
+} derive(Debug, Eq)
+
+///|
+/// Construct a no-content error with AI SDK's default message.
+pub fn NoContentGeneratedError::new(
+  message? : String = "No content generated.",
+) -> NoContentGeneratedError {
+  NoContentGeneratedError(message~)
+}
 
 ///|
 /// Raised when a caller supplies an invalid high-level option.
@@ -144,6 +246,53 @@ pub(all) suberror InvalidArgumentError {
 /// contract before any provider request is prepared.
 pub(all) suberror InvalidPromptError {
   InvalidPromptError(message~ : String)
+} derive(Debug, Eq)
+
+///|
+/// Model family requested from a provider factory.
+pub(all) enum NoSuchModelType {
+  LanguageModel
+  EmbeddingModel
+  ImageModel
+  TranscriptionModel
+  SpeechModel
+  RerankingModel
+  VideoModel
+} derive(Debug, Eq)
+
+///|
+/// Raised when a provider factory cannot create the requested model.
+///
+/// This error belongs to the provider contract, matching AI SDK's
+/// `NoSuchModelError` ownership in `@ai-sdk/provider`.
+pub(all) suberror NoSuchModelError {
+  NoSuchModelError(model_id~ : String, model_type~ : NoSuchModelType)
+} derive(Debug, Eq)
+
+///|
+/// Return the requested provider-specific model identifier.
+pub fn NoSuchModelError::model_id(self : NoSuchModelError) -> String {
+  match self {
+    NoSuchModelError(model_id~, ..) => model_id
+  }
+}
+
+///|
+/// Return the requested provider model family.
+pub fn NoSuchModelError::model_type(self : NoSuchModelError) -> NoSuchModelType {
+  match self {
+    NoSuchModelError(model_type~, ..) => model_type
+  }
+}
+
+///|
+/// Raised when a client-executed tool call has no matching result in a
+/// normalized prompt.
+///
+/// Prompt preparation owns the validation, while the shared provider package
+/// owns the error so every high-level entry point can expose one stable type.
+pub(all) suberror MissingToolResultsError {
+  MissingToolResultsError(tool_call_ids~ : Array[String])
 } derive(Debug, Eq)
 
 ///|

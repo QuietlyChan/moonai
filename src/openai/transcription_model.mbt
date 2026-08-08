@@ -1,14 +1,14 @@
 ///|
 /// Official OpenAI audio transcription model.
-pub struct OpenAITranscriptionModel {
-  priv provider_name : String
-  priv base_url : String
-  priv model_id : String
-  priv api_key : String
-  priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
-  priv http_transport : &@provider_utils.HttpTransport
-  priv websocket_connector : &@provider_utils.WebSocketConnector
+priv struct OpenAITranscriptionModel {
+  provider_name : String
+  base_url : String
+  model_id : String
+  api_key : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  http_transport : &@provider_utils.HttpTransport
+  websocket_connector : &@provider_utils.WebSocketConnector
 }
 
 ///|
@@ -72,7 +72,7 @@ fn openai_is_realtime_transcription_model(model_id : String) -> Bool {
 ///|
 fn OpenAITranscriptionModel::request_headers(
   self : OpenAITranscriptionModel,
-  call_options : @provider.TranscriptionCallOptions,
+  call_headers : Map[String, String],
 ) -> Map[String, String] raise @provider.LoadAPIKeyError {
   let headers : Map[String, String] = Map([("Accept-Encoding", "identity")])
   headers["Authorization"] = "Bearer \{load_openai_api_key(self.api_key)}"
@@ -81,14 +81,14 @@ fn OpenAITranscriptionModel::request_headers(
       @provider_utils.merge_headers(headers, self.headers),
       ["moonai/openai/\{VERSION}"],
     ),
-    call_options.headers,
+    call_headers,
   )
 }
 
 ///|
 fn OpenAITranscriptionModel::stream_request_headers(
   self : OpenAITranscriptionModel,
-  call_options : @provider.TranscriptionStreamOptions,
+  call_headers : Map[String, String],
 ) -> Map[String, String] raise @provider.LoadAPIKeyError {
   let headers : Map[String, String] = Map([])
   headers["Authorization"] = "Bearer \{load_openai_api_key(self.api_key)}"
@@ -97,7 +97,7 @@ fn OpenAITranscriptionModel::stream_request_headers(
       @provider_utils.merge_headers(headers, self.headers),
       ["moonai/openai/\{VERSION}"],
     ),
-    call_options.headers,
+    call_headers,
   )
 }
 
@@ -130,14 +130,10 @@ fn openai_transcription_string_array(
 
 ///|
 fn parse_openai_transcription_options(
-  call_options : @provider.TranscriptionCallOptions,
-  provider_name : String,
+  provider_options : Map[String, Json],
+  _provider_name : String,
 ) -> ParsedOpenAITranscriptionOptions {
-  let resolution = @provider_utils.resolve_provider_options(
-    call_options.provider_options,
-    provider_name~,
-    aliases=["openai"],
-  )
+  let resolution = resolve_official_openai_provider_options(provider_options)
   let provided = resolution.namespace_key is Some(_)
   let reader = @provider_utils.ProviderOptionsReader::new(
     resolution,
@@ -207,14 +203,10 @@ fn openai_transcription_stream_include(
 
 ///|
 fn parse_openai_transcription_stream_options(
-  call_options : @provider.TranscriptionStreamOptions,
-  provider_name : String,
+  provider_options : Map[String, Json],
+  _provider_name : String,
 ) -> ParsedOpenAITranscriptionStreamOptions {
-  let resolution = @provider_utils.resolve_provider_options(
-    call_options.provider_options,
-    provider_name~,
-    aliases=["openai"],
-  )
+  let resolution = resolve_official_openai_provider_options(provider_options)
   let reader = @provider_utils.ProviderOptionsReader::new(
     resolution,
     path="providerOptions.openai",
@@ -317,7 +309,8 @@ async fn send_openai_transcription_audio(
     match audio.read_next() {
       Some(chunk) => {
         let encoded = match chunk {
-          @provider.AudioBytes(data) => @base64.encode(data)
+          @provider.AudioBytes(data) =>
+            @provider_utils.convert_bytes_to_base64(data)
           @provider.AudioBase64(data) => data
         }
         connection.send_text(
@@ -360,7 +353,7 @@ fn append_openai_transcription_text(
 ///|
 fn OpenAITranscriptionModel::form_data(
   self : OpenAITranscriptionModel,
-  call_options : @provider.TranscriptionCallOptions,
+  call_options : @provider.TranscriptionModelV4CallOptions,
   parsed : ParsedOpenAITranscriptionOptions,
 ) -> @provider_utils.MultipartFormData raise {
   let extension = @provider_utils.media_type_to_extension(
@@ -544,8 +537,9 @@ fn decode_openai_transcription_response(
   json : Json,
   model_id : String,
   provider_name : String,
+  request_created_at : Int,
   warnings : Array[@provider.Warning],
-) -> @provider.TranscriptionResponse raise {
+) -> @provider.TranscriptionModelV4Result raise {
   if openai_error_message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI Transcription request failed: \{message}",
@@ -568,43 +562,48 @@ fn decode_openai_transcription_response(
     { "duration": Number(value, ..), .. } => Some(value)
     _ => None
   }
-  let json_metadata = @provider.ResponseMetadata::from_json(json)
+  let json_metadata = @provider_utils.create_language_model_response_metadata(
+    id?=@provider_utils.json_string_field(json, "id"),
+    model?=@provider_utils.json_string_field(json, "model"),
+    created?=@provider_utils.json_int_field_opt(json, "created"),
+  )
   let response_metadata = @provider.merge_response_metadata(
     Some(json_metadata),
-    @provider.ResponseMetadata::new(model_id~),
+    @provider.ResponseMetadata::new(model_id~, created_at=request_created_at),
   )
-  @provider.TranscriptionResponse::new(
+  @provider.TranscriptionModelV4Result::new(
     text~,
     segments=openai_transcription_segments(json),
     language?,
-    duration_seconds?,
-  ).with_diagnostics(
-    None,
-    Some(response_metadata),
-    @provider_utils.provider_metadata_from_json(json, provider_name),
-    warnings,
+    duration_in_seconds?=duration_seconds,
+    response=response_metadata,
+    provider_metadata=@provider_utils.provider_metadata_from_json(
+      json, provider_name,
+    ),
+    warnings~,
   )
 }
 
 ///|
-async fn OpenAITranscriptionModel::transcribe_audio(
+async fn OpenAITranscriptionModel::transcribe_audio_v4(
   self : OpenAITranscriptionModel,
-  call_options : @provider.TranscriptionCallOptions,
-) -> @provider.TranscriptionResponse {
+  call_options : @provider.TranscriptionModelV4CallOptions,
+) -> @provider.TranscriptionModelV4Result {
+  let request_created_at = (@env.now() / 1000UL).to_int()
   if openai_is_realtime_transcription_model(self.model_id) {
     raise @provider.UnsupportedFunctionalityError(
       functionality="non-streaming transcription with \{self.model_id}",
     )
   }
   let parsed = parse_openai_transcription_options(
-    call_options,
+    call_options.provider_options,
     self.provider_name,
   )
   let cancellation_token = call_options.cancellation_token
   let response = @provider_utils.post_multipart(
     provider_name=self.provider_name,
     url=self.url(),
-    headers=self.request_headers(call_options),
+    headers=self.request_headers(call_options.headers),
     form_data=self.form_data(call_options, parsed),
     timeout_ms=self.idle_timeout_ms,
     retry_policy=call_options.retry_policy,
@@ -612,20 +611,37 @@ async fn OpenAITranscriptionModel::transcribe_audio(
     error_to_message=openai_error_message,
     transport=self.http_transport,
   )
-  decode_openai_transcription_response(
-    response.value,
-    self.model_id,
-    self.provider_name,
-    parsed.warnings,
-  ).with_transport(response.request, response.response)
+  let decoded = @provider_utils.handle_json_response(response, value => {
+    decode_openai_transcription_response(
+      value,
+      self.model_id,
+      self.provider_name,
+      request_created_at,
+      parsed.warnings,
+    )
+  })
+  @provider.TranscriptionModelV4Result::new(
+    text=decoded.text,
+    segments=decoded.segments,
+    language?=decoded.language,
+    duration_in_seconds?=decoded.duration_in_seconds,
+    warnings=decoded.warnings,
+    request=response.request,
+    response=@provider.merge_response_metadata(
+      decoded.response,
+      response.response,
+    ),
+    provider_metadata=decoded.provider_metadata,
+  )
 }
 
 ///|
-async fn OpenAITranscriptionModel::stream_transcription(
+async fn OpenAITranscriptionModel::stream_transcription_v4(
   self : OpenAITranscriptionModel,
-  call_options : @provider.TranscriptionStreamOptions,
-  on_event : async (@provider.TranscriptionStreamEvent) -> Unit,
-) -> @provider.TranscriptionResponse {
+  call_options : @provider.TranscriptionModelV4StreamOptions,
+  on_event : async (@provider.TranscriptionModelV4StreamPart) -> Unit,
+) -> @provider.TranscriptionModelV4Result {
+  let request_created_at = (@env.now() / 1000UL).to_int()
   guard openai_is_realtime_transcription_model(self.model_id) else {
     raise @provider.UnsupportedFunctionalityError(
       functionality="streaming transcription with \{self.model_id}",
@@ -633,7 +649,7 @@ async fn OpenAITranscriptionModel::stream_transcription(
   }
   @provider.check_cancellation(call_options.cancellation_token)
   let parsed = parse_openai_transcription_stream_options(
-    call_options,
+    call_options.provider_options,
     self.provider_name,
   )
   let session_update = openai_realtime_transcription_session(
@@ -648,7 +664,7 @@ async fn OpenAITranscriptionModel::stream_transcription(
     ),
   )
   let realtime = openai_realtime_connection_options(
-    self.stream_request_headers(call_options),
+    self.stream_request_headers(call_options.headers),
   )
   defer call_options.audio.cancel()
   let connection = self.websocket_connector.connect(
@@ -657,9 +673,8 @@ async fn OpenAITranscriptionModel::stream_transcription(
     realtime.headers,
   )
   defer connection.close()
-  on_event(@provider.TranscriptionStreamStart(warnings=parsed.warnings))
+  on_event(@provider.TranscriptionV4StreamStart(warnings=parsed.warnings))
   connection.send_text(session_update.stringify())
-  let deltas = StringBuilder::new()
   let mut final_text = ""
   let mut final_id : String? = None
   @async.with_task_group() <| group => {
@@ -670,6 +685,7 @@ async fn OpenAITranscriptionModel::stream_transcription(
         call_options.cancellation_token,
       )
     }
+    defer sender.cancel()
     match call_options.cancellation_token {
       Some(token) =>
         group.spawn_bg(no_wait=true, allow_failure=true) <| () => {
@@ -696,16 +712,15 @@ async fn OpenAITranscriptionModel::stream_transcription(
         None => ()
         Some(event) => {
           if call_options.include_raw_chunks {
-            on_event(@provider.TranscriptionRaw(event))
+            on_event(@provider.TranscriptionV4Raw(event))
           }
           match @provider_utils.json_string_field(event, "type") {
             Some("conversation.item.input_audio_transcription.delta") => {
               let delta = @provider_utils.json_string_field(event, "delta").unwrap_or(
                 "",
               )
-              deltas.write_string(delta)
               on_event(
-                @provider.TranscriptionDelta(
+                @provider.TranscriptionV4TranscriptDelta(
                   id=@provider_utils.json_string_field(event, "item_id"),
                   delta~,
                   provider_metadata=Map([]),
@@ -715,7 +730,7 @@ async fn OpenAITranscriptionModel::stream_transcription(
             Some("conversation.item.input_audio_transcription.completed") => {
               final_text = @provider_utils.json_string_field(
                 event, "transcript",
-              ).unwrap_or(deltas.to_string())
+              ).unwrap_or("")
               final_id = @provider_utils.json_string_field(event, "item_id")
               finished = true
             }
@@ -723,7 +738,11 @@ async fn OpenAITranscriptionModel::stream_transcription(
               let message = openai_error_message(event).unwrap_or(
                 "OpenAI realtime error",
               )
-              on_event(@provider.TranscriptionStreamError(message))
+              on_event(
+                @provider.TranscriptionV4Error(
+                  @provider.StreamErrorInfo::new(message, data=event),
+                ),
+              )
               fail(message)
             }
             _ => ()
@@ -731,121 +750,81 @@ async fn OpenAITranscriptionModel::stream_transcription(
         }
       }
     }
-    sender.cancel()
   }
   connection.send_close(1000, None)
+  if final_id is Some(id) {
+    on_event(
+      @provider.TranscriptionV4TranscriptFinal(
+        id=Some(id),
+        text=final_text,
+        start_second=None,
+        end_second=None,
+        channel_index=None,
+        provider_metadata=Map([]),
+      ),
+    )
+  }
   on_event(
-    @provider.TranscriptionFinal(
-      id=final_id,
-      text=final_text,
-      start_second=None,
-      end_second=None,
-      channel_index=None,
-      provider_metadata=Map([]),
-    ),
-  )
-  on_event(
-    @provider.TranscriptionFinish(
+    @provider.TranscriptionV4Finish(
       text=final_text,
       segments=[],
       language=parsed.language,
-      duration_seconds=None,
+      duration_in_seconds=None,
       provider_metadata=Map([]),
     ),
   )
-  @provider.TranscriptionResponse::new(
+  @provider.TranscriptionModelV4Result::new(
     text=final_text,
     language?=parsed.language,
-  ).with_diagnostics(
-    Some(
-      @provider.RequestMetadata::new(
-        url~,
-        headers=realtime.headers,
-        body=session_update.stringify(),
-      ),
+    request=@provider.RequestMetadata::new(
+      url~,
+      headers=realtime.headers,
+      body=session_update.stringify(),
     ),
-    Some(@provider.ResponseMetadata::new(model_id=self.model_id)),
-    Map([]),
-    parsed.warnings,
+    response=@provider.ResponseMetadata::new(
+      model_id=self.model_id,
+      created_at=request_created_at,
+    ),
+    warnings=parsed.warnings,
   )
 }
 
 ///|
-pub impl @provider.TranscriptionWireModel for OpenAITranscriptionModel with fn provider(
-  self : OpenAITranscriptionModel,
-) -> String {
-  self.provider_name
-}
-
-///|
-pub impl @provider.TranscriptionWireModel for OpenAITranscriptionModel with fn model_id(
-  self : OpenAITranscriptionModel,
-) -> String {
-  self.model_id
-}
-
-///|
-pub impl @provider.TranscriptionWireModel for OpenAITranscriptionModel with fn generate(
-  self : OpenAITranscriptionModel,
-  call_options : @provider.TranscriptionCallOptions,
-) -> @provider.TranscriptionResponse {
-  self.transcribe_audio(call_options)
-}
-
-///|
-pub impl @provider.TranscriptionWireModel for OpenAITranscriptionModel with fn stream(
-  self : OpenAITranscriptionModel,
-  call_options : @provider.TranscriptionStreamOptions,
-  on_event : async (@provider.TranscriptionStreamEvent) -> Unit,
-) -> @provider.TranscriptionResponse {
-  self.stream_transcription(call_options, on_event)
-}
-
-///|
-pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn specification_version(
+impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn specification_version(
   _self,
 ) -> String {
   "v4"
 }
 
 ///|
-pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn provider(
+impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn provider(
   self,
 ) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn model_id(
+impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn model_id(
   self,
 ) -> String {
   self.model_id
 }
 
 ///|
-pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_generate(
+impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_generate(
   self,
   options,
 ) {
-  @provider.TranscriptionModelV4Result::from_transcription_response(
-    self.transcribe_audio(options.to_transcription_call_options()),
-  )
+  self.transcribe_audio_v4(options)
 }
 
 ///|
-pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_stream(
+impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_stream(
   self,
   options,
   on_part,
 ) {
-  let response = self.stream_transcription(
-    options.to_transcription_stream_options(),
-    event => {
-      on_part(
-        @provider.TranscriptionModelV4StreamPart::from_stream_event(event),
-      )
-    },
-  )
+  let response = self.stream_transcription_v4(options, on_part)
   @provider.TranscriptionModelV4StreamResult::new(
     request?=response.request,
     response?=response.response,

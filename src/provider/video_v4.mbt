@@ -318,6 +318,44 @@ pub fn VideoModelV4CallOptions::to_video_call_options(
 }
 
 ///|
+/// Lift the legacy video call shape into the V4 provider contract.
+///
+/// Provider implementations can keep legacy entry points as thin adapters
+/// while making the V4 request path their single protocol implementation.
+pub fn VideoModelV4CallOptions::from_video_call_options(
+  options : VideoCallOptions,
+) -> VideoModelV4CallOptions {
+  VideoModelV4CallOptions::new(
+    prompt=options.prompt,
+    n=options.n,
+    aspect_ratio?=options.aspect_ratio,
+    resolution?=options.resolution,
+    duration?=options.duration,
+    fps?=options.fps,
+    seed?=options.seed,
+    image?=match options.image {
+      Some(value) => Some(VideoModelV4File::from_video_input(value))
+      None => None
+    },
+    frame_images=[
+      for value in options.frame_images => {
+        VideoModelV4FrameImage::from_video_frame_image(value)
+      }
+    ],
+    input_references=[
+      for value in options.input_references => {
+        VideoModelV4File::from_video_input(value)
+      }
+    ],
+    generate_audio?=options.generate_audio,
+    headers=options.headers,
+    provider_options=options.provider_options,
+    retry_policy=options.retry_policy,
+    cancellation_token?=options.cancellation_token,
+  )
+}
+
+///|
 /// Versioned provider contract for video generation.
 pub(open) trait VideoModelV4 {
   fn specification_version(Self) -> String

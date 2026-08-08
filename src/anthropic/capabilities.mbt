@@ -32,6 +32,32 @@ fn anthropic_capabilities(
 }
 
 ///|
+/// Match legacy Claude families without treating future version prefixes such
+/// as `claude-30`, `claude-v20`, or `claude-instantaneous` as legacy models.
+fn is_legacy_anthropic_model(model_id : String) -> Bool {
+  let parts = model_id.split("claude-").to_array()
+  for index = 1; index < parts.length(); index = index + 1 {
+    let suffix = parts[index]
+    if suffix == "instant" ||
+      suffix.has_prefix("instant-") ||
+      suffix == "2" ||
+      suffix.has_prefix("2-") ||
+      suffix.has_prefix("2.") ||
+      suffix.has_prefix("2:") ||
+      suffix == "v2" ||
+      suffix.has_prefix("v2-") ||
+      suffix.has_prefix("v2.") ||
+      suffix.has_prefix("v2:") ||
+      suffix == "3" ||
+      suffix.has_prefix("3-") ||
+      suffix.has_prefix("3.") {
+      return true
+    }
+  }
+  false
+}
+
+///|
 /// Resolve the same model-family defaults used by the TypeScript Anthropic
 /// provider. Unknown non-Claude endpoints keep conservative limits, while
 /// future Claude families inherit the newest known capability envelope.
@@ -60,10 +86,7 @@ fn get_anthropic_model_capabilities(
     anthropic_capabilities(32000, false, false, false, false, false, true)
   } else if model_id.contains("claude-3-haiku") {
     anthropic_capabilities(4096, false, false, false, false, false, true)
-  } else if model_id.contains("claude-instant") ||
-    model_id.contains("claude-v2") ||
-    model_id.contains("claude-2") ||
-    model_id.contains("claude-3") {
+  } else if is_legacy_anthropic_model(model_id) {
     anthropic_capabilities(4096, false, false, false, false, false, false)
   } else if model_id.contains("claude-") {
     anthropic_capabilities(128000, true, true, true, true, true, false)

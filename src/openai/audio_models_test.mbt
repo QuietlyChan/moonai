@@ -95,6 +95,7 @@ async test "official OpenAI speech and transcription own their transports" {
       speech.warnings[0] is @provider.Unsupported(feature="language", ..),
     )
     assert_eq(speech.response.unwrap().model_id, Some("tts-1"))
+    assert_true(speech.response.unwrap().created_at is Some(_))
     assert_eq(speech.response.unwrap().status_code, Some(200))
     let transcription = @ai.transcribe(
       provider.transcription("whisper-1"),
@@ -122,6 +123,7 @@ async test "official OpenAI speech and transcription own their transports" {
       ),
     ])
     assert_eq(transcription.response.unwrap().model_id, Some("whisper-1"))
+    assert_true(transcription.response.unwrap().created_at is Some(_))
     assert_true(
       transcription.request.unwrap().body.contains(
         "<file name=\"file\" filename=\"audio.wav\" type=\"audio/x-wav\" bytes=9>",
@@ -166,7 +168,7 @@ async test "official OpenAI speech surfaces typed binary API errors" {
         ..
       ) => {
         assert_eq(message, "invalid voice")
-        assert_eq(status_code, 400)
+        assert_eq(status_code, Some(400))
         assert_true(request_body.contains("\"model\":\"tts-1\""))
         assert_false(is_retryable)
       }

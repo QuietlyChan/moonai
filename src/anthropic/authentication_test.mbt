@@ -16,7 +16,7 @@ impl @provider_utils.HttpTransport for AnthropicAuthenticationMockTransport with
   self.requests.push(request)
   @provider_utils.HttpResponse::text(
     status_code=200,
-    body="{\"id\":\"msg_env\",\"model\":\"claude-test\",\"content\":[{\"type\":\"text\",\"text\":\"ok\"}],\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+    body="{\"type\":\"message\",\"id\":\"msg_env\",\"model\":\"claude-test\",\"content\":[{\"type\":\"text\",\"text\":\"ok\"}],\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   )
 }
 
@@ -38,13 +38,10 @@ async test "Anthropic loads its API key from the environment" {
   })
   @env.set_env_var(environment_name, "environment-key")
   let transport = AnthropicAuthenticationMockTransport::new()
-  let model = AnthropicLanguageModelV4::new(
-      create_anthropic(
-        base_url="https://mock.anthropic.test/v1",
-        http_transport=transport,
-      ).messages_wire("claude-test"),
-    )
-    as &@provider.LanguageModelV4
+  let model = create_anthropic(
+    base_url="https://mock.anthropic.test/v1",
+    http_transport=transport,
+  ).messages("claude-test")
   let response = @ai.generate_text(
     model,
     prompt="hello",

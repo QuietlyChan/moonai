@@ -4,6 +4,17 @@ async fn bind_test_server() -> @http.Server {
 }
 
 ///|
+fn open_responses_test_model(
+  provider_name : String,
+  url~ : String,
+  api_key? : String = "",
+) -> &@provider.LanguageModelV4 {
+  create_open_responses(provider_name~, url~, api_key~, idle_timeout_ms=2_000).language_model(
+    "test-model",
+  )
+}
+
+///|
 async test "streamText drives an Open Responses HTTP SSE request" {
   @async.with_task_group() <| group => {
     let server = bind_test_server()
@@ -36,15 +47,11 @@ async test "streamText drives an Open Responses HTTP SSE request" {
         max_connections=1,
       )
     }
-    let model = open_responses_wire(
-      model_id="test-model",
-      provider_name="local-test",
+    let model = open_responses_test_model(
+      "local-test",
       url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
       api_key="test-key",
-      idle_timeout_ms=2_000,
     )
-    let model = OpenResponsesLanguageModelV4::new(model)
-      as &@provider.LanguageModelV4
     let deltas : Array[String] = []
     let response = @ai.stream_text(model, prompt="hello", on_event=event => {
       match event {
@@ -72,6 +79,37 @@ async test "streamText drives an Open Responses HTTP SSE request" {
 }
 
 ///|
+async test "streamText finalizes Open Responses at normal EOF without a terminal frame" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let _ = body.read_all()
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/event-stream",
+          })
+          connection.write(
+            "data: {\"type\":\"response.output_item.added\",\"item\":{\"id\":\"msg_eof\",\"type\":\"message\"}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg_eof\",\"delta\":\"EOF response\"}\n\n",
+          )
+        },
+        max_connections=1,
+      )
+    }
+    let model = open_responses_test_model(
+      "local-test",
+      url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
+    )
+    let response = @ai.stream_text(model, prompt="hello")
+    assert_eq(response.text(), "EOF response")
+    assert_eq(response.finish_reason.unified, @provider.V4FinishOther)
+  }
+}
+
+///|
 async test "generateText drives an Open Responses JSON request" {
   @async.with_task_group() <| group => {
     let server = bind_test_server()
@@ -95,15 +133,11 @@ async test "generateText drives an Open Responses JSON request" {
         max_connections=1,
       )
     }
-    let model = open_responses_wire(
-      model_id="test-model",
-      provider_name="local-test",
+    let model = open_responses_test_model(
+      "local-test",
       url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
       api_key="test-key",
-      idle_timeout_ms=2_000,
     )
-    let model = OpenResponsesLanguageModelV4::new(model)
-      as &@provider.LanguageModelV4
     let response = @ai.generate_text(model, prompt="hello", headers={
       "X-Request-Id": "responses-generate",
     })
@@ -152,14 +186,10 @@ async test "HTTP 200 response errors use the typed API call boundary" {
         max_connections=1,
       )
     }
-    let model = open_responses_wire(
-      model_id="test-model",
-      provider_name="local-test",
+    let model = open_responses_test_model(
+      "local-test",
       url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
-      idle_timeout_ms=2_000,
     )
-    let model = OpenResponsesLanguageModelV4::new(model)
-      as &@provider.LanguageModelV4
     try
       @ai.generate_text(
         model,
@@ -169,7 +199,7 @@ async test "HTTP 200 response errors use the typed API call boundary" {
     catch {
       @provider.APICallError(
         message="context exhausted",
-        status_code=400,
+        status_code=Some(400),
         request_body~,
         response_headers~,
         response_body~,
@@ -205,14 +235,10 @@ async test "HTTP 200 responses without output use the typed API call boundary" {
         max_connections=1,
       )
     }
-    let model = open_responses_wire(
-      model_id="test-model",
-      provider_name="local-test",
+    let model = open_responses_test_model(
+      "local-test",
       url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
-      idle_timeout_ms=2_000,
     )
-    let model = OpenResponsesLanguageModelV4::new(model)
-      as &@provider.LanguageModelV4
     try
       @ai.generate_text(
         model,
@@ -222,7 +248,7 @@ async test "HTTP 200 responses without output use the typed API call boundary" {
     catch {
       @provider.APICallError(
         message="Responses API returned no output (max_output_tokens)",
-        status_code=500,
+        status_code=Some(500),
         is_retryable=false,
         ..
       ) => ()
@@ -252,14 +278,10 @@ async test "JSON provider failures expose typed API call diagnostics" {
         max_connections=1,
       )
     }
-    let model = open_responses_wire(
-      model_id="test-model",
-      provider_name="local-test",
+    let model = open_responses_test_model(
+      "local-test",
       url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
-      idle_timeout_ms=2_000,
     )
-    let model = OpenResponsesLanguageModelV4::new(model)
-      as &@provider.LanguageModelV4
     try
       @ai.generate_text(
         model,
@@ -280,7 +302,7 @@ async test "JSON provider failures expose typed API call diagnostics" {
         assert_eq(message, "invalid request")
         assert_true(url.has_suffix("/v1/responses"))
         assert_true(request_body.contains("\"model\":\"test-model\""))
-        assert_eq(status_code, 400)
+        assert_eq(status_code, Some(400))
         assert_eq(response_headers["x-error-id"], "error-json")
         assert_true(response_body.contains("bad_request"))
         assert_eq(is_retryable, false)
@@ -310,14 +332,10 @@ async test "SSE provider failures use the same typed API call error" {
         max_connections=1,
       )
     }
-    let model = open_responses_wire(
-      model_id="test-model",
-      provider_name="local-test",
+    let model = open_responses_test_model(
+      "local-test",
       url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
-      idle_timeout_ms=2_000,
     )
-    let model = OpenResponsesLanguageModelV4::new(model)
-      as &@provider.LanguageModelV4
     try
       @ai.stream_text(
         model,
@@ -327,7 +345,7 @@ async test "SSE provider failures use the same typed API call error" {
     catch {
       @provider.APICallError(
         message="rate limited",
-        status_code=429,
+        status_code=Some(429),
         is_retryable=true,
         ..
       ) => ()
@@ -357,14 +375,10 @@ async test "V4 generate preserves raw usage and raw finish reason" {
         max_connections=1,
       )
     }
-    let concrete = open_responses_wire(
-      model_id="test-model",
-      provider_name="local-v4",
+    let model = open_responses_test_model(
+      "local-v4",
       url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
-      idle_timeout_ms=2_000,
     )
-    let model = OpenResponsesLanguageModelV4::new(concrete)
-      as &@provider.LanguageModelV4
     let result = @ai.generate_text(
       model,
       prompt="hello",
@@ -382,7 +396,7 @@ async test "V4 generate preserves raw usage and raw finish reason" {
     assert_eq(result.usage.output_tokens.total, Some(9))
     assert_eq(result.usage.output_tokens.text, Some(6))
     assert_eq(result.usage.output_tokens.reasoning, Some(3))
-    assert_true(result.usage.raw is Some({ "total_tokens": 21, .. }))
+    assert_true(result.final_step.usage.raw is Some({ "total_tokens": 21, .. }))
     assert_eq(result.warnings.length(), 2)
     assert_true(result.warnings[0] is @provider.Unsupported(feature="topK", ..))
     assert_true(result.warnings[1] is @provider.Unsupported(feature="seed", ..))
@@ -413,16 +427,11 @@ async test "V4 stream bundles warnings and emits native terminal metadata" {
         max_connections=1,
       )
     }
-    let concrete = open_responses_wire(
-      model_id="test-model",
-      provider_name="local-v4",
+    let model = open_responses_test_model(
+      "local-v4",
       url="http://127.0.0.1:\{server.addr.port()}/v1/responses",
-      idle_timeout_ms=2_000,
     )
-    let model = OpenResponsesLanguageModelV4::new(concrete)
-      as &@provider.LanguageModelV4
     let mut starts = 0
-    let mut standalone_warnings = 0
     let mut finish_raw : String? = None
     let mut finish_no_cache : Int? = None
     let result = @ai.stream_text(model, prompt="hello", top_k=20.0, on_event=event => {
@@ -431,7 +440,6 @@ async test "V4 stream bundles warnings and emits native terminal metadata" {
           starts = starts + 1
           assert_eq(warnings.length(), 1)
         }
-        @provider.V4Warning(_) => standalone_warnings = standalone_warnings + 1
         @provider.V4Finish(usage~, reason~, ..) => {
           finish_raw = reason.raw
           finish_no_cache = usage.input_tokens.no_cache
@@ -440,13 +448,12 @@ async test "V4 stream bundles warnings and emits native terminal metadata" {
       }
     })
     assert_eq(starts, 1)
-    assert_eq(standalone_warnings, 0)
     assert_eq(finish_raw, Some("content_filter"))
     assert_eq(finish_no_cache, Some(3))
     assert_eq(result.finish_reason.unified, @provider.V4FinishContentFilter)
     assert_eq(result.finish_reason.raw, Some("content_filter"))
     assert_eq(result.usage.output_tokens.reasoning, Some(1))
-    assert_true(result.usage.raw is Some({ "total_tokens": 6, .. }))
+    assert_true(result.final_step.usage.raw is Some({ "total_tokens": 6, .. }))
     assert_eq(result.warnings.length(), 1)
     assert_eq(result.response.unwrap().id, Some("resp-stream-v4"))
   }

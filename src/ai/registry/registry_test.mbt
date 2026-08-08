@@ -1,5 +1,5 @@
 ///|
-test "provider registry resolves every concrete provider and model family" {
+test "provider registry resolves ProviderV4 models and provider extensions stay concrete" {
   let openai = @openai.create_openai(api_key="test-key")
   let compatible = @openai_compatible.create_openai_compatible(
     provider_name="gateway",
@@ -43,10 +43,6 @@ test "provider registry resolves every concrete provider and model family" {
   assert_eq(responses_model.provider(), "local-responses.responses")
   assert_eq(responses_model.model_id(), "response-model")
   assert_eq(
-    registry.completion_model("openai:gpt-instruct").model_id(),
-    "gpt-instruct",
-  )
-  assert_eq(
     registry.embedding_model("gateway:embed-model").model_id(),
     "embed-model",
   )
@@ -54,8 +50,6 @@ test "provider registry resolves every concrete provider and model family" {
     registry.image_model("openai:gpt-image-1").model_id(),
     "gpt-image-1",
   )
-  assert_eq(registry.video_model("alibaba:wan-model").model_id(), "wan-model")
-  assert_eq(registry.video_model("minimax:MiniMax-H3").model_id(), "MiniMax-H3")
   assert_eq(
     registry.speech_model("openai:gpt-4o-mini-tts").model_id(),
     "gpt-4o-mini-tts",
@@ -64,24 +58,28 @@ test "provider registry resolves every concrete provider and model family" {
     registry.transcription_model("openai:gpt-4o-transcribe").model_id(),
     "gpt-4o-transcribe",
   )
+  assert_eq(openai.completion_model("gpt-instruct").model_id(), "gpt-instruct")
+  let alibaba_video = alibaba.video("wan-model") as &@provider.VideoModelV4
+  let minimax_video = minimax.video("MiniMax-H3") as &@provider.VideoModelV4
+  assert_eq(alibaba_video.model_id(), "wan-model")
+  assert_eq(minimax_video.model_id(), "MiniMax-H3")
   assert_eq(
-    registry
-    .speech_translation_model("openai:gpt-4o-mini-transcribe")
-    .model_id(),
+    openai.speech_translation_model("gpt-4o-mini-transcribe").model_id(),
     "gpt-4o-mini-transcribe",
   )
-  assert_eq(
-    registry.realtime_model("openai:gpt-realtime").model_id(),
-    "gpt-realtime",
-  )
-  assert_eq(registry.files("openai").provider(), "openai.files")
-  assert_eq(registry.skills("anthropic").provider(), "anthropic.skills")
+  assert_eq(openai.realtime_model("gpt-realtime").model_id(), "gpt-realtime")
+  let files = registry.files("openai")
+  assert_eq(files.specification_version(), "v4")
+  assert_eq(files.provider(), "openai.files")
+  let skills = registry.skills("anthropic")
+  assert_eq(skills.specification_version(), "v4")
+  assert_eq(skills.provider(), "anthropic.skills")
 }
 
 ///|
 test "provider registry preserves model ids after the first separator" {
   let openai = @openai.create_openai(api_key="test-key")
-  let providers : Map[String, &@provider.Provider] = Map([("openai", openai)])
+  let providers : Map[String, &@provider.ProviderV4] = Map([("openai", openai)])
   let registry = createProviderRegistry(providers, separator="/")
   assert_eq(registry.separator(), "/")
   assert_eq(
@@ -92,9 +90,9 @@ test "provider registry preserves model ids after the first separator" {
 
 ///|
 test "provider registry applies language-model middleware" {
-  let middleware = @model.LanguageModelV4Middleware::new(
-    provider="wrapped-provider",
-  )
+  let middleware = @provider.LanguageModelV4Middleware::new(override_provider=_ => {
+    "wrapped-provider"
+  })
   let registry = ProviderRegistry::new(language_model_middleware=middleware).with_provider(
     "custom",
     @openai.create_openai(api_key="test-key"),
@@ -106,9 +104,9 @@ test "provider registry applies language-model middleware" {
 
 ///|
 test "provider registry applies language-model middleware metadata" {
-  let middleware = @model.LanguageModelV4Middleware::new(
-    provider="wrapped-v4-provider",
-    model_id="wrapped-v4-model",
+  let middleware = @provider.LanguageModelV4Middleware::new(
+    override_provider=_ => "wrapped-v4-provider",
+    override_model_id=_ => "wrapped-v4-model",
   )
   let registry = ProviderRegistry::new(language_model_middleware=middleware).with_provider(
     "custom",
@@ -121,10 +119,10 @@ test "provider registry applies language-model middleware metadata" {
 
 ///|
 test "provider registry applies image-model middleware" {
-  let middleware = @model.ImageModelV4Middleware::new(
-    provider="wrapped-image-provider",
-    model_id="wrapped-image-model",
-    max_images_per_call=2,
+  let middleware = @provider.ImageModelV4Middleware::new(
+    override_provider=_ => "wrapped-image-provider",
+    override_model_id=_ => "wrapped-image-model",
+    override_max_images_per_call=_ => Some(2),
   )
   let registry = ProviderRegistry::new(image_model_middleware=middleware).with_provider(
     "custom",

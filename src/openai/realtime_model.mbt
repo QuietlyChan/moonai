@@ -99,19 +99,18 @@ async fn OpenAIRealtimeModel::create_client_secret(
     error_to_message=openai_error_message,
     transport=self.http_transport,
   )
-  let token = @provider_utils.json_string_field(response.value, "value").unwrap_or_else(() => {
-      fail("OpenAI realtime response is missing value")
-    },
-  )
-  let expires_at = @provider_utils.json_int_field_opt(
-    response.value,
-    "expires_at",
-  )
-  @provider.RealtimeClientSecretResult::new(
-    token~,
-    url=self.client_websocket_url(),
-    expires_at?,
-  )
+  @provider_utils.handle_json_response(response, value => {
+    let token = @provider_utils.json_string_field(value, "value").unwrap_or_else(() => {
+        fail("OpenAI realtime response is missing value")
+      },
+    )
+    let expires_at = @provider_utils.json_int_field_opt(value, "expires_at")
+    @provider.RealtimeClientSecretResult::new(
+      token~,
+      url=self.client_websocket_url(),
+      expires_at?,
+    )
+  })
 }
 
 ///|

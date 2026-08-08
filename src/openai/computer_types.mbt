@@ -236,7 +236,7 @@ fn openai_computer_drag_path(json : Json) -> Array[OpenAIComputerPoint] raise {
 
 ///|
 /// Decode and validate one OpenAI computer action object.
-pub fn decode_openai_computer_action(json : Json) -> OpenAIComputerAction raise {
+fn decode_openai_computer_action(json : Json) -> OpenAIComputerAction raise {
   let action_type = @provider_utils.json_string_field(json, "type").unwrap_or_else(() => {
       fail("OpenAI computer action requires a type")
     },
@@ -302,7 +302,7 @@ pub fn decode_openai_computer_action(json : Json) -> OpenAIComputerAction raise 
 
 ///|
 /// Decode and validate one OpenAI computer safety check.
-pub fn decode_openai_computer_safety_check(
+fn decode_openai_computer_safety_check(
   json : Json,
 ) -> OpenAIComputerSafetyCheck raise {
   let id = @provider_utils.json_string_field(json, "id").unwrap_or_else(() => {

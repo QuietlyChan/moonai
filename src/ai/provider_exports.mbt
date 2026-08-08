@@ -13,28 +13,26 @@ using @provider {
   type CompletionResponse,
   type EmbeddingBatchResponse,
   type EmbeddingResponse,
-  type FileUploadOptions,
-  type FileUploadResult,
+  type FilesV4UploadFileCallOptions,
+  type FilesV4UploadFileResult,
   type GeneratedImage,
   type ImageResponse,
   type RealtimeClientSecretOptions,
   type RealtimeClientSecretResult,
   type ReasoningEffort,
   type RequestMetadata,
-  type RerankingCallOptions,
-  type RerankingDocuments,
+  type RerankingModelV4CallOptions,
+  type RerankingModelV4Documents,
   type ResponseFormat,
   type ResponseMetadata,
   type RetryPolicy,
-  type SkillFile,
-  type SkillUploadOptions,
-  type SkillUploadResult,
+  type SkillsV4File,
+  type SkillsV4UploadSkillCallOptions,
+  type SkillsV4UploadSkillResult,
   type SpeechResponse,
   type SpeechTranslationResponse,
   type SpeechTranslationStreamEvent,
   type StreamEvent,
-  type ToolChoice,
-  type ToolDefinition,
   type TranscriptionAudio,
   type TranscriptionResponse,
   type TranscriptionStreamEvent,
@@ -47,10 +45,10 @@ using @provider {
   type VideoModelV4VideoData,
   type Warning,
   trait CompletionModel,
-  trait Files,
+  trait FilesV4,
   trait RealtimeModelV4,
-  trait RerankingModel,
-  trait Skills,
+  trait RerankingModelV4,
+  trait SkillsV4,
   trait SpeechModelV4,
   trait AudioStream,
   trait SpeechTranslationModelV4,
@@ -62,6 +60,17 @@ using @provider {
 /// User-facing prompt types live in `provider_utils`, matching AI SDK's
 /// separation between `ModelMessage` and provider language-model prompts.
 pub using @provider_utils {
+  experimentalGetToolCaller,
+  experimentalToolCaller,
+  experimental_get_tool_caller,
+  experimental_tool_caller,
+  dynamicTool,
+  dynamic_tool,
+  isExecutableTool,
+  is_executable_tool,
+  tool,
+  toolSet,
+  tool_set,
   type ModelContentPart,
   type ModelMessage,
   type ModelMessageRole,
@@ -71,6 +80,74 @@ pub using @provider_utils {
   type ModelToolResult,
   type ModelToolResultContentPart,
   type ModelToolResultOutput,
+  type ExperimentalSandboxProcess,
+  type ExperimentalSandboxSession,
+  type SandboxProcess,
+  type SandboxSession,
+  type Tool,
+  type ToolCallerDefinition,
+  type ToolDescriptionFunction,
+  type ToolDescriptionOptions,
+  type ToolExecuteFunction,
+  type ToolExecutionOptions,
+  type ToolNeedsApproval,
+  type ToolNeedsApprovalFunction,
+  type ToolNeedsApprovalOptions,
+  type ToolSet,
+}
+
+///|
+/// Caller routing belongs to the high-level generation layer. The dedicated
+/// package keeps its preparation algorithm out of provider protocol packages.
+pub using @tool {
+  type ResolvedToolCallers,
+  type ToolCallerConfiguration,
+  type ToolCallerReference,
+}
+
+///|
+/// Text generation owns both non-streaming and streaming multi-step tool
+/// workflows in its own package, matching AI SDK's separation from provider
+/// protocol contracts.
+pub using @generate_text {
+  generateText,
+  generate_text,
+  hasToolCall,
+  has_tool_call,
+  isLoopFinished,
+  isStepCount,
+  is_loop_finished,
+  is_step_count,
+  streamText,
+  stream_text,
+  type ActiveTools,
+  type GenerateTextContent,
+  type GenerateTextResult,
+  type GenerateTextStep,
+  type GenerateTextStepPerformance,
+  type GenerateTextToolCall,
+  type GenerateTextToolApprovalRequestOutput,
+  type GenerateTextToolApprovalResponseOutput,
+  type GenerateTextToolResult,
+  type GenericToolApprovalFunction,
+  type GenericToolApprovalOptions,
+  type InvalidToolApprovalError,
+  type InvalidToolApprovalSignatureError,
+  type InvalidToolInputError,
+  type NoSuchToolError,
+  type PrepareStepFunction,
+  type PrepareStepOptions,
+  type PrepareStepResult,
+  type StopCondition,
+  type StreamTextResult,
+  type SingleToolApprovalFunction,
+  type SingleToolApprovalOptions,
+  type ToolApprovalConfiguration,
+  type ToolApprovalRule,
+  type ToolApprovalSecret,
+  type ToolApprovalStatus,
+  type ToolCallNotFoundForApprovalError,
+  type ToolOrder,
 }
 
 ///|
@@ -88,6 +165,21 @@ pub using @prompt {
 }
 
 ///|
+/// Middleware contracts are defined by the provider layer and re-exported by
+/// the high-level package, as in AI SDK. Wrapping functions remain in
+/// `ai/model`.
+pub using @provider {
+  type EmbeddingModelV4Middleware,
+  type EmbeddingModelV4MiddlewareContext,
+  type ImageModelV4Middleware,
+  type ImageModelV4MiddlewareContext,
+  type LanguageModelV4Middleware,
+  type LanguageModelV4MiddlewareContext,
+  type LanguageModelV4MiddlewareOperation,
+  type LanguageModelV4TransformContext,
+}
+
+///|
 /// Model identity and registry types are re-exported by the high-level AI
 /// package for callers that prefer one import, while the dedicated
 /// `ai/model` package remains available for lower-level integrations.
@@ -96,8 +188,6 @@ pub using @model {
   model_id_of_language_model,
   type CompletionModelReference,
   type EmbeddingModelReference,
-  type EmbeddingModelV4Middleware,
-  type EmbeddingModelV4MiddlewareContext,
   type ImageModelReference,
   type InvalidModelIdError,
   type LanguageModelV4Reference,
@@ -111,12 +201,6 @@ pub using @model {
   type SpeechTranslationModelReference,
   type TranscriptionModelReference,
   type VideoModelReference,
-  type LanguageModelV4Middleware,
-  type LanguageModelV4MiddlewareContext,
-  type LanguageModelV4MiddlewareOperation,
-  type LanguageModelV4TransformContext,
-  type ImageModelV4Middleware,
-  type ImageModelV4MiddlewareContext,
   wrapLanguageModelV4,
   wrapLanguageModelV4Chain,
   wrap_language_model_v4,

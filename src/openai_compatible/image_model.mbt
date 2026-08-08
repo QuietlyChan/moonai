@@ -13,6 +13,7 @@ pub struct OpenAICompatibleImageModel {
   priv error_structure : OpenAICompatibleErrorStructure
   priv idle_timeout_ms : Int
   priv http_transport : &@provider_utils.HttpTransport
+  priv download_transport : &@provider_utils.HttpTransport?
 }
 
 ///|
@@ -43,6 +44,7 @@ pub fn openai_compatible_image(
     include_response_format,
     error_structure,
     idle_timeout_ms,
+    download_transport: http_transport,
     http_transport: http_transport.unwrap_or(
       @provider_utils.native_http_transport(),
     ),
@@ -84,15 +86,17 @@ fn image_form_value(value : Json) -> String? {
 ///|
 async fn OpenAICompatibleImageModel::edit_form_data(
   self : OpenAICompatibleImageModel,
-  options : @provider.ImageCallOptions,
+  options : @provider.ImageModelV4CallOptions,
   provider_options : Map[String, Json],
 ) -> @provider_utils.MultipartFormData {
   let cancellation_token = options.cancellation_token
   let fields : Array[@provider_utils.MultipartField] = [
     @provider_utils.MultipartField::text(name="model", value=self.model_id),
-    @provider_utils.MultipartField::text(name="prompt", value=options.prompt),
     @provider_utils.MultipartField::text(name="n", value=options.n.to_string()),
   ]
+  if options.prompt is Some(value) {
+    fields.push(@provider_utils.MultipartField::text(name="prompt", value~))
+  }
   if options.size is Some(value) && provider_options.get("size") is None {
     fields.push(@provider_utils.MultipartField::text(name="size", value~))
   }
@@ -107,19 +111,17 @@ async fn OpenAICompatibleImageModel::edit_form_data(
       )
     }
   }
-  let image_field = if options.files.length() == 1 {
-    "image"
-  } else {
-    "image[]"
-  }
-  for file in options.files {
-    let resolved = @provider_utils.resolve_image_file(
+  let files = options.files.unwrap_or([])
+  let image_field = if files.length() == 1 { "image" } else { "image[]" }
+  for file in files {
+    let resolved = @provider_utils.resolve_image_model_v4_file(
       file,
       provider_name=self.provider_name,
       timeout_ms=self.idle_timeout_ms,
       retry_policy=options.retry_policy,
       cancellation_token?,
-      transport=self.http_transport,
+      trusted_origin=self.base_url,
+      transport?=self.download_transport,
     )
     fields.push(
       @provider_utils.MultipartField::file(
@@ -131,13 +133,15 @@ async fn OpenAICompatibleImageModel::edit_form_data(
     )
   }
   if options.mask is Some(mask) {
-    let resolved = @provider_utils.resolve_image_file(
+    let resolved = @provider_utils.resolve_image_model_v4_file(
       mask,
+      filename="mask",
       provider_name=self.provider_name,
       timeout_ms=self.idle_timeout_ms,
       retry_policy=options.retry_policy,
       cancellation_token?,
-      transport=self.http_transport,
+      trusted_origin=self.base_url,
+      transport?=self.download_transport,
     )
     fields.push(
       @provider_utils.MultipartField::file(
@@ -181,54 +185,31 @@ fn OpenAICompatibleImageModel::request_headers(
 }
 
 ///|
-pub impl @provider.ImageWireModel for OpenAICompatibleImageModel with fn provider(
-  self,
-) -> String {
-  self.provider_name
-}
-
-///|
-pub impl @provider.ImageWireModel for OpenAICompatibleImageModel with fn model_id(
-  self,
-) -> String {
-  self.model_id
-}
-
-///|
-pub impl @provider.ImageWireModel for OpenAICompatibleImageModel with fn max_images_per_call(
-  self,
-) -> Int {
-  self.max_images
-}
-
-///|
-pub impl @provider.ImageWireModel for OpenAICompatibleImageModel with fn generate(
-  self,
-  options,
-) {
-  self.generate_images(options)
-}
-
-///|
-async fn OpenAICompatibleImageModel::generate_images(
+async fn OpenAICompatibleImageModel::generate_images_v4(
   self : OpenAICompatibleImageModel,
-  options : @provider.ImageCallOptions,
-) -> @provider.ImageResponse {
+  options : @provider.ImageModelV4CallOptions,
+) -> @provider.ImageModelV4Result {
+  let request_created_at = (@env.now() / 1000UL).to_int()
   let option_resolution = resolve_compatible_options(
     options.provider_options,
     self.provider_name,
     image_reserved_fields(),
   )
-  let warnings = compatible_image_request_warnings(options, option_resolution)
+  let warnings = compatible_image_request_warnings(
+    options.aspect_ratio,
+    options.seed,
+    option_resolution,
+  )
   let request_headers = @provider_utils.merge_headers(
     self.request_headers(),
     options.headers,
   )
   let cancellation_token = options.cancellation_token
-  guard options.mask is None || options.files.length() > 0 else {
+  let files = options.files.unwrap_or([])
+  guard options.mask is None || files.length() > 0 else {
     fail("OpenAI-compatible image edits require at least one input file")
   }
-  let response = if options.files.length() > 0 {
+  let response = if files.length() > 0 {
     let form_data = self.edit_form_data(options, option_resolution.values)
     @provider_utils.post_multipart(
       provider_name=self.provider_name,
@@ -249,11 +230,13 @@ async fn OpenAICompatibleImageModel::generate_images(
       provider_name=self.provider_name,
       url=self.generations_url(),
       headers=request_headers,
-      body=encode_image_request(
+      body=encode_image_request_data(
         self.model_id,
-        options,
-        include_response_format=self.include_response_format,
-        provider_name=self.provider_name,
+        options.prompt,
+        options.n,
+        options.size,
+        option_resolution.values,
+        self.include_response_format,
       ),
       timeout_ms=self.idle_timeout_ms,
       retry_policy=options.retry_policy,
@@ -265,49 +248,25 @@ async fn OpenAICompatibleImageModel::generate_images(
       transport=self.http_transport,
     )
   }
-  let decoded = decode_image_response(
-    response.value,
-    error_structure=self.error_structure,
-  )
-  decoded
-  .with_diagnostics(
-    None,
-    None,
-    @provider_utils.provider_metadata_from_json(
+  let (images, usage) = @provider_utils.handle_json_response(response, value => {
+    decode_image_response_data(value, self.error_structure)
+  })
+  @provider.ImageModelV4Result::new(
+    images,
+    warnings~,
+    provider_metadata=@provider_utils.provider_metadata_from_json(
       response.value,
       self.provider_name,
     ),
-    warnings,
-  )
-  .with_transport(response.request, response.response)
-}
-
-///|
-/// Convert V4 options at the OpenAI-compatible protocol boundary.
-fn compatible_v4_image_options(
-  options : @provider.ImageModelV4CallOptions,
-) -> @provider.ImageCallOptions {
-  let prompt = options.prompt.unwrap_or("")
-  let files : Array[@provider.ImageFile] = match options.files {
-    Some(values) => [ for file in values => file.to_image_file() ]
-    None => []
-  }
-  let mask = match options.mask {
-    Some(value) => Some(value.to_image_file(filename="mask"))
-    None => None
-  }
-  @provider.ImageCallOptions::new(
-    prompt,
-    n=options.n,
-    size?=options.size,
-    aspect_ratio?=options.aspect_ratio,
-    seed?=options.seed,
-    files~,
-    mask?,
-    headers=options.headers,
-    provider_options=options.provider_options,
-    retry_policy=options.retry_policy,
-    cancellation_token?=options.cancellation_token,
+    request=response.request,
+    response=@provider.merge_response_metadata(
+      Some(response.response),
+      @provider.ResponseMetadata::new(
+        model_id=self.model_id,
+        created_at=request_created_at,
+      ),
+    ),
+    usage?,
   )
 }
 
@@ -344,7 +303,5 @@ pub impl @provider.ImageModelV4 for OpenAICompatibleImageModel with fn do_genera
   self,
   options,
 ) {
-  @provider.ImageModelV4Result::from_image_response(
-    self.generate_images(compatible_v4_image_options(options)),
-  )
+  self.generate_images_v4(options)
 }

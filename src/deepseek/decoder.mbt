@@ -15,7 +15,7 @@ pub(all) struct DeepSeekErrorData {
 
 ///|
 /// Decode a standard DeepSeek error response.
-pub fn decode_deepseek_error_data(json : Json) -> DeepSeekErrorData? {
+fn decode_deepseek_error_data(json : Json) -> DeepSeekErrorData? {
   match json {
     { "error": Object(fields) as detail, .. } =>
       match @provider_utils.json_string_field(detail, "message") {
@@ -35,21 +35,47 @@ pub fn decode_deepseek_error_data(json : Json) -> DeepSeekErrorData? {
 }
 
 ///|
-fn deepseek_error_message(json : Json) -> String? {
-  match json {
-    { "error": { "message": String(message), .. }, .. } => Some(message)
-    { "message": String(message), "type": "error", .. } => Some(message)
-    _ => None
+fn deepseek_error_message(json : Json) -> String? raise {
+  // Adapt the pure built-in parser to the fallible transport hook contract.
+  @provider.check_cancellation(None)
+  match decode_deepseek_error_data(json) {
+    Some(data) => Some(data.error.message)
+    None =>
+      match json {
+        { "message": String(message), "type": "error", .. } => Some(message)
+        _ => None
+      }
   }
 }
 
 ///|
+fn deepseek_finish_reason(value : String) -> @provider.FinishReason {
+  match value {
+    "stop" => @provider.Stop
+    "length" => @provider.Length
+    "content_filter" => @provider.ContentFilter
+    "tool_calls" => @provider.ToolCalls
+    "insufficient_system_resource" => @provider.Error
+    other => @provider.Unknown(other)
+  }
+}
+
+///|
+priv struct DeepSeekDecodedResponse {
+  content : Array[@provider.LanguageModelV4Content]
+  finish_reason : @provider.LanguageModelV4FinishReason
+  usage : @provider.LanguageModelV4Usage
+  provider_metadata : Map[String, Json]
+  response : @provider.ResponseMetadata?
+}
+
+///|
 /// Decode one complete DeepSeek Chat Completions response.
-pub fn decode_deepseek_chat_response(
+fn decode_deepseek_chat_response(
   json : Json,
-  provider_name? : String = "deepseek.chat",
-  id_generator? : @provider_utils.IdGenerator,
-) -> @provider.ChatResponse raise {
+  provider_name~ : String,
+  id_generator~ : @provider_utils.IdGenerator,
+) -> DeepSeekDecodedResponse raise {
   if deepseek_error_message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="DeepSeek request failed: " + message,
@@ -77,14 +103,13 @@ pub fn decode_deepseek_chat_response(
         data=json,
       )
   }
-  let content : Array[@provider.GeneratedContent] = []
-  let generate_id = id_generator.unwrap_or(@provider_utils.generate_id)
+  let content : Array[@provider.LanguageModelV4Content] = []
+  let generate_id = id_generator
   match message {
     { "reasoning_content": String(value), .. } if value != "" =>
-      content.push(@provider.GeneratedContent::reasoning(value))
+      content.push(@provider.LanguageModelV4Content::reasoning(value))
     _ => ()
   }
-  let mut has_tool_calls = false
   match message {
     { "tool_calls": Array(values), .. } =>
       for value in values {
@@ -97,14 +122,17 @@ pub fn decode_deepseek_chat_response(
               ..
             },
             ..
-          } => {
+          } =>
             content.push(
-              @provider.GeneratedContent::tool_call(
-                @provider.ToolCall::new(id~, name~, arguments~),
-              ),
+              @provider.LanguageModelV4Content::tool_call({
+                tool_call_id: id,
+                tool_name: name,
+                input: arguments,
+                provider_executed: false,
+                dynamic: false,
+                provider_metadata: Map([]),
+              }),
             )
-            has_tool_calls = true
-          }
           {
             "function": {
               "name": String(name),
@@ -112,14 +140,17 @@ pub fn decode_deepseek_chat_response(
               ..
             },
             ..
-          } => {
+          } =>
             content.push(
-              @provider.GeneratedContent::tool_call(
-                @provider.ToolCall::new(id=generate_id(), name~, arguments~),
-              ),
+              @provider.LanguageModelV4Content::tool_call({
+                tool_call_id: generate_id(),
+                tool_name: name,
+                input: arguments,
+                provider_executed: false,
+                dynamic: false,
+                provider_metadata: Map([]),
+              }),
             )
-            has_tool_calls = true
-          }
           _ => ()
         }
       }
@@ -127,78 +158,82 @@ pub fn decode_deepseek_chat_response(
   }
   match message {
     { "content": String(value), .. } if value != "" =>
-      content.push(@provider.GeneratedContent::text(value))
+      content.push(@provider.LanguageModelV4Content::text(value))
     _ => ()
   }
   let usage_json = match json {
     { "usage": value, .. } if !(value is Null) => value
     _ => Json::null()
   }
-  let usage = if usage_json is Null {
-    @provider.Usage::zero()
-  } else {
-    convert_deepseek_usage(usage_json)
-  }
-  let finish_reason = match choice {
-    { "finish_reason": String(value), .. } => deepseek_finish_reason(value)
-    _ => if has_tool_calls { @provider.ToolCalls } else { @provider.Stop }
-  }
-  let metadata = @provider.merge_provider_metadata(
-    @provider_utils.provider_metadata_from_json(json, provider_name),
+  let usage = convert_deepseek_usage(
     if usage_json is Null {
-      Map([])
+      None
     } else {
-      deepseek_usage_metadata(usage_json, provider_name)
+      Some(usage_json)
     },
   )
-  @provider.ChatResponse::from_content(content, usage, finish_reason).with_diagnostics(
-    None,
-    Some(@provider.ResponseMetadata::from_json(json)),
-    metadata,
-    [],
+  let finish_reason = deepseek_v4_finish_reason_from_raw(
+    match choice {
+      { "finish_reason": String(value), .. } => Some(value)
+      _ => None
+    },
   )
+  let metadata = @provider.merge_provider_metadata(
+    @provider_utils.provider_metadata_from_json(json, provider_name),
+    deepseek_usage_metadata(
+      if usage_json is Null {
+        Json::empty_object()
+      } else {
+        usage_json
+      },
+      provider_name,
+    ),
+  )
+  {
+    content,
+    usage,
+    finish_reason,
+    provider_metadata: metadata,
+    response: Some(
+      @provider_utils.create_language_model_response_metadata(
+        id?=@provider_utils.json_string_field(json, "id"),
+        model?=@provider_utils.json_string_field(json, "model"),
+        created?=@provider_utils.json_int_field_opt(json, "created"),
+      ),
+    ),
+  }
 }
 
 ///|
 /// Stateful decoder for DeepSeek's Chat Completions SSE protocol.
-pub struct DeepSeekStreamDecoder {
-  priv sse : @provider_utils.EventSourceBuffer
-  priv include_raw_chunks : Bool
-  priv provider_name : String
-  priv text : StringBuilder
-  priv reasoning : StringBuilder
-  priv tools : @provider_utils.ToolCallDeltaAssembler
-  priv tool_stream_ids : Array[String]
-  priv mut usage : @provider.Usage
-  priv mut usage_json : Json
-  priv mut finish_reason : @provider.FinishReason
-  priv mut finish_reason_raw : String?
-  priv mut response_metadata : @provider.ResponseMetadata?
-  priv mut provider_metadata : Map[String, Json]
-  priv mut metadata_emitted : Bool
-  priv mut text_active : Bool
-  priv mut reasoning_active : Bool
-  priv mut text_seen : Bool
-  priv mut reasoning_seen : Bool
-  priv mut finalized : Bool
+priv struct DeepSeekStreamDecoder {
+  sse : @provider_utils.EventSourceBuffer
+  include_raw_chunks : Bool
+  provider_name : String
+  tools : @provider_utils.StreamingToolCallTracker
+  mut usage_json : Json
+  mut finish_reason : @provider.FinishReason
+  mut finish_reason_raw : String?
+  mut response_metadata : @provider.ResponseMetadata?
+  mut provider_metadata : Map[String, Json]
+  mut metadata_emitted : Bool
+  mut text_active : Bool
+  mut reasoning_active : Bool
+  mut finalized : Bool
 }
 
 ///|
 /// Create an empty DeepSeek stream decoder.
-pub fn DeepSeekStreamDecoder::new(
-  include_raw_chunks? : Bool = false,
-  provider_name? : String = "deepseek.chat",
-  id_generator? : @provider_utils.IdGenerator,
+fn DeepSeekStreamDecoder::new(
+  include_raw_chunks~ : Bool,
+  provider_name~ : String,
+  id_generator~ : @provider_utils.IdGenerator,
 ) -> DeepSeekStreamDecoder {
   {
     sse: @provider_utils.EventSourceBuffer::new(),
     include_raw_chunks,
     provider_name,
-    text: StringBuilder::new(),
-    reasoning: StringBuilder::new(),
-    tools: @provider_utils.ToolCallDeltaAssembler::new(id_generator?),
-    tool_stream_ids: [],
-    usage: @provider.Usage::zero(),
+    tools: @provider_utils.StreamingToolCallTracker::new(id_generator~),
     usage_json: Json::null(),
     finish_reason: @provider.Unknown(""),
     finish_reason_raw: None,
@@ -207,8 +242,6 @@ pub fn DeepSeekStreamDecoder::new(
     metadata_emitted: false,
     text_active: false,
     reasoning_active: false,
-    text_seen: false,
-    reasoning_seen: false,
     finalized: false,
   }
 }
@@ -217,9 +250,13 @@ pub fn DeepSeekStreamDecoder::new(
 fn DeepSeekStreamDecoder::record_metadata(
   self : DeepSeekStreamDecoder,
   json : Json,
-  events : Array[@provider.StreamEvent],
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit {
-  let response = @provider.ResponseMetadata::from_json(json)
+  let response = @provider_utils.create_language_model_response_metadata(
+    id?=@provider_utils.json_string_field(json, "id"),
+    model?=@provider_utils.json_string_field(json, "model"),
+    created?=@provider_utils.json_int_field_opt(json, "created"),
+  )
   if !response.is_empty() {
     self.response_metadata = Some(
       @provider.merge_response_metadata(self.response_metadata, response),
@@ -227,7 +264,7 @@ fn DeepSeekStreamDecoder::record_metadata(
   }
   if !self.metadata_emitted {
     self.metadata_emitted = true
-    events.push(@provider.ResponseMetadataReady(response))
+    events.push(@provider.V4ResponseMetadataReady(response))
   }
   self.provider_metadata = @provider.merge_provider_metadata(
     self.provider_metadata,
@@ -236,38 +273,26 @@ fn DeepSeekStreamDecoder::record_metadata(
 }
 
 ///|
-fn DeepSeekStreamDecoder::ensure_tool_stream_id(
-  self : DeepSeekStreamDecoder,
-  index : Int,
-  stream_id : String,
-) -> Unit {
-  while self.tool_stream_ids.length() <= index {
-    self.tool_stream_ids.push("")
-  }
-  if self.tool_stream_ids[index] == "" {
-    self.tool_stream_ids[index] = stream_id
-  }
-}
-
-///|
 fn DeepSeekStreamDecoder::close_reasoning(
   self : DeepSeekStreamDecoder,
-  events : Array[@provider.StreamEvent],
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit {
   if self.reasoning_active {
     self.reasoning_active = false
-    events.push(@provider.ReasoningEnd("reasoning-0"))
+    events.push(
+      @provider.V4ReasoningEnd(id="reasoning-0", provider_metadata=Map([])),
+    )
   }
 }
 
 ///|
 fn DeepSeekStreamDecoder::close_text(
   self : DeepSeekStreamDecoder,
-  events : Array[@provider.StreamEvent],
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit {
   if self.text_active {
     self.text_active = false
-    events.push(@provider.TextEnd("text-0"))
+    events.push(@provider.V4TextEnd(id="txt-0", provider_metadata=Map([])))
   }
 }
 
@@ -276,7 +301,7 @@ fn DeepSeekStreamDecoder::apply_tool_delta(
   self : DeepSeekStreamDecoder,
   value : Json,
   fallback_index : Int,
-  events : Array[@provider.StreamEvent],
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit raise {
   guard value is Object(_) else { return }
   let index = match value {
@@ -295,25 +320,22 @@ fn DeepSeekStreamDecoder::apply_tool_delta(
     { "function": { "arguments": String(value), .. }, .. } => Some(value)
     _ => None
   }
-  let applied = self.tools.apply(
-    @provider_utils.ToolCallDelta::new(index~, id?, name?, arguments_delta?),
-  )
-  self.ensure_tool_stream_id(index, applied.stream_id)
-  if applied.started {
-    events.push(
-      @provider.ToolInputStart(
-        id=applied.stream_id,
-        tool_name=applied.tool_name,
-      ),
-    )
+  let tool_type = match value {
+    { "type": String(value), .. } => Some(value)
+    _ => None
   }
-  if applied.arguments_delta != "" {
-    events.push(
-      @provider.ToolInputDelta(
-        id=applied.stream_id,
-        delta=applied.arguments_delta,
+  for
+    event in self.tools.process_delta_v4(
+      @provider_utils.StreamingToolCallDelta::new(
+        index~,
+        id?,
+        tool_type?,
+        function_name?=name,
+        arguments_delta?,
+        data=value,
       ),
-    )
+    ) {
+    events.push(event)
   }
 }
 
@@ -321,14 +343,11 @@ fn DeepSeekStreamDecoder::apply_tool_delta(
 fn DeepSeekStreamDecoder::apply_json(
   self : DeepSeekStreamDecoder,
   json : Json,
-) -> Array[@provider.StreamEvent] raise {
-  let events : Array[@provider.StreamEvent] = []
+) -> Array[@provider.LanguageModelV4StreamPart] raise {
+  let events : Array[@provider.LanguageModelV4StreamPart] = []
   self.record_metadata(json, events)
   match json {
-    { "usage": value, .. } if !(value is Null) => {
-      self.usage_json = value
-      self.usage = convert_deepseek_usage(value)
-    }
+    { "usage": value, .. } if !(value is Null) => self.usage_json = value
     _ => ()
   }
   match json {
@@ -342,34 +361,47 @@ fn DeepSeekStreamDecoder::apply_json(
     { "choices": [{ "delta": Object(delta), .. }, ..], .. } => {
       match delta {
         { "reasoning_content": String(value), .. } if value != "" => {
-          self.close_text(events)
           if !self.reasoning_active {
             self.reasoning_active = true
-            self.reasoning_seen = true
-            events.push(@provider.ReasoningStart("reasoning-0"))
+            events.push(
+              @provider.V4ReasoningStart(
+                id="reasoning-0",
+                provider_metadata=Map([]),
+              ),
+            )
           }
-          self.reasoning.write_string(value)
-          events.push(@provider.ReasoningDelta(id="reasoning-0", delta=value))
+          events.push(
+            @provider.V4ReasoningDelta(
+              id="reasoning-0",
+              delta=value,
+              provider_metadata=Map([]),
+            ),
+          )
         }
         _ => ()
       }
       match delta {
         { "content": String(value), .. } if value != "" => {
-          self.close_reasoning(events)
           if !self.text_active {
             self.text_active = true
-            self.text_seen = true
-            events.push(@provider.TextStart("text-0"))
+            events.push(
+              @provider.V4TextStart(id="txt-0", provider_metadata=Map([])),
+            )
           }
-          self.text.write_string(value)
-          events.push(@provider.TextDelta(id="text-0", delta=value))
+          self.close_reasoning(events)
+          events.push(
+            @provider.V4TextDelta(
+              id="txt-0",
+              delta=value,
+              provider_metadata=Map([]),
+            ),
+          )
         }
         _ => ()
       }
       match delta {
         { "tool_calls": Array(values), .. } => {
           self.close_reasoning(events)
-          self.close_text(events)
           for index, value in values {
             self.apply_tool_delta(value, index, events)
           }
@@ -383,40 +415,208 @@ fn DeepSeekStreamDecoder::apply_json(
 }
 
 ///|
+fn deepseek_optional_string_field_is_valid(
+  fields : Map[String, Json],
+  name : String,
+) -> Bool {
+  match fields.get(name) {
+    None | Some(Null) | Some(String(_)) => true
+    _ => false
+  }
+}
+
+///|
+fn deepseek_optional_number_field_is_valid(
+  fields : Map[String, Json],
+  name : String,
+) -> Bool {
+  match fields.get(name) {
+    None | Some(Null) | Some(Number(_)) => true
+    _ => false
+  }
+}
+
+///|
+fn deepseek_usage_validation_error(value : Json) -> String? {
+  match value {
+    Null => None
+    Object(fields) => {
+      for
+        name in [
+          "prompt_tokens", "completion_tokens", "prompt_cache_hit_tokens", "prompt_cache_miss_tokens",
+          "total_tokens",
+        ] {
+        if !deepseek_optional_number_field_is_valid(fields, name) {
+          return Some("DeepSeek usage.\{name} must be a number or null")
+        }
+      }
+      match fields.get("completion_tokens_details") {
+        None | Some(Null) => None
+        Some(Object(details)) =>
+          if deepseek_optional_number_field_is_valid(
+              details, "reasoning_tokens",
+            ) {
+            None
+          } else {
+            Some(
+              "DeepSeek usage.completion_tokens_details.reasoning_tokens must be a number or null",
+            )
+          }
+        _ =>
+          Some(
+            "DeepSeek usage.completion_tokens_details must be an object or null",
+          )
+      }
+    }
+    _ => Some("DeepSeek usage must be an object or null")
+  }
+}
+
+///|
+fn deepseek_tool_delta_validation_error(value : Json) -> String? {
+  match value {
+    Object(fields) => {
+      guard fields.get("index") is Some(Number(_)) else {
+        return Some("DeepSeek tool call delta must contain a numeric index")
+      }
+      guard deepseek_optional_string_field_is_valid(fields, "id") else {
+        return Some("DeepSeek tool call delta id must be a string or null")
+      }
+      match fields.get("function") {
+        Some(Object(function)) => {
+          if !deepseek_optional_string_field_is_valid(function, "name") {
+            return Some(
+              "DeepSeek tool call delta function.name must be a string or null",
+            )
+          }
+          if !deepseek_optional_string_field_is_valid(function, "arguments") {
+            return Some(
+              "DeepSeek tool call delta function.arguments must be a string or null",
+            )
+          }
+          None
+        }
+        _ => Some("DeepSeek tool call delta must contain a function object")
+      }
+    }
+    _ => Some("DeepSeek tool call delta must be an object")
+  }
+}
+
+///|
+fn deepseek_delta_validation_error(value : Json) -> String? {
+  match value {
+    Null => None
+    Object(fields) => {
+      match fields.get("role") {
+        None | Some(Null) | Some(String("assistant")) => ()
+        _ => return Some("DeepSeek delta role must be assistant or null")
+      }
+      for name in ["content", "reasoning_content"] {
+        if !deepseek_optional_string_field_is_valid(fields, name) {
+          return Some("DeepSeek delta \{name} must be a string or null")
+        }
+      }
+      match fields.get("tool_calls") {
+        None | Some(Null) => None
+        Some(Array(values)) => {
+          for tool_call in values {
+            if deepseek_tool_delta_validation_error(tool_call) is Some(error) {
+              return Some(error)
+            }
+          }
+          None
+        }
+        _ => Some("DeepSeek delta tool_calls must be an array or null")
+      }
+    }
+    _ => Some("DeepSeek delta must be an object or null")
+  }
+}
+
+///|
+fn deepseek_stream_chunk_validation_error(json : Json) -> String? {
+  match json {
+    Object(fields) => {
+      if !deepseek_optional_string_field_is_valid(fields, "id") ||
+        !deepseek_optional_string_field_is_valid(fields, "model") {
+        return Some("DeepSeek stream id and model must be strings or null")
+      }
+      if !deepseek_optional_number_field_is_valid(fields, "created") {
+        return Some("DeepSeek stream created must be a number or null")
+      }
+      let choices = match fields.get("choices") {
+        Some(Array(values)) => values
+        _ => return Some("DeepSeek stream chunk must contain a choices array")
+      }
+      for choice in choices {
+        match choice {
+          Object(choice_fields) => {
+            if !deepseek_optional_string_field_is_valid(
+                choice_fields, "finish_reason",
+              ) {
+              return Some(
+                "DeepSeek stream finish_reason must be a string or null",
+              )
+            }
+            match choice_fields.get("delta") {
+              None => ()
+              Some(delta) =>
+                if deepseek_delta_validation_error(delta) is Some(error) {
+                  return Some(error)
+                }
+            }
+          }
+          _ => return Some("DeepSeek stream choice must be an object")
+        }
+      }
+      match fields.get("usage") {
+        Some(usage) => deepseek_usage_validation_error(usage)
+        None => None
+      }
+    }
+    _ => Some("DeepSeek stream chunk must be a JSON object")
+  }
+}
+
+///|
+fn DeepSeekStreamDecoder::invalid_stream_chunk(
+  self : DeepSeekStreamDecoder,
+  message : String,
+  data : Json,
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] {
+  self.finish_reason = @provider.Error
+  self.finish_reason_raw = None
+  let events : Array[@provider.LanguageModelV4StreamPart] = [
+    @provider.V4Error(@provider.StreamErrorInfo::new(message, data~)),
+  ]
+  if self.include_raw_chunks {
+    events.insert(0, @provider.V4Raw(data))
+  }
+  { events, consumed_event: true, done: false }
+}
+
+///|
 fn DeepSeekStreamDecoder::finish_events(
   self : DeepSeekStreamDecoder,
-) -> Array[@provider.StreamEvent] {
+) -> Array[@provider.LanguageModelV4StreamPart] {
   if self.finalized {
     return []
   }
   self.finalized = true
-  let events : Array[@provider.StreamEvent] = []
+  let events : Array[@provider.LanguageModelV4StreamPart] = []
   self.close_reasoning(events)
   self.close_text(events)
-  let calls = self.tools.calls()
-  if !(self.finish_reason is @provider.Error) {
-    for index, call in calls {
-      let stream_id = if index < self.tool_stream_ids.length() &&
-        self.tool_stream_ids[index] != "" {
-        self.tool_stream_ids[index]
-      } else {
-        call.id
-      }
-      events.push(@provider.ToolInputEnd(stream_id))
-      events.push(@provider.ToolCallReady(call))
-    }
+  for event in self.tools.flush_v4() {
+    events.push(event)
   }
-  let reason = match self.finish_reason {
-    @provider.Unknown("") =>
-      if calls.length() > 0 {
-        @provider.ToolCalls
-      } else {
-        @provider.Stop
-      }
-    value => value
-  }
-  self.finish_reason = reason
-  events.push(@provider.Finish(usage=self.usage, reason~))
+  events.push(
+    @provider.V4Finish(
+      usage=self.v4_usage(),
+      reason=self.v4_finish_reason(),
+      provider_metadata=self.provider_metadata_snapshot(),
+    ),
+  )
   events
 }
 
@@ -424,121 +624,87 @@ fn DeepSeekStreamDecoder::finish_events(
 fn DeepSeekStreamDecoder::decode_data(
   self : DeepSeekStreamDecoder,
   data : String,
-) -> @provider_utils.DecodeBatch raise {
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   if data.trim() == "[DONE]" {
     return { events: self.finish_events(), consumed_event: true, done: true }
   }
   let json = @json.parse(data) catch {
-    _ =>
-      raise @provider.InvalidResponseDataError(
-        message="DeepSeek stream decode error",
-        data=Json::string(data),
-      )
+    error => {
+      self.finish_reason = @provider.Error
+      self.finish_reason_raw = None
+      let events : Array[@provider.LanguageModelV4StreamPart] = [
+        @provider.V4Error(
+          @provider.StreamErrorInfo::new(
+            "DeepSeek stream decode error: \{error}; data: \{data}",
+            data=Json::string(data),
+          ),
+        ),
+      ]
+      if self.include_raw_chunks {
+        events.insert(0, @provider.V4Raw(Json::string(data)))
+      }
+      return { events, consumed_event: true, done: false }
+    }
   }
   if deepseek_error_message(json) is Some(message) {
     self.finish_reason = @provider.Error
-    let events : Array[@provider.StreamEvent] = [@provider.StreamError(message)]
-    for event in self.finish_events() {
-      events.push(event)
+    self.finish_reason_raw = None
+    let error_data = match json {
+      { "error": value, .. } => value
+      _ => json
     }
+    let events : Array[@provider.LanguageModelV4StreamPart] = [
+      @provider.V4Error(
+        @provider.StreamErrorInfo::new(message, data=error_data),
+      ),
+    ]
     if self.include_raw_chunks {
-      events.insert(0, @provider.Raw(json))
+      events.insert(0, @provider.V4Raw(json))
     }
-    return { events, consumed_event: true, done: true }
+    return { events, consumed_event: true, done: false }
+  }
+  if deepseek_stream_chunk_validation_error(json) is Some(message) {
+    return self.invalid_stream_chunk(message, json)
   }
   let events = self.apply_json(json)
   if self.include_raw_chunks {
-    events.insert(0, @provider.Raw(json))
+    events.insert(0, @provider.V4Raw(json))
   }
   { events, consumed_event: true, done: false }
 }
 
 ///|
 /// Feed one physical SSE line into the DeepSeek decoder.
-pub fn DeepSeekStreamDecoder::feed_line(
+fn DeepSeekStreamDecoder::feed_line(
   self : DeepSeekStreamDecoder,
   raw : String,
-) -> @provider_utils.DecodeBatch raise {
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   match self.sse.feed_line(raw) {
     Some(data) => self.decode_data(data)
-    None => @provider_utils.DecodeBatch::empty(self.finalized)
+    None => @provider_utils.SseDecodeBatch::empty(self.finalized)
   }
 }
 
 ///|
 /// Flush a final unterminated DeepSeek SSE payload.
-pub fn DeepSeekStreamDecoder::flush_buffered(
+fn DeepSeekStreamDecoder::flush_buffered(
   self : DeepSeekStreamDecoder,
-) -> @provider_utils.DecodeBatch raise {
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   match self.sse.flush() {
-    Some(data) => {
-      let batch = self.decode_data(data)
-      if batch.done {
-        batch
-      } else {
-        let events = batch.events
-        for event in self.finish_events() {
-          events.push(event)
-        }
-        { events, consumed_event: batch.consumed_event, done: true }
-      }
-    }
-    None =>
-      if self.finalized {
-        @provider_utils.DecodeBatch::empty(true)
-      } else if !(self.finish_reason is @provider.Unknown("")) {
-        { events: self.finish_events(), consumed_event: false, done: true }
-      } else {
-        @provider_utils.DecodeBatch::empty(false)
-      }
+    Some(data) => self.decode_data(data)
+    None => @provider_utils.SseDecodeBatch::empty(self.finalized)
   }
 }
 
 ///|
-/// Return the accumulated DeepSeek stream response.
-pub fn DeepSeekStreamDecoder::response(
+/// Finish the protocol transform after the transport reports a normal EOF.
+fn DeepSeekStreamDecoder::finish_stream(
   self : DeepSeekStreamDecoder,
-) -> @provider.ChatResponse {
-  let content : Array[@provider.GeneratedContent] = []
-  if self.reasoning_seen {
-    content.push(
-      @provider.GeneratedContent::reasoning(self.reasoning.to_string()),
-    )
-  }
-  if !(self.finish_reason is @provider.Error) {
-    for call in self.tools.calls() {
-      content.push(@provider.GeneratedContent::tool_call(call))
-    }
-  }
-  if self.text_seen {
-    content.push(@provider.GeneratedContent::text(self.text.to_string()))
-  }
-  let metadata = @provider.merge_provider_metadata(
-    self.provider_metadata,
-    if self.usage_json is Null {
-      Map([])
-    } else {
-      deepseek_usage_metadata(self.usage_json, self.provider_name)
-    },
-  )
-  @provider.ChatResponse::from_content(content, self.usage, self.finish_reason).with_diagnostics(
-    None,
-    self.response_metadata,
-    metadata,
-    [],
-  )
-}
-
-///|
-fn deepseek_v4_usage_from_raw(
-  raw_usage : Json?,
-) -> @provider.LanguageModelV4Usage {
-  match raw_usage {
-    Some(raw) if !(raw is Null) =>
-      @provider.LanguageModelV4Usage::from_usage(convert_deepseek_usage(raw)).with_raw(
-        Some(raw),
-      )
-    _ => @provider.LanguageModelV4Usage::unknown()
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] {
+  if self.finalized {
+    @provider_utils.SseDecodeBatch::empty(true)
+  } else {
+    { events: self.finish_events(), consumed_event: false, done: true }
   }
 }
 
@@ -557,10 +723,10 @@ fn deepseek_v4_finish_reason_from_raw(
 
 ///|
 /// Return lossless V4 usage accumulated from the terminal SSE chunk.
-pub fn DeepSeekStreamDecoder::v4_usage(
+fn DeepSeekStreamDecoder::v4_usage(
   self : DeepSeekStreamDecoder,
 ) -> @provider.LanguageModelV4Usage {
-  deepseek_v4_usage_from_raw(
+  convert_deepseek_usage(
     if self.usage_json is Null {
       None
     } else {
@@ -571,16 +737,43 @@ pub fn DeepSeekStreamDecoder::v4_usage(
 
 ///|
 /// Return the normalized and provider-native finish reason.
-pub fn DeepSeekStreamDecoder::v4_finish_reason(
+fn DeepSeekStreamDecoder::v4_finish_reason(
   self : DeepSeekStreamDecoder,
 ) -> @provider.LanguageModelV4FinishReason {
-  deepseek_v4_finish_reason_from_raw(self.finish_reason_raw)
+  match self.finish_reason_raw {
+    Some(value) => deepseek_v4_finish_reason_from_raw(Some(value))
+    None =>
+      if self.finish_reason is @provider.Error {
+        @provider.LanguageModelV4FinishReason::from_finish_reason(
+          @provider.Error,
+        )
+      } else {
+        @provider.LanguageModelV4FinishReason::unknown()
+      }
+  }
 }
 
 ///|
 /// Return a copy of provider metadata collected while decoding the stream.
-pub fn DeepSeekStreamDecoder::provider_metadata_snapshot(
+fn DeepSeekStreamDecoder::provider_metadata_snapshot(
   self : DeepSeekStreamDecoder,
 ) -> Map[String, Json] {
-  @provider.copy_provider_metadata(self.response().provider_metadata)
+  @provider.merge_provider_metadata(
+    self.provider_metadata,
+    deepseek_usage_metadata(
+      if self.usage_json is Null {
+        Json::empty_object()
+      } else {
+        self.usage_json
+      },
+      self.provider_name,
+    ),
+  )
+}
+
+///|
+fn DeepSeekStreamDecoder::response_metadata_snapshot(
+  self : DeepSeekStreamDecoder,
+) -> @provider.ResponseMetadata? {
+  self.response_metadata
 }

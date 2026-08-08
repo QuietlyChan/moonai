@@ -1,15 +1,23 @@
 ///|
-fn openai_provider_metadata_key(provider_name : String) -> String {
-  let parts = [ for part in provider_name.split(".") => part ]
-  if parts.length() > 0 && !parts[0].trim().is_empty() {
-    parts[0].trim().to_owned()
+fn openai_provider_metadata_key(_provider_name : String) -> String {
+  "openai"
+}
+
+///|
+/// Responses uses Azure's namespace when the configured provider identifier
+/// contains `azure`; all other provider names retain OpenAI's namespace.
+fn openai_responses_provider_metadata_key(provider_name : String) -> String {
+  if provider_name.contains("azure") {
+    "azure"
   } else {
     "openai"
   }
 }
 
 ///|
-fn openai_error_message(json : Json) -> String? {
+fn openai_error_message(json : Json) -> String? raise {
+  // Adapt the pure built-in parser to the fallible transport hook contract.
+  @provider.check_cancellation(None)
   match json {
     { "error": { "message": String(message), .. }, .. } => Some(message)
     { "error": String(message), .. } => Some(message)
@@ -146,7 +154,7 @@ fn openai_responses_metadata(
   let logprobs : Array[Json] = []
   update_openai_responses_metadata(json, fields, logprobs)
   build_openai_responses_metadata(
-    openai_provider_metadata_key(provider_name),
+    openai_responses_provider_metadata_key(provider_name),
     fields,
     logprobs,
   )
@@ -156,7 +164,7 @@ fn openai_responses_metadata(
 fn openai_responses_stream_metadata(
   provider_name : String,
 ) -> ((Json) -> Unit, () -> Map[String, Json]) {
-  let provider_key = openai_provider_metadata_key(provider_name)
+  let provider_key = openai_responses_provider_metadata_key(provider_name)
   let fields : Map[String, Json] = Map([])
   let logprobs : Array[Json] = []
   let observe_json = json => {

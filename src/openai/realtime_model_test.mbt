@@ -142,7 +142,21 @@ async test "OpenAI realtime rejects client secret responses without a token" {
       idle_timeout_ms=2_000,
     )
     try @ai.create_realtime_client_secret(model) catch {
-      error => assert_true("\{error}".contains("response is missing value"))
+      @provider.APICallError(
+        message~,
+        status_code~,
+        is_retryable~,
+        data~,
+        cause~,
+        ..
+      ) => {
+        assert_eq(message, "Failed to process successful response")
+        assert_eq(status_code, Some(200))
+        assert_false(is_retryable)
+        assert_eq(data, Some(({ "expires_at": 1700000000 } : Json)))
+        assert_true(cause.unwrap_or("").contains("response is missing value"))
+      }
+      error => fail("unexpected realtime client secret error: \{error}")
     } noraise {
       _ => fail("expected missing realtime token error")
     }

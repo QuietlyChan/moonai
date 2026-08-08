@@ -1,26 +1,31 @@
 ///|
-pub impl @provider.Provider for DeepSeekProvider with fn specification_version(
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn specification_version(
   _self,
 ) -> String {
   "v4"
 }
 
 ///|
-pub impl @provider.Provider for DeepSeekProvider with fn provider_name(self) -> String {
-  self.provider_name
-}
-
-///|
-pub impl @provider.Provider for DeepSeekProvider with fn language_model(
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn language_model(
   self,
   model_id,
 ) {
-  let model = DeepSeekProvider::language_model(self, model_id)
-  Some(model as &@provider.LanguageModelV4)
+  DeepSeekProvider::language_model(self, model_id)
 }
 
 ///|
-pub impl @provider.Provider for DeepSeekProvider with fn completion_model(
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn embedding_model(
+  _self,
+  model_id,
+) {
+  raise @provider.NoSuchModelError(
+    model_id~,
+    model_type=@provider.EmbeddingModel,
+  )
+}
+
+///|
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn reranking_model(
   _self,
   _model_id,
 ) {
@@ -28,7 +33,15 @@ pub impl @provider.Provider for DeepSeekProvider with fn completion_model(
 }
 
 ///|
-pub impl @provider.Provider for DeepSeekProvider with fn embedding_model(
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn image_model(
+  _self,
+  model_id,
+) {
+  raise @provider.NoSuchModelError(model_id~, model_type=@provider.ImageModel)
+}
+
+///|
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn speech_model(
   _self,
   _model_id,
 ) {
@@ -36,7 +49,7 @@ pub impl @provider.Provider for DeepSeekProvider with fn embedding_model(
 }
 
 ///|
-pub impl @provider.Provider for DeepSeekProvider with fn reranking_model(
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn transcription_model(
   _self,
   _model_id,
 ) {
@@ -44,59 +57,11 @@ pub impl @provider.Provider for DeepSeekProvider with fn reranking_model(
 }
 
 ///|
-pub impl @provider.Provider for DeepSeekProvider with fn image_model(
-  _self,
-  _model_id,
-) {
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn files(_self) {
   None
 }
 
 ///|
-pub impl @provider.Provider for DeepSeekProvider with fn video_model(
-  _self,
-  _model_id,
-) {
-  None
-}
-
-///|
-pub impl @provider.Provider for DeepSeekProvider with fn speech_model(
-  _self,
-  _model_id,
-) {
-  None
-}
-
-///|
-pub impl @provider.Provider for DeepSeekProvider with fn transcription_model(
-  _self,
-  _model_id,
-) {
-  None
-}
-
-///|
-pub impl @provider.Provider for DeepSeekProvider with fn speech_translation_model(
-  _self,
-  _model_id,
-) {
-  None
-}
-
-///|
-pub impl @provider.Provider for DeepSeekProvider with fn realtime_model(
-  _self,
-  _model_id,
-) {
-  None
-}
-
-///|
-pub impl @provider.Provider for DeepSeekProvider with fn files(_self) {
-  None
-}
-
-///|
-pub impl @provider.Provider for DeepSeekProvider with fn skills(_self) {
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn skills(_self) {
   None
 }

@@ -54,6 +54,7 @@ pub async fn resolve_image_file(
   timeout_ms? : Int = 120_000,
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
+  trusted_origin? : String,
   transport? : &HttpTransport,
 ) -> ResolvedImageFile {
   match file {
@@ -61,7 +62,7 @@ pub async fn resolve_image_file(
       {
         filename,
         media_type: resolve_full_media_type(media_type, data),
-        data: @base64.decode(data),
+        data: convert_base64_to_bytes(data),
       }
     @provider.ImageFileBytes(data~, media_type~, filename~) =>
       { filename, media_type, data }
@@ -72,6 +73,7 @@ pub async fn resolve_image_file(
         timeout_ms~,
         retry_policy~,
         cancellation_token?,
+        trusted_origin?,
         transport?,
       )
       { filename, media_type: downloaded.media_type, data: downloaded.data }
@@ -80,15 +82,39 @@ pub async fn resolve_image_file(
 }
 
 ///|
-/// Convert provider-level inline upload data to its binary wire form.
-pub fn resolve_upload_file_data(data : @provider.UploadFileData) -> Bytes raise {
-  match data {
-    @provider.UploadFileBytes(value) => value
-    @provider.UploadFileBase64(value) =>
-      @base64.decode(value) catch {
-        _ => fail("invalid Base64 file upload data")
+/// Resolve a V4 image input without lowering it through the legacy image-file
+/// representation. Protocol adapters supply the multipart filename because
+/// the V4 provider contract intentionally does not carry one.
+pub async fn resolve_image_model_v4_file(
+  file : @provider.ImageModelV4File,
+  filename? : String = "image",
+  provider_name~ : String,
+  timeout_ms? : Int = 120_000,
+  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  cancellation_token? : @provider.CancellationToken,
+  trusted_origin? : String,
+  transport? : &HttpTransport,
+) -> ResolvedImageFile {
+  match file {
+    @provider.ImageV4Data(data~, media_type~) =>
+      {
+        filename,
+        media_type: resolve_full_media_type(media_type, data),
+        data: convert_base64_to_bytes(data),
       }
-    @provider.UploadFileText(value) => @utf8.encode(value)
+    @provider.ImageV4Bytes(data~, media_type~) => { filename, media_type, data }
+    @provider.ImageV4Url(url~) => {
+      let downloaded = download_file(
+        provider_name~,
+        url~,
+        timeout_ms~,
+        retry_policy~,
+        cancellation_token?,
+        trusted_origin?,
+        transport?,
+      )
+      { filename, media_type: downloaded.media_type, data: downloaded.data }
+    }
   }
 }
 
@@ -100,7 +126,7 @@ pub fn resolve_transcription_audio(
   match audio {
     @provider.TranscriptionAudioBytes(value) => value
     @provider.TranscriptionAudioBase64(value) =>
-      @base64.decode(value) catch {
+      convert_base64_to_bytes(value) catch {
         _ => fail("invalid Base64 transcription audio")
       }
   }
@@ -118,6 +144,12 @@ pub fn media_type_to_extension(media_type : String) -> String {
     "mp4" | "x-m4a" => "m4a"
     value => value
   }
+}
+
+///|
+/// AI SDK-style spelling for `media_type_to_extension`.
+pub fn mediaTypeToExtension(media_type : String) -> String {
+  media_type_to_extension(media_type)
 }
 
 ///|

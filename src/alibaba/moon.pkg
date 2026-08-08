@@ -2,6 +2,7 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "QuietlyChan/moonai/openai_compatible",
+  "moonbitlang/core/env",
   "moonbitlang/core/json",
   "moonbitlang/core/string",
 }
@@ -9,8 +10,7 @@ import {
 import {
   "QuietlyChan/moonai/ai",
   "moonbitlang/async",
-  "moonbitlang/async/http",
-  "moonbitlang/async/socket",
+  "moonbitlang/core/encoding/utf8",
 } for "test"
 
 import {

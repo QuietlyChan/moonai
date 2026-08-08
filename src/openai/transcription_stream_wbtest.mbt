@@ -182,6 +182,7 @@ async test "OpenAI realtime transcription streams normalized events" {
   assert_eq(result.text, "hello world")
   assert_eq(result.language, Some("en"))
   assert_eq(result.response.unwrap().model_id, Some("gpt-realtime-whisper"))
+  assert_true(result.response.unwrap().created_at is Some(_))
   assert_eq(result.warnings.length(), 1)
   assert_true(audio.cancelled.val)
   assert_eq(connector.urls, [
@@ -258,6 +259,53 @@ async test "OpenAI realtime transcription streams normalized events" {
 }
 
 ///|
+async test "OpenAI realtime transcription retains structured stream errors" {
+  let connection = MockTranscriptionWebSocketConnection::new(
+    [
+      transcription_text_message({
+        "type": "error",
+        "error": { "message": "rate limited", "code": "rate_limit" },
+      }),
+    ],
+    expected_sends_before_receive=1,
+  )
+  let connector = MockTranscriptionWebSocketConnector::new(connection)
+  let model = create_openai(
+    api_key="test-api-key",
+    websocket_connector=connector,
+  ).transcription("gpt-realtime-whisper")
+  let audio = MockTranscriptionAudioStream::new([])
+  let events : Array[@provider.TranscriptionStreamEvent] = []
+  try
+    @ai.stream_transcribe(
+      model,
+      audio~,
+      input_audio_format=@provider.AudioFormat::new(media_type="audio/pcm"),
+      on_event=event => events.push(event),
+    )
+    |> ignore
+  catch {
+    _ => ()
+  } noraise {
+    _ => fail("expected the realtime transcription call to fail")
+  }
+  assert_true(
+    events.any(event => {
+      match event {
+        @provider.TranscriptionStreamError(error) =>
+          error.message == "rate limited" &&
+          error.data
+          is Some(
+            { "type": "error", "error": { "code": "rate_limit", .. }, .. }
+          )
+        _ => false
+      }
+    }),
+  )
+  assert_true(audio.cancelled.val)
+}
+
+///|
 async test "OpenAI rejects streaming on a buffered transcription model" {
   let model = openai_transcription("whisper-1", api_key="test-api-key")
   let audio = @provider.audio_chunks([])
@@ -274,4 +322,37 @@ async test "OpenAI rejects streaming on a buffered transcription model" {
   } noraise {
     _ => fail("expected an unsupported streaming transcription error")
   }
+}
+
+///|
+async test "OpenAI realtime transcription omits an unidentified final part" {
+  let connection = MockTranscriptionWebSocketConnection::new(
+    [
+      transcription_text_message({
+        "type": "conversation.item.input_audio_transcription.delta",
+        "delta": "partial text",
+      }),
+      transcription_text_message({
+        "type": "conversation.item.input_audio_transcription.completed",
+      }),
+    ],
+    expected_sends_before_receive=2,
+  )
+  let connector = MockTranscriptionWebSocketConnector::new(connection)
+  let model = create_openai(
+    api_key="test-api-key",
+    websocket_connector=connector,
+  ).transcription("gpt-realtime-whisper")
+  let events : Array[@provider.TranscriptionStreamEvent] = []
+  let result = @ai.stream_transcribe(
+    model,
+    audio=@provider.audio_chunks([]),
+    input_audio_format=@provider.AudioFormat::new(media_type="audio/pcm"),
+    on_event=event => events.push(event),
+  )
+  assert_eq(result.text, "")
+  assert_false(events.any(event => event is @provider.TranscriptionFinal(..)))
+  assert_true(
+    events.any(event => event is @provider.TranscriptionFinish(text="", ..)),
+  )
 }

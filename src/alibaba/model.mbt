@@ -80,12 +80,12 @@ pub fn createAlibaba(
 }
 
 ///|
-/// Select the protocol-level Alibaba Chat Completions model.
-pub fn AlibabaProvider::chat_wire(
+/// Construct the concrete chat model behind the public V4 boundary.
+fn AlibabaProvider::language_model_value(
   self : AlibabaProvider,
   model_id : AlibabaChatModelId,
 ) -> AlibabaChatModel {
-  alibaba_chat(
+  alibaba_chat_value(
     model_id,
     api_key=self.api_key,
     base_url=self.base_url,
@@ -102,7 +102,7 @@ pub fn AlibabaProvider::chat_wire(
 pub fn AlibabaProvider::language_model(
   self : AlibabaProvider,
   model_id : AlibabaChatModelId,
-) -> AlibabaLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.chat(model_id)
 }
 
@@ -111,8 +111,9 @@ pub fn AlibabaProvider::language_model(
 pub fn AlibabaProvider::chat(
   self : AlibabaProvider,
   model_id : AlibabaChatModelId,
-) -> AlibabaLanguageModelV4 {
-  AlibabaLanguageModelV4::new(self.chat_wire(model_id))
+) -> &@provider.LanguageModelV4 {
+  let model = self.language_model_value(model_id)
+  model as &@provider.LanguageModelV4
 }
 
 ///|
@@ -120,7 +121,7 @@ pub fn AlibabaProvider::chat(
 pub fn AlibabaProvider::languageModel(
   self : AlibabaProvider,
   model_id : AlibabaChatModelId,
-) -> AlibabaLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.language_model(model_id)
 }
 
@@ -129,17 +130,17 @@ pub fn AlibabaProvider::languageModel(
 pub fn AlibabaProvider::chatModel(
   self : AlibabaProvider,
   model_id : AlibabaChatModelId,
-) -> AlibabaLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.chat(model_id)
 }
 
 ///|
-/// Select a native Alibaba text embedding model.
-pub fn AlibabaProvider::embedding(
+/// Construct the concrete embedding model behind the public V4 boundary.
+fn AlibabaProvider::embedding_model_value(
   self : AlibabaProvider,
   model_id : AlibabaEmbeddingModelId,
 ) -> AlibabaEmbeddingModel {
-  alibaba_embedding(
+  alibaba_embedding_value(
     model_id,
     api_key=self.api_key,
     base_url=self.embedding_base_url,
@@ -150,11 +151,21 @@ pub fn AlibabaProvider::embedding(
 }
 
 ///|
+/// Select a native Alibaba text embedding model.
+pub fn AlibabaProvider::embedding(
+  self : AlibabaProvider,
+  model_id : AlibabaEmbeddingModelId,
+) -> &@provider.EmbeddingModelV4 {
+  let model = self.embedding_model_value(model_id)
+  model as &@provider.EmbeddingModelV4
+}
+
+///|
 /// Alias for `embedding`.
 pub fn AlibabaProvider::embedding_model(
   self : AlibabaProvider,
   model_id : AlibabaEmbeddingModelId,
-) -> AlibabaEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 {
   self.embedding(model_id)
 }
 
@@ -163,17 +174,17 @@ pub fn AlibabaProvider::embedding_model(
 pub fn AlibabaProvider::embeddingModel(
   self : AlibabaProvider,
   model_id : AlibabaEmbeddingModelId,
-) -> AlibabaEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 {
   self.embedding_model(model_id)
 }
 
 ///|
-/// Select an Alibaba asynchronous video generation model.
-pub fn AlibabaProvider::video(
+/// Construct the concrete video model behind the public V4 boundary.
+fn AlibabaProvider::video_model_value(
   self : AlibabaProvider,
   model_id : AlibabaVideoModelId,
 ) -> AlibabaVideoModel {
-  alibaba_video(
+  alibaba_video_value(
     model_id,
     api_key=self.api_key,
     base_url=self.video_base_url,
@@ -184,11 +195,21 @@ pub fn AlibabaProvider::video(
 }
 
 ///|
+/// Select an Alibaba asynchronous video generation model.
+pub fn AlibabaProvider::video(
+  self : AlibabaProvider,
+  model_id : AlibabaVideoModelId,
+) -> &@provider.VideoModelV4 {
+  let model = self.video_model_value(model_id)
+  model as &@provider.VideoModelV4
+}
+
+///|
 /// Camel-case alias for `video`.
 pub fn AlibabaProvider::videoModel(
   self : AlibabaProvider,
   model_id : AlibabaVideoModelId,
-) -> AlibabaVideoModel {
+) -> &@provider.VideoModelV4 {
   self.video(model_id)
 }
 
@@ -203,17 +224,14 @@ pub fn alibaba(
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
-) -> AlibabaLanguageModelV4 {
-  AlibabaLanguageModelV4::new(
-    alibaba_chat(
-      model_id,
-      api_key~,
-      base_url~,
-      headers~,
-      include_usage~,
-      idle_timeout_ms~,
-      http_transport?,
-      id_generator?,
-    ),
-  )
+) -> &@provider.LanguageModelV4 {
+  create_alibaba(
+    api_key~,
+    base_url~,
+    headers~,
+    include_usage~,
+    idle_timeout_ms~,
+    http_transport?,
+    id_generator?,
+  ).language_model(model_id)
 }

@@ -25,10 +25,24 @@ fn parse_int_opt(value : StringView) -> Int? {
 }
 
 ///|
+fn is_ascii_decimal(value : StringView) -> Bool {
+  let bytes = @utf8.encode(value)
+  guard bytes.length() > 0 else { return false }
+  for byte in bytes {
+    let digit = byte.to_int()
+    if digit < b'0'.to_int() || digit > b'9'.to_int() {
+      return false
+    }
+  }
+  true
+}
+
+///|
 fn openai_o_series_version(model_id : String) -> Int? {
   guard model_id.strip_prefix("o") is Some(rest) else { return None }
   let parts = [ for part in rest.to_owned().split("-") => part ]
   guard parts.length() > 0 else { return None }
+  guard is_ascii_decimal(parts[0]) else { return None }
   parse_int_opt(parts[0])
 }
 
@@ -40,12 +54,20 @@ fn openai_gpt_version(model_id : String) -> OpenAIGptVersion? {
   let version_parts = [
     for part in dash_parts[0].to_owned().split(".") => part
   ]
-  guard version_parts.length() > 0 else { return None }
+  guard version_parts.length() == 1 || version_parts.length() == 2 else {
+    return None
+  }
+  guard is_ascii_decimal(version_parts[0]) else { return None }
   guard parse_int_opt(version_parts[0]) is Some(major) else { return None }
   let minor = if version_parts.length() > 1 {
+    guard is_ascii_decimal(version_parts[1]) else { return None }
     parse_int_opt(version_parts[1])
   } else {
     None
+  }
+  guard dash_parts.length() == 1 ||
+    dash_parts[1:].any(part => part.length() > 0) else {
+    return None
   }
   let variant = if dash_parts.length() > 1 {
     Some(dash_parts[1].to_owned())

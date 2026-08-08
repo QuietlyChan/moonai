@@ -1,7 +1,9 @@
 import {
+  "QuietlyChan/moonai/ai/generate_text",
   "QuietlyChan/moonai/ai/model",
   "QuietlyChan/moonai/ai/prompt",
   "QuietlyChan/moonai/ai/registry",
+  "QuietlyChan/moonai/ai/tool",
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/async",

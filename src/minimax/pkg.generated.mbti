@@ -2,7 +2,6 @@
 package "QuietlyChan/moonai/minimax"
 
 import {
-  "QuietlyChan/moonai/anthropic",
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
@@ -15,11 +14,7 @@ pub fn createMiniMax(api_key? : String, base_url? : String, video_base_url? : St
 
 pub fn create_minimax(api_key? : String, base_url? : String, video_base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MiniMaxProvider
 
-pub fn minimax(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MiniMaxLanguageModelV4 raise
-
-pub fn minimax_messages(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> @anthropic.AnthropicMessagesModel raise
-
-pub fn minimax_video(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> MiniMaxVideoModel
+pub fn minimax(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise
 
 // Errors
 
@@ -30,33 +25,20 @@ pub(all) struct MiniMaxLanguageModelOptions {
 pub fn MiniMaxLanguageModelOptions::new(thinking? : MiniMaxThinkingMode) -> Self
 pub fn MiniMaxLanguageModelOptions::to_provider_options(Self) -> Map[String, Json]
 
-pub struct MiniMaxLanguageModelV4 {
-  model : @anthropic.AnthropicMessagesModel
-}
-pub fn MiniMaxLanguageModelV4::new(@anthropic.AnthropicMessagesModel) -> Self
-pub impl @provider.LanguageModelV4 for MiniMaxLanguageModelV4
-
 pub struct MiniMaxProvider {
   // private fields
 }
-pub fn MiniMaxProvider::chat(Self, String) -> MiniMaxLanguageModelV4 raise
-pub fn MiniMaxProvider::chat_wire(Self, String) -> @anthropic.AnthropicMessagesModel raise
-pub fn MiniMaxProvider::languageModel(Self, String) -> MiniMaxLanguageModelV4 raise
-pub fn MiniMaxProvider::language_model(Self, String) -> MiniMaxLanguageModelV4 raise
-pub fn MiniMaxProvider::video(Self, String) -> MiniMaxVideoModel
-pub fn MiniMaxProvider::videoModel(Self, String) -> MiniMaxVideoModel
-pub impl @provider.Provider for MiniMaxProvider
+pub fn MiniMaxProvider::chat(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn MiniMaxProvider::languageModel(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn MiniMaxProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn MiniMaxProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn MiniMaxProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub impl @provider.ProviderV4 for MiniMaxProvider
 
 pub(all) enum MiniMaxThinkingMode {
   AdaptiveThinking
   DisabledThinking
 } derive(Eq, @debug.Debug)
-
-pub struct MiniMaxVideoModel {
-  // private fields
-}
-pub impl @provider.VideoModelV4 for MiniMaxVideoModel
-pub impl @provider.VideoWireModel for MiniMaxVideoModel
 
 pub(all) struct MiniMaxVideoModelOptions {
   resolution : String?
@@ -70,8 +52,6 @@ pub fn MiniMaxVideoModelOptions::new(resolution? : String, ratio? : String, refe
 pub fn MiniMaxVideoModelOptions::to_provider_options(Self) -> Map[String, Json]
 
 // Type aliases
-pub using @anthropic {type AnthropicMessagesModel as MiniMaxChatModel}
-
 pub type MiniMaxChatModelId = String
 
 pub type MiniMaxVideoModelId = String

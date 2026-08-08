@@ -5,6 +5,15 @@ pub fn without_trailing_slash(url : String) -> String {
 }
 
 ///|
+/// Remove one trailing slash while preserving an omitted URL, matching AI SDK.
+pub fn withoutTrailingSlash(url : String?) -> String? {
+  match url {
+    Some(value) => Some(without_trailing_slash(value))
+    None => None
+  }
+}
+
+///|
 /// Append a path unless the configured endpoint already ends with it.
 pub fn append_path(url : String, path : String) -> String {
   let base = without_trailing_slash(url)

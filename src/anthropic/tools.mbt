@@ -40,6 +40,8 @@ fn anthropic_function_tool(
   supports_structured_output : Bool,
   supports_strict_tools : Bool,
   default_eager_input_streaming : Bool,
+  provider_name : String,
+  cache_control_validator : AnthropicCacheControlValidator,
   warnings : Array[@provider.Warning],
   beta_features : Array[String],
 ) -> Json {
@@ -48,14 +50,17 @@ fn anthropic_function_tool(
     fields["description"] = Json::string(value)
   }
   fields["input_schema"] = input_schema
+  match
+    cache_control_validator.get_cache_control(
+      provider_options, provider_name, "tool definition", true,
+    ) {
+    Some(value) => fields["cache_control"] = anthropic_wire_json(value)
+    None => ()
+  }
   let mut eager_input_streaming = default_eager_input_streaming
   let mut has_allowed_callers = false
   match provider_options.get("anthropic") {
     Some(Object(options)) => {
-      if anthropic_tool_option(options, "cacheControl", "cache_control")
-        is Some(value) {
-        fields["cache_control"] = anthropic_wire_json(value)
-      }
       if anthropic_tool_bool_option(
           options, "eagerInputStreaming", "eager_input_streaming",
         )
@@ -81,7 +86,7 @@ fn anthropic_function_tool(
       warnings.push(
         @provider.Warning::Unsupported(
           feature="strict",
-          details="Tool '\{name}' has strict: \{value}, but strict mode is not supported by this provider; strict was ignored.",
+          details="Tool '\{name}' has strict: \{value}, but strict mode is not supported by this provider. The strict property will be ignored.",
         ),
       )
     None => ()
@@ -414,45 +419,57 @@ fn anthropic_provider_tool_names() -> Map[String, String] {
 
 ///|
 fn create_anthropic_tool_name_mapping(
-  tools : Array[@provider.ToolDefinition],
+  tools : Array[@provider.LanguageModelV4Tool],
 ) -> @provider_utils.ToolNameMapping {
-  @provider_utils.create_tool_name_mapping(
+  @provider_utils.create_v4_tool_name_mapping(
     tools,
     anthropic_provider_tool_names(),
   )
 }
 
 ///|
-fn prepare_anthropic_tools(
-  tools : Array[@provider.ToolDefinition],
+fn prepare_anthropic_v4_tools(
+  tools : Array[@provider.LanguageModelV4Tool],
   supports_structured_output : Bool,
   supports_strict_tools : Bool,
   default_eager_input_streaming : Bool,
+  provider_name : String,
+  cache_control_validator : AnthropicCacheControlValidator,
   warnings : Array[@provider.Warning],
 ) -> AnthropicPreparedTools raise {
   let prepared : Array[Json] = []
   let beta_features : Array[String] = []
   for tool in tools {
     match tool {
-      @provider.FunctionTool(
-        name~,
-        description~,
-        input_schema~,
-        input_examples~,
-        strict~,
-        provider_options~
-      ) =>
+      @provider.V4FunctionTool(value) =>
         prepared.push(
           anthropic_function_tool(
-            name, description, input_schema, input_examples, strict, provider_options,
-            supports_structured_output, supports_strict_tools, default_eager_input_streaming,
-            warnings, beta_features,
+            value.name,
+            value.description,
+            value.input_schema,
+            [
+              for example in value.input_examples => example.input
+            ],
+            value.strict,
+            value.provider_options,
+            supports_structured_output,
+            supports_strict_tools,
+            default_eager_input_streaming,
+            provider_name,
+            cache_control_validator,
+            warnings,
+            beta_features,
           ),
         )
-      @provider.ProviderTool(id~, args~, ..) =>
-        if anthropic_provider_tool(id, args, warnings, beta_features)
-          is Some(value) {
-          prepared.push(value)
+      @provider.V4ProviderTool(value) =>
+        if anthropic_provider_tool(
+            value.id,
+            value.args,
+            warnings,
+            beta_features,
+          )
+          is Some(prepared_tool) {
+          prepared.push(prepared_tool)
         }
     }
   }

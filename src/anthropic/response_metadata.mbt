@@ -266,12 +266,90 @@ fn anthropic_metadata_map(
 }
 
 ///|
+/// Build the AI SDK metadata namespace for a high-level Anthropic call.
+/// Canonical `anthropic` metadata is always present. A custom provider key is
+/// added only when the request explicitly selected that provider-options
+/// namespace.
+fn anthropic_canonical_metadata_map(
+  provider_name : String,
+  value : Json,
+  include_custom_provider : Bool,
+) -> Map[String, Json] {
+  let result : Map[String, Json] = Map([("anthropic", value)])
+  if include_custom_provider {
+    let parts = [ for part in provider_name.split(".") => part ]
+    let custom_key = if parts.length() > 0 {
+      parts[0].trim().to_owned()
+    } else {
+      ""
+    }
+    if custom_key != "" && custom_key != "anthropic" {
+      result[custom_key] = value
+    }
+  }
+  result
+}
+
+///|
+fn anthropic_resolved_metadata_map(
+  provider_name : String,
+  value : Json,
+  canonical_metadata : Bool,
+  include_custom_provider : Bool,
+) -> Map[String, Json] {
+  if canonical_metadata {
+    anthropic_canonical_metadata_map(
+      provider_name, value, include_custom_provider,
+    )
+  } else {
+    anthropic_metadata_map(provider_name, value)
+  }
+}
+
+///|
+/// Anthropic V4 metadata has four nullable fields that are always present on
+/// a completed response. Streaming frames are merged incrementally, so the
+/// defaults are added only when exposing the final snapshot.
+fn anthropic_complete_provider_metadata(
+  metadata : Map[String, Json],
+  provider_name : String,
+  canonical_metadata : Bool,
+  include_custom_provider : Bool,
+) -> Map[String, Json] {
+  let primary_key = if canonical_metadata {
+    "anthropic"
+  } else {
+    anthropic_metadata_key(provider_name)
+  }
+  let fields : Map[String, Json] = match metadata.get(primary_key) {
+    Some(Object(values)) => @provider.copy_provider_metadata(values)
+    _ => Map([])
+  }
+  for name in ["stopSequence", "iterations", "container", "contextManagement"] {
+    if fields.get(name) is None {
+      fields[name] = Json::null()
+    }
+  }
+  @provider.merge_provider_metadata(
+    metadata,
+    anthropic_resolved_metadata_map(
+      provider_name,
+      Json::object(fields),
+      canonical_metadata,
+      include_custom_provider,
+    ),
+  )
+}
+
+///|
 /// Build the Anthropic-specific metadata emitted by a response or stream
 /// event. The function intentionally only adds fields present in the event;
 /// callers can merge successive events without losing earlier metadata.
 fn anthropic_response_provider_metadata(
   json : Json,
   provider_name : String,
+  canonical_metadata~ : Bool,
+  include_custom_provider~ : Bool,
 ) -> Map[String, Json] {
   let source = match json {
     { "message": Object(message), .. } => Json::object(message)
@@ -324,6 +402,11 @@ fn anthropic_response_provider_metadata(
   if fields.length() == 0 {
     Map([])
   } else {
-    anthropic_metadata_map(provider_name, Json::object(fields))
+    anthropic_resolved_metadata_map(
+      provider_name,
+      Json::object(fields),
+      canonical_metadata,
+      include_custom_provider,
+    )
   }
 }

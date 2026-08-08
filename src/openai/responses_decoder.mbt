@@ -8,40 +8,57 @@ fn openai_responses_response_error(json : Json) -> String? {
 }
 
 ///|
-fn openai_responses_usage(json : Json) -> @provider.Usage {
-  let input_tokens = @provider_utils.json_int_field(json, "input_tokens")
-  let output_tokens = @provider_utils.json_int_field(json, "output_tokens")
-  let total_tokens = @provider_utils.json_int_field(
-    json,
-    "total_tokens",
-    default=input_tokens + output_tokens,
-  )
-  let cached_input_tokens = match json {
-    { "input_tokens_details": { "cached_tokens": Number(value, ..), .. }, .. } =>
-      value.to_int()
-    _ => 0
-  }
-  let reasoning_tokens = match json {
-    {
-      "output_tokens_details": { "reasoning_tokens": Number(value, ..), .. },
-      ..
-    } => value.to_int()
-    _ => 0
-  }
-  let cache_write_input_tokens = match json {
-    {
-      "input_tokens_details": { "cache_write_tokens": Number(value, ..), .. },
-      ..
-    } => value.to_int()
-    _ => 0
-  }
-  {
-    input_tokens,
-    output_tokens,
-    total_tokens,
-    reasoning_tokens,
-    cached_input_tokens,
-    cache_write_input_tokens,
+fn openai_responses_v4_usage(
+  raw_usage : Json?,
+) -> @provider.LanguageModelV4Usage {
+  match raw_usage {
+    Some(json) if !(json is Null) => {
+      let input_tokens = @provider_utils.json_int_field(json, "input_tokens")
+      let output_tokens = @provider_utils.json_int_field(json, "output_tokens")
+      let cached_input_tokens = match json {
+        {
+          "input_tokens_details": { "cached_tokens": Number(value, ..), .. },
+          ..
+        } => value.to_int()
+        _ => 0
+      }
+      let cache_write_input_tokens = match json {
+        {
+          "input_tokens_details": {
+            "cache_write_tokens": Number(value, ..),
+            ..
+          },
+          ..
+        } => Some(value.to_int())
+        _ => None
+      }
+      let reasoning_tokens = match json {
+        {
+          "output_tokens_details": { "reasoning_tokens": Number(value, ..), .. },
+          ..
+        } => value.to_int()
+        _ => 0
+      }
+      {
+        input_tokens: {
+          total: Some(input_tokens),
+          no_cache: Some(
+            input_tokens -
+            cached_input_tokens -
+            cache_write_input_tokens.unwrap_or(0),
+          ),
+          cache_read: Some(cached_input_tokens),
+          cache_write: cache_write_input_tokens,
+        },
+        output_tokens: {
+          total: Some(output_tokens),
+          text: Some(output_tokens - reasoning_tokens),
+          reasoning: Some(reasoning_tokens),
+        },
+        raw: Some(json),
+      }
+    }
+    _ => @provider_utils.create_null_language_model_usage()
   }
 }
 
@@ -54,7 +71,7 @@ fn openai_responses_item_metadata(
   if item_id == "" && extra_fields.length() == 0 {
     return Map([])
   }
-  let key = openai_provider_metadata_key(provider_name)
+  let key = openai_responses_provider_metadata_key(provider_name)
   let fields : Map[String, Json] = Map([])
   if item_id != "" {
     fields["itemId"] = Json::string(item_id)
@@ -66,14 +83,29 @@ fn openai_responses_item_metadata(
 }
 
 ///|
+fn copy_openai_approval_tool_call_ids(
+  values : Map[String, String],
+) -> Map[String, String] {
+  let copied : Map[String, String] = Map([])
+  for entry in values.iter2() {
+    copied[entry.0] = entry.1
+  }
+  copied
+}
+
+///|
 fn openai_responses_text_item_metadata(
   provider_name : String,
   item_id : String,
   item : Json,
+  annotations? : Array[Json],
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map([])
   if @provider_utils.json_string_field(item, "phase") is Some(value) {
     fields["phase"] = Json::string(value)
+  }
+  if annotations is Some(value) && value.length() > 0 {
+    fields["annotations"] = Json::array(value)
   }
   openai_responses_item_metadata(provider_name, item_id, extra_fields=fields)
 }
@@ -87,6 +119,13 @@ fn openai_responses_tool_item_metadata(
   let fields : Map[String, Json] = Map([])
   if @provider_utils.json_string_field(item, "namespace") is Some(value) {
     fields["namespace"] = Json::string(value)
+  }
+  match item {
+    { "caller": { "type": "program", "caller_id": String(caller_id), .. }, .. } =>
+      fields["caller"] = { "type": "program", "callerId": caller_id }
+    { "caller": Object(caller), .. } =>
+      fields["caller"] = Json::object(@provider.copy_provider_metadata(caller))
+    _ => ()
   }
   openai_responses_item_metadata(provider_name, item_id, extra_fields=fields)
 }
@@ -140,22 +179,20 @@ fn openai_responses_tool_call(
   id : String,
   name : String,
   arguments : String,
-  provider_name : String,
-  item_id : String,
+  _provider_name : String,
+  _item_id : String,
   provider_executed? : Bool = false,
   dynamic? : Bool = false,
-  provider_metadata? : Map[String, Json] = openai_responses_item_metadata(
-    provider_name, item_id,
-  ),
-) -> @provider.ToolCall {
-  @provider.ToolCall::new(
-    id~,
-    name~,
-    arguments~,
-    provider_executed~,
-    dynamic~,
-    provider_metadata~,
-  )
+  provider_metadata? : Map[String, Json] = Map([]),
+) -> @provider.LanguageModelV4ToolCall {
+  {
+    tool_call_id: id,
+    tool_name: name,
+    input: arguments,
+    provider_executed,
+    dynamic,
+    provider_metadata,
+  }
 }
 
 ///|
@@ -163,32 +200,158 @@ fn openai_responses_tool_result(
   tool_call_id : String,
   tool_name : String,
   result : Json,
-  provider_name : String,
-  item_id : String,
+  _provider_name : String,
+  _item_id : String,
   is_error? : Bool = false,
   preliminary? : Bool = false,
   dynamic? : Bool = false,
-) -> @provider.ToolResult {
-  @provider.ToolResult::new(
-    tool_call_id~,
-    tool_name~,
-    result~,
-    is_error~,
-    preliminary~,
-    dynamic~,
-    provider_metadata=openai_responses_item_metadata(provider_name, item_id),
-  )
+  provider_metadata? : Map[String, Json] = Map([]),
+) -> @provider.LanguageModelV4ToolResult {
+  {
+    tool_call_id,
+    tool_name,
+    result,
+    is_error,
+    preliminary,
+    dynamic,
+    provider_metadata,
+  }
+}
+
+///|
+fn openai_responses_shell_output_result(output : Json) -> Json {
+  match output {
+    Array(items) =>
+      Json::array(
+        [
+          for item in items => {
+            match item {
+              {
+                "stdout": stdout,
+                "stderr": stderr,
+                "outcome": { "type": "exit", "exit_code": exit_code, .. },
+                ..
+              } =>
+                {
+                  "stdout": stdout,
+                  "stderr": stderr,
+                  "outcome": { "type": "exit", "exitCode": exit_code },
+                }
+              {
+                "stdout": stdout,
+                "stderr": stderr,
+                "outcome": { "type": "timeout", .. },
+                ..
+              } =>
+                {
+                  "stdout": stdout,
+                  "stderr": stderr,
+                  "outcome": { "type": "timeout" },
+                }
+              other => other
+            }
+          }
+        ],
+      )
+    other => other
+  }
+}
+
+///|
+fn openai_responses_web_search_output(action : Json?) -> Json {
+  let result : Map[String, Json] = Map([])
+  match action {
+    Some({ "type": "search", .. } as raw_action) => {
+      let mapped_action : Map[String, Json] = Map([
+        ("type", Json::string("search")),
+      ])
+      match raw_action {
+        { "query": query, .. } if !(query is Null) =>
+          mapped_action["query"] = query
+        _ => ()
+      }
+      match raw_action {
+        { "queries": queries, .. } if !(queries is Null) =>
+          mapped_action["queries"] = queries
+        _ => ()
+      }
+      result["action"] = Json::object(mapped_action)
+      match raw_action {
+        { "sources": sources, .. } if !(sources is Null) =>
+          result["sources"] = sources
+        _ => ()
+      }
+    }
+    Some({ "type": "open_page", .. } as raw_action) => {
+      let mapped_action : Map[String, Json] = Map([
+        ("type", Json::string("openPage")),
+      ])
+      mapped_action["url"] = match raw_action {
+        { "url": url, .. } => url
+        _ => Json::null()
+      }
+      result["action"] = Json::object(mapped_action)
+    }
+    Some({ "type": "find_in_page", .. } as raw_action) => {
+      let mapped_action : Map[String, Json] = Map([
+        ("type", Json::string("findInPage")),
+      ])
+      mapped_action["url"] = match raw_action {
+        { "url": url, .. } => url
+        _ => Json::null()
+      }
+      mapped_action["pattern"] = match raw_action {
+        { "pattern": pattern, .. } => pattern
+        _ => Json::null()
+      }
+      result["action"] = Json::object(mapped_action)
+    }
+    _ => ()
+  }
+  Json::object(result)
+}
+
+///|
+fn openai_responses_file_search_output(queries : Json, item : Json) -> Json {
+  let results = match item {
+    { "results": Array(values), .. } =>
+      Json::array(
+        [
+          for value in values => {
+            match value {
+              {
+                "attributes": attributes,
+                "file_id": String(file_id),
+                "filename": String(filename),
+                "score": score,
+                "text": String(text),
+                ..
+              } =>
+                {
+                  "attributes": attributes,
+                  "fileId": file_id,
+                  "filename": filename,
+                  "score": score,
+                  "text": text,
+                }
+              other => other
+            }
+          }
+        ],
+      )
+    _ => Json::null()
+  }
+  { "queries": queries, "results": results }
 }
 
 ///|
 fn openai_responses_source_contents(
   annotations : Array[Json],
   provider_name : String,
-  item_id : String,
   index : Int,
   id_generator : @provider_utils.IdGenerator,
-) -> Array[@provider.GeneratedContent] {
-  let sources : Array[@provider.GeneratedContent] = []
+) -> Array[@provider.LanguageModelV4Content] {
+  let sources : Array[@provider.LanguageModelV4Content] = []
   for annotation_index, annotation in annotations {
     let generated = id_generator()
     let source_id = if generated == "" {
@@ -201,24 +364,15 @@ fn openai_responses_source_contents(
         match title {
           String(value) =>
             sources.push(
-              @provider.GeneratedContent::url_source(
+              @provider.LanguageModelV4Content::url_source(
                 id=source_id,
                 url~,
                 title=value,
-                provider_metadata=openai_responses_item_metadata(
-                  provider_name, item_id,
-                ),
               ),
             )
           _ =>
             sources.push(
-              @provider.GeneratedContent::url_source(
-                id=source_id,
-                url~,
-                provider_metadata=openai_responses_item_metadata(
-                  provider_name, item_id,
-                ),
-              ),
+              @provider.LanguageModelV4Content::url_source(id=source_id, url~),
             )
         }
       {
@@ -229,19 +383,18 @@ fn openai_responses_source_contents(
         ..
       } =>
         sources.push(
-          @provider.GeneratedContent::document_source(
+          @provider.LanguageModelV4Content::document_source(
             id=source_id,
             media_type="text/plain",
             title=filename,
             filename~,
             provider_metadata=Map([
               (
-                openai_provider_metadata_key(provider_name),
+                openai_responses_provider_metadata_key(provider_name),
                 {
                   "type": "file_citation",
                   "fileId": file_id,
                   "index": citation_index,
-                  "itemId": item_id,
                 },
               ),
             ]),
@@ -255,14 +408,14 @@ fn openai_responses_source_contents(
         ..
       } =>
         sources.push(
-          @provider.GeneratedContent::document_source(
+          @provider.LanguageModelV4Content::document_source(
             id=source_id,
             media_type="text/plain",
             title=filename,
             filename~,
             provider_metadata=Map([
               (
-                openai_provider_metadata_key(provider_name),
+                openai_responses_provider_metadata_key(provider_name),
                 {
                   "type": "container_file_citation",
                   "fileId": file_id,
@@ -279,19 +432,18 @@ fn openai_responses_source_contents(
         ..
       } =>
         sources.push(
-          @provider.GeneratedContent::document_source(
+          @provider.LanguageModelV4Content::document_source(
             id=source_id,
             media_type="application/octet-stream",
             title=file_id,
             filename=file_id,
             provider_metadata=Map([
               (
-                openai_provider_metadata_key(provider_name),
+                openai_responses_provider_metadata_key(provider_name),
                 {
                   "type": "file_path",
                   "fileId": file_id,
                   "index": citation_index,
-                  "itemId": item_id,
                 },
               ),
             ]),
@@ -305,16 +457,24 @@ fn openai_responses_source_contents(
 
 ///|
 fn append_openai_mcp_approval(
-  content : Array[@provider.GeneratedContent],
+  content : Array[@provider.LanguageModelV4Content],
   provider_name : String,
   item_id : String,
   approval_id : String,
   name : String,
   arguments : Json,
   id_generator : @provider_utils.IdGenerator,
+  approval_tool_call_ids : Map[String, String],
 ) -> Unit {
-  let generated = id_generator()
-  let tool_call_id = if generated == "" { item_id } else { generated }
+  let tool_call_id = match approval_tool_call_ids.get(approval_id) {
+    Some(value) => value
+    None => {
+      let generated = id_generator()
+      let value = if generated == "" { item_id } else { generated }
+      approval_tool_call_ids[approval_id] = value
+      value
+    }
+  }
   let call = openai_responses_tool_call(
     tool_call_id,
     "mcp.\{name}",
@@ -323,16 +483,20 @@ fn append_openai_mcp_approval(
     item_id,
     provider_executed=true,
     dynamic=true,
-  )
-  content.push(@provider.GeneratedContent::tool_call(call))
-  content.push(
-    @provider.GeneratedContent::tool_approval_request(
-      @provider.ToolApprovalRequest::new(
-        approval_id~,
-        tool_call_id~,
-        provider_metadata=openai_responses_item_metadata(provider_name, item_id),
+    provider_metadata=Map([
+      (
+        openai_responses_provider_metadata_key(provider_name),
+        { "approvalRequestId": approval_id },
       ),
-    ),
+    ]),
+  )
+  content.push(@provider.LanguageModelV4Content::tool_call(call))
+  content.push(
+    @provider.LanguageModelV4Content::tool_approval_request({
+      approval_id,
+      tool_call_id,
+      provider_metadata: openai_responses_item_metadata(provider_name, item_id),
+    }),
   )
 }
 
@@ -342,8 +506,12 @@ fn openai_responses_output_content(
   provider_name : String,
   tool_name_mapping : @provider_utils.ToolNameMapping,
   id_generator : @provider_utils.IdGenerator,
-) -> (Array[@provider.GeneratedContent], Bool) {
-  let content : Array[@provider.GeneratedContent] = []
+  shell_provider_executed : Bool,
+  approval_tool_call_ids~ : Map[String, String],
+  web_search_tool_name? : String,
+  stream_mode? : Bool = false,
+) -> (Array[@provider.LanguageModelV4Content], Bool) {
+  let content : Array[@provider.LanguageModelV4Content] = []
   let mut has_function_call = false
   let hosted_tool_search_call_ids : Array[String] = []
   let mut hosted_tool_search_result_index = 0
@@ -359,10 +527,13 @@ fn openai_responses_output_content(
               ..
             } => {
               content.push(
-                @provider.GeneratedContent::text(
+                @provider.LanguageModelV4Content::text(
                   text,
                   provider_metadata=openai_responses_text_item_metadata(
-                    provider_name, item_id, item,
+                    provider_name,
+                    item_id,
+                    item,
+                    annotations~,
                   ),
                 ),
               )
@@ -370,7 +541,6 @@ fn openai_responses_output_content(
                 source in openai_responses_source_contents(
                   annotations,
                   provider_name,
-                  item_id,
                   index + part_index,
                   id_generator,
                 ) {
@@ -380,7 +550,7 @@ fn openai_responses_output_content(
             { "type": "output_text", "text": String(text), .. }
             | { "type": "refusal", "refusal": String(text), .. } =>
               content.push(
-                @provider.GeneratedContent::text(
+                @provider.LanguageModelV4Content::text(
                   text,
                   provider_metadata=openai_responses_text_item_metadata(
                     provider_name, item_id, item,
@@ -399,12 +569,11 @@ fn openai_responses_output_content(
               "annotations": Array(annotations),
               ..
             } => {
-              content.push(@provider.GeneratedContent::text(text))
+              content.push(@provider.LanguageModelV4Content::text(text))
               for
                 source in openai_responses_source_contents(
                   annotations,
                   provider_name,
-                  "",
                   index + part_index,
                   id_generator,
                 ) {
@@ -413,7 +582,7 @@ fn openai_responses_output_content(
             }
             { "type": "output_text", "text": String(text), .. }
             | { "type": "refusal", "refusal": String(text), .. } =>
-              content.push(@provider.GeneratedContent::text(text))
+              content.push(@provider.LanguageModelV4Content::text(text))
             _ => ()
           }
         }
@@ -421,19 +590,27 @@ fn openai_responses_output_content(
         "type": "reasoning",
         "id": String(item_id),
         "summary": Array(parts),
-        "encrypted_content": encrypted_content,
         ..
-      } =>
-        for part in parts {
+      } as item => {
+        let encrypted_content = match item {
+          { "encrypted_content": value, .. } => value
+          _ => Json::null()
+        }
+        let summaries : Array[Json] = if parts.length() == 0 {
+          [{ "type": "summary_text", "text": "" }]
+        } else {
+          parts
+        }
+        for part in summaries {
           match part {
             { "type": "summary_text", "text": String(text), .. }
             | { "type": "reasoning_text", "text": String(text), .. } =>
               content.push(
-                @provider.GeneratedContent::reasoning(
+                @provider.LanguageModelV4Content::reasoning(
                   text,
                   provider_metadata=Map([
                     (
-                      openai_provider_metadata_key(provider_name),
+                      openai_responses_provider_metadata_key(provider_name),
                       {
                         "itemId": item_id,
                         "reasoningEncryptedContent": encrypted_content,
@@ -445,27 +622,7 @@ fn openai_responses_output_content(
             _ => ()
           }
         }
-      {
-        "type": "reasoning",
-        "id": String(item_id),
-        "summary": Array(parts),
-        ..
-      } =>
-        for part in parts {
-          match part {
-            { "type": "summary_text", "text": String(text), .. }
-            | { "type": "reasoning_text", "text": String(text), .. } =>
-              content.push(
-                @provider.GeneratedContent::reasoning(
-                  text,
-                  provider_metadata=openai_responses_item_metadata(
-                    provider_name, item_id,
-                  ),
-                ),
-              )
-            _ => ()
-          }
-        }
+      }
       {
         "type": "function_call",
         "id": String(item_id),
@@ -476,7 +633,7 @@ fn openai_responses_output_content(
       } => {
         has_function_call = true
         content.push(
-          @provider.GeneratedContent::tool_call(
+          @provider.LanguageModelV4Content::tool_call(
             openai_responses_tool_call(
               call_id,
               name,
@@ -500,15 +657,15 @@ fn openai_responses_output_content(
       } => {
         has_function_call = true
         content.push(
-          @provider.GeneratedContent::tool_call(
+          @provider.LanguageModelV4Content::tool_call(
             openai_responses_tool_call(
               call_id,
               name,
-              openai_responses_string_or_json(input),
+              input.stringify(),
               provider_name,
               item_id,
-              provider_metadata=openai_responses_tool_item_metadata(
-                provider_name, item_id, item,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
               ),
             ),
           ),
@@ -524,9 +681,14 @@ fn openai_responses_output_content(
           "server",
         )
         let provider_executed = execution == "server"
-        let call_id = @provider_utils.json_string_field(item, "call_id").unwrap_or(
-          item_id,
+        let response_call_id = @provider_utils.json_string_field(
+          item, "call_id",
         )
+        let call_id = if stream_mode && provider_executed {
+          item_id
+        } else {
+          response_call_id.unwrap_or(item_id)
+        }
         if provider_executed {
           hosted_tool_search_call_ids.push(call_id)
         }
@@ -534,14 +696,15 @@ fn openai_responses_output_content(
           ("arguments", arguments),
           (
             "call_id",
-            match @provider_utils.json_string_field(item, "call_id") {
+            match response_call_id {
+              _ if stream_mode && provider_executed => Json::null()
               Some(value) => Json::string(value)
               None => Json::null()
             },
           ),
         ])
         content.push(
-          @provider.GeneratedContent::tool_call(
+          @provider.LanguageModelV4Content::tool_call(
             openai_responses_tool_call(
               call_id,
               "tool_search",
@@ -549,6 +712,9 @@ fn openai_responses_output_content(
               provider_name,
               item_id,
               provider_executed~,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
+              ),
             ),
           ),
         )
@@ -573,13 +739,16 @@ fn openai_responses_output_content(
             }
         }
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
               call_id,
               "tool_search",
               { "tools": tools },
               provider_name,
               item_id,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
+              ),
             ),
           ),
         )
@@ -598,9 +767,9 @@ fn openai_responses_output_content(
           item_id,
           provider_executed=true,
         )
-        content.push(@provider.GeneratedContent::tool_call(call))
+        content.push(@provider.LanguageModelV4Content::tool_call(call))
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
               item_id,
               "image_generation",
@@ -615,9 +784,8 @@ fn openai_responses_output_content(
         "type": "file_search_call",
         "id": String(item_id),
         "queries": queries,
-        "results": results,
         ..
-      } => {
+      } as item => {
         let call = openai_responses_tool_call(
           item_id,
           "file_search",
@@ -626,13 +794,13 @@ fn openai_responses_output_content(
           item_id,
           provider_executed=true,
         )
-        content.push(@provider.GeneratedContent::tool_call(call))
+        content.push(@provider.LanguageModelV4Content::tool_call(call))
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
               item_id,
               "file_search",
-              { "queries": queries, "results": results },
+              openai_responses_file_search_output(queries, item),
               provider_name,
               item_id,
             ),
@@ -655,9 +823,9 @@ fn openai_responses_output_content(
           item_id,
           provider_executed=true,
         )
-        content.push(@provider.GeneratedContent::tool_call(call))
+        content.push(@provider.LanguageModelV4Content::tool_call(call))
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
               item_id,
               "code_interpreter",
@@ -668,20 +836,29 @@ fn openai_responses_output_content(
           ),
         )
       }
-      { "type": "web_search_call", "id": String(item_id), "action": action, .. } => {
+      { "type": "web_search_call", "id": String(item_id), .. } as item => {
+        let tool_name = web_search_tool_name.unwrap_or("web_search")
+        let action = match item {
+          { "action": value, .. } if !(value is Null) => Some(value)
+          _ => None
+        }
         let call = openai_responses_tool_call(
           item_id,
-          "web_search",
+          tool_name,
           "{}",
           provider_name,
           item_id,
           provider_executed=true,
         )
-        content.push(@provider.GeneratedContent::tool_call(call))
+        content.push(@provider.LanguageModelV4Content::tool_call(call))
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
-              item_id, "web_search", action, provider_name, item_id,
+              item_id,
+              tool_name,
+              openai_responses_web_search_output(action),
+              provider_name,
+              item_id,
             ),
           ),
         )
@@ -704,13 +881,16 @@ fn openai_responses_output_content(
             }
         }
         content.push(
-          @provider.GeneratedContent::tool_call(
+          @provider.LanguageModelV4Content::tool_call(
             openai_responses_tool_call(
               call_id,
               "computer",
               computer_input.stringify(),
               provider_name,
               item_id,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
+              ),
             ),
           ),
         )
@@ -729,9 +909,9 @@ fn openai_responses_output_content(
           item_id,
           provider_executed=true,
         )
-        content.push(@provider.GeneratedContent::tool_call(call))
+        content.push(@provider.LanguageModelV4Content::tool_call(call))
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
               item_id,
               "computer_use",
@@ -751,13 +931,16 @@ fn openai_responses_output_content(
       } => {
         has_function_call = true
         content.push(
-          @provider.GeneratedContent::tool_call(
+          @provider.LanguageModelV4Content::tool_call(
             openai_responses_tool_call(
               call_id,
               "apply_patch",
               ({ "callId": call_id, "operation": operation } : Json).stringify(),
               provider_name,
               item_id,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
+              ),
             ),
           ),
         )
@@ -770,14 +953,22 @@ fn openai_responses_output_content(
         ..
       } => {
         has_function_call = true
+        let input = if stream_mode {
+          openai_responses_local_shell_stream_input(item)
+        } else {
+          ({ "action": action } : Json).stringify()
+        }
         content.push(
-          @provider.GeneratedContent::tool_call(
+          @provider.LanguageModelV4Content::tool_call(
             openai_responses_tool_call(
               call_id,
               "local_shell",
-              ({ "action": action } : Json).stringify(),
+              input,
               provider_name,
               item_id,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
+              ),
             ),
           ),
         )
@@ -786,18 +977,22 @@ fn openai_responses_output_content(
         "type": "shell_call",
         "id": String(item_id),
         "call_id": String(call_id),
-        "action": action,
+        "action": { "commands": commands, .. },
         ..
       } => {
         has_function_call = true
         content.push(
-          @provider.GeneratedContent::tool_call(
+          @provider.LanguageModelV4Content::tool_call(
             openai_responses_tool_call(
               call_id,
               "shell",
-              ({ "action": action } : Json).stringify(),
+              ({ "action": { "commands": commands } } : Json).stringify(),
               provider_name,
               item_id,
+              provider_executed=shell_provider_executed,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
+              ),
             ),
           ),
         )
@@ -810,11 +1005,11 @@ fn openai_responses_output_content(
         ..
       } =>
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
               call_id,
               "shell",
-              { "output": output },
+              { "output": openai_responses_shell_output_result(output) },
               provider_name,
               item_id,
             ),
@@ -835,8 +1030,11 @@ fn openai_responses_output_content(
           provider_name,
           item_id,
           provider_executed=true,
+          provider_metadata=openai_responses_item_metadata(
+            provider_name, item_id,
+          ),
         )
-        content.push(@provider.GeneratedContent::tool_call(call))
+        content.push(@provider.LanguageModelV4Content::tool_call(call))
       }
       {
         "type": "program_output",
@@ -847,13 +1045,16 @@ fn openai_responses_output_content(
         ..
       } =>
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
               call_id,
               "programmatic_tool_calling",
               { "result": result, "status": status },
               provider_name,
               item_id,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
+              ),
             ),
           ),
         )
@@ -866,8 +1067,14 @@ fn openai_responses_output_content(
         ..
       } => {
         let tool_name = "mcp.\{name}"
+        let tool_call_id = match
+          @provider_utils.json_string_field(item, "approval_request_id") {
+          Some(approval_id) =>
+            approval_tool_call_ids.get(approval_id).unwrap_or(item_id)
+          None => item_id
+        }
         let call = openai_responses_tool_call(
-          item_id,
+          tool_call_id,
           tool_name,
           openai_responses_string_or_json(arguments),
           provider_name,
@@ -875,7 +1082,7 @@ fn openai_responses_output_content(
           provider_executed=true,
           dynamic=true,
         )
-        content.push(@provider.GeneratedContent::tool_call(call))
+        content.push(@provider.LanguageModelV4Content::tool_call(call))
         let result_fields : Map[String, Json] = Map([
           ("type", Json::string("call")),
           ("serverLabel", Json::string(server_label)),
@@ -884,24 +1091,27 @@ fn openai_responses_output_content(
         ])
         match item {
           Object(item_fields) => {
-            if item_fields.get("output") is Some(value) {
+            if item_fields.get("output") is Some(value) && !(value is Null) {
               result_fields["output"] = value
             }
-            if item_fields.get("error") is Some(value) {
+            if item_fields.get("error") is Some(value) && !(value is Null) {
               result_fields["error"] = value
             }
           }
           _ => ()
         }
         content.push(
-          @provider.GeneratedContent::tool_result(
+          @provider.LanguageModelV4Content::tool_result(
             openai_responses_tool_result(
-              item_id,
+              tool_call_id,
               tool_name,
               Json::object(result_fields),
               provider_name,
               item_id,
               dynamic=true,
+              provider_metadata=openai_responses_item_metadata(
+                provider_name, item_id,
+              ),
             ),
           ),
         )
@@ -917,6 +1127,7 @@ fn openai_responses_output_content(
         let approval_id = openai_responses_string_or_json(approval_request_id)
         append_openai_mcp_approval(
           content, provider_name, item_id, approval_id, name, arguments, id_generator,
+          approval_tool_call_ids,
         )
       }
       {
@@ -928,6 +1139,7 @@ fn openai_responses_output_content(
       } =>
         append_openai_mcp_approval(
           content, provider_name, item_id, item_id, name, arguments, id_generator,
+          approval_tool_call_ids,
         )
       {
         "type": "compaction",
@@ -936,7 +1148,7 @@ fn openai_responses_output_content(
         ..
       } =>
         content.push(
-          @provider.GeneratedContent::custom(
+          @provider.LanguageModelV4Content::custom(
             kind="openai.compaction",
             provider_metadata=openai_responses_item_metadata(
               provider_name,
@@ -950,7 +1162,7 @@ fn openai_responses_output_content(
         )
       { "type": "compaction", "id": String(item_id), .. } =>
         content.push(
-          @provider.GeneratedContent::custom(
+          @provider.LanguageModelV4Content::custom(
             kind="openai.compaction",
             provider_metadata=openai_responses_item_metadata(
               provider_name,
@@ -962,35 +1174,31 @@ fn openai_responses_output_content(
       _ => ()
     }
   }
-  let mapped_content : Array[@provider.GeneratedContent] = []
+  let mapped_content : Array[@provider.LanguageModelV4Content] = []
   for part in content {
     match part {
-      @provider.GeneratedToolCallOutput(call) =>
+      @provider.V4ToolCallOutput(call) =>
         mapped_content.push(
-          @provider.GeneratedContent::tool_call(
-            @provider.ToolCall::new(
-              id=call.id,
-              name=tool_name_mapping.to_custom_tool_name(call.name),
-              arguments=call.arguments,
-              provider_executed=call.provider_executed,
-              dynamic=call.dynamic,
-              provider_metadata=call.provider_metadata,
-            ),
-          ),
+          @provider.LanguageModelV4Content::tool_call({
+            tool_call_id: call.tool_call_id,
+            tool_name: tool_name_mapping.to_custom_tool_name(call.tool_name),
+            input: call.input,
+            provider_executed: call.provider_executed,
+            dynamic: call.dynamic,
+            provider_metadata: call.provider_metadata,
+          }),
         )
-      @provider.GeneratedToolResultOutput(result) =>
+      @provider.V4ToolResultOutput(result) =>
         mapped_content.push(
-          @provider.GeneratedContent::tool_result(
-            @provider.ToolResult::new(
-              tool_call_id=result.tool_call_id,
-              tool_name=tool_name_mapping.to_custom_tool_name(result.tool_name),
-              result=result.result,
-              is_error=result.is_error,
-              preliminary=result.preliminary,
-              dynamic=result.dynamic,
-              provider_metadata=result.provider_metadata,
-            ),
-          ),
+          @provider.LanguageModelV4Content::tool_result({
+            tool_call_id: result.tool_call_id,
+            tool_name: tool_name_mapping.to_custom_tool_name(result.tool_name),
+            result: result.result,
+            is_error: result.is_error,
+            preliminary: result.preliminary,
+            dynamic: result.dynamic,
+            provider_metadata: result.provider_metadata,
+          }),
         )
       other => mapped_content.push(other)
     }
@@ -999,40 +1207,53 @@ fn openai_responses_output_content(
 }
 
 ///|
-fn openai_responses_finish_reason(
+fn openai_responses_v4_finish_reason(
   json : Json,
   has_function_call : Bool,
-) -> @provider.FinishReason {
-  let reason = match json {
-    { "incomplete_details": { "reason": String(value), .. }, .. } => value
-    _ => ""
+) -> @provider.LanguageModelV4FinishReason {
+  let raw = match json {
+    { "incomplete_details": { "reason": String(value), .. }, .. } => Some(value)
+    _ => None
   }
-  if (match json {
-      { "status": "failed", .. } => true
-      _ => false
-    }) {
-    @provider.Error
-  } else if reason == "max_output_tokens" {
-    @provider.Length
-  } else if reason == "content_filter" {
-    @provider.ContentFilter
-  } else if has_function_call {
-    @provider.ToolCalls
-  } else if reason == "" {
-    @provider.Stop
-  } else {
-    @provider.Unknown(reason)
+  let unified = match raw {
+    None =>
+      if has_function_call {
+        @provider.V4FinishToolCalls
+      } else {
+        @provider.V4FinishStop
+      }
+    Some("max_output_tokens") => @provider.V4FinishLength
+    Some("content_filter") => @provider.V4FinishContentFilter
+    Some(_) =>
+      if has_function_call {
+        @provider.V4FinishToolCalls
+      } else {
+        @provider.V4FinishOther
+      }
   }
+  { unified, raw }
+}
+
+///|
+priv struct OpenAIResponsesDecodedResponse {
+  content : Array[@provider.LanguageModelV4Content]
+  finish_reason : @provider.LanguageModelV4FinishReason
+  usage : @provider.LanguageModelV4Usage
+  provider_metadata : Map[String, Json]
+  response : @provider.ResponseMetadata?
 }
 
 ///|
 /// Decode an official OpenAI Responses response, including hosted tools.
-pub fn decode_openai_responses_response(
+fn decode_openai_responses_response(
   json : Json,
-  provider_name? : String = "openai.responses",
-  tool_name_mapping? : @provider_utils.ToolNameMapping,
-  id_generator? : @provider_utils.IdGenerator,
-) -> @provider.ChatResponse raise {
+  provider_name~ : String,
+  shell_provider_executed~ : Bool,
+  tool_name_mapping~ : @provider_utils.ToolNameMapping,
+  id_generator~ : @provider_utils.IdGenerator,
+  approval_tool_call_ids~ : Map[String, String],
+  web_search_tool_name? : String,
+) -> OpenAIResponsesDecodedResponse raise {
   if openai_responses_response_error(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI Responses request failed: \{message}",
@@ -1043,17 +1264,12 @@ pub fn decode_openai_responses_response(
     { "output": Array(items), .. } => items
     { "incomplete_details": { "reason": String(reason), .. }, .. } =>
       raise @provider.InvalidResponseDataError(
-        message="OpenAI Responses returned no output (\{reason})",
-        data=json,
-      )
-    { "status": String(status), .. } =>
-      raise @provider.InvalidResponseDataError(
-        message="OpenAI Responses returned no output (\{status})",
+        message="Responses API returned no output (\{reason})",
         data=json,
       )
     _ =>
       raise @provider.InvalidResponseDataError(
-        message="OpenAI Responses returned no output",
+        message="Responses API returned no output",
         data=json,
       )
   }
@@ -1065,33 +1281,40 @@ pub fn decode_openai_responses_response(
       _ => ()
     }
   }
+  let resolved_approval_tool_call_ids = copy_openai_approval_tool_call_ids(
+    approval_tool_call_ids,
+  )
   let (content, has_function_call) = openai_responses_output_content(
     output,
     provider_name,
-    tool_name_mapping.unwrap_or(@provider_utils.ToolNameMapping::identity()),
-    id_generator.unwrap_or(@provider_utils.generate_id),
+    tool_name_mapping,
+    id_generator,
+    shell_provider_executed,
+    approval_tool_call_ids=resolved_approval_tool_call_ids,
+    web_search_tool_name?,
   )
-  let usage = match json {
-    { "usage": value, .. } if !(value is Null) => openai_responses_usage(value)
-    _ => @provider.Usage::zero()
+  let raw_usage = match json {
+    { "usage": value, .. } if !(value is Null) => Some(value)
+    _ => None
   }
-  let response_metadata = @provider.ResponseMetadata::from_json(json)
+  let response_metadata = @provider_utils.create_language_model_response_metadata(
+    id?=@provider_utils.json_string_field(json, "id"),
+    model?=@provider_utils.json_string_field(json, "model"),
+    created?=@provider_utils.json_int_field_opt(json, "created_at"),
+  )
   let provider_metadata = @provider.merge_provider_metadata(
     @provider_utils.provider_metadata_from_json(json, provider_name),
     openai_responses_metadata(json, provider_name),
   )
-  @provider.ChatResponse::from_content(
+  {
     content,
-    usage,
-    openai_responses_finish_reason(json, has_function_call),
-  ).with_diagnostics(
-    None,
-    if response_metadata.is_empty() {
+    finish_reason: openai_responses_v4_finish_reason(json, has_function_call),
+    usage: openai_responses_v4_usage(raw_usage),
+    provider_metadata,
+    response: if response_metadata.is_empty() {
       None
     } else {
       Some(response_metadata)
     },
-    provider_metadata,
-    [],
-  )
+  }
 }

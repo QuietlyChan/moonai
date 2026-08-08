@@ -1,22 +1,20 @@
 ///|
-/// Encode one OpenAI-compatible image generation request.
-pub fn encode_image_request(
+fn encode_image_request_data(
   model_id : String,
-  options : @provider.ImageCallOptions,
-  include_response_format? : Bool = false,
-  provider_name? : String = "",
+  prompt : String?,
+  n : Int,
+  size : String?,
+  provider_options : Map[String, Json],
+  include_response_format : Bool,
 ) -> Json {
-  let provider_options = resolve_compatible_options(
-      options.provider_options,
-      provider_name,
-      image_reserved_fields(),
-    ).values
   let fields : Map[String, Json] = Map(
     [
       ("model", Json::string(model_id)),
-      ("prompt", Json::string(options.prompt)),
-      ("n", Json::number(options.n.to_double())),
-      ..if options.size is Some(value) {
+      ..if prompt is Some(value) {
+        [("prompt", Json::string(value))]
+      },
+      ("n", Json::number(n.to_double())),
+      ..if size is Some(value) {
         [("size", Json::string(value))]
       },
       ..if include_response_format {

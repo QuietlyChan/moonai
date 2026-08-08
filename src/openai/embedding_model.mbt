@@ -1,13 +1,13 @@
 ///|
 /// Official OpenAI embeddings model.
-pub struct OpenAIEmbeddingModel {
-  priv provider_name : String
-  priv base_url : String
-  priv model_id : String
-  priv api_key : String
-  priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
-  priv http_transport : &@provider_utils.HttpTransport
+priv struct OpenAIEmbeddingModel {
+  provider_name : String
+  base_url : String
+  model_id : String
+  api_key : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
@@ -54,17 +54,9 @@ fn OpenAIEmbeddingModel::request_headers(
 fn openai_embedding_request(
   model_id : String,
   values : Array[String],
-  call_options : @provider.EmbeddingOptions,
-  provider_options : OpenAIEmbeddingOptions,
+  dimensions : Int?,
+  user : String?,
 ) -> Json {
-  let dimensions = match provider_options.dimensions {
-    Some(value) => Some(value)
-    None => call_options.dimensions
-  }
-  let user = match provider_options.user {
-    Some(value) => Some(value)
-    None => call_options.user
-  }
   Json::object(
     Map(
       [
@@ -109,7 +101,7 @@ fn openai_embedding_vector(json : Json) -> Array[Double] raise {
 ///|
 fn decode_openai_embedding_response(
   json : Json,
-) -> @provider.EmbeddingBatchResponse raise {
+) -> (Array[Array[Double]], Int?) raise {
   if openai_error_message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI embedding request failed: \{message}",
@@ -136,64 +128,23 @@ fn decode_openai_embedding_response(
         )
     }
   }
-  let input_tokens = match json {
-    { "usage": usage, .. } =>
-      @provider_utils.json_int_field(usage, "prompt_tokens")
-    _ => 0
+  let usage_tokens = match json {
+    { "usage": usage, .. } if !(usage is Null) =>
+      Some(@provider_utils.json_int_field(usage, "prompt_tokens"))
+    _ => None
   }
-  @provider.EmbeddingBatchResponse::new(embeddings, {
-    input_tokens,
-    output_tokens: 0,
-    total_tokens: input_tokens,
-    reasoning_tokens: 0,
-    cached_input_tokens: 0,
-    cache_write_input_tokens: 0,
-  })
+  (embeddings, usage_tokens)
 }
 
 ///|
-pub impl @provider.EmbeddingWireModel for OpenAIEmbeddingModel with fn provider(
-  self,
-) -> String {
-  self.provider_name
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for OpenAIEmbeddingModel with fn model_id(
-  self,
-) -> String {
-  self.model_id
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for OpenAIEmbeddingModel with fn max_embeddings_per_call(
-  _self,
-) -> Int {
-  2048
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for OpenAIEmbeddingModel with fn supports_parallel_calls(
-  _self,
-) -> Bool {
-  true
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for OpenAIEmbeddingModel with fn embed(
-  self,
-  values,
-  call_options,
-) {
-  self.embed_values(values, call_options)
-}
-
-///|
-async fn OpenAIEmbeddingModel::embed_values(
+async fn OpenAIEmbeddingModel::perform_embedding_request(
   self : OpenAIEmbeddingModel,
   values : Array[String],
-  call_options : @provider.EmbeddingOptions,
-) -> @provider.EmbeddingBatchResponse {
+  headers : Map[String, String],
+  provider_options : Map[String, Json],
+  retry_policy : @provider.RetryPolicy,
+  cancellation_token : @provider.CancellationToken?,
+) -> @provider.EmbeddingModelV4Result {
   guard values.length() <= 2048 else {
     raise @provider.TooManyEmbeddingValuesForCallError(
       provider=self.provider_name,
@@ -202,82 +153,84 @@ async fn OpenAIEmbeddingModel::embed_values(
       values=values.copy(),
     )
   }
-  let parsed = parse_openai_embedding_options(call_options, self.provider_name)
-  let cancellation_token = call_options.cancellation_token
+  let parsed = parse_openai_embedding_provider_options(
+    provider_options,
+    self.provider_name,
+  )
   let response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=self.embeddings_url(),
-    headers=@provider_utils.merge_headers(
-      self.request_headers(),
-      call_options.headers,
-    ),
+    headers=@provider_utils.merge_headers(self.request_headers(), headers),
     body=openai_embedding_request(
       self.model_id,
       values,
-      call_options,
-      parsed.options,
+      parsed.options.dimensions,
+      parsed.options.user,
     ),
     timeout_ms=self.idle_timeout_ms,
-    retry_policy=call_options.retry_policy,
+    retry_policy~,
     cancellation_token?,
     error_to_message=openai_error_message,
     transport=self.http_transport,
   )
-  decode_openai_embedding_response(response.value)
-  .with_diagnostics(None, None, Map([]), parsed.warnings)
-  .with_transport(response.request, response.response)
+  let (embeddings, usage_tokens) = @provider_utils.handle_json_response(
+    response, decode_openai_embedding_response,
+  )
+  let usage = match usage_tokens {
+    Some(value) => Some(@provider.EmbeddingModelV4Usage::new(value))
+    None => None
+  }
+  @provider.EmbeddingModelV4Result::new(
+    embeddings,
+    usage?,
+    request=response.request,
+    response=response.response,
+    warnings=parsed.warnings,
+  )
 }
 
 ///|
 /// Versioned V4 boundary for the official OpenAI embedding model.
-pub impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn specification_version(
+impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn specification_version(
   _self,
 ) -> String {
   "v4"
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn provider(
-  self,
-) -> String {
+impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn provider(self) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn model_id(
-  self,
-) -> String {
+impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn model_id(self) -> String {
   self.model_id
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn max_embeddings_per_call(
+impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn max_embeddings_per_call(
   _self,
 ) -> Int? {
   Some(2048)
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn supports_parallel_calls(
+impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn supports_parallel_calls(
   _self,
 ) -> Bool {
   true
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn do_embed(
+impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn do_embed(
   self,
   options,
 ) {
-  let legacy_options = @provider.EmbeddingOptions::new(
-    dimensions?=None,
-    user?=None,
-    headers=options.headers,
-    provider_options=options.provider_options,
-    retry_policy=options.retry_policy,
-    cancellation_token?=options.cancellation_token,
-  )
-  @provider.EmbeddingModelV4Result::from_batch_response(
-    self.embed_values(options.values, legacy_options),
+  self.perform_embedding_request(
+    options.values,
+    options.headers,
+    options.provider_options,
+    options.retry_policy,
+    options.cancellation_token,
   )
 }

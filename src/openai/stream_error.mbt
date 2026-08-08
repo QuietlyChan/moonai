@@ -89,38 +89,75 @@ fn openai_responses_stream_is_output(json : Json) -> Bool {
 }
 
 ///|
-fn openai_responses_stream_guard() -> (Json) -> Unit raise {
-  let saw_output = Ref(false)
-  json => {
-    if !saw_output.val {
-      match openai_stream_error_object(json) {
-        Some(error) => {
-          let message = @provider_utils.json_string_field(error, "message").unwrap_or(
-            "OpenAI stream failed before any output was generated",
-          )
-          let status_code = openai_stream_error_status(error)
-          raise @provider_utils.SseProviderError(
-            message~,
-            status_code~,
-            response_body=json.stringify(),
-            is_retryable=@provider_utils.is_retryable_status(status_code),
-          )
-        }
-        None =>
-          match json {
-            { "choices": Array(_), .. } =>
-              raise @provider_utils.SseProviderError(
-                message="Received a Chat Completions stream while using the OpenAI Responses API. Use openai.chat(model_id) for Chat Completions-compatible endpoints.",
-                status_code=400,
-                response_body=json.stringify(),
-                is_retryable=false,
-              )
-            _ => ()
-          }
+priv struct OpenAIResponsesStreamGuard {
+  mut accepted : Bool
+  mut output : Bool
+  mut started : Bool
+}
+
+///|
+fn OpenAIResponsesStreamGuard::new() -> OpenAIResponsesStreamGuard {
+  { accepted: false, output: false, started: false }
+}
+
+///|
+fn OpenAIResponsesStreamGuard::validate(
+  self : OpenAIResponsesStreamGuard,
+  json : Json,
+) -> Unit raise {
+  if !self.started {
+    match openai_stream_error_object(json) {
+      Some(error) => {
+        let message = @provider_utils.json_string_field(error, "message").unwrap_or(
+          "OpenAI stream failed before any output was generated",
+        )
+        let status_code = openai_stream_error_status(error)
+        raise @provider_utils.SseProviderError(
+          message~,
+          status_code~,
+          response_body=json.stringify(),
+          is_retryable=@provider_utils.is_retryable_status(status_code),
+        )
       }
-    }
-    if openai_responses_stream_is_output(json) {
-      saw_output.val = true
+      None =>
+        match json {
+          { "choices": Array(_), .. } =>
+            raise @provider_utils.SseProviderError(
+              message="Received a Chat Completions stream while using the OpenAI Responses API. Use openai.chat(model_id) for Chat Completions-compatible endpoints.",
+              status_code=400,
+              response_body=json.stringify(),
+              is_retryable=false,
+            )
+          _ => ()
+        }
     }
   }
+  let event_type = @provider_utils.json_string_field(json, "type").unwrap_or("")
+  if event_type == "response.in_progress" {
+    self.accepted = true
+  }
+  if openai_responses_stream_is_output(json) {
+    self.output = true
+  }
+}
+
+///|
+fn OpenAIResponsesStreamGuard::is_accepted(
+  self : OpenAIResponsesStreamGuard,
+) -> Bool {
+  self.accepted
+}
+
+///|
+fn OpenAIResponsesStreamGuard::has_output(
+  self : OpenAIResponsesStreamGuard,
+) -> Bool {
+  self.output
+}
+
+///|
+fn OpenAIResponsesStreamGuard::mark_started(
+  self : OpenAIResponsesStreamGuard,
+) -> Unit {
+  self.started = true
 }

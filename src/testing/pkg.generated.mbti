@@ -48,12 +48,12 @@ pub struct MockRealtimeModel {
 pub fn MockRealtimeModel::new(provider_name? : String, model_id? : String, client_secret? : @provider.RealtimeClientSecretResult, websocket_config? : @provider.RealtimeWebSocketConfig, parsed_events? : Array[@provider.RealtimeServerEvent]) -> Self
 pub impl @provider.RealtimeModelV4 for MockRealtimeModel
 
-pub struct MockRerankingModel {
+pub struct MockRerankingModelV4 {
   // private fields
 }
-pub fn MockRerankingModel::captured_options(Self) -> @provider.RerankingCallOptions?
-pub fn MockRerankingModel::new(@provider.RerankingResponse, provider_name? : String, model_id? : String) -> Self
-pub impl @provider.RerankingModel for MockRerankingModel
+pub fn MockRerankingModelV4::captured_options(Self) -> @provider.RerankingModelV4CallOptions?
+pub fn MockRerankingModelV4::new(@provider.RerankingModelV4Result, provider_name? : String, model_id? : String) -> Self
+pub impl @provider.RerankingModelV4 for MockRerankingModelV4
 
 pub struct MockSpeechModel {
   // private fields

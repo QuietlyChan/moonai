@@ -2,7 +2,6 @@
 package "QuietlyChan/moonai/alibaba"
 
 import {
-  "QuietlyChan/moonai/openai_compatible",
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
@@ -11,25 +10,11 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn alibaba(String, api_key? : String, base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> AlibabaLanguageModelV4
-
-pub fn alibaba_apply_reasoning(@provider.ChatCallOptions) -> @provider.ChatCallOptions
-
-pub fn alibaba_chat(String, api_key? : String, base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> @openai_compatible.OpenAICompatibleChatModel
-
-pub fn alibaba_embedding(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> AlibabaEmbeddingModel
-
-pub fn alibaba_prompt_converter(Array[@provider.LanguageModelMessage], Bool, String) -> @openai_compatible.OpenAICompatiblePromptConversion raise
-
-pub fn alibaba_video(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> AlibabaVideoModel
-
-pub fn convert_alibaba_chat_usage(Json) -> @provider.Usage
+pub fn alibaba(String, api_key? : String, base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
 pub fn createAlibaba(api_key? : String, base_url? : String, embedding_base_url? : String, video_base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> AlibabaProvider
 
 pub fn create_alibaba(api_key? : String, base_url? : String, embedding_base_url? : String, video_base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> AlibabaProvider
-
-pub fn encode_alibaba_chat_request(String, @provider.ChatCallOptions, stream? : Bool) -> Json raise
 
 // Errors
 
@@ -40,11 +25,10 @@ pub(all) struct AlibabaCacheControl {
 pub fn AlibabaCacheControl::new(cache_type~ : String) -> Self
 pub fn AlibabaCacheControl::to_provider_options(Self) -> Map[String, Json]
 
-pub struct AlibabaEmbeddingModel {
-  // private fields
-}
-pub impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel
-pub impl @provider.EmbeddingWireModel for AlibabaEmbeddingModel
+pub(all) struct AlibabaCompletionTokensDetails {
+  reasoning_tokens : Int?
+} derive(Eq, @debug.Debug)
+pub fn AlibabaCompletionTokensDetails::new(reasoning_tokens? : Int) -> Self
 
 pub(all) struct AlibabaEmbeddingModelOptions {
   text_type : String?
@@ -62,26 +46,36 @@ pub(all) struct AlibabaLanguageModelChatOptions {
 pub fn AlibabaLanguageModelChatOptions::new(enable_thinking? : Bool, thinking_budget? : Int, parallel_tool_calls? : Bool) -> Self raise
 pub fn AlibabaLanguageModelChatOptions::to_provider_options(Self) -> Map[String, Json]
 
-pub struct AlibabaLanguageModelV4 {
-  model : @openai_compatible.OpenAICompatibleChatModel
-}
-pub fn AlibabaLanguageModelV4::new(@openai_compatible.OpenAICompatibleChatModel) -> Self
-pub impl @provider.LanguageModelV4 for AlibabaLanguageModelV4
+pub(all) struct AlibabaPromptTokensDetails {
+  cached_tokens : Int?
+  cache_creation_input_tokens : Int?
+} derive(Eq, @debug.Debug)
+pub fn AlibabaPromptTokensDetails::new(cached_tokens? : Int, cache_creation_input_tokens? : Int) -> Self
 
 pub struct AlibabaProvider {
   // private fields
 }
-pub fn AlibabaProvider::chat(Self, String) -> AlibabaLanguageModelV4
-pub fn AlibabaProvider::chatModel(Self, String) -> AlibabaLanguageModelV4
-pub fn AlibabaProvider::chat_wire(Self, String) -> @openai_compatible.OpenAICompatibleChatModel
-pub fn AlibabaProvider::embedding(Self, String) -> AlibabaEmbeddingModel
-pub fn AlibabaProvider::embeddingModel(Self, String) -> AlibabaEmbeddingModel
-pub fn AlibabaProvider::embedding_model(Self, String) -> AlibabaEmbeddingModel
-pub fn AlibabaProvider::languageModel(Self, String) -> AlibabaLanguageModelV4
-pub fn AlibabaProvider::language_model(Self, String) -> AlibabaLanguageModelV4
-pub fn AlibabaProvider::video(Self, String) -> AlibabaVideoModel
-pub fn AlibabaProvider::videoModel(Self, String) -> AlibabaVideoModel
-pub impl @provider.Provider for AlibabaProvider
+pub fn AlibabaProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn AlibabaProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn AlibabaProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn AlibabaProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn AlibabaProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn AlibabaProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn AlibabaProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn AlibabaProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn AlibabaProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub impl @provider.ProviderV4 for AlibabaProvider
+
+pub(all) struct AlibabaUsage {
+  prompt_tokens : Int?
+  completion_tokens : Int?
+  total_tokens : Int?
+  prompt_tokens_details : AlibabaPromptTokensDetails?
+  completion_tokens_details : AlibabaCompletionTokensDetails?
+} derive(Eq, @debug.Debug)
+pub fn AlibabaUsage::from_json(Json) -> Self?
+pub fn AlibabaUsage::new(prompt_tokens? : Int, completion_tokens? : Int, total_tokens? : Int, prompt_tokens_details? : AlibabaPromptTokensDetails, completion_tokens_details? : AlibabaCompletionTokensDetails) -> Self
+pub fn AlibabaUsage::to_json(Self) -> Json
 
 pub(all) struct AlibabaVideoMedia {
   media_type : String
@@ -89,12 +83,6 @@ pub(all) struct AlibabaVideoMedia {
   reference_voice : String?
 } derive(Eq, @debug.Debug)
 pub fn AlibabaVideoMedia::new(media_type~ : String, url~ : String, reference_voice? : String) -> Self raise
-
-pub struct AlibabaVideoModel {
-  // private fields
-}
-pub impl @provider.VideoModelV4 for AlibabaVideoModel
-pub impl @provider.VideoWireModel for AlibabaVideoModel
 
 pub(all) struct AlibabaVideoModelOptions {
   negative_prompt : String?
@@ -113,8 +101,6 @@ pub fn AlibabaVideoModelOptions::new(negative_prompt? : String, audio_url? : Str
 pub fn AlibabaVideoModelOptions::to_provider_options(Self) -> Map[String, Json]
 
 // Type aliases
-pub using @openai_compatible {type OpenAICompatibleChatModel as AlibabaChatModel}
-
 pub type AlibabaChatModelId = String
 
 pub type AlibabaEmbeddingModelId = String

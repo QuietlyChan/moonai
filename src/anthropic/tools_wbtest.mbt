@@ -100,6 +100,45 @@ test "Anthropic prepares function and provider-defined tools" {
 }
 
 ///|
+test "Anthropic-compatible configs can disable native structured output and strict tools" {
+  let prepared = prepare_anthropic_v4_request_with_config(
+    "claude-sonnet-4-6",
+    anthropic_test_v4_options_from_chat(
+      @provider.ChatCallOptions::new(
+        [@provider.LanguageModelMessage::user("return JSON")],
+        tools=[
+          @provider.ToolDefinition::new(
+            "lookup",
+            { "type": "object" },
+            strict=true,
+          ),
+        ],
+        response_format=@provider.ResponseFormat::json(schema={
+          "type": "object",
+          "properties": { "answer": { "type": "string" } },
+        }),
+      ),
+    ),
+    "compatible.messages",
+    false,
+    false,
+    false,
+  )
+  guard prepared.body is { "tools": Array(tools), .. } else {
+    fail("expected Anthropic tools")
+  }
+  assert_true(tools.any(tool => tool is { "name": "json", .. }))
+  assert_false(tools[0].stringify().contains("\"strict\""))
+  assert_false(prepared.body.stringify().contains("\"output_config\""))
+  assert_false(prepared.beta_features.contains("structured-outputs-2025-11-13"))
+  assert_true(
+    prepared.warnings.any(warning => {
+      warning is @provider.Warning::Unsupported(feature="strict", ..)
+    }),
+  )
+}
+
+///|
 test "Anthropic function tool can disable model-level eager streaming" {
   let prepared = prepare_anthropic_request(
     "claude-sonnet-4-6",
@@ -237,4 +276,32 @@ test "Anthropic maps custom provider-tool names in tool changes" {
     } => assert_eq(name, "web_search")
     _ => fail("expected mapped Anthropic tool change")
   }
+}
+
+///|
+test "Anthropic strict-tool warning matches AI SDK" {
+  let prepared = prepare_anthropic_request(
+    "claude-3-haiku-20240307",
+    @provider.ChatCallOptions::new(
+      [@provider.LanguageModelMessage::user("hello")],
+      tools=[
+        @provider.ToolDefinition::new(
+          "lookup",
+          Json::empty_object(),
+          strict=true,
+        ),
+      ],
+    ),
+    "anthropic.messages",
+    false,
+  )
+  assert_true(
+    prepared.warnings.any(fn(warning) {
+      warning
+      is @provider.Unsupported(
+        feature="strict",
+        details="Tool 'lookup' has strict: true, but strict mode is not supported by this provider. The strict property will be ignored."
+      )
+    }),
+  )
 }

@@ -6,12 +6,11 @@ pub struct OpenAIProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv preserve_reasoning : Bool
-  priv include_usage : Bool
   priv idle_timeout_ms : Int
   priv id_generator : @provider_utils.IdGenerator
   priv websocket_connector : &@provider_utils.WebSocketConnector
   priv http_transport : &@provider_utils.HttpTransport
+  priv custom_http_transport : &@provider_utils.HttpTransport?
 }
 
 ///|
@@ -22,13 +21,18 @@ const OPENAI_DEFAULT_BASE_URL : String = "https://api.openai.com/v1"
 ///|
 /// Resolve the explicit base URL, `OPENAI_BASE_URL`, and the official default
 /// in that order. Keeping this at the provider factory boundary makes every
-/// model family, Files, and Skills client observe the same endpoint.
-fn resolve_openai_base_url(base_url : String) -> String {
-  @provider_utils.without_trailing_slash(
+/// model family, FilesV4, and SkillsV4 client observe the same endpoint.
+fn resolve_openai_base_url(
+  base_url : String?,
+) -> String raise @provider.InvalidArgumentError {
+  let validated = @provider_utils.validate_base_url(
     @provider_utils.load_optional_setting(
       base_url,
       environment_variable_name="OPENAI_BASE_URL",
-    ).unwrap_or(OPENAI_DEFAULT_BASE_URL),
+    ),
+  )
+  @provider_utils.without_trailing_slash(
+    validated.unwrap_or(OPENAI_DEFAULT_BASE_URL),
   )
 }
 
@@ -49,18 +53,16 @@ fn load_openai_api_key(
 /// Create an official OpenAI provider factory.
 pub fn create_openai(
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   provider_name? : String = "openai",
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
-  preserve_reasoning? : Bool = false,
-  include_usage? : Bool = true,
   idle_timeout_ms? : Int = 120_000,
   websocket_connector? : &@provider_utils.WebSocketConnector,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
-) -> OpenAIProvider {
+) -> OpenAIProvider raise @provider.InvalidArgumentError {
   let openai_headers : Map[String, String] = Map([])
   if organization != "" {
     openai_headers["OpenAI-Organization"] = organization
@@ -73,8 +75,6 @@ pub fn create_openai(
     api_key,
     base_url: resolve_openai_base_url(base_url),
     headers: @provider_utils.merge_headers(openai_headers, headers),
-    preserve_reasoning,
-    include_usage,
     idle_timeout_ms,
     id_generator: id_generator.unwrap_or(@provider_utils.generate_id),
     websocket_connector: websocket_connector.unwrap_or(
@@ -83,6 +83,7 @@ pub fn create_openai(
     http_transport: http_transport.unwrap_or(
       @provider_utils.native_http_transport(),
     ),
+    custom_http_transport: http_transport,
   }
 }
 
@@ -90,27 +91,23 @@ pub fn create_openai(
 /// AI SDK-style camel-case provider factory.
 pub fn createOpenAI(
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   provider_name? : String = "openai",
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
-  preserve_reasoning? : Bool = false,
-  include_usage? : Bool = true,
   idle_timeout_ms? : Int = 120_000,
   websocket_connector? : &@provider_utils.WebSocketConnector,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
-) -> OpenAIProvider {
+) -> OpenAIProvider raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     provider_name~,
     organization~,
     project~,
     headers~,
-    preserve_reasoning~,
-    include_usage~,
     idle_timeout_ms~,
     websocket_connector?,
     http_transport?,
@@ -122,7 +119,7 @@ pub fn createOpenAI(
 
 ///|
 /// Select the protocol-level official Chat Completions model.
-pub fn OpenAIProvider::chat_wire(
+fn OpenAIProvider::chat_wire(
   self : OpenAIProvider,
   model_id : String,
 ) -> OpenAIChatModel {
@@ -132,8 +129,7 @@ pub fn OpenAIProvider::chat_wire(
     api_key: self.api_key,
     model_id,
     headers: @provider_utils.copy_headers(self.headers),
-    preserve_reasoning: self.preserve_reasoning,
-    include_usage: self.include_usage,
+    include_usage: true,
     idle_timeout_ms: self.idle_timeout_ms,
     id_generator: self.id_generator,
     http_transport: self.http_transport,
@@ -145,8 +141,9 @@ pub fn OpenAIProvider::chat_wire(
 pub fn OpenAIProvider::chat(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIChatLanguageModelV4 {
-  OpenAIChatLanguageModelV4::new(self.chat_wire(model_id))
+) -> &@provider.LanguageModelV4 {
+  let model = OpenAIChatLanguageModelV4::new(self.chat_wire(model_id))
+  model as &@provider.LanguageModelV4
 }
 
 ///|
@@ -154,7 +151,7 @@ pub fn OpenAIProvider::chat(
 pub fn OpenAIProvider::chat_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIChatLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.chat(model_id)
 }
 
@@ -163,7 +160,7 @@ pub fn OpenAIProvider::chat_model(
 pub fn OpenAIProvider::chatModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIChatLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.chat(model_id)
 }
 
@@ -172,8 +169,8 @@ pub fn OpenAIProvider::chatModel(
 pub fn OpenAIProvider::embedding(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIEmbeddingModel {
-  openai_embedding_model(
+) -> &@provider.EmbeddingModelV4 {
+  let model = openai_embedding_model(
     provider_name=self.provider_name,
     base_url=self.base_url,
     model_id~,
@@ -182,6 +179,7 @@ pub fn OpenAIProvider::embedding(
     idle_timeout_ms=self.idle_timeout_ms,
     http_transport=self.http_transport,
   )
+  model as &@provider.EmbeddingModelV4
 }
 
 ///|
@@ -189,7 +187,7 @@ pub fn OpenAIProvider::embedding(
 pub fn OpenAIProvider::embedding_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 {
   self.embedding(model_id)
 }
 
@@ -198,7 +196,7 @@ pub fn OpenAIProvider::embedding_model(
 pub fn OpenAIProvider::embeddingModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 {
   self.embedding(model_id)
 }
 
@@ -207,7 +205,7 @@ pub fn OpenAIProvider::embeddingModel(
 pub fn OpenAIProvider::text_embedding(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 {
   self.embedding(model_id)
 }
 
@@ -216,7 +214,7 @@ pub fn OpenAIProvider::text_embedding(
 pub fn OpenAIProvider::textEmbedding(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 {
   self.embedding(model_id)
 }
 
@@ -225,7 +223,7 @@ pub fn OpenAIProvider::textEmbedding(
 pub fn OpenAIProvider::text_embedding_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 {
   self.embedding(model_id)
 }
 
@@ -234,13 +232,13 @@ pub fn OpenAIProvider::text_embedding_model(
 pub fn OpenAIProvider::textEmbeddingModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 {
   self.embedding(model_id)
 }
 
 ///|
 /// Select the protocol-level official `/completions` model.
-pub fn OpenAIProvider::completion_wire(
+fn OpenAIProvider::completion_wire(
   self : OpenAIProvider,
   model_id : String,
 ) -> OpenAICompletionModel {
@@ -250,7 +248,7 @@ pub fn OpenAIProvider::completion_wire(
     model_id~,
     api_key=self.api_key,
     headers=self.headers,
-    include_usage=self.include_usage,
+    include_usage=true,
     idle_timeout_ms=self.idle_timeout_ms,
     http_transport=self.http_transport,
   )
@@ -261,8 +259,11 @@ pub fn OpenAIProvider::completion_wire(
 pub fn OpenAIProvider::completion(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAICompletionLanguageModelV4 {
-  OpenAICompletionLanguageModelV4::new(self.completion_wire(model_id))
+) -> &@provider.LanguageModelV4 {
+  let model = OpenAICompletionLanguageModelV4::new(
+    self.completion_wire(model_id),
+  )
+  model as &@provider.LanguageModelV4
 }
 
 ///|
@@ -270,7 +271,7 @@ pub fn OpenAIProvider::completion(
 pub fn OpenAIProvider::completion_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAICompletionLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.completion(model_id)
 }
 
@@ -279,7 +280,7 @@ pub fn OpenAIProvider::completion_model(
 pub fn OpenAIProvider::completionModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAICompletionLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.completion(model_id)
 }
 
@@ -304,8 +305,8 @@ fn openai_image_requires_response_format(model_id : String) -> Bool {
 pub fn OpenAIProvider::image(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIImageModel {
-  openai_image_model(
+) -> &@provider.ImageModelV4 {
+  let model = openai_image_model(
     provider_name=self.provider_name,
     base_url=self.base_url,
     model_id~,
@@ -315,7 +316,9 @@ pub fn OpenAIProvider::image(
     include_response_format=openai_image_requires_response_format(model_id),
     idle_timeout_ms=self.idle_timeout_ms,
     http_transport=self.http_transport,
+    download_transport?=self.custom_http_transport,
   )
+  model as &@provider.ImageModelV4
 }
 
 ///|
@@ -323,7 +326,7 @@ pub fn OpenAIProvider::image(
 pub fn OpenAIProvider::image_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIImageModel {
+) -> &@provider.ImageModelV4 {
   self.image(model_id)
 }
 
@@ -332,14 +335,14 @@ pub fn OpenAIProvider::image_model(
 pub fn OpenAIProvider::imageModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIImageModel {
+) -> &@provider.ImageModelV4 {
   self.image(model_id)
 }
 
 ///|
 /// Select the official OpenAI Files API.
-pub fn OpenAIProvider::files(self : OpenAIProvider) -> OpenAIFiles {
-  openai_files(
+pub fn OpenAIProvider::files(self : OpenAIProvider) -> &@provider.FilesV4 {
+  let files = openai_files(
     provider_name=self.provider_name,
     base_url=self.base_url,
     api_key=self.api_key,
@@ -347,12 +350,13 @@ pub fn OpenAIProvider::files(self : OpenAIProvider) -> OpenAIFiles {
     idle_timeout_ms=self.idle_timeout_ms,
     http_transport=self.http_transport,
   )
+  files as &@provider.FilesV4
 }
 
 ///|
 /// Select the official OpenAI Skills API.
-pub fn OpenAIProvider::skills(self : OpenAIProvider) -> OpenAISkills {
-  openai_skills(
+pub fn OpenAIProvider::skills(self : OpenAIProvider) -> &@provider.SkillsV4 {
+  let skills = openai_skills(
     provider_name=self.provider_name,
     base_url=self.base_url,
     api_key=self.api_key,
@@ -360,6 +364,7 @@ pub fn OpenAIProvider::skills(self : OpenAIProvider) -> OpenAISkills {
     idle_timeout_ms=self.idle_timeout_ms,
     http_transport=self.http_transport,
   )
+  skills as &@provider.SkillsV4
 }
 
 ///|
@@ -367,8 +372,8 @@ pub fn OpenAIProvider::skills(self : OpenAIProvider) -> OpenAISkills {
 pub fn OpenAIProvider::speech(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAISpeechModel {
-  openai_speech_model(
+) -> &@provider.SpeechModelV4 {
+  let model = openai_speech_model(
     provider_name=self.provider_name,
     base_url=self.base_url,
     model_id~,
@@ -377,6 +382,7 @@ pub fn OpenAIProvider::speech(
     idle_timeout_ms=self.idle_timeout_ms,
     http_transport=self.http_transport,
   )
+  model as &@provider.SpeechModelV4
 }
 
 ///|
@@ -384,7 +390,7 @@ pub fn OpenAIProvider::speech(
 pub fn OpenAIProvider::speech_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAISpeechModel {
+) -> &@provider.SpeechModelV4 {
   self.speech(model_id)
 }
 
@@ -393,7 +399,7 @@ pub fn OpenAIProvider::speech_model(
 pub fn OpenAIProvider::speechModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAISpeechModel {
+) -> &@provider.SpeechModelV4 {
   self.speech(model_id)
 }
 
@@ -402,8 +408,8 @@ pub fn OpenAIProvider::speechModel(
 pub fn OpenAIProvider::transcription(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAITranscriptionModel {
-  openai_transcription_model(
+) -> &@provider.TranscriptionModelV4 {
+  let model = openai_transcription_model(
     provider_name=self.provider_name,
     base_url=self.base_url,
     model_id~,
@@ -413,6 +419,7 @@ pub fn OpenAIProvider::transcription(
     http_transport=self.http_transport,
     websocket_connector=self.websocket_connector,
   )
+  model as &@provider.TranscriptionModelV4
 }
 
 ///|
@@ -420,7 +427,7 @@ pub fn OpenAIProvider::transcription(
 pub fn OpenAIProvider::transcription_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAITranscriptionModel {
+) -> &@provider.TranscriptionModelV4 {
   self.transcription(model_id)
 }
 
@@ -429,7 +436,7 @@ pub fn OpenAIProvider::transcription_model(
 pub fn OpenAIProvider::transcriptionModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAITranscriptionModel {
+) -> &@provider.TranscriptionModelV4 {
   self.transcription(model_id)
 }
 
@@ -438,8 +445,8 @@ pub fn OpenAIProvider::transcriptionModel(
 pub fn OpenAIProvider::translation(
   self : OpenAIProvider,
   model_id : OpenAITranslationModelId,
-) -> OpenAITranslationModel {
-  openai_translation_model(
+) -> &@provider.SpeechTranslationModelV4 {
+  let model = openai_translation_model(
     provider_name=self.provider_name,
     base_url=self.base_url,
     model_id~,
@@ -447,6 +454,7 @@ pub fn OpenAIProvider::translation(
     headers=self.headers,
     websocket_connector=self.websocket_connector,
   )
+  model as &@provider.SpeechTranslationModelV4
 }
 
 ///|
@@ -454,7 +462,7 @@ pub fn OpenAIProvider::translation(
 pub fn OpenAIProvider::speech_translation_model(
   self : OpenAIProvider,
   model_id : OpenAITranslationModelId,
-) -> OpenAITranslationModel {
+) -> &@provider.SpeechTranslationModelV4 {
   self.translation(model_id)
 }
 
@@ -463,7 +471,7 @@ pub fn OpenAIProvider::speech_translation_model(
 pub fn OpenAIProvider::speechTranslationModel(
   self : OpenAIProvider,
   model_id : OpenAITranslationModelId,
-) -> OpenAITranslationModel {
+) -> &@provider.SpeechTranslationModelV4 {
   self.translation(model_id)
 }
 
@@ -520,7 +528,7 @@ pub fn OpenAIProvider::realtimeModel(
 
 ///|
 /// Select the protocol-level official Responses API model.
-pub fn OpenAIProvider::responses_wire(
+fn OpenAIProvider::responses_wire(
   self : OpenAIProvider,
   model_id : String,
 ) -> OpenAIResponsesModel {
@@ -541,8 +549,9 @@ pub fn OpenAIProvider::responses_wire(
 pub fn OpenAIProvider::responses(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIResponsesLanguageModelV4 {
-  OpenAIResponsesLanguageModelV4::new(self.responses_wire(model_id))
+) -> &@provider.LanguageModelV4 {
+  let model = OpenAIResponsesLanguageModelV4::new(self.responses_wire(model_id))
+  model as &@provider.LanguageModelV4
 }
 
 ///|
@@ -550,7 +559,7 @@ pub fn OpenAIProvider::responses(
 pub fn OpenAIProvider::responses_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIResponsesLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.responses(model_id)
 }
 
@@ -559,7 +568,7 @@ pub fn OpenAIProvider::responses_model(
 pub fn OpenAIProvider::responsesModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIResponsesLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.responses(model_id)
 }
 
@@ -569,7 +578,7 @@ pub fn OpenAIProvider::responsesModel(
 pub fn OpenAIProvider::language_model(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIResponsesLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.responses(model_id)
 }
 
@@ -578,7 +587,7 @@ pub fn OpenAIProvider::language_model(
 pub fn OpenAIProvider::languageModel(
   self : OpenAIProvider,
   model_id : String,
-) -> OpenAIResponsesLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.language_model(model_id)
 }
 
@@ -587,17 +596,17 @@ pub fn OpenAIProvider::languageModel(
 pub fn openai(
   model_id : String,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
-) -> OpenAIResponsesLanguageModelV4 {
+) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,
@@ -612,24 +621,20 @@ pub fn openai(
 pub fn openai_chat(
   model_id : String,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
-  preserve_reasoning? : Bool = false,
-  include_usage? : Bool = true,
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
-) -> OpenAIChatLanguageModelV4 {
+) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,
-    preserve_reasoning~,
-    include_usage~,
     idle_timeout_ms~,
     http_transport?,
     id_generator?,
@@ -637,49 +642,20 @@ pub fn openai_chat(
 }
 
 ///|
-/// Construct the protocol-level Chat Completions model directly.
-pub fn openai_chat_wire(
-  model_id : String,
-  api_key? : String = "",
-  base_url? : String = "",
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  preserve_reasoning? : Bool = false,
-  include_usage? : Bool = true,
-  idle_timeout_ms? : Int = 120_000,
-  http_transport? : &@provider_utils.HttpTransport,
-  id_generator? : @provider_utils.IdGenerator,
-) -> OpenAIChatModel {
-  create_openai(
-    api_key~,
-    base_url~,
-    organization~,
-    project~,
-    headers~,
-    preserve_reasoning~,
-    include_usage~,
-    idle_timeout_ms~,
-    http_transport?,
-    id_generator?,
-  ).chat_wire(model_id)
-}
-
-///|
 /// Construct an official OpenAI text embedding model.
 pub fn openai_embedding(
   model_id : String,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
-) -> OpenAIEmbeddingModel {
+) -> &@provider.EmbeddingModelV4 raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,
@@ -693,49 +669,22 @@ pub fn openai_embedding(
 pub fn openai_completion(
   model_id : String,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
-  include_usage? : Bool = true,
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
-) -> OpenAICompletionLanguageModelV4 {
+) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,
-    include_usage~,
     idle_timeout_ms~,
     http_transport?,
   ).completion(model_id)
-}
-
-///|
-/// Construct the protocol-level official `/completions` model directly.
-pub fn openai_completion_wire(
-  model_id : String,
-  api_key? : String = "",
-  base_url? : String = "",
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  include_usage? : Bool = true,
-  idle_timeout_ms? : Int = 120_000,
-  http_transport? : &@provider_utils.HttpTransport,
-) -> OpenAICompletionModel {
-  create_openai(
-    api_key~,
-    base_url~,
-    organization~,
-    project~,
-    headers~,
-    include_usage~,
-    idle_timeout_ms~,
-    http_transport?,
-  ).completion_wire(model_id)
 }
 
 ///|
@@ -743,16 +692,16 @@ pub fn openai_completion_wire(
 pub fn openai_image(
   model_id : String,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
-) -> OpenAIImageModel {
+) -> &@provider.ImageModelV4 raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,
@@ -766,16 +715,16 @@ pub fn openai_image(
 pub fn openai_speech(
   model_id : String,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
-) -> OpenAISpeechModel {
+) -> &@provider.SpeechModelV4 raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,
@@ -789,17 +738,17 @@ pub fn openai_speech(
 pub fn openai_transcription(
   model_id : String,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   websocket_connector? : &@provider_utils.WebSocketConnector,
   http_transport? : &@provider_utils.HttpTransport,
-) -> OpenAITranscriptionModel {
+) -> &@provider.TranscriptionModelV4 raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,
@@ -814,15 +763,15 @@ pub fn openai_transcription(
 pub fn openai_translation(
   model_id : OpenAITranslationModelId,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
   websocket_connector? : &@provider_utils.WebSocketConnector,
-) -> OpenAITranslationModel {
+) -> &@provider.SpeechTranslationModelV4 raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,
@@ -835,16 +784,16 @@ pub fn openai_translation(
 pub fn openai_realtime(
   model_id : String,
   api_key? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   organization? : String = "",
   project? : String = "",
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
-) -> OpenAIRealtimeModel {
+) -> OpenAIRealtimeModel raise @provider.InvalidArgumentError {
   create_openai(
     api_key~,
-    base_url~,
+    base_url?,
     organization~,
     project~,
     headers~,

@@ -23,24 +23,10 @@ fn decode_embedding_vector(json : Json) -> Array[Double] raise {
 }
 
 ///|
-fn embedding_usage_from_json(json : Json) -> @provider.Usage {
-  let input_tokens = @provider_utils.json_int_field(json, "prompt_tokens")
-  {
-    input_tokens,
-    output_tokens: 0,
-    total_tokens: input_tokens,
-    reasoning_tokens: 0,
-    cached_input_tokens: 0,
-    cache_write_input_tokens: 0,
-  }
-}
-
-///|
-/// Decode one non-streaming OpenAI-compatible embeddings response.
-pub fn decode_embedding_response(
+fn decode_embedding_response_data(
   json : Json,
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-) -> @provider.EmbeddingBatchResponse raise {
+  error_structure : OpenAICompatibleErrorStructure,
+) -> (Array[Array[Double]], Int?) raise {
   if error_structure.message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI-compatible embedding request failed: \{message}",
@@ -67,10 +53,10 @@ pub fn decode_embedding_response(
         )
     }
   }
-  let usage = match json {
+  let usage_tokens = match json {
     { "usage": value, .. } if !(value is Null) =>
-      embedding_usage_from_json(value)
-    _ => @provider.Usage::zero()
+      Some(@provider_utils.json_int_field(value, "prompt_tokens"))
+    _ => None
   }
-  @provider.EmbeddingBatchResponse::new(embeddings, usage)
+  (embeddings, usage_tokens)
 }

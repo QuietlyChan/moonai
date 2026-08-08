@@ -10,47 +10,69 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
+pub fn advisor_20260301(model~ : String, max_uses? : Int, caching? : AnthropicAdvisorCaching, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn advisor_20260301_tool(Json, name? : String) -> @provider.ToolDefinition
 
-pub fn anthropic(String, api_key? : String, auth_token? : String, base_url? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> AnthropicLanguageModelV4 raise
+pub fn anthropic(String, api_key? : String, auth_token? : String, base_url? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], supports_native_structured_output? : Bool, supports_strict_tools? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String, transform_request_body? : (Json, Array[String]) -> Json, build_request_url? : (String, Bool) -> String) -> &@provider.LanguageModelV4 raise
+
+pub fn anthropicTools() -> AnthropicTools
 
 pub fn anthropic_files(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String) -> AnthropicFiles raise
 
-pub fn anthropic_messages(String, api_key? : String, auth_token? : String, base_url? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> AnthropicMessagesModel raise
+pub fn anthropic_tools() -> AnthropicTools
+
+pub fn bash_20241022(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, disable_default_execute? : Bool, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn bash_20241022_tool(name? : String) -> @provider.ToolDefinition
 
+pub fn bash_20250124(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, disable_default_execute? : Bool, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn bash_20250124_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn codeExecution_20250522(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn codeExecution_20250825(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn codeExecution_20260120(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn code_execution_20250522(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn code_execution_20250522_tool(name? : String) -> @provider.ToolDefinition
 
+pub fn code_execution_20250825(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn code_execution_20250825_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn code_execution_20260120(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn code_execution_20260120_tool(name? : String) -> @provider.ToolDefinition
 
+pub fn computer_20241022(display_width_px~ : Int, display_height_px~ : Int, display_number? : Int, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn computer_20241022_tool(Json, name? : String) -> @provider.ToolDefinition
+
+pub fn computer_20250124(display_width_px~ : Int, display_height_px~ : Int, display_number? : Int, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn computer_20250124_tool(Json, name? : String) -> @provider.ToolDefinition
 
+pub fn computer_20251124(display_width_px~ : Int, display_height_px~ : Int, display_number? : Int, enable_zoom? : Bool, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn computer_20251124_tool(Json, name? : String) -> @provider.ToolDefinition
 
-pub fn createAnthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> AnthropicProvider raise
+pub fn createAnthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], supports_native_structured_output? : Bool, supports_strict_tools? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String, transform_request_body? : (Json, Array[String]) -> Json, build_request_url? : (String, Bool) -> String) -> AnthropicProvider raise
 
-pub fn create_anthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String) -> AnthropicProvider raise
+pub fn create_anthropic(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, beta_features? : Array[String], supported_urls? : Array[@provider.SupportedUrlRule], supports_native_structured_output? : Bool, supports_strict_tools? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String, id_generator? : () -> String, transform_request_body? : (Json, Array[String]) -> Json, build_request_url? : (String, Bool) -> String) -> AnthropicProvider raise
 
 pub fn decodeAnthropicMessageMetadata(Json) -> AnthropicMessageMetadata?
 
 pub fn decode_anthropic_message_metadata(Json) -> AnthropicMessageMetadata?
 
-pub fn decode_messages_response(Json, provider_name? : String, tool_name_mapping? : @provider_utils.ToolNameMapping, id_generator? : () -> String) -> @provider.ChatResponse raise
-
-pub fn encode_messages_request(String, @provider.ChatCallOptions, provider_name? : String, stream? : Bool) -> Json raise
-
-pub fn encode_messages_v4_request(String, @provider.LanguageModelV4CallOptions, provider_name? : String, stream? : Bool) -> Json raise
-
 pub fn forwardAnthropicContainerIdFromLastStep(Array[Map[String, Json]]) -> Map[String, Json]?
 
 pub fn forward_anthropic_container_id_from_last_step(Array[Map[String, Json]]) -> Map[String, Json]?
+
+pub fn memory_20250818(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn memory_20250818_tool(name? : String) -> @provider.ToolDefinition
 
@@ -58,29 +80,75 @@ pub fn sanitizeJsonSchema(Json) -> Json
 
 pub fn sanitize_json_schema(Json) -> Json
 
+pub fn textEditor_20241022(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn textEditor_20250124(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn textEditor_20250429(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn textEditor_20250728(max_characters? : Int, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn text_editor_20241022(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn text_editor_20241022_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn text_editor_20250124(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn text_editor_20250124_tool(name? : String) -> @provider.ToolDefinition
 
+pub fn text_editor_20250429(output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn text_editor_20250429_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn text_editor_20250728(max_characters? : Int, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn text_editor_20250728_tool(args? : Json, name? : String) -> @provider.ToolDefinition
 
+pub fn toolSearchBm25_20251119(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn toolSearchRegex_20251119(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn tool_search_bm25_20251119(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn tool_search_bm25_20251119_tool(name? : String) -> @provider.ToolDefinition
+
+pub fn tool_search_regex_20251119(on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn tool_search_regex_20251119_tool(name? : String) -> @provider.ToolDefinition
 
+pub fn webFetch_20250910(max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], citations? : AnthropicWebFetchCitations, max_content_tokens? : Int, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn webFetch_20260209(max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], citations? : AnthropicWebFetchCitations, max_content_tokens? : Int, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn webSearch_20250305(max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], user_location? : AnthropicWebSearchUserLocation, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn webSearch_20260209(max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], user_location? : AnthropicWebSearchUserLocation, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub fn web_fetch_20250910(max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], citations? : AnthropicWebFetchCitations, max_content_tokens? : Int, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn web_fetch_20250910_tool(args? : Json, name? : String) -> @provider.ToolDefinition
+
+pub fn web_fetch_20260209(max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], citations? : AnthropicWebFetchCitations, max_content_tokens? : Int, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn web_fetch_20260209_tool(args? : Json, name? : String) -> @provider.ToolDefinition
 
+pub fn web_search_20250305(max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], user_location? : AnthropicWebSearchUserLocation, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub fn web_search_20250305_tool(args? : Json, name? : String) -> @provider.ToolDefinition
+
+pub fn web_search_20260209(max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], user_location? : AnthropicWebSearchUserLocation, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn web_search_20260209_tool(args? : Json, name? : String) -> @provider.ToolDefinition
 
 // Errors
 
 // Types and methods
+pub(all) struct AnthropicAdvisorCaching {
+  ttl : AnthropicCacheTtl
+} derive(Eq, @debug.Debug)
+pub fn AnthropicAdvisorCaching::new(ttl~ : AnthropicCacheTtl) -> Self
+pub fn AnthropicAdvisorCaching::to_json(Self) -> Json
+
 pub(all) struct AnthropicCacheControl {
   ttl : AnthropicCacheTtl?
 } derive(Eq, @debug.Debug)
@@ -194,7 +262,7 @@ pub fn AnthropicFilePartProviderOptions::to_provider_options(Self, provider_name
 pub struct AnthropicFiles {
   // private fields
 }
-pub impl @provider.Files for AnthropicFiles
+pub impl @provider.FilesV4 for AnthropicFiles
 
 pub(all) enum AnthropicInferenceGeo {
   AnthropicInferenceUs
@@ -227,12 +295,6 @@ pub(all) struct AnthropicLanguageModelOptions {
 pub fn AnthropicLanguageModelOptions::new(send_reasoning? : Bool, structured_output_mode? : AnthropicStructuredOutputMode, thinking? : AnthropicThinking, disable_parallel_tool_use? : Bool, cache_control? : AnthropicCacheControl, metadata? : AnthropicMetadata, mcp_servers? : Array[AnthropicMcpServer], container? : AnthropicContainer, tool_streaming? : Bool, effort? : AnthropicEffort, task_budget? : AnthropicTaskBudget, speed? : AnthropicSpeed, inference_geo? : AnthropicInferenceGeo, fallbacks? : AnthropicFallbacks, anthropic_beta? : Array[String], context_management? : AnthropicContextManagement) -> Self
 pub fn AnthropicLanguageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
 
-pub struct AnthropicLanguageModelV4 {
-  model : AnthropicMessagesModel
-}
-pub fn AnthropicLanguageModelV4::new(AnthropicMessagesModel) -> Self
-pub impl @provider.LanguageModelV4 for AnthropicLanguageModelV4
-
 pub(all) struct AnthropicMcpServer {
   name : String
   url : String
@@ -257,11 +319,6 @@ pub(all) struct AnthropicMessageMetadata {
   raw : Json
 } derive(@debug.Debug)
 
-pub struct AnthropicMessagesModel {
-  // private fields
-}
-pub impl @provider.ChatModel for AnthropicMessagesModel
-
 pub(all) struct AnthropicMetadata {
   user_id : String?
 } derive(Eq, @debug.Debug)
@@ -270,19 +327,19 @@ pub fn AnthropicMetadata::new(user_id? : String) -> Self
 pub struct AnthropicProvider {
   // private fields
 }
-pub fn AnthropicProvider::chat(Self, String) -> AnthropicLanguageModelV4
-pub fn AnthropicProvider::chat_wire(Self, String) -> AnthropicMessagesModel
+pub fn AnthropicProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn AnthropicProvider::files(Self) -> AnthropicFiles raise
-pub fn AnthropicProvider::language_model(Self, String) -> AnthropicLanguageModelV4
-pub fn AnthropicProvider::messages(Self, String) -> AnthropicLanguageModelV4
-pub fn AnthropicProvider::messages_wire(Self, String) -> AnthropicMessagesModel
+pub fn AnthropicProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn AnthropicProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn AnthropicProvider::messages(Self, String) -> &@provider.LanguageModelV4
 pub fn AnthropicProvider::skills(Self) -> AnthropicSkills
-pub impl @provider.Provider for AnthropicProvider
+pub fn AnthropicProvider::tools(Self) -> AnthropicTools
+pub impl @provider.ProviderV4 for AnthropicProvider
 
 pub struct AnthropicSkills {
   // private fields
 }
-pub impl @provider.Skills for AnthropicSkills
+pub impl @provider.SkillsV4 for AnthropicSkills
 
 pub(all) enum AnthropicSpeed {
   AnthropicSpeedFast
@@ -295,17 +352,6 @@ pub(all) struct AnthropicStopDetails {
   explanation : String?
   recommended_model : String?
 } derive(Eq, @debug.Debug)
-
-pub struct AnthropicStreamDecoder {
-  // private fields
-}
-pub fn AnthropicStreamDecoder::feed_line(Self, String) -> @provider_utils.DecodeBatch raise
-pub fn AnthropicStreamDecoder::flush_buffered(Self) -> @provider_utils.DecodeBatch raise
-pub fn AnthropicStreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String, tool_name_mapping? : @provider_utils.ToolNameMapping, id_generator? : () -> String) -> Self
-pub fn AnthropicStreamDecoder::provider_metadata_snapshot(Self) -> Map[String, Json]
-pub fn AnthropicStreamDecoder::response(Self) -> @provider.ChatResponse
-pub fn AnthropicStreamDecoder::v4_finish_reason(Self) -> @provider.LanguageModelV4FinishReason
-pub fn AnthropicStreamDecoder::v4_usage(Self) -> @provider.LanguageModelV4Usage
 
 pub(all) enum AnthropicStructuredOutputMode {
   AnthropicStructuredOutputFormat
@@ -372,6 +418,29 @@ pub(all) struct AnthropicToolUseKeep {
 } derive(Eq, @debug.Debug)
 pub fn AnthropicToolUseKeep::new(value~ : Double) -> Self
 
+pub struct AnthropicTools {
+}
+pub fn AnthropicTools::advisor_20260301(Self, model~ : String, max_uses? : Int, caching? : AnthropicAdvisorCaching, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::bash_20241022(Self, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, disable_default_execute? : Bool, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::bash_20250124(Self, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, disable_default_execute? : Bool, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::codeExecution_20250522(Self, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::codeExecution_20250825(Self, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::codeExecution_20260120(Self, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::computer_20241022(Self, display_width_px~ : Int, display_height_px~ : Int, display_number? : Int, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::computer_20250124(Self, display_width_px~ : Int, display_height_px~ : Int, display_number? : Int, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::computer_20251124(Self, display_width_px~ : Int, display_height_px~ : Int, display_number? : Int, enable_zoom? : Bool, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::memory_20250818(Self, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::textEditor_20241022(Self, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::textEditor_20250124(Self, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::textEditor_20250429(Self, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::textEditor_20250728(Self, max_characters? : Int, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::toolSearchBm25_20251119(Self, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::toolSearchRegex_20251119(Self, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::webFetch_20250910(Self, max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], citations? : AnthropicWebFetchCitations, max_content_tokens? : Int, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::webFetch_20260209(Self, max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], citations? : AnthropicWebFetchCitations, max_content_tokens? : Int, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::webSearch_20250305(Self, max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], user_location? : AnthropicWebSearchUserLocation, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn AnthropicTools::webSearch_20260209(Self, max_uses? : Int, allowed_domains? : Array[String], blocked_domains? : Array[String], user_location? : AnthropicWebSearchUserLocation, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
 pub(all) struct AnthropicUsageIteration {
   kind : String
   model : String?
@@ -381,8 +450,25 @@ pub(all) struct AnthropicUsageIteration {
   cache_read_input_tokens : Int?
 } derive(Eq, @debug.Debug)
 
+pub(all) struct AnthropicWebFetchCitations {
+  enabled : Bool
+} derive(Eq, @debug.Debug)
+pub fn AnthropicWebFetchCitations::new(enabled~ : Bool) -> Self
+pub fn AnthropicWebFetchCitations::to_json(Self) -> Json
+
+pub(all) struct AnthropicWebSearchUserLocation {
+  city : String?
+  region : String?
+  country : String?
+  timezone : String?
+} derive(Eq, @debug.Debug)
+pub fn AnthropicWebSearchUserLocation::new(city? : String, region? : String, country? : String, timezone? : String) -> Self
+pub fn AnthropicWebSearchUserLocation::to_json(Self) -> Json
+
 // Type aliases
 pub type AnthropicModelId = String
+
+pub type AnthropicRequestUrlBuilder = (String, Bool) -> String
 
 // Traits
 

@@ -2,13 +2,13 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/anthropic",
   "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/env",
   "moonbitlang/core/json",
 }
 
 import {
   "QuietlyChan/moonai/ai",
   "moonbitlang/async",
-  "moonbitlang/core/env",
 } for "test"
 
 import {

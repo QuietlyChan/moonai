@@ -55,6 +55,7 @@ async test "official OpenAI Files uploads multipart data and returns a reference
       idle_timeout_ms=2_000,
     )
     let files = provider.files()
+    assert_eq(files.specification_version(), "v4")
     assert_eq(files.provider(), "openai.files")
     let result = @ai.upload_file(
       files,

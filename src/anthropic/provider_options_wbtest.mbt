@@ -30,10 +30,42 @@ test "Anthropic configured headers override generated authentication" {
   let provider = create_anthropic(api_key="default-key", headers={
     "X-Api-Key": "override-key",
   })
-  let model = provider.chat_wire("claude-test")
+  let model = provider.language_model_value("claude-test")
   let headers = model.request_headers(Map([]), request_beta_features=[])
   assert_eq(headers.get("x-api-key"), None)
   assert_eq(headers.get("X-Api-Key"), Some("override-key"))
+}
+
+///|
+test "Anthropic merges beta headers into transforms and one request header" {
+  let mut observed_betas : Array[String] = []
+  let provider = create_anthropic(
+    api_key="test-key",
+    headers={ "Anthropic-Beta": "CONFIG-beta1, config-beta2" },
+    transform_request_body=(body, betas) => {
+      observed_betas = betas
+      body
+    },
+  )
+  let model = provider.language_model_value("claude-test")
+  let request_headers = { "ANTHROPIC-BETA": "REQUEST-beta1, config-beta2" }
+  let _ = model.apply_request_body_transform(
+    Json::empty_object(),
+    ["prepared-beta"],
+    request_headers,
+  )
+  assert_eq(observed_betas, [
+    "prepared-beta", "config-beta1", "config-beta2", "request-beta1",
+  ])
+  let headers = model.request_headers(request_headers, request_beta_features=[
+    "prepared-beta",
+  ])
+  assert_eq(
+    headers.get("anthropic-beta"),
+    Some("prepared-beta,config-beta1,config-beta2,request-beta1"),
+  )
+  assert_eq(headers.get("Anthropic-Beta"), None)
+  assert_eq(headers.get("ANTHROPIC-BETA"), None)
 }
 
 ///|
@@ -62,6 +94,56 @@ test "Anthropic legacy models map standardized reasoning to a token budget" {
     prepared.warnings[0] is @provider.Unsupported(feature="temperature", ..),
   )
   assert_true(prepared.warnings[1] is @provider.Unsupported(feature="topP", ..))
+}
+
+///|
+test "Anthropic reasoning uses shared AI SDK effort mapping diagnostics" {
+  let minimal = prepare_anthropic_request(
+    "claude-opus-4-6",
+    @provider.ChatCallOptions::new(
+      [@provider.LanguageModelMessage::user("hello")],
+      reasoning_effort=@provider.Minimal,
+    ),
+    "anthropic.messages",
+    false,
+  )
+  json_inspect(minimal.body, content={
+    "model": "claude-opus-4-6",
+    "messages": [
+      { "role": "user", "content": [{ "type": "text", "text": "hello" }] },
+    ],
+    "max_tokens": 128000,
+    "thinking": { "type": "adaptive", "display": "summarized" },
+    "output_config": { "effort": "low" },
+  })
+  assert_true(
+    minimal.warnings.any(fn(warning) {
+      warning
+      is @provider.Compatibility(
+        feature="reasoning",
+        details="reasoning \"minimal\" is not directly supported by this model. mapped to effort \"low\"."
+      )
+    }),
+  )
+
+  let xhigh = prepare_anthropic_request(
+    "claude-opus-4-6",
+    @provider.ChatCallOptions::new(
+      [@provider.LanguageModelMessage::user("hello")],
+      reasoning_effort=@provider.XHigh,
+    ),
+    "anthropic.messages",
+    false,
+  )
+  assert_true(
+    xhigh.warnings.any(fn(warning) {
+      warning
+      is @provider.Compatibility(
+        feature="reasoning",
+        details="reasoning \"xhigh\" is not directly supported by this model. mapped to effort \"max\"."
+      )
+    }),
+  )
 }
 
 ///|
@@ -188,4 +270,177 @@ test "Anthropic sends topK unless thinking disables sampling" {
   assert_false(thinking.body.stringify().contains("top_k"))
   assert_eq(thinking.warnings.length(), 1)
   assert_true(thinking.warnings[0] is @provider.Unsupported(feature="topK", ..))
+}
+
+///|
+test "Anthropic sanitizes nested provider options before wire encoding" {
+  let prepared = prepare_anthropic_request(
+    "claude-sonnet-4-6",
+    @provider.ChatCallOptions::new(
+      [@provider.LanguageModelMessage::user("hello")],
+      provider_options={
+        "anthropic": {
+          "cacheControl": { "type": "ephemeral", "ttl": "1h", "ignored": true },
+          "mcpServers": [
+            {
+              "type": "url",
+              "name": "docs",
+              "url": "https://mcp.example.com",
+              "authorizationToken": null,
+              "toolConfiguration": {
+                "enabled": true,
+                "allowedTools": ["search"],
+                "ignored": true,
+              },
+              "ignored": true,
+            },
+          ],
+          "container": {
+            "id": "container-1",
+            "skills": [
+              {
+                "type": "anthropic",
+                "skillId": "pptx",
+                "version": "latest",
+                "ignored": true,
+              },
+              {
+                "type": "custom",
+                "providerReference": { "anthropic": "skill-uploaded" },
+                "ignored": true,
+              },
+            ],
+            "ignored": true,
+          },
+          "taskBudget": {
+            "type": "tokens",
+            "total": 20000,
+            "remaining": 10000,
+            "ignored": true,
+          },
+          "fallbacks": [
+            {
+              "model": "claude-opus-4-8",
+              "max_tokens": 8192,
+              "thinking": { "type": "disabled" },
+              "speed": "fast",
+              "ignored": true,
+            },
+          ],
+          "contextManagement": {
+            "edits": [
+              {
+                "type": "compact_20260112",
+                "trigger": { "type": "input_tokens", "value": 50000 },
+                "pauseAfterCompaction": true,
+                "instructions": "Keep the task state.",
+                "ignored": true,
+              },
+            ],
+            "ignored": true,
+          },
+        },
+      },
+    ),
+    "anthropic.messages",
+    false,
+  )
+  json_inspect(prepared.body, content={
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      { "role": "user", "content": [{ "type": "text", "text": "hello" }] },
+    ],
+    "max_tokens": 128000,
+    "output_config": {
+      "task_budget": { "type": "tokens", "total": 20000, "remaining": 10000 },
+    },
+    "cache_control": { "type": "ephemeral", "ttl": "1h" },
+    "mcp_servers": [
+      {
+        "type": "url",
+        "name": "docs",
+        "url": "https://mcp.example.com",
+        "tool_configuration": { "enabled": true, "allowed_tools": ["search"] },
+      },
+    ],
+    "container": {
+      "id": "container-1",
+      "skills": [
+        { "type": "anthropic", "skill_id": "pptx", "version": "latest" },
+        { "type": "custom", "skill_id": "skill-uploaded" },
+      ],
+    },
+    "fallbacks": [
+      {
+        "model": "claude-opus-4-8",
+        "max_tokens": 8192,
+        "thinking": { "type": "disabled" },
+        "speed": "fast",
+      },
+    ],
+    "context_management": {
+      "edits": [
+        {
+          "type": "compact_20260112",
+          "trigger": { "type": "input_tokens", "value": 50000 },
+          "pause_after_compaction": true,
+          "instructions": "Keep the task state.",
+        },
+      ],
+    },
+  })
+  assert_eq(prepared.warnings, [
+    @provider.Warning::Other(
+      message="code execution tool is required when using skills",
+    ),
+  ])
+}
+
+///|
+test "Anthropic ignores invalid nested provider options" {
+  let prepared = prepare_anthropic_request(
+    "claude-sonnet-4-6",
+    @provider.ChatCallOptions::new(
+      [@provider.LanguageModelMessage::user("hello")],
+      provider_options={
+        "anthropic": {
+          "cacheControl": { "type": "persistent" },
+          "mcpServers": [
+            { "type": "url", "name": 42, "url": "https://mcp.example.com" },
+          ],
+          "container": { "skills": [{ "type": "anthropic", "skillId": 42 }] },
+          "taskBudget": { "type": "tokens", "total": 19999 },
+          "fallbacks": [{ "model": true }],
+          "contextManagement": {
+            "edits": [
+              { "type": "compact_20260112", "pauseAfterCompaction": "yes" },
+            ],
+          },
+        },
+      },
+    ),
+    "anthropic.messages",
+    false,
+  )
+  let body = prepared.body.stringify()
+  assert_false(body.contains("cache_control"))
+  assert_false(body.contains("mcp_servers"))
+  assert_false(body.contains("container"))
+  assert_false(body.contains("output_config"))
+  assert_false(body.contains("fallbacks"))
+  assert_false(body.contains("context_management"))
+  assert_eq(prepared.beta_features, [])
+  for
+    feature in [
+      "providerOptions.cacheControl.type", "providerOptions.mcpServers[0].name",
+      "providerOptions.container.skills[0].skillId", "providerOptions.taskBudget.total",
+      "providerOptions.fallbacks[0].model", "providerOptions.contextManagement.edits[0].pauseAfterCompaction",
+    ] {
+    assert_true(
+      prepared.warnings.any(fn(warning) {
+        warning is @provider.Compatibility(feature=actual, ..) &&
+        actual == feature
+      }),
+    )
+  }
 }

@@ -1,12 +1,12 @@
 ///|
 /// Official OpenAI Files API implementation.
-pub struct OpenAIFiles {
-  priv provider_name : String
-  priv base_url : String
-  priv api_key : String
-  priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
-  priv http_transport : &@provider_utils.HttpTransport
+priv struct OpenAIFiles {
+  provider_name : String
+  base_url : String
+  api_key : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
@@ -26,7 +26,7 @@ pub fn OpenAIFilesOptions::new(
 }
 
 ///|
-/// Convert typed Files options into the OpenAI provider namespace.
+/// Convert typed FilesV4 options into the OpenAI provider namespace.
 pub fn OpenAIFilesOptions::to_provider_options(
   self : OpenAIFilesOptions,
   provider_name? : String = "openai",
@@ -86,13 +86,11 @@ fn OpenAIFiles::request_headers(
 
 ///|
 fn parse_openai_files_options(
-  call_options : @provider.FileUploadOptions,
-  provider_name : String,
+  call_options : @provider.FilesV4UploadFileCallOptions,
+  _provider_name : String,
 ) -> ParsedOpenAIFilesOptions {
-  let resolution = @provider_utils.resolve_provider_options(
+  let resolution = resolve_official_openai_provider_options(
     call_options.provider_options,
-    provider_name~,
-    aliases=["openai"],
   )
   let reader = @provider_utils.ProviderOptionsReader::new(
     resolution,
@@ -108,7 +106,7 @@ fn parse_openai_files_options(
 ///|
 fn OpenAIFiles::form_data(
   _self : OpenAIFiles,
-  call_options : @provider.FileUploadOptions,
+  call_options : @provider.FilesV4UploadFileCallOptions,
   parsed : ParsedOpenAIFilesOptions,
 ) -> @provider_utils.MultipartFormData raise {
   let filename = call_options.filename.unwrap_or("blob")
@@ -117,7 +115,7 @@ fn OpenAIFiles::form_data(
       name="file",
       filename~,
       media_type=call_options.media_type,
-      data=@provider_utils.resolve_upload_file_data(call_options.data),
+      data=@provider_utils.convert_inline_file_data_to_bytes(call_options.data),
     ),
     @provider_utils.MultipartField::text(
       name="purpose",
@@ -177,9 +175,9 @@ fn openai_files_provider_metadata(json : Json) -> Map[String, Json] {
 ///|
 fn decode_openai_file_upload(
   json : Json,
-  call_options : @provider.FileUploadOptions,
+  call_options : @provider.FilesV4UploadFileCallOptions,
   parsed : ParsedOpenAIFilesOptions,
-) -> @provider.FileUploadResult raise {
+) -> @provider.FilesV4UploadFileResult raise {
   if openai_error_message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI Files request failed: \{message}",
@@ -198,7 +196,7 @@ fn decode_openai_file_upload(
     { "filename": String(value), .. } => Some(value)
     _ => call_options.filename
   }
-  @provider.FileUploadResult::new(
+  @provider.FilesV4UploadFileResult::new(
     provider_reference=@provider.ProviderReference::single(
       provider="openai",
       id~,
@@ -213,8 +211,8 @@ fn decode_openai_file_upload(
 ///|
 async fn OpenAIFiles::upload(
   self : OpenAIFiles,
-  call_options : @provider.FileUploadOptions,
-) -> @provider.FileUploadResult {
+  call_options : @provider.FilesV4UploadFileCallOptions,
+) -> @provider.FilesV4UploadFileResult {
   let parsed = parse_openai_files_options(call_options, self.provider_name)
   let response = @provider_utils.post_multipart(
     provider_name=self.provider_name,
@@ -225,18 +223,27 @@ async fn OpenAIFiles::upload(
     error_to_message=openai_error_message,
     transport=self.http_transport,
   )
-  decode_openai_file_upload(response.value, call_options, parsed)
+  @provider_utils.handle_json_response(response, value => {
+    decode_openai_file_upload(value, call_options, parsed)
+  })
 }
 
 ///|
-pub impl @provider.Files for OpenAIFiles with fn provider(self : OpenAIFiles) -> String {
+impl @provider.FilesV4 for OpenAIFiles with fn specification_version(
+  _self : OpenAIFiles,
+) -> String {
+  "v4"
+}
+
+///|
+impl @provider.FilesV4 for OpenAIFiles with fn provider(self : OpenAIFiles) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @provider.Files for OpenAIFiles with fn upload_file(
+impl @provider.FilesV4 for OpenAIFiles with fn upload_file(
   self : OpenAIFiles,
-  call_options : @provider.FileUploadOptions,
-) -> @provider.FileUploadResult {
+  call_options : @provider.FilesV4UploadFileCallOptions,
+) -> @provider.FilesV4UploadFileResult {
   self.upload(call_options)
 }

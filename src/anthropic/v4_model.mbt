@@ -1,59 +1,42 @@
 ///|
-/// Native V4 boundary for Anthropic Messages. Files and Skills stay separate
-/// capabilities on the provider factory, just like the AI SDK provider.
-pub struct AnthropicLanguageModelV4 {
-  model : AnthropicMessagesModel
-}
-
-///|
-/// Construct a V4 Anthropic Messages model.
-pub fn AnthropicLanguageModelV4::new(
-  model : AnthropicMessagesModel,
-) -> AnthropicLanguageModelV4 {
-  { model, }
-}
-
-///|
-pub impl @provider.LanguageModelV4 for AnthropicLanguageModelV4 with fn specification_version(
+/// The concrete Anthropic model remains package-private. Callers only depend
+/// on the shared V4 contract returned by the provider factory.
+impl @provider.LanguageModelV4 for AnthropicLanguageModel with fn specification_version(
   _self,
 ) -> String {
   "v4"
 }
 
 ///|
-pub impl @provider.LanguageModelV4 for AnthropicLanguageModelV4 with fn provider(
-  self,
-) -> String {
-  self.model.provider()
+impl @provider.LanguageModelV4 for AnthropicLanguageModel with fn provider(self) -> String {
+  self.provider_name
 }
 
 ///|
-pub impl @provider.LanguageModelV4 for AnthropicLanguageModelV4 with fn model_id(
-  self,
-) -> String {
-  self.model.model_id()
+impl @provider.LanguageModelV4 for AnthropicLanguageModel with fn model_id(self) -> String {
+  self.model_id
 }
 
 ///|
-pub impl @provider.LanguageModelV4 for AnthropicLanguageModelV4 with fn supported_urls(
+impl @provider.LanguageModelV4 for AnthropicLanguageModel with fn supported_urls(
   self,
 ) -> Array[@provider.SupportedUrlRule] {
-  self.model.supported_urls()
+  self.supported_url_rules.copy()
 }
 
 ///|
-pub impl @provider.LanguageModelV4 for AnthropicLanguageModelV4 with fn do_generate(
+impl @provider.LanguageModelV4 for AnthropicLanguageModel with fn do_generate(
   self,
   options,
 ) {
-  self.model.generate_v4(options)
+  self.generate_v4(options)
 }
 
 ///|
-pub impl @provider.LanguageModelV4 for AnthropicLanguageModelV4 with fn do_stream(
+impl @provider.LanguageModelV4 for AnthropicLanguageModel with fn do_stream(
   self,
   options,
   on_event,
 ) {
-  self.model.stream_v4(options, on_event)
+  self.stream_v4(options, on_event)
 }

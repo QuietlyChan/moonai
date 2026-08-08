@@ -30,6 +30,21 @@ pub fn TranscriptionModelV4CallOptions::new(
 }
 
 ///|
+/// Lift buffered legacy transcription options into the V4 contract.
+pub fn TranscriptionModelV4CallOptions::from_transcription_call_options(
+  options : TranscriptionCallOptions,
+) -> TranscriptionModelV4CallOptions {
+  TranscriptionModelV4CallOptions::new(
+    audio=options.audio,
+    media_type=options.media_type,
+    provider_options=options.provider_options,
+    headers=options.headers,
+    retry_policy=options.retry_policy,
+    cancellation_token?=options.cancellation_token,
+  )
+}
+
+///|
 /// Convert V4 buffered options at the wire boundary.
 pub fn TranscriptionModelV4CallOptions::to_transcription_call_options(
   self : TranscriptionModelV4CallOptions,
@@ -118,7 +133,7 @@ pub fn TranscriptionModelV4Result::to_transcription_response(
 
 ///|
 /// Options for a live V4 transcription stream.
-pub struct TranscriptionModelV4StreamOptions {
+pub(all) struct TranscriptionModelV4StreamOptions {
   audio : &AudioStream
   input_audio_format : AudioFormat
   provider_options : Map[String, Json]
@@ -145,6 +160,21 @@ pub fn TranscriptionModelV4StreamOptions::new(
     include_raw_chunks,
     cancellation_token,
   }
+}
+
+///|
+/// Lift realtime legacy transcription options into the V4 contract.
+pub fn TranscriptionModelV4StreamOptions::from_transcription_stream_options(
+  options : TranscriptionStreamOptions,
+) -> TranscriptionModelV4StreamOptions {
+  TranscriptionModelV4StreamOptions::new(
+    audio=options.audio,
+    input_audio_format=options.input_audio_format,
+    provider_options=options.provider_options,
+    headers=options.headers,
+    include_raw_chunks=options.include_raw_chunks,
+    cancellation_token?=options.cancellation_token,
+  )
 }
 
 ///|
@@ -196,7 +226,7 @@ pub(all) enum TranscriptionModelV4StreamPart {
     provider_metadata~ : Map[String, Json]
   )
   TranscriptionV4Raw(Json)
-  TranscriptionV4Error(String)
+  TranscriptionV4Error(StreamErrorInfo)
 } derive(Debug, Eq)
 
 ///|
@@ -257,7 +287,7 @@ pub fn TranscriptionModelV4StreamPart::from_stream_event(
         provider_metadata~,
       )
     TranscriptionRaw(value) => TranscriptionV4Raw(value)
-    TranscriptionStreamError(message) => TranscriptionV4Error(message)
+    TranscriptionStreamError(error) => TranscriptionV4Error(error)
   }
 }
 
@@ -319,7 +349,7 @@ pub fn TranscriptionModelV4StreamPart::to_stream_event(
         provider_metadata~,
       )
     TranscriptionV4Raw(value) => TranscriptionRaw(value)
-    TranscriptionV4Error(message) => TranscriptionStreamError(message)
+    TranscriptionV4Error(error) => TranscriptionStreamError(error)
   }
 }
 

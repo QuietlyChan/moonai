@@ -2,7 +2,10 @@
 priv struct OpenAIResponsesHostedStreamDecoder {
   provider_name : String
   tool_name_mapping : @provider_utils.ToolNameMapping
+  shell_provider_executed : Bool
+  web_search_tool_name : String?
   id_generator : @provider_utils.IdGenerator
+  approval_tool_call_ids : Map[String, String]
   items : Array[Json?]
   hosted_item_ids : Array[String]
   hosted_kinds : Array[String]
@@ -14,6 +17,8 @@ priv struct OpenAIResponsesHostedStreamDecoder {
   hosted_diff_seen : Array[Bool]
   hosted_code_delta_seen : Array[Bool]
   hosted_ready : Array[Bool]
+  hosted_tool_search_call_ids : Array[String]
+  mut hosted_tool_search_result_index : Int
   mut response_output : Array[Json]
   mut has_response_output : Bool
 }
@@ -22,12 +27,20 @@ priv struct OpenAIResponsesHostedStreamDecoder {
 fn OpenAIResponsesHostedStreamDecoder::new(
   provider_name : String,
   tool_name_mapping : @provider_utils.ToolNameMapping,
+  shell_provider_executed : Bool,
   id_generator~ : @provider_utils.IdGenerator,
+  approval_tool_call_ids~ : Map[String, String],
+  web_search_tool_name? : String,
 ) -> OpenAIResponsesHostedStreamDecoder {
   {
     provider_name,
     tool_name_mapping,
+    shell_provider_executed,
+    web_search_tool_name,
     id_generator,
+    approval_tool_call_ids: copy_openai_approval_tool_call_ids(
+      approval_tool_call_ids,
+    ),
     items: [],
     hosted_item_ids: [],
     hosted_kinds: [],
@@ -39,6 +52,8 @@ fn OpenAIResponsesHostedStreamDecoder::new(
     hosted_diff_seen: [],
     hosted_code_delta_seen: [],
     hosted_ready: [],
+    hosted_tool_search_call_ids: [],
+    hosted_tool_search_result_index: 0,
     response_output: [],
     has_response_output: false,
   }
@@ -147,15 +162,45 @@ fn openai_hosted_output_index(json : Json) -> Int {
 }
 
 ///|
+fn openai_responses_local_shell_stream_input(item : Json) -> String {
+  let action : Map[String, Json] = Map([("type", Json::string("exec"))])
+  match item {
+    { "action": Object(fields), .. } => {
+      if fields.get("command") is Some(value) {
+        action["command"] = value
+      }
+      if fields.get("timeout_ms") is Some(value) {
+        action["timeoutMs"] = value
+      }
+      if fields.get("user") is Some(value) {
+        action["user"] = value
+      }
+      if fields.get("working_directory") is Some(value) {
+        action["workingDirectory"] = value
+      }
+      if fields.get("env") is Some(value) {
+        action["env"] = value
+      }
+    }
+    _ => ()
+  }
+  ({ "action": Json::object(action) } : Json).stringify()
+}
+
+///|
 fn OpenAIResponsesHostedStreamDecoder::hosted_generated_parts(
   self : OpenAIResponsesHostedStreamDecoder,
   item : Json,
-) -> Array[@provider.GeneratedContent] {
+) -> Array[@provider.LanguageModelV4Content] {
   let (parts, _) = openai_responses_output_content(
     [item],
     self.provider_name,
     self.tool_name_mapping,
     self.id_generator,
+    self.shell_provider_executed,
+    approval_tool_call_ids=self.approval_tool_call_ids,
+    web_search_tool_name?=self.web_search_tool_name,
+    stream_mode=true,
   )
   parts
 }
@@ -168,23 +213,40 @@ fn OpenAIResponsesHostedStreamDecoder::emit_parts(
   emit_call : Bool,
   emit_result : Bool,
   emit_input_end : Bool,
+  emit_input_delta? : Bool = false,
 ) -> Unit {
   for part in self.hosted_generated_parts(item) {
     match part {
-      @provider.GeneratedToolCallOutput(call) => {
+      @provider.V4ToolCallOutput(call) => {
+        if emit_input_delta {
+          events.push(
+            @provider.ToolInputDelta(id=call.tool_call_id, delta=call.input),
+          )
+        }
         if emit_input_end {
-          events.push(@provider.ToolInputEnd(call.id))
+          events.push(@provider.ToolInputEnd(call.tool_call_id))
         }
         if emit_call {
-          events.push(@provider.ToolCallReady(call))
+          events.push(@provider.ToolCallReady(call.to_tool_call()))
         }
       }
-      @provider.GeneratedToolResultOutput(result) if emit_result =>
-        events.push(@provider.ToolResultReady(result))
-      @provider.GeneratedToolApprovalRequestOutput(approval) if emit_result =>
-        events.push(@provider.ToolApprovalRequestReady(approval))
-      @provider.GeneratedCustomOutput(custom) if emit_result =>
-        events.push(@provider.CustomContentReady(custom))
+      @provider.V4ToolResultOutput(result) if emit_result =>
+        events.push(@provider.ToolResultReady(result.to_tool_result()))
+      @provider.V4ToolApprovalRequestOutput(approval) if emit_result =>
+        events.push(
+          @provider.ToolApprovalRequestReady(
+            approval.to_tool_approval_request(),
+          ),
+        )
+      @provider.V4CustomOutput(custom) if emit_result =>
+        events.push(
+          @provider.CustomContentReady({
+            kind: custom.kind,
+            provider_metadata: @provider.copy_provider_metadata(
+              custom.provider_metadata,
+            ),
+          }),
+        )
       _ => ()
     }
   }
@@ -200,10 +262,11 @@ fn OpenAIResponsesHostedStreamDecoder::added_events(
   let kind = openai_hosted_item_type(item)
   let item_id = openai_hosted_item_id(item)
   if kind == "web_search_call" {
+    let web_search_tool_name = self.web_search_tool_name.unwrap_or("web_search")
     events.push(
       @provider.ToolInputStart(
         id=item_id,
-        tool_name=self.custom_tool_name("web_search"),
+        tool_name=self.custom_tool_name(web_search_tool_name),
       ),
     )
     events.push(@provider.ToolInputEnd(item_id))
@@ -211,12 +274,12 @@ fn OpenAIResponsesHostedStreamDecoder::added_events(
       @provider.ToolCallReady(
         openai_responses_tool_call(
           item_id,
-          self.custom_tool_name("web_search"),
+          self.custom_tool_name(web_search_tool_name),
           "{}",
           self.provider_name,
           item_id,
           provider_executed=true,
-        ),
+        ).to_tool_call(),
       ),
     )
   } else if kind == "file_search_call" {
@@ -229,7 +292,7 @@ fn OpenAIResponsesHostedStreamDecoder::added_events(
           self.provider_name,
           item_id,
           provider_executed=true,
-        ),
+        ).to_tool_call(),
       ),
     )
   } else if kind == "image_generation_call" {
@@ -242,7 +305,7 @@ fn OpenAIResponsesHostedStreamDecoder::added_events(
           self.provider_name,
           item_id,
           provider_executed=true,
-        ),
+        ).to_tool_call(),
       ),
     )
   } else if kind == "code_interpreter_call" {
@@ -396,17 +459,25 @@ fn OpenAIResponsesHostedStreamDecoder::done_events(
     }
     for part in self.hosted_generated_parts(item) {
       match part {
-        @provider.GeneratedToolCallOutput(call) if !self.hosted_ready[state] => {
-          events.push(@provider.ToolCallReady(call))
+        @provider.V4ToolCallOutput(call) if !self.hosted_ready[state] => {
+          events.push(@provider.ToolCallReady(call.to_tool_call()))
           self.hosted_ready[state] = true
         }
-        @provider.GeneratedToolResultOutput(result) =>
-          events.push(@provider.ToolResultReady(result))
+        @provider.V4ToolResultOutput(result) =>
+          events.push(@provider.ToolResultReady(result.to_tool_result()))
         _ => ()
       }
     }
   } else if kind == "computer_call" {
-    self.emit_parts(item, events, true, true, true)
+    self.emit_parts(
+      item,
+      events,
+      true,
+      true,
+      true,
+      emit_input_delta=@provider_utils.json_string_field(item, "call_id")
+        is Some(_),
+    )
   } else if kind == "apply_patch_call" {
     let call_id = openai_hosted_call_id(item)
     let state = self.ensure_hosted_item(
@@ -443,8 +514,8 @@ fn OpenAIResponsesHostedStreamDecoder::done_events(
       !self.hosted_ready[state] {
       for part in self.hosted_generated_parts(item) {
         match part {
-          @provider.GeneratedToolCallOutput(call) => {
-            events.push(@provider.ToolCallReady(call))
+          @provider.V4ToolCallOutput(call) => {
+            events.push(@provider.ToolCallReady(call.to_tool_call()))
             self.hosted_ready[state] = true
           }
           _ => ()
@@ -476,18 +547,25 @@ fn OpenAIResponsesHostedStreamDecoder::done_events(
       self.emit_parts(item, events, true, false, false)
       self.hosted_ready[state] = true
     }
-  } else if kind == "local_shell_call" || kind == "shell_call" {
+  } else if kind == "local_shell_call" {
     let call_id = openai_hosted_call_id(item)
-    let name = if kind == "local_shell_call" { "local_shell" } else { "shell" }
-    if kind == "local_shell_call" || kind == "shell_call" {
-      events.push(
-        @provider.ToolInputStart(
-          id=call_id,
-          tool_name=self.custom_tool_name(name),
-        ),
-      )
-    }
-    self.emit_parts(item, events, true, false, true)
+    events.push(
+      @provider.ToolCallReady(
+        openai_responses_tool_call(
+          call_id,
+          self.custom_tool_name("local_shell"),
+          openai_responses_local_shell_stream_input(item),
+          self.provider_name,
+          openai_hosted_item_id(item),
+          provider_metadata=openai_responses_item_metadata(
+            self.provider_name,
+            openai_hosted_item_id(item),
+          ),
+        ).to_tool_call(),
+      ),
+    )
+  } else if kind == "shell_call" {
+    self.emit_parts(item, events, true, false, false)
   } else if kind == "shell_call_output" {
     self.emit_parts(item, events, false, true, false)
   } else if kind == "program" {
@@ -495,9 +573,88 @@ fn OpenAIResponsesHostedStreamDecoder::done_events(
   } else if kind == "program_output" {
     self.emit_parts(item, events, false, true, false)
   } else if kind == "tool_search_call" {
-    self.emit_parts(item, events, true, false, true)
+    let is_hosted = @provider_utils.json_string_field(item, "execution").unwrap_or(
+        "server",
+      ) ==
+      "server"
+    let call_id = if is_hosted {
+      openai_hosted_item_id(item)
+    } else {
+      openai_hosted_call_id(item)
+    }
+    if is_hosted {
+      self.hosted_tool_search_call_ids.push(call_id)
+    } else {
+      events.push(
+        @provider.ToolInputStart(
+          id=call_id,
+          tool_name=self.custom_tool_name("tool_search"),
+        ),
+      )
+    }
+    let arguments = match item {
+      { "arguments": value, .. } => value
+      _ => Json::null()
+    }
+    events.push(@provider.ToolInputEnd(call_id))
+    events.push(
+      @provider.ToolCallReady(
+        openai_responses_tool_call(
+          call_id,
+          self.custom_tool_name("tool_search"),
+          (
+            {
+              "arguments": arguments,
+              "call_id": if is_hosted {
+                Json::null()
+              } else {
+                Json::string(call_id)
+              },
+            } : Json).stringify(),
+          self.provider_name,
+          openai_hosted_item_id(item),
+          provider_executed=is_hosted,
+          provider_metadata=openai_responses_item_metadata(
+            self.provider_name,
+            openai_hosted_item_id(item),
+          ),
+        ).to_tool_call(),
+      ),
+    )
   } else if kind == "tool_search_output" {
-    self.emit_parts(item, events, false, true, false)
+    let item_id = openai_hosted_item_id(item)
+    let call_id = match @provider_utils.json_string_field(item, "call_id") {
+      Some(value) => value
+      None =>
+        if self.hosted_tool_search_result_index <
+          self.hosted_tool_search_call_ids.length() {
+          let value = self.hosted_tool_search_call_ids[self.hosted_tool_search_result_index]
+          self.hosted_tool_search_result_index = self.hosted_tool_search_result_index +
+            1
+          value
+        } else {
+          item_id
+        }
+    }
+    let result : Json = match item {
+      { "tools": value, .. } => { "tools": value }
+      _ => { "tools": Json::array([]) }
+    }
+    events.push(
+      @provider.ToolResultReady(
+        openai_responses_tool_result(
+          call_id,
+          self.custom_tool_name("tool_search"),
+          result,
+          self.provider_name,
+          item_id,
+          provider_metadata=openai_responses_item_metadata(
+            self.provider_name,
+            item_id,
+          ),
+        ).to_tool_result(),
+      ),
+    )
   } else if kind == "mcp_call" {
     self.emit_parts(item, events, true, true, false)
   } else if kind == "mcp_approval_request" {
@@ -534,18 +691,17 @@ fn OpenAIResponsesHostedStreamDecoder::observe(
     }
   } else if event_type == "response.output_text.annotation.added" {
     match json {
-      { "annotation": annotation, "item_id": String(item_id), .. } =>
+      { "annotation": annotation, "item_id": String(_), .. } =>
         for
           source in openai_responses_source_contents(
             [annotation],
             self.provider_name,
-            item_id,
             0,
             self.id_generator,
           ) {
           match source {
-            @provider.GeneratedSourceOutput(value) =>
-              events.push(@provider.SourceReady(value))
+            @provider.V4SourceOutput(value) =>
+              events.push(@provider.SourceReady(value.to_generated_source()))
             _ => ()
           }
         }
@@ -686,7 +842,7 @@ fn OpenAIResponsesHostedStreamDecoder::observe(
         item_id,
         provider_executed=true,
       )
-      events.push(@provider.ToolCallReady(call))
+      events.push(@provider.ToolCallReady(call.to_tool_call()))
       self.hosted_ready[state] = true
     }
   } else if event_type == "response.image_generation_call.partial_image" {
@@ -701,7 +857,7 @@ fn OpenAIResponsesHostedStreamDecoder::observe(
               self.provider_name,
               item_id,
               preliminary=true,
-            ),
+            ).to_tool_result(),
           ),
         )
       _ => ()
@@ -729,8 +885,12 @@ fn OpenAIResponsesHostedStreamDecoder::content(
       self.provider_name,
       self.tool_name_mapping,
       self.id_generator,
+      self.shell_provider_executed,
+      approval_tool_call_ids=self.approval_tool_call_ids,
+      web_search_tool_name?=self.web_search_tool_name,
+      stream_mode=true,
     )
-    return content
+    return @provider.LanguageModelV4Content::to_generated_content_array(content)
   }
   let items : Array[Json] = []
   for item in self.items {
@@ -743,8 +903,12 @@ fn OpenAIResponsesHostedStreamDecoder::content(
     self.provider_name,
     self.tool_name_mapping,
     self.id_generator,
+    self.shell_provider_executed,
+    approval_tool_call_ids=self.approval_tool_call_ids,
+    web_search_tool_name?=self.web_search_tool_name,
+    stream_mode=true,
   )
-  content
+  @provider.LanguageModelV4Content::to_generated_content_array(content)
 }
 
 ///|

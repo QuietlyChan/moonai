@@ -23,7 +23,7 @@ async test "generateImage batches OpenAI-compatible image requests" {
           } else {
             assert_true(request_body.contains("\"n\":1"))
             connection.write(
-              "{\"id\":\"image-2\",\"model\":\"image-model\",\"provider_metadata\":{\"local-test.image\":{\"last_batch\":true}},\"data\":[{\"url\":\"https://example.com/image-3.png\"}],\"usage\":{\"input_tokens\":1,\"output_tokens\":2,\"total_tokens\":3}}",
+              "{\"id\":\"image-2\",\"model\":\"image-model\",\"provider_metadata\":{\"local-test.image\":{\"last_batch\":true}},\"data\":[{\"b64_json\":\"image-3\"}],\"usage\":{\"input_tokens\":1,\"output_tokens\":2,\"total_tokens\":3}}",
             )
           }
           request_count = request_count + 1
@@ -48,10 +48,7 @@ async test "generateImage batches OpenAI-compatible image requests" {
     )
     assert_eq(response.images.length(), 3)
     assert_eq(response.images[0].data, @provider.ImageData::Base64("image-1"))
-    assert_eq(
-      response.images[2].data,
-      @provider.ImageData::Url("https://example.com/image-3.png"),
-    )
+    assert_eq(response.images[2].data, @provider.ImageData::Base64("image-3"))
     assert_eq(response.usage.total_tokens, 9)
     assert_eq(response.response.unwrap().id, Some("image-1"))
     assert_eq(response.response.unwrap().created_at, Some(1700000020))
@@ -122,6 +119,8 @@ async test "OpenAI-compatible image edits use multipart files and mask" {
     )
     assert_eq(response.images.length(), 2)
     assert_eq(response.images[0].data, @provider.ImageData::Base64("edited-1"))
+    assert_eq(response.response.unwrap().model_id, Some("image-model"))
+    assert_true(response.response.unwrap().created_at is Some(_))
     assert_true(response.request.unwrap().body.contains("bytes=11"))
     assert_true(!response.request.unwrap().body.contains("FIRST-IMAGE"))
   }

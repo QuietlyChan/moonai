@@ -36,10 +36,29 @@ priv struct ParsedOpenAIResponsesOptions {
 }
 
 ///|
+/// Resolve options owned by the official OpenAI provider package.
+///
+/// AI SDK keeps this namespace fixed at `openai` even when `createOpenAI`
+/// receives a custom display name. Responses is the sole exception because
+/// Azure selects its own namespace and falls back to `openai`.
+fn resolve_official_openai_provider_options(
+  provider_options : Map[String, Json],
+  reserved_fields? : Array[String] = [],
+) -> @provider_utils.ProviderOptionsResolution {
+  @provider_utils.resolve_provider_options(
+    provider_options,
+    provider_name="openai",
+    reserved_fields~,
+  )
+}
+
+///|
 priv struct OpenAIPreparedResponsesRequest {
   body : Json
   warnings : Array[@provider.Warning]
   tool_name_mapping : @provider_utils.ToolNameMapping
+  shell_provider_executed : Bool
+  web_search_tool_name : String?
 }
 
 ///|
@@ -112,14 +131,19 @@ fn parse_openai_logprobs(
 }
 
 ///|
-fn parse_openai_responses_options(
-  options : @provider.ChatCallOptions,
+fn parse_openai_responses_provider_options(
+  provider_options : Map[String, Json],
   provider_name : String,
 ) -> ParsedOpenAIResponsesOptions {
+  let responses_provider_name = if provider_name.contains("azure") {
+    "azure"
+  } else {
+    "openai"
+  }
   let resolution = @provider_utils.resolve_provider_options(
-    options.provider_options,
-    provider_name~,
-    aliases=["openai"],
+    provider_options,
+    provider_name=responses_provider_name,
+    aliases=if responses_provider_name == "azure" { ["openai"] } else { [] },
     reserved_fields=openai_responses_reserved_fields(),
   )
   let reader = @provider_utils.ProviderOptionsReader::new(resolution)
@@ -237,19 +261,6 @@ fn parse_openai_responses_options(
 }
 
 ///|
-fn openai_reasoning_effort(effort : @provider.ReasoningEffort) -> String? {
-  match effort {
-    @provider.ProviderDefault => None
-    @provider.Disabled => Some("none")
-    @provider.Minimal => Some("minimal")
-    @provider.Low => Some("low")
-    @provider.Medium => Some("medium")
-    @provider.High => Some("high")
-    @provider.XHigh => Some("xhigh")
-  }
-}
-
-///|
 priv struct OpenAIChatOptions {
   logit_bias : Json?
   logprobs : Bool
@@ -315,14 +326,12 @@ fn parse_openai_chat_logprobs(
 }
 
 ///|
-fn parse_openai_chat_options(
-  options : @provider.ChatCallOptions,
-  provider_name : String,
+fn parse_openai_chat_provider_options(
+  provider_options : Map[String, Json],
+  _provider_name : String,
 ) -> ParsedOpenAIChatOptions {
-  let resolution = @provider_utils.resolve_provider_options(
-    options.provider_options,
-    provider_name~,
-    aliases=["openai"],
+  let resolution = resolve_official_openai_provider_options(
+    provider_options,
     reserved_fields=openai_chat_reserved_fields(),
   )
   let reader = @provider_utils.ProviderOptionsReader::new(resolution)
@@ -430,14 +439,12 @@ fn openai_image_reserved_fields() -> Array[String] {
 }
 
 ///|
-fn parse_openai_image_options(
-  call_options : @provider.ImageCallOptions,
-  provider_name : String,
+fn parse_openai_image_provider_options(
+  provider_options : Map[String, Json],
+  _provider_name : String,
 ) -> ParsedOpenAIImageOptions {
-  let resolution = @provider_utils.resolve_provider_options(
-    call_options.provider_options,
-    provider_name~,
-    aliases=["openai"],
+  let resolution = resolve_official_openai_provider_options(
+    provider_options,
     reserved_fields=openai_image_reserved_fields(),
   )
   let reader = @provider_utils.ProviderOptionsReader::new(resolution)
@@ -494,16 +501,13 @@ priv struct ParsedOpenAIEmbeddingOptions {
 }
 
 ///|
-fn parse_openai_embedding_options(
-  call_options : @provider.EmbeddingOptions,
-  provider_name : String,
+fn parse_openai_embedding_provider_options(
+  provider_options : Map[String, Json],
+  _provider_name : String,
 ) -> ParsedOpenAIEmbeddingOptions {
-  let resolution = @provider_utils.resolve_provider_options(
-    call_options.provider_options,
-    provider_name~,
-    aliases=["openai"],
-    reserved_fields=["model", "input", "encoding_format"],
-  )
+  let resolution = resolve_official_openai_provider_options(provider_options, reserved_fields=[
+    "model", "input", "encoding_format",
+  ])
   let reader = @provider_utils.ProviderOptionsReader::new(resolution)
   {
     options: {
@@ -563,19 +567,14 @@ fn parse_openai_completion_logprobs(
 }
 
 ///|
-fn parse_openai_completion_options(
-  call_options : @provider.CompletionOptions,
-  provider_name : String,
+fn parse_openai_completion_provider_options(
+  provider_options : Map[String, Json],
+  _provider_name : String,
 ) -> ParsedOpenAICompletionOptions {
-  let resolution = @provider_utils.resolve_provider_options(
-    call_options.provider_options,
-    provider_name~,
-    aliases=["openai"],
-    reserved_fields=[
-      "model", "prompt", "stream", "stream_options", "max_tokens", "temperature",
-      "top_p", "frequency_penalty", "presence_penalty", "seed", "stop",
-    ],
-  )
+  let resolution = resolve_official_openai_provider_options(provider_options, reserved_fields=[
+    "model", "prompt", "stream", "stream_options", "max_tokens", "temperature", "top_p",
+    "frequency_penalty", "presence_penalty", "seed", "stop",
+  ])
   let reader = @provider_utils.ProviderOptionsReader::new(resolution)
   {
     options: {

@@ -70,11 +70,6 @@ pub fn AlibabaEmbeddingModelOptions::new(
       fail("Alibaba embedding text_type must be query or document")
     }
   }
-  if dimension is Some(value) {
-    guard value > 0 else {
-      fail("Alibaba embedding dimension must be positive")
-    }
-  }
   if output_type is Some(value) {
     guard value == "dense" || value == "sparse" || value == "dense&sparse" else {
       fail(
@@ -275,7 +270,7 @@ fn parse_alibaba_embedding_options(
     text_type: reader.take_string("textType", aliases=["text_type"], allowed=[
       "query", "document",
     ]),
-    dimension: reader.take_int("dimension", min=1),
+    dimension: reader.take_int("dimension"),
     output_type: reader.take_string("outputType", aliases=["output_type"], allowed=[
       "dense", "sparse", "dense&sparse",
     ]),

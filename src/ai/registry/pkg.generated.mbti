@@ -8,13 +8,13 @@ import {
 }
 
 // Values
-pub fn createProviderRegistry(Map[String, &@provider.Provider], separator? : String, language_model_middleware? : @model.LanguageModelV4Middleware, image_model_middleware? : @model.ImageModelV4Middleware) -> ProviderRegistry raise @provider.InvalidArgumentError
+pub fn createProviderRegistry(Map[String, &@provider.ProviderV4], separator? : String, language_model_middleware? : @provider.LanguageModelV4Middleware, image_model_middleware? : @provider.ImageModelV4Middleware) -> ProviderRegistry raise @provider.InvalidArgumentError
 
-pub fn create_provider_registry(Map[String, &@provider.Provider], separator? : String, language_model_middleware? : @model.LanguageModelV4Middleware, image_model_middleware? : @model.ImageModelV4Middleware) -> ProviderRegistry raise @provider.InvalidArgumentError
+pub fn create_provider_registry(Map[String, &@provider.ProviderV4], separator? : String, language_model_middleware? : @provider.LanguageModelV4Middleware, image_model_middleware? : @provider.ImageModelV4Middleware) -> ProviderRegistry raise @provider.InvalidArgumentError
 
-pub fn customProvider(provider_name? : String, language_models? : Map[String, &@provider.LanguageModelV4], completion_models? : Map[String, &@provider.CompletionModel], embedding_models? : Map[String, &@provider.EmbeddingModelV4], reranking_models? : Map[String, &@provider.RerankingModel], image_models? : Map[String, &@provider.ImageModelV4], video_models? : Map[String, &@provider.VideoModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_translation_models? : Map[String, &@provider.SpeechTranslationModelV4], realtime_models? : Map[String, &@provider.RealtimeModelV4], files? : &@provider.Files, skills? : &@provider.Skills, fallback_provider? : &@provider.Provider) -> CustomProvider raise @provider.InvalidArgumentError
+pub fn customProvider(language_models? : Map[String, &@provider.LanguageModelV4], embedding_models? : Map[String, &@provider.EmbeddingModelV4], image_models? : Map[String, &@provider.ImageModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], reranking_models? : Map[String, &@provider.RerankingModelV4], video_models? : Map[String, &@provider.VideoModelV4], files? : &@provider.FilesV4, skills? : &@provider.SkillsV4, fallback_provider? : &@provider.ProviderV4) -> CustomProvider
 
-pub fn custom_provider(provider_name? : String, language_models? : Map[String, &@provider.LanguageModelV4], completion_models? : Map[String, &@provider.CompletionModel], embedding_models? : Map[String, &@provider.EmbeddingModelV4], reranking_models? : Map[String, &@provider.RerankingModel], image_models? : Map[String, &@provider.ImageModelV4], video_models? : Map[String, &@provider.VideoModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_translation_models? : Map[String, &@provider.SpeechTranslationModelV4], realtime_models? : Map[String, &@provider.RealtimeModelV4], files? : &@provider.Files, skills? : &@provider.Skills, fallback_provider? : &@provider.Provider) -> CustomProvider raise @provider.InvalidArgumentError
+pub fn custom_provider(language_models? : Map[String, &@provider.LanguageModelV4], embedding_models? : Map[String, &@provider.EmbeddingModelV4], image_models? : Map[String, &@provider.ImageModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], reranking_models? : Map[String, &@provider.RerankingModelV4], video_models? : Map[String, &@provider.VideoModelV4], files? : &@provider.FilesV4, skills? : &@provider.SkillsV4, fallback_provider? : &@provider.ProviderV4) -> CustomProvider
 
 // Errors
 pub(all) suberror InvalidRegistryModelIdError {
@@ -35,39 +35,32 @@ pub fn NoSuchProviderError::provider_id(Self) -> String
 pub struct CustomProvider {
   // private fields
 }
-pub fn CustomProvider::name(Self) -> String
-pub fn CustomProvider::require_completion_model(Self, String) -> &@provider.CompletionModel raise
-pub fn CustomProvider::require_embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
-pub fn CustomProvider::require_image_model(Self, String) -> &@provider.ImageModelV4 raise
-pub fn CustomProvider::require_language_model(Self, String) -> &@provider.LanguageModelV4 raise
-pub fn CustomProvider::require_realtime_model(Self, String) -> &@provider.RealtimeModelV4 raise
-pub fn CustomProvider::require_reranking_model(Self, String) -> &@provider.RerankingModel raise
-pub fn CustomProvider::require_speech_model(Self, String) -> &@provider.SpeechModelV4 raise
-pub fn CustomProvider::require_speech_translation_model(Self, String) -> &@provider.SpeechTranslationModelV4 raise
-pub fn CustomProvider::require_transcription_model(Self, String) -> &@provider.TranscriptionModelV4 raise
-pub fn CustomProvider::require_video_model(Self, String) -> &@provider.VideoModelV4 raise
-pub impl @provider.Provider for CustomProvider
+pub fn CustomProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn CustomProvider::files(Self) -> &@provider.FilesV4 raise
+pub fn CustomProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
+pub fn CustomProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn CustomProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4 raise
+pub fn CustomProvider::skills(Self) -> &@provider.SkillsV4 raise
+pub fn CustomProvider::speech_model(Self, String) -> &@provider.SpeechModelV4 raise
+pub fn CustomProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4 raise
+pub fn CustomProvider::video_model(Self, String) -> &@provider.VideoModelV4 raise
+pub impl @provider.ProviderV4 for CustomProvider
 
 pub struct ProviderRegistry {
   // private fields
 }
-pub fn ProviderRegistry::completion_model(Self, String) -> &@provider.CompletionModel raise
 pub fn ProviderRegistry::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
-pub fn ProviderRegistry::files(Self, String) -> &@provider.Files raise
+pub fn ProviderRegistry::files(Self, String) -> &@provider.FilesV4 raise
 pub fn ProviderRegistry::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn ProviderRegistry::language_model(Self, String) -> &@provider.LanguageModelV4 raise
-pub fn ProviderRegistry::new(separator? : String, language_model_middleware? : @model.LanguageModelV4Middleware, image_model_middleware? : @model.ImageModelV4Middleware) -> Self raise @provider.InvalidArgumentError
+pub fn ProviderRegistry::new(separator? : String, language_model_middleware? : @provider.LanguageModelV4Middleware, image_model_middleware? : @provider.ImageModelV4Middleware) -> Self raise @provider.InvalidArgumentError
 pub fn ProviderRegistry::provider_ids(Self) -> Array[String]
-pub fn ProviderRegistry::realtime_model(Self, String) -> &@provider.RealtimeModelV4 raise
-pub fn ProviderRegistry::register_provider(Self, &@provider.Provider) -> Self raise @provider.InvalidArgumentError
-pub fn ProviderRegistry::reranking_model(Self, String) -> &@provider.RerankingModel raise
+pub fn ProviderRegistry::reranking_model(Self, String) -> &@provider.RerankingModelV4 raise
 pub fn ProviderRegistry::separator(Self) -> String
-pub fn ProviderRegistry::skills(Self, String) -> &@provider.Skills raise
+pub fn ProviderRegistry::skills(Self, String) -> &@provider.SkillsV4 raise
 pub fn ProviderRegistry::speech_model(Self, String) -> &@provider.SpeechModelV4 raise
-pub fn ProviderRegistry::speech_translation_model(Self, String) -> &@provider.SpeechTranslationModelV4 raise
 pub fn ProviderRegistry::transcription_model(Self, String) -> &@provider.TranscriptionModelV4 raise
-pub fn ProviderRegistry::video_model(Self, String) -> &@provider.VideoModelV4 raise
-pub fn ProviderRegistry::with_provider(Self, String, &@provider.Provider) -> Self raise @provider.InvalidArgumentError
+pub fn ProviderRegistry::with_provider(Self, String, &@provider.ProviderV4) -> Self raise @provider.InvalidArgumentError
 
 // Type aliases
 

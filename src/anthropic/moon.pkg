@@ -8,10 +8,14 @@ import {
 import {
   "QuietlyChan/moonai/ai",
   "moonbitlang/async",
-  "moonbitlang/async/fs",
   "moonbitlang/async/http",
   "moonbitlang/async/io",
   "moonbitlang/async/socket",
 } for "test"
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+} for "wbtest"
 
 supported_targets = "+native"

@@ -1,36 +1,52 @@
 ///|
-/// Convert DeepSeek token accounting, including cache reads and reasoning.
-pub fn convert_deepseek_usage(json : Json) -> @provider.Usage {
-  let input_tokens = @provider_utils.json_int_field(json, "prompt_tokens")
-  let output_tokens = @provider_utils.json_int_field(json, "completion_tokens")
-  let total_tokens = match
-    @provider_utils.json_int_field_opt(json, "total_tokens") {
-    Some(value) => value
-    None => input_tokens + output_tokens
-  }
-  let cached_input_tokens = @provider_utils.json_int_field(
-    json, "prompt_cache_hit_tokens",
-  )
-  let reasoning_tokens = match json {
-    {
-      "completion_tokens_details": { "reasoning_tokens": Number(value, ..), .. },
-      ..
-    } => value.to_int()
-    _ => 0
-  }
-  {
-    input_tokens,
-    output_tokens,
-    total_tokens,
-    reasoning_tokens,
-    cached_input_tokens,
-    cache_write_input_tokens: 0,
+/// Convert DeepSeek token accounting into the lossless V4 usage contract.
+fn convert_deepseek_usage(usage : Json?) -> @provider.LanguageModelV4Usage {
+  match usage {
+    Some(raw) if !(raw is Null) => {
+      let input_tokens = @provider_utils.json_int_field(raw, "prompt_tokens")
+      let output_tokens = @provider_utils.json_int_field(
+        raw, "completion_tokens",
+      )
+      let cache_read_tokens = @provider_utils.json_int_field(
+        raw, "prompt_cache_hit_tokens",
+      )
+      let reasoning_tokens = match raw {
+        {
+          "completion_tokens_details": {
+            "reasoning_tokens": Number(value, ..),
+            ..
+          },
+          ..
+        } => value.to_int()
+        _ => 0
+      }
+      {
+        input_tokens: {
+          total: Some(input_tokens),
+          no_cache: Some(input_tokens - cache_read_tokens),
+          cache_read: Some(cache_read_tokens),
+          cache_write: None,
+        },
+        output_tokens: {
+          total: Some(output_tokens),
+          text: Some(output_tokens - reasoning_tokens),
+          reasoning: Some(reasoning_tokens),
+        },
+        raw: Some(raw),
+      }
+    }
+    _ => @provider_utils.create_null_language_model_usage()
   }
 }
 
 ///|
 fn deepseek_provider_base(provider_name : String) -> String {
-  provider_name.strip_suffix(".chat").unwrap_or(provider_name).to_owned()
+  let parts = [ for part in provider_name.split(".") => part ]
+  if parts.length() > 0 && !parts[0].trim().is_empty() {
+    parts[0].trim().to_owned()
+  } else {
+    "deepseek"
+  }
 }
 
 ///|
@@ -49,9 +65,5 @@ fn deepseek_usage_metadata(
       details["promptCacheMissTokens"] = Json::number(value.to_double())
     None => ()
   }
-  let metadata : Map[String, Json] = Map([])
-  if details.length() > 0 {
-    metadata[deepseek_provider_base(provider_name)] = Json::object(details)
-  }
-  metadata
+  Map([(deepseek_provider_base(provider_name), Json::object(details))])
 }

@@ -47,7 +47,7 @@ fn anthropic_skills(
 }
 
 ///|
-/// Select the Skills API from an Anthropic provider factory.
+/// Select the SkillsV4 API from an Anthropic provider factory.
 pub fn AnthropicProvider::skills(self : AnthropicProvider) -> AnthropicSkills {
   anthropic_skills(
     provider_name=self.provider_name,
@@ -103,7 +103,7 @@ fn AnthropicSkills::request_headers(
 ///|
 fn AnthropicSkills::form_data(
   _self : AnthropicSkills,
-  options : @provider.SkillUploadOptions,
+  options : @provider.SkillsV4UploadSkillCallOptions,
 ) -> @provider_utils.MultipartFormData raise {
   let fields : Array[@provider_utils.MultipartField] = []
   if options.display_title is Some(display_title) {
@@ -120,7 +120,7 @@ fn AnthropicSkills::form_data(
         name="files[]",
         filename=file.path,
         media_type="application/octet-stream",
-        data=@provider_utils.resolve_upload_file_data(file.data),
+        data=@provider_utils.convert_inline_file_data_to_bytes(file.data),
       ),
     )
   }
@@ -194,27 +194,23 @@ async fn AnthropicSkills::fetch_version_metadata(
     error_to_message=anthropic_error_message,
     transport=self.http_transport,
   )
-  let _ = anthropic_skill_required_string(
-    response.value,
-    "type",
-    "version type",
-  )
-  let _ = anthropic_skill_required_string(
-    response.value,
-    "skill_id",
-    "version skill_id",
-  )
-  (
-    anthropic_skill_optional_string(response.value, "name"),
-    anthropic_skill_optional_string(response.value, "description"),
-  )
+  @provider_utils.handle_json_response(response, value => {
+    let _ = anthropic_skill_required_string(value, "type", "version type")
+    let _ = anthropic_skill_required_string(
+      value, "skill_id", "version skill_id",
+    )
+    (
+      anthropic_skill_optional_string(value, "name"),
+      anthropic_skill_optional_string(value, "description"),
+    )
+  })
 }
 
 ///|
 async fn AnthropicSkills::upload(
   self : AnthropicSkills,
-  options : @provider.SkillUploadOptions,
-) -> @provider.SkillUploadResult {
+  options : @provider.SkillsV4UploadSkillCallOptions,
+) -> @provider.SkillsV4UploadSkillResult {
   let response = @provider_utils.post_multipart(
     provider_name=self.provider_name,
     url=self.skills_url(),
@@ -224,20 +220,25 @@ async fn AnthropicSkills::upload(
     error_to_message=anthropic_error_message,
     transport=self.http_transport,
   )
-  let id = anthropic_skill_required_string(response.value, "id", "skill id")
-  let display_title = anthropic_skill_optional_string(
-    response.value,
-    "display_title",
-  )
-  let latest_version = anthropic_skill_optional_string(
-    response.value,
-    "latest_version",
-  )
-  let mut name = anthropic_skill_optional_string(response.value, "name")
-  let mut description = anthropic_skill_optional_string(
-    response.value,
-    "description",
-  )
+  let (
+    id,
+    display_title,
+    latest_version,
+    initial_name,
+    initial_description,
+    provider_metadata,
+  ) = @provider_utils.handle_json_response(response, value => {
+    (
+      anthropic_skill_required_string(value, "id", "skill id"),
+      anthropic_skill_optional_string(value, "display_title"),
+      anthropic_skill_optional_string(value, "latest_version"),
+      anthropic_skill_optional_string(value, "name"),
+      anthropic_skill_optional_string(value, "description"),
+      anthropic_skill_provider_metadata(value),
+    )
+  })
+  let mut name = initial_name
+  let mut description = initial_description
   if latest_version is Some(version) {
     let (version_name, version_description) = self.fetch_version_metadata(
       id, version,
@@ -249,7 +250,7 @@ async fn AnthropicSkills::upload(
       description = Some(value)
     }
   }
-  @provider.SkillUploadResult::new(
+  @provider.SkillsV4UploadSkillResult::new(
     provider_reference=@provider.ProviderReference::single(
       provider="anthropic",
       id~,
@@ -258,22 +259,29 @@ async fn AnthropicSkills::upload(
     name?,
     description?,
     latest_version?,
-    provider_metadata=anthropic_skill_provider_metadata(response.value),
+    provider_metadata~,
     warnings=[],
   )
 }
 
 ///|
-pub impl @provider.Skills for AnthropicSkills with fn provider(
+pub impl @provider.SkillsV4 for AnthropicSkills with fn specification_version(
+  _self : AnthropicSkills,
+) -> String {
+  "v4"
+}
+
+///|
+pub impl @provider.SkillsV4 for AnthropicSkills with fn provider(
   self : AnthropicSkills,
 ) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @provider.Skills for AnthropicSkills with fn upload_skill(
+pub impl @provider.SkillsV4 for AnthropicSkills with fn upload_skill(
   self : AnthropicSkills,
-  options : @provider.SkillUploadOptions,
-) -> @provider.SkillUploadResult {
+  options : @provider.SkillsV4UploadSkillCallOptions,
+) -> @provider.SkillsV4UploadSkillResult {
   self.upload(options)
 }

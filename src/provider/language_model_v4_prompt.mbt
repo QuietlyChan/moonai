@@ -1,36 +1,4 @@
 ///|
-/// Tagged file data used by a V4 prompt.
-pub(all) enum LanguageModelV4FileData {
-  V4FileData(String)
-  V4FileUrl(String)
-  V4FileReference(ProviderReference)
-  V4FileText(String)
-} derive(Debug, Eq)
-
-///|
-/// Standardized content part used by V4 prompt messages.
-pub(all) enum LanguageModelV4PromptPart {
-  V4PromptText(text~ : String, provider_options~ : Map[String, Json])
-  V4PromptReasoning(text~ : String, provider_options~ : Map[String, Json])
-  V4PromptReasoningFile(
-    data~ : LanguageModelV4FileData,
-    media_type~ : String,
-    provider_options~ : Map[String, Json]
-  )
-  V4PromptCustom(kind~ : String, provider_options~ : Map[String, Json])
-  V4PromptFile(
-    data~ : LanguageModelV4FileData,
-    media_type~ : String,
-    filename~ : String?,
-    provider_options~ : Map[String, Json]
-  )
-  V4PromptToolCall(ToolCall)
-  V4PromptToolResult(LanguageModelToolResult)
-  V4PromptToolApprovalRequest(LanguageModelToolApprovalRequest)
-  V4PromptToolApprovalResponse(LanguageModelToolApprovalResponse)
-} derive(Debug, Eq)
-
-///|
 /// One role-specific V4 prompt message.
 pub(all) enum LanguageModelV4Message {
   V4SystemMessage(content~ : String, provider_options~ : Map[String, Json])
@@ -74,70 +42,99 @@ fn copy_prompt_options(options : Map[String, Json]) -> Map[String, Json] {
 /// Convert one normalized provider prompt part to the V4 shape.
 fn LanguageModelV4PromptPart::from_content_part(
   part : LanguageModelContentPart,
-) -> LanguageModelV4PromptPart {
+) -> LanguageModelV4PromptPart? {
   let options = copy_prompt_options(part.provider_options())
   match part.without_provider_options() {
-    Text(value) => V4PromptText(text=value, provider_options=options)
+    Text(value) => Some(V4PromptText(text=value, provider_options=options))
     ImageUrl(value) =>
-      V4PromptFile(
-        data=V4FileUrl(value),
-        media_type="image/*",
-        filename=None,
-        provider_options=options,
+      Some(
+        V4PromptFile(
+          data=V4FileUrl(value),
+          media_type="image/*",
+          filename=None,
+          provider_options=options,
+        ),
       )
     ImageData(data~, media_type~) =>
-      V4PromptFile(
-        data=V4FileData(data),
-        media_type~,
-        filename=None,
-        provider_options=options,
+      Some(
+        V4PromptFile(
+          data=V4FileData(data),
+          media_type~,
+          filename=None,
+          provider_options=options,
+        ),
       )
     AudioData(data~, format~) =>
-      V4PromptFile(
-        data=V4FileData(data),
-        media_type=format,
-        filename=None,
-        provider_options=options,
+      Some(
+        V4PromptFile(
+          data=V4FileData(data),
+          media_type=format,
+          filename=None,
+          provider_options=options,
+        ),
       )
     FileUrl(url~, media_type~, filename~) =>
-      V4PromptFile(
-        data=V4FileUrl(url),
-        media_type~,
-        filename=if filename == "" { None } else { Some(filename) },
-        provider_options=options,
+      Some(
+        V4PromptFile(
+          data=V4FileUrl(url),
+          media_type~,
+          filename=if filename == "" { None } else { Some(filename) },
+          provider_options=options,
+        ),
       )
     FileData(data~, media_type~, filename~) =>
-      V4PromptFile(
-        data=V4FileData(data),
-        media_type~,
-        filename=if filename == "" { None } else { Some(filename) },
-        provider_options=options,
+      Some(
+        V4PromptFile(
+          data=V4FileData(data),
+          media_type~,
+          filename=if filename == "" { None } else { Some(filename) },
+          provider_options=options,
+        ),
       )
     FileReference(reference~, media_type~, filename~) =>
-      V4PromptFile(
-        data=V4FileReference(reference),
-        media_type~,
-        filename=if filename == "" { None } else { Some(filename) },
-        provider_options=options,
+      Some(
+        V4PromptFile(
+          data=V4FileReference(reference),
+          media_type~,
+          filename=if filename == "" { None } else { Some(filename) },
+          provider_options=options,
+        ),
       )
-    Reasoning(value) => V4PromptReasoning(text=value, provider_options=options)
+    Reasoning(value) =>
+      Some(V4PromptReasoning(text=value, provider_options=options))
     ReasoningFileUrl(url~, media_type~) =>
-      V4PromptReasoningFile(
-        data=V4FileUrl(url),
-        media_type~,
-        provider_options=options,
+      Some(
+        V4PromptReasoningFile(
+          data=V4FileUrl(url),
+          media_type~,
+          provider_options=options,
+        ),
       )
     ReasoningFileData(data~, media_type~) =>
-      V4PromptReasoningFile(
-        data=V4FileData(data),
-        media_type~,
-        provider_options=options,
+      Some(
+        V4PromptReasoningFile(
+          data=V4FileData(data),
+          media_type~,
+          provider_options=options,
+        ),
       )
-    Custom(kind~) => V4PromptCustom(kind~, provider_options=options)
-    ToolCallPart(value) => V4PromptToolCall(value)
-    ToolResultPart(value) => V4PromptToolResult(value)
-    ToolApprovalRequestPart(value) => V4PromptToolApprovalRequest(value)
-    ToolApprovalResponsePart(value) => V4PromptToolApprovalResponse(value)
+    Custom(kind~) => Some(V4PromptCustom(kind~, provider_options=options))
+    ToolCallPart(value) =>
+      Some(V4PromptToolCall(LanguageModelV4ToolCallPart::from_tool_call(value)))
+    ToolResultPart(value) =>
+      Some(
+        V4PromptToolResult(LanguageModelV4ToolResultPart::from_legacy(value)),
+      )
+    // Approval requests are an AI-layer coordination detail. AI SDK removes
+    // them before constructing a provider-facing V4 prompt.
+    ToolApprovalRequestPart(_) => None
+    ToolApprovalResponsePart(value) if value.provider_executed =>
+      Some(
+        V4PromptToolApprovalResponse(
+          LanguageModelV4ToolApprovalResponsePart::from_legacy(value),
+        ),
+      )
+    ToolApprovalResponsePart(_) => None
     ProviderOptions(part~, ..) =>
       LanguageModelV4PromptPart::from_content_part(part)
   }
@@ -153,10 +150,21 @@ fn LanguageModelV4FileData::to_content_part(
   match self {
     V4FileData(data) if media_type.has_prefix("image/") =>
       LanguageModelContentPart::image_data(data~, media_type~)
+    V4FileBytes(data) if media_type.has_prefix("image/") =>
+      LanguageModelContentPart::image_data(
+        data=@base64.encode(data),
+        media_type~,
+      )
     V4FileUrl(url) if media_type == "image/*" =>
       LanguageModelContentPart::image_url(url)
     V4FileData(data) =>
       LanguageModelContentPart::file_data(data~, media_type~, filename~)
+    V4FileBytes(data) =>
+      LanguageModelContentPart::file_data(
+        data=@base64.encode(data),
+        media_type~,
+        filename~,
+      )
     V4FileUrl(url) =>
       LanguageModelContentPart::file_url(url~, media_type~, filename~)
     V4FileReference(reference) =>
@@ -189,6 +197,11 @@ fn LanguageModelV4PromptPart::to_content_part(
           LanguageModelContentPart::reasoning_file_data(data=value, media_type~).with_provider_options(
             provider_options,
           )
+        V4FileBytes(value) =>
+          LanguageModelContentPart::reasoning_file_data(
+            data=@base64.encode(value),
+            media_type~,
+          ).with_provider_options(provider_options)
         V4FileUrl(value) =>
           LanguageModelContentPart::reasoning_file_url(url=value, media_type~).with_provider_options(
             provider_options,
@@ -210,12 +223,12 @@ fn LanguageModelV4PromptPart::to_content_part(
       data
       .to_content_part(media_type, filename.unwrap_or(""))
       .with_provider_options(provider_options)
-    V4PromptToolCall(value) => LanguageModelContentPart::tool_call(value)
-    V4PromptToolResult(value) => LanguageModelContentPart::tool_result(value)
-    V4PromptToolApprovalRequest(value) =>
-      LanguageModelContentPart::tool_approval_request(value)
+    V4PromptToolCall(value) =>
+      LanguageModelContentPart::tool_call(value.to_tool_call())
+    V4PromptToolResult(value) =>
+      LanguageModelContentPart::tool_result(value.to_legacy())
     V4PromptToolApprovalResponse(value) =>
-      LanguageModelContentPart::tool_approval_response(value)
+      LanguageModelContentPart::tool_approval_response(value.to_legacy())
   }
 }
 
@@ -238,7 +251,10 @@ fn prompt_parts_from_message(
     parts.push(V4PromptText(text=message.content, provider_options=Map([])))
   }
   for part in message.parts {
-    parts.push(LanguageModelV4PromptPart::from_content_part(part))
+    match LanguageModelV4PromptPart::from_content_part(part) {
+      Some(value) => parts.push(value)
+      None => ()
+    }
   }
   for call in message.tool_calls {
     let mut present = false
@@ -250,7 +266,9 @@ fn prompt_parts_from_message(
       }
     }
     if !present {
-      parts.push(V4PromptToolCall(call))
+      parts.push(
+        V4PromptToolCall(LanguageModelV4ToolCallPart::from_tool_call(call)),
+      )
     }
   }
   parts
@@ -262,73 +280,85 @@ fn tool_prompt_parts_from_message(
   tool_call_id : String,
 ) -> Array[LanguageModelV4PromptPart] {
   let parts : Array[LanguageModelV4PromptPart] = []
-  let wire_output_parts : Array[LanguageModelToolResultContentPart] = []
+  let wire_output_parts : Array[LanguageModelV4ToolResultContentPart] = []
+  let mut filtered_approval_response = false
   for part in message.parts {
     match part.without_provider_options() {
-      ToolResultPart(value) => parts.push(V4PromptToolResult(value))
-      ToolApprovalResponsePart(value) =>
-        parts.push(V4PromptToolApprovalResponse(value))
+      ToolResultPart(value) =>
+        parts.push(
+          V4PromptToolResult(LanguageModelV4ToolResultPart::from_legacy(value)),
+        )
+      ToolApprovalResponsePart(value) if value.provider_executed =>
+        parts.push(
+          V4PromptToolApprovalResponse(
+            LanguageModelV4ToolApprovalResponsePart::from_legacy(value),
+          ),
+        )
+      ToolApprovalResponsePart(_) => filtered_approval_response = true
       Text(text) =>
         wire_output_parts.push(
-          LanguageModelToolText(text~, provider_options=part.provider_options()),
+          V4ToolResultTextContent(
+            text~,
+            provider_options=part.provider_options(),
+          ),
         )
       ImageUrl(url) =>
         wire_output_parts.push(
-          LanguageModelToolFileUrl(
-            url~,
+          V4ToolResultFileContent(
+            data=V4FileUrl(url),
             media_type="image/*",
-            filename="",
+            filename=None,
             provider_options=part.provider_options(),
           ),
         )
       ImageData(data~, media_type~) =>
         wire_output_parts.push(
-          LanguageModelToolFileData(
-            data~,
+          V4ToolResultFileContent(
+            data=V4FileData(data),
             media_type~,
-            filename="",
+            filename=None,
             provider_options=part.provider_options(),
           ),
         )
       AudioData(data~, format~) =>
         wire_output_parts.push(
-          LanguageModelToolFileData(
-            data~,
+          V4ToolResultFileContent(
+            data=V4FileData(data),
             media_type=format,
-            filename="",
+            filename=None,
             provider_options=part.provider_options(),
           ),
         )
       FileUrl(url~, media_type~, filename~) =>
         wire_output_parts.push(
-          LanguageModelToolFileUrl(
-            url~,
+          V4ToolResultFileContent(
+            data=V4FileUrl(url),
             media_type~,
-            filename~,
+            filename=if filename == "" { None } else { Some(filename) },
             provider_options=part.provider_options(),
           ),
         )
       FileData(data~, media_type~, filename~) =>
         wire_output_parts.push(
-          LanguageModelToolFileData(
-            data~,
+          V4ToolResultFileContent(
+            data=V4FileData(data),
             media_type~,
-            filename~,
+            filename=if filename == "" { None } else { Some(filename) },
             provider_options=part.provider_options(),
           ),
         )
       FileReference(reference~, media_type~, filename~) =>
         wire_output_parts.push(
-          LanguageModelToolFileReference(
-            reference~,
+          V4ToolResultFileContent(
+            data=V4FileReference(reference),
             media_type~,
-            filename~,
+            filename=if filename == "" { None } else { Some(filename) },
             provider_options=part.provider_options(),
           ),
         )
       Custom(kind=provider_kind) =>
         wire_output_parts.push(
-          LanguageModelToolCustom(
+          V4ToolResultCustomContent(
             provider_options=Map([("kind", Json::string(provider_kind))]),
           ),
         )
@@ -339,7 +369,7 @@ fn tool_prompt_parts_from_message(
   if wire_output_parts.length() > 0 {
     parts.push(
       V4PromptToolResult(
-        LanguageModelToolResult::content(
+        LanguageModelV4ToolResultPart::content(
           tool_call_id~,
           tool_name="",
           value=wire_output_parts,
@@ -347,10 +377,10 @@ fn tool_prompt_parts_from_message(
       ),
     )
   }
-  if parts.length() == 0 {
+  if parts.length() == 0 && !filtered_approval_response {
     parts.push(
       V4PromptToolResult(
-        LanguageModelToolResult::text(
+        LanguageModelV4ToolResultPart::text(
           tool_call_id~,
           tool_name="",
           value=message.content,
@@ -405,13 +435,14 @@ pub fn LanguageModelV4Prompt::from_language_model_prompt(
             provider_options=options,
           ),
         )
-      Tool(tool_call_id) =>
-        result.messages.push(
-          V4ToolMessage(
-            content=tool_prompt_parts_from_message(message, tool_call_id),
-            provider_options=options,
-          ),
-        )
+      Tool(tool_call_id) => {
+        let content = tool_prompt_parts_from_message(message, tool_call_id)
+        if content.length() > 0 {
+          result.messages.push(
+            V4ToolMessage(content~, provider_options=options),
+          )
+        }
+      }
     }
   }
   result
@@ -444,7 +475,18 @@ pub fn LanguageModelV4Prompt::to_language_model_prompt(
       V4UserMessage(content~, provider_options~) =>
         match wire_text_content(content) {
           Some(text) =>
-            result.push(LanguageModelMessage::user(text, provider_options~))
+            match content[0] {
+              V4PromptText(provider_options=part_options, ..) if part_options.length() >
+                0 =>
+                result.push(
+                  LanguageModelMessage::user_parts(
+                    [content[0].to_content_part()],
+                    provider_options~,
+                  ),
+                )
+              _ =>
+                result.push(LanguageModelMessage::user(text, provider_options~))
+            }
           None =>
             result.push(
               LanguageModelMessage::new(
@@ -458,9 +500,20 @@ pub fn LanguageModelV4Prompt::to_language_model_prompt(
       V4AssistantMessage(content~, provider_options~) =>
         match wire_text_content(content) {
           Some(text) =>
-            result.push(
-              LanguageModelMessage::assistant(text, provider_options~),
-            )
+            match content[0] {
+              V4PromptText(provider_options=part_options, ..) if part_options.length() >
+                0 =>
+                result.push(
+                  LanguageModelMessage::assistant_parts(
+                    [content[0].to_content_part()],
+                    provider_options~,
+                  ),
+                )
+              _ =>
+                result.push(
+                  LanguageModelMessage::assistant(text, provider_options~),
+                )
+            }
           None =>
             result.push(
               LanguageModelMessage::new(

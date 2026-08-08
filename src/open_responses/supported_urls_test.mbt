@@ -1,10 +1,9 @@
 ///|
 test "Open Responses supports native HTTP image URLs" {
-  let model = open_responses(
-    model_id="test-model",
+  let model = create_open_responses(
     provider_name="test",
     url="https://example.com/v1/responses",
-  )
+  ).language_model("test-model")
   assert_true(
     @provider_utils.is_url_supported(
       media_type="image/png",

@@ -261,6 +261,78 @@ pub(all) enum ModelToolResultOutput {
 } derive(Debug, Eq)
 
 ///|
+/// Construct a text model output for a tool result.
+pub fn ModelToolResultOutput::text(
+  value : String,
+  provider_options? : Map[String, Json] = Map([]),
+) -> ModelToolResultOutput {
+  ModelToolText(
+    value~,
+    provider_options=copy_model_provider_options(provider_options),
+  )
+}
+
+///|
+/// Construct a JSON model output for a tool result.
+pub fn ModelToolResultOutput::json(
+  value : Json,
+  provider_options? : Map[String, Json] = Map([]),
+) -> ModelToolResultOutput {
+  ModelToolJson(
+    value~,
+    provider_options=copy_model_provider_options(provider_options),
+  )
+}
+
+///|
+/// Construct an execution-denied model output for a tool result.
+pub fn ModelToolResultOutput::execution_denied(
+  reason? : String,
+  provider_options? : Map[String, Json] = Map([]),
+) -> ModelToolResultOutput {
+  ModelToolExecutionDenied(
+    reason~,
+    provider_options=copy_model_provider_options(provider_options),
+  )
+}
+
+///|
+/// Construct a text error model output for a tool result.
+pub fn ModelToolResultOutput::error_text(
+  value : String,
+  provider_options? : Map[String, Json] = Map([]),
+) -> ModelToolResultOutput {
+  ModelToolErrorText(
+    value~,
+    provider_options=copy_model_provider_options(provider_options),
+  )
+}
+
+///|
+/// Construct a JSON error model output for a tool result.
+pub fn ModelToolResultOutput::error_json(
+  value : Json,
+  provider_options? : Map[String, Json] = Map([]),
+) -> ModelToolResultOutput {
+  ModelToolErrorJson(
+    value~,
+    provider_options=copy_model_provider_options(provider_options),
+  )
+}
+
+///|
+/// Construct a multimodal model output for a tool result.
+pub fn ModelToolResultOutput::content(
+  value : Array[ModelToolResultContentPart],
+  provider_options? : Map[String, Json] = Map([]),
+) -> ModelToolResultOutput {
+  ModelToolContent(
+    value=value.copy(),
+    provider_options=copy_model_provider_options(provider_options),
+  )
+}
+
+///|
 /// A tool result in a user-facing model message.
 pub(all) struct ModelToolResult {
   tool_call_id : String

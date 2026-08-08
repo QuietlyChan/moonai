@@ -69,11 +69,10 @@ fn anthropic_constraint_description(schema : Map[String, Json]) -> String? {
 
 ///|
 fn sanitize_anthropic_definition(value : Json) -> Json {
-  match value {
-    True | False => value
-    Object(_) => sanitize_anthropic_schema(value)
-    _ => value
+  if value is True || value is False || !@provider_utils.is_record(value) {
+    return value
   }
+  sanitize_anthropic_schema(value)
 }
 
 ///|

@@ -53,14 +53,23 @@ fn decode_openai_compatible_tool_call(
   index : Int,
   metadata_key : String,
   id_generator : @provider_utils.IdGenerator,
-) -> @provider.ToolCall? {
-  guard json is Object(_) else { return None }
+) -> @provider.LanguageModelV4ToolCall raise {
+  guard json is Object(_) else {
+    raise @provider.InvalidResponseDataError(
+      message="OpenAI-compatible tool call is not an object",
+      data=json,
+    )
+  }
   let (name, arguments) = match json {
     {
       "function": { "name": String(name), "arguments": String(arguments), .. },
       ..
     } => (name, arguments)
-    _ => return None
+    _ =>
+      raise @provider.InvalidResponseDataError(
+        message="OpenAI-compatible tool call has no valid function name and arguments",
+        data=json,
+      )
   }
   let id = match json {
     { "id": String(value), .. } => value
@@ -73,32 +82,59 @@ fn decode_openai_compatible_tool_call(
       }
     }
   }
-  Some(
-    @provider.ToolCall::new(
-      id~,
-      name~,
-      arguments~,
-      provider_metadata=openai_compatible_thought_signature_metadata(
-        json, metadata_key,
-      ),
+  {
+    tool_call_id: id,
+    tool_name: name,
+    input: arguments,
+    provider_executed: false,
+    dynamic: false,
+    provider_metadata: openai_compatible_thought_signature_metadata(
+      json, metadata_key,
     ),
-  )
+  }
+}
+
+///|
+fn openai_compatible_v4_finish_reason(
+  raw : String?,
+) -> @provider.LanguageModelV4FinishReason {
+  let unified = match raw {
+    Some("stop") => @provider.V4FinishStop
+    Some("length") => @provider.V4FinishLength
+    Some("content_filter") => @provider.V4FinishContentFilter
+    Some("function_call") | Some("tool_calls") => @provider.V4FinishToolCalls
+    _ => @provider.V4FinishOther
+  }
+  { unified, raw }
+}
+
+///|
+priv struct OpenAICompatibleDecodedChatResponse {
+  content : Array[@provider.LanguageModelV4Content]
+  finish_reason : @provider.LanguageModelV4FinishReason
+  usage : @provider.LanguageModelV4Usage
+  provider_metadata : Map[String, Json]
+  response : @provider.ResponseMetadata?
 }
 
 ///|
 /// Decode one non-streaming OpenAI-compatible Chat Completions response.
-pub fn decode_chat_response(
+fn decode_chat_response(
   json : Json,
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-  convert_usage? : (Json) -> @provider.Usage = convert_openai_compatible_chat_usage,
-  metadata_key? : String = "openai-compatible",
-  id_generator? : @provider_utils.IdGenerator,
-) -> @provider.ChatResponse raise {
+  error_structure : OpenAICompatibleErrorStructure,
+  convert_usage : OpenAICompatibleUsageConverter,
+  metadata_key : String,
+  id_generator : @provider_utils.IdGenerator,
+  validate_response : OpenAICompatibleJsonValidator,
+) -> OpenAICompatibleDecodedChatResponse raise {
   if error_structure.message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI-compatible request failed: \{message}",
       data=json,
     )
+  }
+  if validate_response(json) is Some(message) {
+    raise @provider.InvalidResponseDataError(message~, data=json)
   }
   let choice = match json {
     { "choices": [choice, ..], .. } => choice
@@ -121,6 +157,14 @@ pub fn decode_chat_response(
         data=json,
       )
   }
+  match message {
+    { "role": String(role), .. } if role != "assistant" =>
+      raise @provider.InvalidResponseDataError(
+        message="OpenAI-compatible response message has invalid role: \{role}",
+        data=message,
+      )
+    _ => ()
+  }
   let raw_finish_reason = match choice {
     { "finish_reason": String(reason), .. } => Some(reason)
     _ => None
@@ -134,45 +178,49 @@ pub fn decode_chat_response(
     { "reasoning": String(value), .. } => value
     _ => ""
   }
-  let content : Array[@provider.GeneratedContent] = []
-  let generate_id = id_generator.unwrap_or(@provider_utils.generate_id)
+  let content : Array[@provider.LanguageModelV4Content] = []
+  let generate_id = id_generator
   if text != "" {
-    content.push(@provider.GeneratedContent::text(text))
+    content.push(@provider.LanguageModelV4Content::text(text))
   }
   if reasoning != "" {
-    content.push(@provider.GeneratedContent::reasoning(reasoning))
+    content.push(@provider.LanguageModelV4Content::reasoning(reasoning))
   }
   match message {
     { "tool_calls": Array(values), .. } =>
       for index, value in values {
-        match
-          decode_openai_compatible_tool_call(
-            value, index, metadata_key, generate_id,
-          ) {
-          Some(call) =>
-            content.push(@provider.GeneratedContent::tool_call(call))
-          None => ()
-        }
+        content.push(
+          @provider.LanguageModelV4Content::tool_call(
+            decode_openai_compatible_tool_call(
+              value, index, metadata_key, generate_id,
+            ),
+          ),
+        )
       }
     _ => ()
   }
   let usage = match json {
-    { "usage": value, .. } if !(value is Null) => convert_usage(value)
-    _ => @provider.Usage::zero()
+    { "usage": value, .. } if !(value is Null) => convert_usage(Some(value))
+    _ => convert_usage(None)
   }
-  let finish_reason = match raw_finish_reason {
-    Some(value) => @provider.FinishReason::from_openai(value)
-    None => @provider.Unknown("")
-  }
-  let response_metadata = @provider.ResponseMetadata::from_json(json)
-  @provider.ChatResponse::from_content(content, usage, finish_reason).with_diagnostics(
-    None,
-    if response_metadata.is_empty() {
+  let response_metadata = @provider_utils.create_language_model_response_metadata(
+    id?=@provider_utils.json_string_field(json, "id"),
+    model?=@provider_utils.json_string_field(json, "model"),
+    created?=@provider_utils.json_int_field_opt(json, "created"),
+  )
+  let provider_metadata = @provider.merge_provider_metadata(
+    Map([(metadata_key, Json::empty_object())]),
+    openai_compatible_prediction_metadata(json, metadata_key),
+  )
+  {
+    content,
+    finish_reason: openai_compatible_v4_finish_reason(raw_finish_reason),
+    usage,
+    provider_metadata,
+    response: if response_metadata.is_empty() {
       None
     } else {
       Some(response_metadata)
     },
-    openai_compatible_prediction_metadata(json, metadata_key),
-    [],
-  )
+  }
 }

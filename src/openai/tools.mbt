@@ -811,10 +811,13 @@ fn openai_provider_tool_names() -> Map[String, String] {
 }
 
 ///|
-fn create_openai_tool_name_mapping(
-  tools : Array[@provider.ToolDefinition],
+fn create_openai_v4_tool_name_mapping(
+  tools : Array[@provider.LanguageModelV4Tool],
 ) -> @provider_utils.ToolNameMapping {
-  @provider_utils.create_tool_name_mapping(tools, openai_provider_tool_names())
+  @provider_utils.create_v4_tool_name_mapping(
+    tools,
+    openai_provider_tool_names(),
+  )
 }
 
 ///|
@@ -1050,8 +1053,8 @@ fn openai_provider_tool(
 }
 
 ///|
-fn prepare_openai_responses_tools(
-  tools : Array[@provider.ToolDefinition],
+fn prepare_openai_v4_responses_tools(
+  tools : Array[@provider.LanguageModelV4Tool],
   warnings : Array[@provider.Warning],
 ) -> Array[Json] raise {
   let prepared : Array[Json] = []
@@ -1060,18 +1063,15 @@ fn prepare_openai_responses_tools(
   let namespace_tools : Map[String, Array[Json]] = Map([])
   for tool in tools {
     match tool {
-      @provider.FunctionTool(
-        name~,
-        description~,
-        input_schema~,
-        strict~,
-        provider_options~,
-        ..
-      ) => {
+      @provider.V4FunctionTool(value) => {
         let function_tool = openai_function_tool(
-          name, description, input_schema, strict, provider_options,
+          value.name,
+          value.description,
+          value.input_schema,
+          value.strict,
+          value.provider_options,
         )
-        match openai_function_tool_namespace(provider_options, warnings) {
+        match openai_function_tool_namespace(value.provider_options, warnings) {
           None => prepared.push(function_tool)
           Some((namespace_name, namespace_description)) =>
             match namespace_output_indices.get(namespace_name) {
@@ -1095,9 +1095,10 @@ fn prepare_openai_responses_tools(
             }
         }
       }
-      @provider.ProviderTool(id~, name~, args~) =>
-        if openai_provider_tool(id, name, args, warnings) is Some(value) {
-          prepared.push(value)
+      @provider.V4ProviderTool(value) =>
+        if openai_provider_tool(value.id, value.name, value.args, warnings)
+          is Some(prepared_tool) {
+          prepared.push(prepared_tool)
         }
     }
   }
@@ -1114,16 +1115,17 @@ fn prepare_openai_responses_tools(
 }
 
 ///|
-fn openai_named_tool_choice(
+fn openai_v4_named_tool_choice(
   name : String,
-  tools : Array[@provider.ToolDefinition],
+  tools : Array[@provider.LanguageModelV4Tool],
   tool_name_mapping : @provider_utils.ToolNameMapping,
 ) -> Json {
   let resolved_name = tool_name_mapping.to_provider_tool_name(name)
   for tool in tools {
     match tool {
-      @provider.ProviderTool(id="openai.custom", name=tool_name, ..) if tool_name ==
-        resolved_name => return { "type": "custom", "name": resolved_name }
+      @provider.V4ProviderTool(value) if value.id == "openai.custom" &&
+        value.name == resolved_name =>
+        return { "type": "custom", "name": resolved_name }
       _ => ()
     }
   }
@@ -1143,221 +1145,58 @@ fn openai_named_tool_choice(
 }
 
 ///|
-fn openai_responses_tool_choice(
-  choice : @provider.ToolChoice,
-  tools : Array[@provider.ToolDefinition],
+fn openai_v4_responses_tool_choice(
+  choice : @provider.LanguageModelV4ToolChoice,
+  tools : Array[@provider.LanguageModelV4Tool],
   tool_name_mapping : @provider_utils.ToolNameMapping,
 ) -> Json {
   match choice {
-    @provider.Auto => Json::string("auto")
-    @provider.NoTool => Json::string("none")
-    @provider.Required => Json::string("required")
-    @provider.Named(name) =>
-      openai_named_tool_choice(name, tools, tool_name_mapping)
+    @provider.V4ToolChoiceAuto => Json::string("auto")
+    @provider.V4ToolChoiceNone => Json::string("none")
+    @provider.V4ToolChoiceRequired => Json::string("required")
+    @provider.V4ToolChoiceTool(name) =>
+      openai_v4_named_tool_choice(name, tools, tool_name_mapping)
   }
 }
 
 ///|
-/// Create an OpenAI file-search provider tool.
+fn add_openai_programmatic_caller(
+  provider_options : Map[String, Json],
+) -> Map[String, Json] {
+  let result = @provider.copy_provider_metadata(provider_options)
+  let openai_options : Map[String, Json] = match result.get("openai") {
+    Some(Object(fields)) => @provider.copy_provider_metadata(fields)
+    _ => Map([])
+  }
+  let allowed_callers : Array[Json] = match
+    openai_options.get("allowedCallers") {
+    Some(Array(values)) => values.copy()
+    _ => []
+  }
+  guard !allowed_callers.any(value => value == Json::string("programmatic")) else {
+    return result
+  }
+  allowed_callers.push(Json::string("programmatic"))
+  openai_options["allowedCallers"] = Json::array(allowed_callers)
+  result["openai"] = Json::object(openai_options)
+  result
+}
+
+///|
+/// Create the high-level OpenAI programmatic caller tool.
 ///
-/// Typed `options` take precedence over the low-level JSON `args` fallback.
-pub fn file_search_tool(
-  args? : Json = Json::empty_object(),
-  options? : OpenAIFileSearchOptions,
-  name? : String = "file_search",
-) -> @provider.ToolDefinition {
-  let resolved_args = match options {
-    Some(value) => value.to_args_json()
-    None => args
-  }
-  @provider.ToolDefinition::provider(
-    id="openai.file_search",
-    name~,
-    args=resolved_args,
-  )
-}
-
-///|
-/// Create an OpenAI local-shell provider tool.
-pub fn local_shell_tool(
-  name? : String = "local_shell",
-) -> @provider.ToolDefinition {
-  @provider.ToolDefinition::provider(id="openai.local_shell", name~)
-}
-
-///|
-/// Create an OpenAI shell provider tool.
-pub fn shell_tool(
-  args? : Json,
-  environment? : OpenAIShellEnvironment,
-  name? : String = "shell",
-) -> @provider.ToolDefinition {
-  let resolved_args = match environment {
-    Some(value) => Json::object(Map([("environment", value.to_args_json())]))
-    None => args.unwrap_or(Json::empty_object())
-  }
-  @provider.ToolDefinition::provider(
-    id="openai.shell",
-    name~,
-    args=resolved_args,
-  )
-}
-
-///|
-/// Create an OpenAI apply-patch provider tool.
-pub fn apply_patch_tool(
-  name? : String = "apply_patch",
-) -> @provider.ToolDefinition {
-  @provider.ToolDefinition::provider(id="openai.apply_patch", name~)
-}
-
-///|
-/// Create an OpenAI computer-use provider tool.
-pub fn computer_tool(name? : String = "computer") -> @provider.ToolDefinition {
-  @provider.ToolDefinition::provider(id="openai.computer", name~)
-}
-
-///|
-/// Create the preview OpenAI web-search provider tool.
-///
-/// Typed `options` take precedence over the low-level JSON `args` fallback.
-pub fn web_search_preview_tool(
-  args? : Json = Json::empty_object(),
-  options? : OpenAIWebSearchPreviewOptions,
-  name? : String = "web_search_preview",
-) -> @provider.ToolDefinition {
-  let resolved_args = match options {
-    Some(value) => value.to_args_json()
-    None => args
-  }
-  @provider.ToolDefinition::provider(
-    id="openai.web_search_preview",
-    name~,
-    args=resolved_args,
-  )
-}
-
-///|
-/// Create an OpenAI web-search provider tool.
-///
-/// Typed `options` take precedence over the low-level JSON `args` fallback.
-pub fn web_search_tool(
-  args? : Json = Json::empty_object(),
-  options? : OpenAIWebSearchOptions,
-  name? : String = "web_search",
-) -> @provider.ToolDefinition {
-  let resolved_args = match options {
-    Some(value) => value.to_args_json()
-    None => args
-  }
-  @provider.ToolDefinition::provider(
-    id="openai.web_search",
-    name~,
-    args=resolved_args,
-  )
-}
-
-///|
-/// Create an OpenAI code-interpreter provider tool.
-pub fn code_interpreter_tool(
-  args? : Json,
-  container? : OpenAICodeInterpreterContainer,
-  name? : String = "code_interpreter",
-) -> @provider.ToolDefinition {
-  let resolved_args = match container {
-    Some(value) => Json::object(Map([("container", value.to_args_json())]))
-    None => args.unwrap_or(Json::empty_object())
-  }
-  @provider.ToolDefinition::provider(
-    id="openai.code_interpreter",
-    name~,
-    args=resolved_args,
-  )
-}
-
-///|
-/// Create an OpenAI image-generation provider tool.
-///
-/// Typed `options` take precedence over the low-level JSON `args` fallback.
-pub fn image_generation_tool(
-  args? : Json = Json::empty_object(),
-  options? : OpenAIImageGenerationOptions,
-  name? : String = "image_generation",
-) -> @provider.ToolDefinition {
-  let resolved_args = match options {
-    Some(value) => value.to_args_json()
-    None => args
-  }
-  @provider.ToolDefinition::provider(
-    id="openai.image_generation",
-    name~,
-    args=resolved_args,
-  )
-}
-
-///|
-/// Create an OpenAI MCP provider tool.
-///
-/// Typed `options` take precedence over the low-level JSON `args` fallback.
-pub fn mcp_tool(
-  args? : Json = Json::empty_object(),
-  options? : OpenAIMCPOptions,
-  name? : String = "mcp",
-) -> @provider.ToolDefinition {
-  let resolved_args = match options {
-    Some(value) => value.to_args_json()
-    None => args
-  }
-  @provider.ToolDefinition::provider(id="openai.mcp", name~, args=resolved_args)
-}
-
-///|
-/// Create an OpenAI custom provider tool.
-///
-/// Typed `options` take precedence over the low-level JSON `args` fallback.
-pub fn custom_tool(
-  name : String,
-  args? : Json = Json::empty_object(),
-  options? : OpenAICustomToolOptions,
-) -> @provider.ToolDefinition {
-  let resolved_args = match options {
-    Some(value) => value.to_args_json()
-    None => args
-  }
-  @provider.ToolDefinition::provider(
-    id="openai.custom",
-    name~,
-    args=resolved_args,
-  )
-}
-
-///|
-/// Create the OpenAI programmatic-tool-calling provider tool.
-pub fn programmatic_tool_calling_tool(
-  name? : String = "programmatic_tool_calling",
-) -> @provider.ToolDefinition {
-  @provider.ToolDefinition::provider(
-    id="openai.programmatic_tool_calling",
-    name~,
-  )
-}
-
-///|
-/// Create an OpenAI tool-search provider tool.
-///
-/// Typed `options` take precedence over the low-level JSON `args` fallback.
-pub fn tool_search_tool(
-  args? : Json = Json::empty_object(),
-  options? : OpenAIToolSearchOptions,
-  name? : String = "tool_search",
-) -> @provider.ToolDefinition {
-  let resolved_args = match options {
-    Some(value) => value.to_args_json()
-    None => args
-  }
-  @provider.ToolDefinition::provider(
-    id="openai.tool_search",
-    name~,
-    args=resolved_args,
+/// When this tool is registered as a caller, each callee receives the
+/// `openai.allowedCallers` option expected by the Responses API.
+fn programmatic_tool_calling() -> @provider_utils.Tool {
+  @provider_utils.experimental_tool_caller(
+    @provider_utils.create_provider_executed_tool_factory(
+      id="openai.programmatic_tool_calling",
+      input_schema=openai_programmatic_tool_calling_input_schema(),
+      output_schema=openai_programmatic_tool_calling_output_schema(),
+      supports_deferred_results=true,
+    ).create(),
+    @provider_utils.ToolCallerDefinition::provider(
+      add_openai_programmatic_caller,
+    ),
   )
 }

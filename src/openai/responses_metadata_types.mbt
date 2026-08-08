@@ -242,37 +242,3 @@ pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_provider_metadata(
 ) -> Map[String, Json] {
   Map([(provider_name, self.openai.to_json())])
 }
-
-///|
-/// Decode response-level OpenAI metadata from the provider-neutral map.
-pub fn decode_openai_responses_provider_metadata(
-  metadata : Map[String, Json],
-  provider_name? : String = "openai",
-) -> OpenaiResponsesProviderMetadata? {
-  let value = match metadata.get(provider_name) {
-    Some(Object(fields) as json) => Some((fields, json))
-    _ => None
-  }
-  match value {
-    Some((fields, json)) => {
-      let response_id = @provider_utils.json_string_field(json, "responseId")
-      let logprobs = match fields.get("logprobs") {
-        Some(Array(values)) => Some(values.copy())
-        _ => None
-      }
-      Some(
-        OpenaiResponsesProviderMetadata::new(
-          openai=OpenAIResponsesMetadata::new(
-            response_id?,
-            logprobs?,
-            service_tier?=@provider_utils.json_string_field(json, "serviceTier"),
-            reasoning_context?=@provider_utils.json_string_field(
-              json, "reasoningContext",
-            ),
-          ),
-        ),
-      )
-    }
-    None => None
-  }
-}

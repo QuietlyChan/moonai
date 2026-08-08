@@ -8,7 +8,7 @@ pub struct ModelRegistry {
   priv language_models : Map[String, &@provider.LanguageModelV4]
   priv completion_models : Map[String, &@provider.CompletionModel]
   priv embedding_models : Map[String, &@provider.EmbeddingModelV4]
-  priv reranking_models : Map[String, &@provider.RerankingModel]
+  priv reranking_models : Map[String, &@provider.RerankingModelV4]
   priv image_models : Map[String, &@provider.ImageModelV4]
   priv video_models : Map[String, &@provider.VideoModelV4]
   priv speech_models : Map[String, &@provider.SpeechModelV4]
@@ -71,7 +71,7 @@ pub fn ModelRegistry::with_embedding_model(
 /// Register a reranking model under its canonical identity.
 pub fn ModelRegistry::with_reranking_model(
   self : ModelRegistry,
-  model : &@provider.RerankingModel,
+  model : &@provider.RerankingModelV4,
 ) -> ModelRegistry {
   self.reranking_models[model_id_of_reranking(model).key()] = model
   self
@@ -169,7 +169,7 @@ pub fn ModelRegistry::embedding_model(
 pub fn ModelRegistry::reranking_model(
   self : ModelRegistry,
   id : ModelId,
-) -> &@provider.RerankingModel? {
+) -> &@provider.RerankingModelV4? {
   self.reranking_models.get(id.key())
 }
 
@@ -268,7 +268,7 @@ pub fn ModelRegistry::embedding_model_by_key(
 pub fn ModelRegistry::reranking_model_by_key(
   self : ModelRegistry,
   key : String,
-) -> &@provider.RerankingModel? {
+) -> &@provider.RerankingModelV4? {
   match ModelId::parse(key) {
     Some(id) => self.reranking_model(id)
     None => None
@@ -388,7 +388,7 @@ pub fn ModelRegistry::require_embedding_model(
 pub fn ModelRegistry::require_reranking_model(
   self : ModelRegistry,
   id : ModelId,
-) -> &@provider.RerankingModel raise NoSuchModelError {
+) -> &@provider.RerankingModelV4 raise NoSuchModelError {
   match self.reranking_model(id) {
     Some(model) => model
     None => raise NoSuchModelError(model_id=id, model_type=Reranking)
@@ -508,7 +508,7 @@ pub fn ModelRegistry::resolve_embedding_model(
 pub fn ModelRegistry::resolve_reranking_model(
   self : ModelRegistry,
   reference : RerankingModelReference,
-) -> &@provider.RerankingModel raise NoSuchModelError {
+) -> &@provider.RerankingModelV4 raise NoSuchModelError {
   match reference {
     Instance(model) => model
     Named(id) => self.require_reranking_model(id)

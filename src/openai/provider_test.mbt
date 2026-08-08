@@ -4,6 +4,47 @@ async fn bind_test_server() -> @http.Server {
 }
 
 ///|
+test "OpenAI public factory exposes the AI SDK provider contract" {
+  let provider = createOpenAI(
+    api_key="test-key",
+    base_url="https://example.test/v1",
+  )
+  let generic_provider = provider as &@provider.ProviderV4
+  assert_eq(generic_provider.specification_version(), "v4")
+  let language_model = generic_provider.language_model("gpt-test")
+  assert_eq(language_model.specification_version(), "v4")
+  assert_eq(language_model.provider(), "openai.responses")
+  assert_eq(language_model.model_id(), "gpt-test")
+  let chat_model = provider.chat("gpt-chat-test")
+  assert_eq(chat_model.provider(), "openai.chat")
+  let completion_model = provider.completion("gpt-completion-test")
+  assert_eq(completion_model.provider(), "openai.completion")
+  let embedding_model = generic_provider.embedding_model("embedding-test")
+  assert_eq(embedding_model.specification_version(), "v4")
+  assert_eq(embedding_model.provider(), "openai.embedding")
+  assert_eq(embedding_model.model_id(), "embedding-test")
+  let image_model = generic_provider.image_model("gpt-image-test")
+  assert_eq(image_model.specification_version(), "v4")
+  assert_eq(image_model.provider(), "openai.image")
+  assert_eq(image_model.model_id(), "gpt-image-test")
+  let speech_model = generic_provider.speech_model("tts-test").unwrap()
+  assert_eq(speech_model.specification_version(), "v4")
+  assert_eq(speech_model.provider(), "openai.speech")
+  let transcription_model = generic_provider
+    .transcription_model("whisper-test")
+    .unwrap()
+  assert_eq(transcription_model.specification_version(), "v4")
+  assert_eq(transcription_model.provider(), "openai.transcription")
+  let files = generic_provider.files().unwrap()
+  assert_eq(files.specification_version(), "v4")
+  assert_eq(files.provider(), "openai.files")
+  let skills = generic_provider.skills().unwrap()
+  assert_eq(skills.specification_version(), "v4")
+  assert_eq(skills.provider(), "openai.skills")
+  assert_true(generic_provider.reranking_model("missing") is None)
+}
+
+///|
 async test "official OpenAI provider composes chat and responses protocols" {
   @async.with_task_group() <| group => {
     let server = bind_test_server()
@@ -30,7 +71,6 @@ async test "official OpenAI provider composes chat and responses protocols" {
             connection.write(
               "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":4,\"rejected_prediction_tokens\":1}}}\n\n",
             )
-            connection.write("data: [DONE]\n\n")
           } else {
             assert_eq(request.path, "/v1/responses")
             connection.write(
@@ -88,6 +128,72 @@ async test "official OpenAI provider composes chat and responses protocols" {
 }
 
 ///|
+async test "OpenAI Chat retries provider errors before output without leaking state" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    let mut request_count = 0
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let _ = body.read_all()
+          let attempt = request_count
+          request_count = request_count + 1
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/event-stream",
+          })
+          if attempt == 0 {
+            connection.write(
+              "data: {\"id\":\"chat-first\",\"model\":\"gpt-test\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"},\"finish_reason\":null}]}\n\n",
+            )
+            connection.write(
+              "data: {\"error\":{\"message\":\"retry chat\",\"code\":\"insufficient_quota\"}}\n\n",
+            )
+          } else {
+            connection.write(
+              "data: {\"id\":\"chat-second\",\"model\":\"gpt-test\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"retried\"},\"finish_reason\":\"stop\"}]}\n\n",
+            )
+            connection.write("data: [DONE]\n\n")
+          }
+        },
+        max_connections=2,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let events : Array[@provider.LanguageModelV4StreamPart] = []
+    let result = @ai.stream_text(
+      provider.chat("gpt-test"),
+      prompt="hello",
+      include_raw_chunks=true,
+      retry_policy=@provider.RetryPolicy::new(
+        max_retries=1,
+        initial_delay_ms=0,
+        max_delay_ms=0,
+      ),
+      on_event=event => events.push(event),
+    )
+    assert_eq(request_count, 2)
+    assert_eq(result.text(), "retried")
+    assert_eq(result.response.unwrap().id, Some("chat-second"))
+    let mut start_count = 0
+    let mut leaked_first_attempt = false
+    for event in events {
+      match event {
+        @provider.V4StreamStart(..) => start_count = start_count + 1
+        @provider.V4Raw(value) if value.stringify().contains("chat-first") =>
+          leaked_first_attempt = true
+        _ => ()
+      }
+    }
+    assert_eq(start_count, 1)
+    assert_false(leaked_first_attempt)
+  }
+}
+
+///|
 async test "OpenAI Responses V4 preserves native stream usage and finish reason" {
   @async.with_task_group() <| group => {
     let server = bind_test_server()
@@ -102,7 +208,7 @@ async test "OpenAI Responses V4 preserves native stream usage and finish reason"
             "data: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg-v4\",\"delta\":\"partial\"}\n\n",
           )
           connection.write(
-            "data: {\"type\":\"response.incomplete\",\"response\":{\"id\":\"resp-v4\",\"status\":\"incomplete\",\"incomplete_details\":{\"reason\":\"max_output_tokens\"},\"usage\":{\"input_tokens\":12,\"input_tokens_details\":{\"cached_tokens\":5},\"output_tokens\":9,\"output_tokens_details\":{\"reasoning_tokens\":3},\"total_tokens\":21}}}\n\n",
+            "data: {\"type\":\"response.incomplete\",\"response\":{\"id\":\"resp-v4\",\"status\":\"incomplete\",\"incomplete_details\":{\"reason\":\"max_output_tokens\"},\"usage\":{\"input_tokens\":12,\"input_tokens_details\":{\"cached_tokens\":5,\"cache_write_tokens\":2},\"output_tokens\":9,\"output_tokens_details\":{\"reasoning_tokens\":3},\"total_tokens\":21}}}\n\n",
           )
           connection.write("data: [DONE]\n\n")
         },
@@ -132,9 +238,141 @@ async test "OpenAI Responses V4 preserves native stream usage and finish reason"
     assert_eq(result.finish_reason.raw, Some("max_output_tokens"))
     assert_eq(finish_raw, Some("max_output_tokens"))
     assert_eq(result.usage.input_tokens.total, Some(12))
-    assert_eq(result.usage.input_tokens.no_cache, Some(7))
+    assert_eq(result.usage.input_tokens.no_cache, Some(5))
+    assert_eq(result.usage.input_tokens.cache_write, Some(2))
     assert_eq(result.usage.output_tokens.reasoning, Some(3))
     assert_eq(result.response.unwrap().id, Some("resp-v4"))
+  }
+}
+
+///|
+async test "OpenAI Responses V4 preserves item metadata on stream parts" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let request_body = body.read_all().text()
+          assert_true(request_body.contains("\"store\":false"))
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/event-stream",
+          })
+          connection.write(
+            "data: {\"type\":\"response.created\",\"response\":{\"id\":\"resp-metadata\",\"model\":\"gpt-5\",\"created_at\":1700000020}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{\"id\":\"rs_1\",\"type\":\"reasoning\",\"encrypted_content\":\"initial-encrypted\",\"summary\":[]}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.reasoning_summary_text.delta\",\"item_id\":\"rs_1\",\"summary_index\":0,\"delta\":\"plan\"}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.reasoning_summary_part.done\",\"item_id\":\"rs_1\",\"summary_index\":0}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_item.done\",\"output_index\":0,\"item\":{\"id\":\"rs_1\",\"type\":\"reasoning\",\"encrypted_content\":\"final-encrypted\",\"summary\":[{\"type\":\"summary_text\",\"text\":\"plan\"}]}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_item.added\",\"output_index\":1,\"item\":{\"id\":\"msg_1\",\"type\":\"message\",\"phase\":\"commentary\",\"content\":[]}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_text.annotation.added\",\"item_id\":\"msg_1\",\"annotation\":{\"type\":\"file_citation\",\"file_id\":\"file_1\",\"filename\":\"notes.txt\",\"index\":0}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg_1\",\"delta\":\"answer\"}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_text.done\",\"item_id\":\"msg_1\",\"text\":\"answer\"}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_item.done\",\"output_index\":1,\"item\":{\"id\":\"msg_1\",\"type\":\"message\",\"phase\":\"commentary\",\"content\":[]}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.output_item.added\",\"output_index\":2,\"item\":{\"id\":\"ws_1\",\"type\":\"web_search_call\",\"status\":\"in_progress\"}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp-metadata\",\"status\":\"completed\",\"usage\":{\"input_tokens\":2,\"output_tokens\":3,\"total_tokens\":5}}}\n\n",
+          )
+        },
+        max_connections=1,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let events : Array[@provider.LanguageModelV4StreamPart] = []
+    ignore(
+      @ai.stream_text(
+        provider.responses("gpt-5"),
+        prompt="hello",
+        provider_options={ "openai": { "store": false } },
+        on_event=event => events.push(event),
+      ),
+    )
+    let mut saw_reasoning_start = false
+    let mut saw_reasoning_delta = false
+    let mut saw_reasoning_end = false
+    let mut saw_text_start = false
+    let mut saw_text_end = false
+    let mut saw_hosted_tool_start = false
+    let mut saw_raw = false
+    for event in events {
+      match event {
+        @provider.V4ReasoningStart(provider_metadata~, ..) => {
+          json_inspect(provider_metadata["openai"], content={
+            "itemId": "rs_1",
+            "reasoningEncryptedContent": "initial-encrypted",
+          })
+          saw_reasoning_start = true
+        }
+        @provider.V4ReasoningDelta(delta="plan", provider_metadata~, ..) => {
+          json_inspect(provider_metadata["openai"], content={ "itemId": "rs_1" })
+          saw_reasoning_delta = true
+        }
+        @provider.V4ReasoningEnd(provider_metadata~, ..) => {
+          json_inspect(provider_metadata["openai"], content={
+            "itemId": "rs_1",
+            "reasoningEncryptedContent": "final-encrypted",
+          })
+          saw_reasoning_end = true
+        }
+        @provider.V4TextStart(provider_metadata~, ..) => {
+          json_inspect(provider_metadata["openai"], content={
+            "itemId": "msg_1",
+            "phase": "commentary",
+          })
+          saw_text_start = true
+        }
+        @provider.V4TextEnd(provider_metadata~, ..) => {
+          json_inspect(provider_metadata["openai"], content={
+            "itemId": "msg_1",
+            "phase": "commentary",
+            "annotations": [
+              {
+                "type": "file_citation",
+                "file_id": "file_1",
+                "filename": "notes.txt",
+                "index": 0,
+              },
+            ],
+          })
+          saw_text_end = true
+        }
+        @provider.V4ToolInputStart(id="ws_1", provider_executed=true, ..) =>
+          saw_hosted_tool_start = true
+        @provider.V4Raw(_) => saw_raw = true
+        _ => ()
+      }
+    }
+    assert_true(saw_reasoning_start)
+    assert_true(saw_reasoning_delta)
+    assert_true(saw_reasoning_end)
+    assert_true(saw_text_start)
+    assert_true(saw_text_end)
+    assert_true(saw_hosted_tool_start)
+    assert_false(saw_raw)
   }
 }
 
@@ -224,7 +462,7 @@ async test "OpenAI Responses maps an early provider error to APICallError" {
     catch {
       @provider.APICallError(
         message="quota exceeded",
-        status_code=429,
+        status_code=Some(429),
         response_headers~,
         response_body~,
         is_retryable=true,
@@ -273,7 +511,7 @@ async test "OpenAI Responses maps response.failed before output to APICallError"
     catch {
       @provider.APICallError(
         message="service overloaded",
-        status_code=503,
+        status_code=Some(503),
         is_retryable=true,
         ..
       ) => ()
@@ -315,8 +553,12 @@ async test "OpenAI Responses rejects a Chat Completions SSE payload" {
       )
       |> ignore
     catch {
-      @provider.APICallError(message~, status_code=400, is_retryable=false, ..) =>
-        assert_true(message.contains("Chat Completions"))
+      @provider.APICallError(
+        message~,
+        status_code=Some(400),
+        is_retryable=false,
+        ..
+      ) => assert_true(message.contains("Chat Completions"))
       error => fail("unexpected error: \{error}")
     } noraise {
       _ => fail("expected a protocol mismatch error")
@@ -361,7 +603,255 @@ async test "OpenAI Responses keeps post-output errors in the stream" {
       events.any(event => event is @provider.V4TextDelta(delta="partial", ..)),
     )
     assert_eq(result.finish_reason.unified, @provider.V4FinishError)
-    assert_true(events.any(event => event is @provider.V4Error("late failure")))
+    assert_true(
+      events.any(event => {
+        match event {
+          @provider.V4Error(error) =>
+            error.message == "late failure" &&
+            error.data is Some({ "type": "error", .. })
+          _ => false
+        }
+      }),
+    )
+  }
+}
+
+///|
+async test "OpenAI Responses maps errors flushed with acceptance to APICallError" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let _ = body.read_all()
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/event-stream",
+          })
+          connection.write(
+            "data: {\"type\":\"response.in_progress\",\"response\":{\"id\":\"resp-accepted\",\"status\":\"in_progress\"}}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"error\",\"error\":{\"message\":\"failure flushed with acceptance\",\"code\":\"server_error\"}}\n\n",
+          )
+        },
+        max_connections=1,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let events : Array[@provider.LanguageModelV4StreamPart] = []
+    try
+      @ai.stream_text(
+        provider.responses("responses-model"),
+        prompt="hello",
+        retry_policy=@provider.RetryPolicy::none(),
+        on_event=event => events.push(event),
+      )
+      |> ignore
+    catch {
+      @provider.APICallError(
+        message="failure flushed with acceptance",
+        status_code=Some(500),
+        is_retryable=true,
+        ..
+      ) => ()
+      error => fail("unexpected error: \{error}")
+    } noraise {
+      _ => fail("expected the flushed provider error to fail the call")
+    }
+    assert_eq(events.length(), 0)
+  }
+}
+
+///|
+async test "OpenAI Responses keeps post-acceptance errors in the stream" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let _ = body.read_all()
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/event-stream",
+          })
+          connection.write(
+            "data: {\"type\":\"response.in_progress\",\"response\":{\"id\":\"resp-accepted\",\"status\":\"in_progress\"}}\n\n",
+          )
+          connection.flush()
+          @async.sleep(150)
+          connection.write(
+            "data: {\"type\":\"error\",\"error\":{\"message\":\"failure after acceptance\",\"code\":\"server_error\"}}\n\n",
+          )
+        },
+        max_connections=1,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let events : Array[@provider.LanguageModelV4StreamPart] = []
+    let result = @ai.stream_text(
+      provider.responses("responses-model"),
+      prompt="hello",
+      retry_policy=@provider.RetryPolicy::none(),
+      on_event=event => events.push(event),
+    )
+    assert_eq(result.finish_reason.unified, @provider.V4FinishError)
+    assert_true(
+      events.any(event => {
+        match event {
+          @provider.V4Error(error) =>
+            error.message == "failure after acceptance" &&
+            error.data is Some({ "type": "error", .. })
+          _ => false
+        }
+      }),
+    )
+  }
+}
+
+///|
+async test "OpenAI Responses retries before acceptance without leaking decoder state" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    let mut request_count = 0
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let _ = body.read_all()
+          let attempt = request_count
+          request_count = request_count + 1
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/event-stream",
+          })
+          if attempt == 0 {
+            connection.write(
+              "data: {\"type\":\"response.created\",\"response\":{\"id\":\"resp-first\",\"status\":\"queued\"}}\n\n",
+            )
+            connection.write(
+              "data: {\"type\":\"error\",\"error\":{\"message\":\"retry first attempt\",\"code\":\"server_error\"}}\n\n",
+            )
+          } else {
+            connection.write(
+              "data: {\"type\":\"response.created\",\"response\":{\"id\":\"resp-second\",\"status\":\"queued\"}}\n\n",
+            )
+            connection.write(
+              "data: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg_2\",\"delta\":\"retried\"}\n\n",
+            )
+            connection.write(
+              "data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp-second\",\"status\":\"completed\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1,\"total_tokens\":2}}}\n\n",
+            )
+          }
+        },
+        max_connections=2,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let events : Array[@provider.LanguageModelV4StreamPart] = []
+    let text = StringBuilder::new()
+    let result = @ai.stream_text(
+      provider.responses("responses-model"),
+      prompt="hello",
+      include_raw_chunks=true,
+      retry_policy=@provider.RetryPolicy::new(
+        max_retries=1,
+        initial_delay_ms=0,
+        max_delay_ms=0,
+      ),
+      on_event=event => {
+        events.push(event)
+        match event {
+          @provider.V4TextDelta(delta~, ..) => text.write_string(delta)
+          _ => ()
+        }
+      },
+    )
+    assert_eq(request_count, 2)
+    assert_eq(text.to_string(), "retried")
+    assert_eq(result.response.unwrap().id, Some("resp-second"))
+    json_inspect(result.provider_metadata["openai"], content={
+      "responseId": "resp-second",
+    })
+    let mut start_count = 0
+    let mut leaked_first_attempt = false
+    for event in events {
+      match event {
+        @provider.V4StreamStart(..) => start_count = start_count + 1
+        @provider.V4Raw(value) if value.stringify().contains("resp-first") =>
+          leaked_first_attempt = true
+        _ => ()
+      }
+    }
+    assert_eq(start_count, 1)
+    assert_false(leaked_first_attempt)
+  }
+}
+
+///|
+async test "OpenAI Responses continues normally after acceptance" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    let output_sent = Ref(false)
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let _ = body.read_all()
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/event-stream",
+          })
+          connection.write(
+            "data: {\"type\":\"response.in_progress\",\"response\":{\"id\":\"resp-accepted\",\"status\":\"in_progress\"}}\n\n",
+          )
+          connection.flush()
+          @async.sleep(150)
+          output_sent.val = true
+          connection.write(
+            "data: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg_1\",\"delta\":\"accepted\"}\n\n",
+          )
+          connection.write(
+            "data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp-accepted\",\"status\":\"completed\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1,\"total_tokens\":2}}}\n\n",
+          )
+        },
+        max_connections=1,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let events : Array[@provider.LanguageModelV4StreamPart] = []
+    let text = StringBuilder::new()
+    let started_before_output = Ref(false)
+    let result = @ai.stream_text(
+      provider.responses("responses-model"),
+      prompt="hello",
+      retry_policy=@provider.RetryPolicy::none(),
+      on_event=event => {
+        events.push(event)
+        match event {
+          @provider.V4StreamStart(..) =>
+            started_before_output.val = !output_sent.val
+          @provider.V4TextDelta(delta~, ..) => text.write_string(delta)
+          _ => ()
+        }
+      },
+    )
+    assert_eq(text.to_string(), "accepted")
+    assert_true(started_before_output.val)
+    assert_eq(result.finish_reason.unified, @provider.V4FinishStop)
+    assert_true(
+      events.any(event => event is @provider.V4TextDelta(delta="accepted", ..)),
+    )
   }
 }
 
@@ -509,7 +999,11 @@ async test "official OpenAI image models apply model-specific limits and format"
     )
     assert_eq(dalle.images.length(), 2)
     assert_eq(dalle.usage.total_tokens, 4)
+    assert_eq(dalle.response.unwrap().model_id, Some("dall-e-3"))
+    assert_true(dalle.response.unwrap().created_at is Some(_))
     assert_eq(gpt_image.images.length(), 1)
+    assert_eq(gpt_image.response.unwrap().model_id, Some("gpt-image-1"))
+    assert_true(gpt_image.response.unwrap().created_at is Some(_))
   }
 }
 
@@ -533,7 +1027,6 @@ async test "official OpenAI completion model owns streaming decoding" {
           connection.write(
             "data: {\"choices\":[{\"text\":\"Bit\",\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":2,\"total_tokens\":3}}\n\n",
           )
-          connection.write("data: [DONE]\n\n")
         },
         max_connections=1,
       )
@@ -547,6 +1040,7 @@ async test "official OpenAI completion model owns streaming decoding" {
     let result = @ai.stream_text(
       provider.completion("gpt-3.5-turbo-instruct"),
       prompt="",
+      top_k=5.0,
       on_event=event => events.push(event),
     )
     let text = StringBuilder::new()
@@ -559,12 +1053,20 @@ async test "official OpenAI completion model owns streaming decoding" {
     assert_eq(text.to_string(), "MoonBit")
     assert_eq(result.usage.output_tokens.total, Some(2))
     assert_eq(result.response.unwrap().id, Some("cmpl_1"))
-    assert_true(events[0] is @provider.V4StreamStart(..))
+    match events[0] {
+      @provider.V4StreamStart(warnings~) => {
+        assert_eq(warnings.length(), 1)
+        assert_true(warnings[0] is @provider.Unsupported(feature="topK", ..))
+      }
+      _ => fail("expected the V4 stream-start event first")
+    }
     assert_true(
-      events.any(event => event is @provider.V4TextDelta(delta="Moon", ..)),
+      events.any(event => {
+        event is @provider.V4TextDelta(id="0", delta="Moon", ..)
+      }),
     )
     json_inspect(result.provider_metadata["openai"], content={
-      "logprobs": [{ "tokens": ["Moon"] }],
+      "logprobs": { "tokens": ["Moon"] },
     })
   }
 }

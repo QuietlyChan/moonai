@@ -60,15 +60,16 @@ async test "Anthropic Skills uploads bundles and resolves latest version metadat
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
     ).skills()
+    assert_eq(skills.specification_version(), "v4")
     assert_eq(skills.provider(), "anthropic.skills")
     let result = @ai.upload_skill(
       skills,
       files=[
-        @provider.SkillFile::new(
+        @provider.SkillsV4File::new(
           path="SKILL.md",
           data=@provider.UploadFileData::text("# Capture Skill"),
         ),
-        @provider.SkillFile::new(
+        @provider.SkillsV4File::new(
           path="scripts/capture.mbt",
           data=@provider.UploadFileData::base64("Zm4gY2FwdHVyZQ=="),
         ),
@@ -121,7 +122,7 @@ async test "Anthropic Skills omits an absent display title" {
       idle_timeout_ms=2_000,
     ).skills()
     let result = @ai.upload_skill(skills, files=[
-      @provider.SkillFile::new(
+      @provider.SkillsV4File::new(
         path="SKILL.md",
         data=@provider.UploadFileData::text("# Untitled Skill"),
       ),

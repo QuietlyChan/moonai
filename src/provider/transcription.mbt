@@ -131,7 +131,7 @@ pub(all) enum TranscriptionStreamEvent {
     provider_metadata~ : Map[String, Json]
   )
   TranscriptionRaw(Json)
-  TranscriptionStreamError(String)
+  TranscriptionStreamError(StreamErrorInfo)
 } derive(Debug, Eq)
 
 ///|

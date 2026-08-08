@@ -1,48 +1,55 @@
 ///|
 /// Stateful decoder for OpenAI-compatible Chat Completions SSE.
-pub struct OpenAICompatibleStreamDecoder {
-  priv sse : @provider_utils.EventSourceBuffer
-  priv include_raw_chunks : Bool
-  priv generate_id : @provider_utils.IdGenerator
-  priv generate_reasoning_ids : Bool
-  priv text : StringBuilder
-  priv reasoning : StringBuilder
-  priv tools : @provider_utils.ToolCallDeltaAssembler
-  priv tool_stream_ids : Array[String]
-  priv pending_tool_ids : Array[String]
-  priv pending_tool_arguments : Array[StringBuilder]
-  priv pending_tool_metadata : Array[Map[String, Json]]
-  priv pending_tool_received : Array[Bool]
-  priv forwarded_tool_calls : Array[Bool]
-  priv mut usage : @provider.Usage
-  priv mut raw_usage : Json?
-  priv mut finish_reason : @provider.FinishReason
-  priv mut finish_reason_raw : String?
-  priv provider_name : String
-  priv metadata_key : String
-  priv error_structure : OpenAICompatibleErrorStructure
-  priv convert_usage : (Json) -> @provider.Usage
-  priv stream_metadata_extractor : OpenAICompatibleStreamMetadataExtractor?
-  priv mut response_metadata : @provider.ResponseMetadata?
-  priv mut provider_metadata : Map[String, Json]
-  priv mut text_started : Bool
-  priv mut reasoning_started : Bool
-  priv mut reasoning_stream_id : String
-  priv mut metadata_emitted : Bool
-  priv mut finalized : Bool
+priv struct OpenAICompatibleStreamDecoder {
+  sse : @provider_utils.EventSourceBuffer
+  include_raw_chunks : Bool
+  generate_id : @provider_utils.IdGenerator
+  generate_reasoning_ids : Bool
+  text_stream_id : String
+  close_text_before_reasoning : Bool
+  close_text_before_tool_calls : Bool
+  validate_stream_chunk : OpenAICompatibleJsonValidator
+  text : StringBuilder
+  reasoning : StringBuilder
+  tools : @provider_utils.StreamingToolCallTracker
+  pending_tool_ids : Array[String?]
+  pending_tool_arguments : Array[StringBuilder]
+  pending_tool_metadata : Array[Map[String, Json]]
+  pending_tool_data : Array[Json]
+  pending_tool_received : Array[Bool]
+  forwarded_tool_calls : Array[Bool]
+  mut raw_usage : Json?
+  mut finish_reason : @provider.FinishReason
+  mut finish_reason_raw : String?
+  provider_name : String
+  metadata_key : String
+  error_structure : OpenAICompatibleErrorStructure
+  convert_usage : OpenAICompatibleUsageConverter
+  stream_metadata_extractor : OpenAICompatibleStreamMetadataExtractor?
+  mut response_metadata : @provider.ResponseMetadata?
+  mut provider_metadata : Map[String, Json]
+  mut text_started : Bool
+  mut reasoning_started : Bool
+  mut reasoning_stream_id : String
+  mut metadata_emitted : Bool
+  mut finalized : Bool
 }
 
 ///|
 /// Create an empty OpenAI-compatible stream decoder.
-pub fn OpenAICompatibleStreamDecoder::new(
-  include_raw_chunks? : Bool = false,
-  provider_name? : String = "",
-  metadata_key? : String = "",
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-  metadata_extractor? : OpenAICompatibleMetadataExtractor,
-  convert_usage? : (Json) -> @provider.Usage = convert_openai_compatible_chat_usage,
-  id_generator? : @provider_utils.IdGenerator,
-  generate_reasoning_ids? : Bool = false,
+fn OpenAICompatibleStreamDecoder::new(
+  include_raw_chunks : Bool,
+  provider_name : String,
+  metadata_key : String,
+  error_structure : OpenAICompatibleErrorStructure,
+  metadata_extractor : OpenAICompatibleMetadataExtractor?,
+  convert_usage : OpenAICompatibleUsageConverter,
+  id_generator : @provider_utils.IdGenerator,
+  generate_reasoning_ids : Bool,
+  text_stream_id : String,
+  close_text_before_reasoning : Bool,
+  close_text_before_tool_calls : Bool,
+  validate_stream_chunk : OpenAICompatibleJsonValidator,
 ) -> OpenAICompatibleStreamDecoder {
   let resolved_metadata_key = if metadata_key != "" {
     metadata_key
@@ -54,26 +61,27 @@ pub fn OpenAICompatibleStreamDecoder::new(
   } else {
     "openai-compatible"
   }
-  let resolved_id_generator = id_generator.unwrap_or(
-    @provider_utils.generate_id,
-  )
+  let resolved_id_generator = id_generator
   {
     sse: @provider_utils.EventSourceBuffer::new(),
     include_raw_chunks,
     generate_id: resolved_id_generator,
     generate_reasoning_ids,
+    text_stream_id,
+    close_text_before_reasoning,
+    close_text_before_tool_calls,
+    validate_stream_chunk,
     text: StringBuilder::new(),
     reasoning: StringBuilder::new(),
-    tools: @provider_utils.ToolCallDeltaAssembler::new(
+    tools: @provider_utils.StreamingToolCallTracker::new(
       id_generator=resolved_id_generator,
     ),
-    tool_stream_ids: [],
     pending_tool_ids: [],
     pending_tool_arguments: [],
     pending_tool_metadata: [],
+    pending_tool_data: [],
     pending_tool_received: [],
     forwarded_tool_calls: [],
-    usage: @provider.Usage::zero(),
     raw_usage: None,
     finish_reason: @provider.Unknown(""),
     finish_reason_raw: None,
@@ -95,9 +103,26 @@ pub fn OpenAICompatibleStreamDecoder::new(
 }
 
 ///|
+fn OpenAICompatibleStreamDecoder::invalid_stream_chunk(
+  self : OpenAICompatibleStreamDecoder,
+  message : String,
+  data : Json,
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] {
+  self.finish_reason = @provider.Error
+  self.finish_reason_raw = None
+  let events : Array[@provider.LanguageModelV4StreamPart] = [
+    @provider.V4Error(@provider.StreamErrorInfo::new(message, data~)),
+  ]
+  if self.include_raw_chunks {
+    events.insert(0, @provider.V4Raw(data))
+  }
+  { events, consumed_event: true, done: false }
+}
+
+///|
 fn OpenAICompatibleStreamDecoder::start_reasoning(
   self : OpenAICompatibleStreamDecoder,
-  events : Array[@provider.StreamEvent],
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> String {
   if !self.reasoning_started {
     self.reasoning_started = true
@@ -111,7 +136,12 @@ fn OpenAICompatibleStreamDecoder::start_reasoning(
     } else {
       generated
     }
-    events.push(@provider.ReasoningStart(self.reasoning_stream_id))
+    events.push(
+      @provider.V4ReasoningStart(
+        id=self.reasoning_stream_id,
+        provider_metadata=Map([]),
+      ),
+    )
   }
   self.reasoning_stream_id
 }
@@ -119,12 +149,30 @@ fn OpenAICompatibleStreamDecoder::start_reasoning(
 ///|
 fn OpenAICompatibleStreamDecoder::close_reasoning(
   self : OpenAICompatibleStreamDecoder,
-  events : Array[@provider.StreamEvent],
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit {
   if self.reasoning_started {
     self.reasoning_started = false
-    events.push(@provider.ReasoningEnd(self.reasoning_stream_id))
+    events.push(
+      @provider.V4ReasoningEnd(
+        id=self.reasoning_stream_id,
+        provider_metadata=Map([]),
+      ),
+    )
     self.reasoning_stream_id = ""
+  }
+}
+
+///|
+fn OpenAICompatibleStreamDecoder::close_text(
+  self : OpenAICompatibleStreamDecoder,
+  events : Array[@provider.LanguageModelV4StreamPart],
+) -> Unit {
+  if self.text_started {
+    self.text_started = false
+    events.push(
+      @provider.V4TextEnd(id=self.text_stream_id, provider_metadata=Map([])),
+    )
   }
 }
 
@@ -133,9 +181,13 @@ fn OpenAICompatibleStreamDecoder::close_reasoning(
 fn OpenAICompatibleStreamDecoder::record_json(
   self : OpenAICompatibleStreamDecoder,
   json : Json,
-  events : Array[@provider.StreamEvent],
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit {
-  let chunk_metadata = @provider.ResponseMetadata::from_json(json)
+  let chunk_metadata = @provider_utils.create_language_model_response_metadata(
+    id?=@provider_utils.json_string_field(json, "id"),
+    model?=@provider_utils.json_string_field(json, "model"),
+    created?=@provider_utils.json_int_field_opt(json, "created"),
+  )
   if !chunk_metadata.is_empty() {
     self.response_metadata = Some(
       @provider.merge_response_metadata(self.response_metadata, chunk_metadata),
@@ -143,7 +195,7 @@ fn OpenAICompatibleStreamDecoder::record_json(
   }
   if !self.metadata_emitted {
     self.metadata_emitted = true
-    events.push(@provider.ResponseMetadataReady(chunk_metadata))
+    events.push(@provider.V4ResponseMetadataReady(chunk_metadata))
   }
   if self.provider_name != "" {
     self.provider_metadata = @provider.merge_provider_metadata(
@@ -155,28 +207,6 @@ fn OpenAICompatibleStreamDecoder::record_json(
     self.provider_metadata,
     openai_compatible_prediction_metadata(json, self.metadata_key),
   )
-  if self.stream_metadata_extractor is Some(extractor) {
-    extractor.process_chunk(json)
-  }
-}
-
-///|
-fn finish_reason_is_known(reason : @provider.FinishReason) -> Bool {
-  !(reason is @provider.Unknown(""))
-}
-
-///|
-fn OpenAICompatibleStreamDecoder::ensure_tool_stream_id(
-  self : OpenAICompatibleStreamDecoder,
-  index : Int,
-  stream_id : String,
-) -> Unit {
-  while self.tool_stream_ids.length() <= index {
-    self.tool_stream_ids.push("")
-  }
-  if self.tool_stream_ids[index] == "" {
-    self.tool_stream_ids[index] = stream_id
-  }
 }
 
 ///|
@@ -192,9 +222,10 @@ fn OpenAICompatibleStreamDecoder::ensure_pending_tool(
     )
   }
   while self.pending_tool_ids.length() <= index {
-    self.pending_tool_ids.push("")
+    self.pending_tool_ids.push(None)
     self.pending_tool_arguments.push(StringBuilder::new())
     self.pending_tool_metadata.push(Map([]))
+    self.pending_tool_data.push(data)
     self.pending_tool_received.push(false)
     self.forwarded_tool_calls.push(false)
   }
@@ -208,33 +239,21 @@ fn OpenAICompatibleStreamDecoder::apply_forwarded_tool_delta(
   name : String?,
   arguments_delta : String?,
   provider_metadata : Map[String, Json],
-  events : Array[@provider.StreamEvent],
+  data : Json,
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit raise {
-  let applied = self.tools.apply(
-    @provider_utils.ToolCallDelta::new(
-      index~,
-      id?,
-      name?,
-      arguments_delta?,
-      provider_metadata~,
-    ),
-  )
-  self.ensure_tool_stream_id(index, applied.stream_id)
-  if applied.started {
-    events.push(
-      @provider.ToolInputStart(
-        id=applied.stream_id,
-        tool_name=applied.tool_name,
+  for
+    event in self.tools.process_delta_v4(
+      @provider_utils.StreamingToolCallDelta::new(
+        index~,
+        id?,
+        function_name?=name,
+        arguments_delta?,
+        provider_metadata~,
+        data~,
       ),
-    )
-  }
-  if applied.arguments_delta != "" {
-    events.push(
-      @provider.ToolInputDelta(
-        id=applied.stream_id,
-        delta=applied.arguments_delta,
-      ),
-    )
+    ) {
+    events.push(event)
   }
 }
 
@@ -243,7 +262,7 @@ fn OpenAICompatibleStreamDecoder::apply_tool_delta(
   self : OpenAICompatibleStreamDecoder,
   json : Json,
   fallback_index : Int,
-  events : Array[@provider.StreamEvent],
+  events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit raise {
   guard json is Object(_) else { return }
   let index = match json {
@@ -269,13 +288,13 @@ fn OpenAICompatibleStreamDecoder::apply_tool_delta(
   self.ensure_pending_tool(index, json)
   if self.forwarded_tool_calls[index] {
     self.apply_forwarded_tool_delta(
-      index, id, name, arguments_delta, provider_metadata, events,
+      index, id, name, arguments_delta, provider_metadata, json, events,
     )
     return
   }
   self.pending_tool_received[index] = true
-  if id is Some(value) && value != "" && self.pending_tool_ids[index] == "" {
-    self.pending_tool_ids[index] = value
+  if id is Some(_) && self.pending_tool_ids[index] is None {
+    self.pending_tool_ids[index] = id
   }
   if arguments_delta is Some(value) && value != "" {
     self.pending_tool_arguments[index].write_string(value)
@@ -284,18 +303,14 @@ fn OpenAICompatibleStreamDecoder::apply_tool_delta(
     self.pending_tool_metadata[index],
     provider_metadata,
   )
-  if name is Some(value) && value != "" {
-    let buffered_id = if self.pending_tool_ids[index] == "" {
-      None
-    } else {
-      Some(self.pending_tool_ids[index])
-    }
+  if name is Some(value) {
     self.apply_forwarded_tool_delta(
       index,
-      buffered_id,
+      self.pending_tool_ids[index],
       Some(value),
       Some(self.pending_tool_arguments[index].to_string()),
       self.pending_tool_metadata[index],
+      json,
       events,
     )
     self.forwarded_tool_calls[index] = true
@@ -306,14 +321,11 @@ fn OpenAICompatibleStreamDecoder::apply_tool_delta(
 fn OpenAICompatibleStreamDecoder::apply_json(
   self : OpenAICompatibleStreamDecoder,
   json : Json,
-) -> Array[@provider.StreamEvent] raise {
-  let events : Array[@provider.StreamEvent] = []
+) -> Array[@provider.LanguageModelV4StreamPart] raise {
+  let events : Array[@provider.LanguageModelV4StreamPart] = []
   match json {
     { "usage": Null, .. } => ()
-    { "usage": usage, .. } => {
-      self.usage = (self.convert_usage)(usage)
-      self.raw_usage = Some(usage)
-    }
+    { "usage": usage, .. } => self.raw_usage = Some(usage)
     _ => ()
   }
   match json {
@@ -325,21 +337,44 @@ fn OpenAICompatibleStreamDecoder::apply_json(
         _ => ""
       }
       if reasoning != "" {
+        if self.close_text_before_reasoning {
+          self.close_text(events)
+        }
         let reasoning_id = self.start_reasoning(events)
         self.reasoning.write_string(reasoning)
-        events.push(@provider.ReasoningDelta(id=reasoning_id, delta=reasoning))
+        events.push(
+          @provider.V4ReasoningDelta(
+            id=reasoning_id,
+            delta=reasoning,
+            provider_metadata=Map([]),
+          ),
+        )
       }
       if delta is { "content": String(content), .. } && content != "" {
         self.close_reasoning(events)
         if !self.text_started {
           self.text_started = true
-          events.push(@provider.TextStart("text-0"))
+          events.push(
+            @provider.V4TextStart(
+              id=self.text_stream_id,
+              provider_metadata=Map([]),
+            ),
+          )
         }
         self.text.write_string(content)
-        events.push(@provider.TextDelta(id="text-0", delta=content))
+        events.push(
+          @provider.V4TextDelta(
+            id=self.text_stream_id,
+            delta=content,
+            provider_metadata=Map([]),
+          ),
+        )
       }
       if delta is { "tool_calls": Array(calls), .. } {
         self.close_reasoning(events)
+        if self.close_text_before_tool_calls {
+          self.close_text(events)
+        }
         for index, call in calls {
           self.apply_tool_delta(call, index, events)
         }
@@ -372,45 +407,35 @@ fn OpenAICompatibleStreamDecoder::first_unresolved_tool_call(
 ///|
 fn OpenAICompatibleStreamDecoder::final_events(
   self : OpenAICompatibleStreamDecoder,
-) -> Array[@provider.StreamEvent] {
+) -> Array[@provider.LanguageModelV4StreamPart] raise {
   if self.finalized {
     return []
   }
-  self.finalized = true
-  let events : Array[@provider.StreamEvent] = []
   if self.first_unresolved_tool_call() is Some(index) {
-    self.finish_reason = @provider.Error
-    self.finish_reason_raw = Some("invalid_tool_call")
-    events.push(
-      @provider.StreamError(
-        "OpenAI-compatible tool call at index \{index} is missing function.name",
+    let _ = self.tools.process_delta(
+      @provider_utils.StreamingToolCallDelta::new(
+        index~,
+        id?=self.pending_tool_ids[index],
+        arguments_delta=self.pending_tool_arguments[index].to_string(),
+        provider_metadata=self.pending_tool_metadata[index],
+        data=self.pending_tool_data[index],
       ),
     )
   }
-  if self.text_started {
-    events.push(@provider.TextEnd("text-0"))
-  }
+  self.finalized = true
+  let events : Array[@provider.LanguageModelV4StreamPart] = []
+  self.close_text(events)
   self.close_reasoning(events)
-  if self.finish_reason is @provider.Error {
-    for stream_id in self.tool_stream_ids {
-      if stream_id != "" {
-        events.push(@provider.ToolInputEnd(stream_id))
-      }
-    }
-  } else {
-    let calls = self.tools.calls()
-    for index, call in calls {
-      let stream_id = if index < self.tool_stream_ids.length() &&
-        self.tool_stream_ids[index] != "" {
-        self.tool_stream_ids[index]
-      } else {
-        call.id
-      }
-      events.push(@provider.ToolInputEnd(stream_id))
-      events.push(@provider.ToolCallReady(call))
-    }
+  for event in self.tools.flush_v4() {
+    events.push(event)
   }
-  events.push(@provider.Finish(usage=self.usage, reason=self.finish_reason))
+  events.push(
+    @provider.V4Finish(
+      usage=self.v4_usage(),
+      reason=self.v4_finish_reason(),
+      provider_metadata=self.provider_metadata_snapshot(),
+    ),
+  )
   events
 }
 
@@ -418,50 +443,53 @@ fn OpenAICompatibleStreamDecoder::final_events(
 fn OpenAICompatibleStreamDecoder::decode_data(
   self : OpenAICompatibleStreamDecoder,
   data : String,
-) -> @provider_utils.DecodeBatch raise {
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   if data.trim() == "[DONE]" {
     return { events: self.final_events(), consumed_event: true, done: true }
   }
   let json = @json.parse(data) catch {
-    error => {
-      self.finish_reason = @provider.Error
-      self.finish_reason_raw = Some("invalid_json")
-      return {
-        events: [
-          @provider.StreamError(
-            "OpenAI-compatible stream decode error: \{error}; data: \{data}",
-          ),
-        ],
-        consumed_event: true,
-        done: false,
-      }
-    }
+    error =>
+      return self.invalid_stream_chunk(
+        "OpenAI-compatible stream decode error: \{error}; data: \{data}",
+        Json::string(data),
+      )
   }
   if self.error_structure.message(json) is Some(message) {
+    if self.stream_metadata_extractor is Some(extractor) {
+      extractor.process_chunk(json)
+    }
     self.finish_reason = @provider.Error
-    self.finish_reason_raw = Some("error")
-    let events : Array[@provider.StreamEvent] = [@provider.StreamError(message)]
-    let terminal_events = self.final_events()
-    for event in terminal_events {
-      events.push(event)
+    self.finish_reason_raw = None
+    let error_data = match json {
+      { "error": value, .. } => value
+      _ => json
     }
+    let events : Array[@provider.LanguageModelV4StreamPart] = [
+      @provider.V4Error(
+        @provider.StreamErrorInfo::new(message, data=error_data),
+      ),
+    ]
     if self.include_raw_chunks {
-      let all_events : Array[@provider.StreamEvent] = [@provider.Raw(json)]
-      for event in events {
-        all_events.push(event)
-      }
-      return { events: all_events, consumed_event: true, done: true }
+      events.insert(0, @provider.V4Raw(json))
     }
-    return { events, consumed_event: true, done: true }
+    return { events, consumed_event: true, done: false }
   }
-  let events : Array[@provider.StreamEvent] = []
+  if (self.validate_stream_chunk)(json) is Some(message) {
+    return self.invalid_stream_chunk(message, json)
+  }
+  if self.stream_metadata_extractor is Some(extractor) {
+    extractor.process_chunk(json)
+  }
+  let events : Array[@provider.LanguageModelV4StreamPart] = []
   self.record_json(json, events)
   let decoded_events = self.apply_json(json)
   for event in decoded_events {
     events.push(event)
   }
   if self.include_raw_chunks {
-    let all_events : Array[@provider.StreamEvent] = [@provider.Raw(json)]
+    let all_events : Array[@provider.LanguageModelV4StreamPart] = [
+      @provider.V4Raw(json),
+    ]
     for event in events {
       all_events.push(event)
     }
@@ -473,89 +501,50 @@ fn OpenAICompatibleStreamDecoder::decode_data(
 
 ///|
 /// Feed one physical SSE line.
-pub fn OpenAICompatibleStreamDecoder::feed_line(
+fn OpenAICompatibleStreamDecoder::feed_line(
   self : OpenAICompatibleStreamDecoder,
   raw : String,
-) -> @provider_utils.DecodeBatch raise {
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   match self.sse.feed_line(raw) {
     Some(data) => self.decode_data(data)
-    None => @provider_utils.DecodeBatch::empty(self.finalized)
+    None => @provider_utils.SseDecodeBatch::empty(self.finalized)
   }
 }
 
 ///|
 /// Flush a final unterminated SSE payload.
-pub fn OpenAICompatibleStreamDecoder::flush_buffered(
+fn OpenAICompatibleStreamDecoder::flush_buffered(
   self : OpenAICompatibleStreamDecoder,
-) -> @provider_utils.DecodeBatch raise {
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   match self.sse.flush() {
-    Some(data) => {
-      let batch = self.decode_data(data)
-      if batch.done || !finish_reason_is_known(self.finish_reason) {
-        batch
-      } else {
-        let events = batch.events
-        let terminal_events = self.final_events()
-        for event in terminal_events {
-          events.push(event)
-        }
-        { events, consumed_event: batch.consumed_event, done: true }
-      }
-    }
-    None =>
-      if self.finalized {
-        @provider_utils.DecodeBatch::empty(true)
-      } else if finish_reason_is_known(self.finish_reason) {
-        { events: self.final_events(), consumed_event: false, done: true }
-      } else {
-        @provider_utils.DecodeBatch::empty(false)
-      }
+    Some(data) => self.decode_data(data)
+    None => @provider_utils.SseDecodeBatch::empty(self.finalized)
   }
 }
 
 ///|
-/// Return the accumulated normalized response.
-pub fn OpenAICompatibleStreamDecoder::response(
+/// Finish the protocol transform after the transport reports a normal EOF.
+fn OpenAICompatibleStreamDecoder::finish_stream(
   self : OpenAICompatibleStreamDecoder,
-) -> @provider.ChatResponse {
-  let provider_metadata = match self.stream_metadata_extractor {
-    Some(extractor) =>
-      @provider.merge_provider_metadata(
-        extractor.build_metadata(),
-        self.provider_metadata,
-      )
-    None => self.provider_metadata
+) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
+  if self.finalized {
+    @provider_utils.SseDecodeBatch::empty(true)
+  } else {
+    { events: self.final_events(), consumed_event: false, done: true }
   }
-  @provider.ChatResponse::new(
-    self.text.to_string(),
-    self.reasoning.to_string(),
-    if self.finish_reason is @provider.Error {
-      []
-    } else {
-      self.tools.calls()
-    },
-    self.usage,
-    self.finish_reason,
-  ).with_diagnostics(None, self.response_metadata, provider_metadata, [])
 }
 
 ///|
 /// Return V4 usage with the latest provider-native usage object.
-pub fn OpenAICompatibleStreamDecoder::v4_usage(
+fn OpenAICompatibleStreamDecoder::v4_usage(
   self : OpenAICompatibleStreamDecoder,
 ) -> @provider.LanguageModelV4Usage {
-  match self.raw_usage {
-    Some(_) =>
-      @provider.LanguageModelV4Usage::from_usage(self.usage).with_raw(
-        self.raw_usage,
-      )
-    None => @provider.LanguageModelV4Usage::unknown()
-  }
+  (self.convert_usage)(self.raw_usage)
 }
 
 ///|
 /// Return V4 finish reason with the provider-native finish string.
-pub fn OpenAICompatibleStreamDecoder::v4_finish_reason(
+fn OpenAICompatibleStreamDecoder::v4_finish_reason(
   self : OpenAICompatibleStreamDecoder,
 ) -> @provider.LanguageModelV4FinishReason {
   @provider.LanguageModelV4FinishReason::from_finish_reason(self.finish_reason).with_raw(
@@ -565,7 +554,7 @@ pub fn OpenAICompatibleStreamDecoder::v4_finish_reason(
 
 ///|
 /// Return metadata accumulated from compatible stream chunks.
-pub fn OpenAICompatibleStreamDecoder::provider_metadata_snapshot(
+fn OpenAICompatibleStreamDecoder::provider_metadata_snapshot(
   self : OpenAICompatibleStreamDecoder,
 ) -> Map[String, Json] {
   match self.stream_metadata_extractor {
@@ -576,4 +565,12 @@ pub fn OpenAICompatibleStreamDecoder::provider_metadata_snapshot(
       )
     None => self.provider_metadata
   }
+}
+
+///|
+/// Return response identity accumulated from compatible stream chunks.
+fn OpenAICompatibleStreamDecoder::response_metadata_snapshot(
+  self : OpenAICompatibleStreamDecoder,
+) -> @provider.ResponseMetadata? {
+  self.response_metadata
 }

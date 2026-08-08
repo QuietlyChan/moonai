@@ -89,48 +89,14 @@ fn OpenAICompatibleEmbeddingModel::request_headers(
 }
 
 ///|
-pub impl @provider.EmbeddingWireModel for OpenAICompatibleEmbeddingModel with fn provider(
-  self,
-) -> String {
-  self.provider_name
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for OpenAICompatibleEmbeddingModel with fn model_id(
-  self,
-) -> String {
-  self.model_id
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for OpenAICompatibleEmbeddingModel with fn max_embeddings_per_call(
-  self,
-) -> Int {
-  self.max_embeddings
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for OpenAICompatibleEmbeddingModel with fn supports_parallel_calls(
-  self,
-) -> Bool {
-  self.supports_parallel
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for OpenAICompatibleEmbeddingModel with fn embed(
-  self,
-  values,
-  options,
-) {
-  self.embed_values(values, options)
-}
-
-///|
-async fn OpenAICompatibleEmbeddingModel::embed_values(
+async fn OpenAICompatibleEmbeddingModel::perform_embedding_request(
   self : OpenAICompatibleEmbeddingModel,
   values : Array[String],
-  options : @provider.EmbeddingOptions,
-) -> @provider.EmbeddingBatchResponse {
+  headers : Map[String, String],
+  provider_options : Map[String, Json],
+  retry_policy : @provider.RetryPolicy,
+  cancellation_token : @provider.CancellationToken?,
+) -> @provider.EmbeddingModelV4Result {
   guard values.length() <= self.max_embeddings else {
     raise @provider.TooManyEmbeddingValuesForCallError(
       provider=self.provider_name,
@@ -139,29 +105,27 @@ async fn OpenAICompatibleEmbeddingModel::embed_values(
       values=values.copy(),
     )
   }
-  let request_body = encode_embedding_request(
-    self.model_id,
-    values,
-    options,
-    provider_name=self.provider_name,
-  )
   let option_resolution = resolve_compatible_options(
-    options.provider_options,
+    provider_options,
     self.provider_name,
     embedding_reserved_fields(),
   )
+  let request_body = encode_embedding_request_data(
+    self.model_id,
+    values,
+    option_resolution.values,
+  )
   let request_headers = @provider_utils.merge_headers(
     self.request_headers(),
-    options.headers,
+    headers,
   )
-  let cancellation_token = options.cancellation_token
   let response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=self.embeddings_url(),
     headers=request_headers,
     body=request_body,
     timeout_ms=self.idle_timeout_ms,
-    retry_policy=options.retry_policy,
+    retry_policy~,
     cancellation_token?,
     error_to_message=json => self.error_structure.message(json),
     is_retryable_response=(status_code, error) => {
@@ -169,21 +133,25 @@ async fn OpenAICompatibleEmbeddingModel::embed_values(
     },
     transport=self.http_transport,
   )
-  let decoded = decode_embedding_response(
-    response.value,
-    error_structure=self.error_structure,
+  let (embeddings, usage_tokens) = @provider_utils.handle_json_response(
+    response,
+    value => decode_embedding_response_data(value, self.error_structure),
   )
-  decoded
-  .with_diagnostics(
-    None,
-    None,
-    @provider_utils.provider_metadata_from_json(
+  let usage = match usage_tokens {
+    Some(value) => Some(@provider.EmbeddingModelV4Usage::new(value))
+    None => None
+  }
+  @provider.EmbeddingModelV4Result::new(
+    embeddings,
+    usage?,
+    provider_metadata=@provider_utils.provider_metadata_from_json(
       response.value,
       self.provider_name,
     ),
-    option_resolution.warnings,
+    request=response.request,
+    response=response.response,
+    warnings=option_resolution.warnings,
   )
-  .with_transport(response.request, response.response)
 }
 
 ///|
@@ -227,15 +195,11 @@ pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel with fn d
   self,
   options,
 ) {
-  let legacy_options = @provider.EmbeddingOptions::new(
-    dimensions?=None,
-    user?=None,
-    headers=options.headers,
-    provider_options=options.provider_options,
-    retry_policy=options.retry_policy,
-    cancellation_token?=options.cancellation_token,
-  )
-  @provider.EmbeddingModelV4Result::from_batch_response(
-    self.embed_values(options.values, legacy_options),
+  self.perform_embedding_request(
+    options.values,
+    options.headers,
+    options.provider_options,
+    options.retry_policy,
+    options.cancellation_token,
   )
 }

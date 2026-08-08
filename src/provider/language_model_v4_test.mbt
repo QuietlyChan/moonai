@@ -35,13 +35,23 @@ test "V4 unknown usage does not fabricate zero counters" {
 ///|
 test "V4 stream conversion preserves lifecycle and diagnostics" {
   let start = LanguageModelV4StreamPart::from_stream_event(StreamStart)
-  assert_true(start is V4StreamStart(warnings=values) && values.length() == 0)
+  assert_true(
+    start is Some(V4StreamStart(warnings=values)) && values.length() == 0,
+  )
+
+  assert_true(
+    LanguageModelV4StreamPart::from_stream_event(
+      Warning(Warning::unsupported("topK")),
+    )
+    is None,
+  )
 
   let delta = LanguageModelV4StreamPart::from_stream_event(
     TextDelta(id="text-0", delta="hello"),
   )
   assert_true(
-    delta is V4TextDelta(id="text-0", delta="hello", provider_metadata=metadata) &&
+    delta
+    is Some(V4TextDelta(id="text-0", delta="hello", provider_metadata=metadata)) &&
     metadata.length() == 0,
   )
 
@@ -49,16 +59,22 @@ test "V4 stream conversion preserves lifecycle and diagnostics" {
     Finish(usage=Usage::zero(), reason=Stop),
   )
   assert_true(
-    finish is V4Finish(usage=value, reason~, provider_metadata=metadata) &&
+    finish is Some(V4Finish(usage=value, reason~, provider_metadata=metadata)) &&
     reason.unified is V4FinishStop &&
     value.input_tokens.total == Some(0) &&
     metadata.length() == 0,
   )
 
   let error = LanguageModelV4StreamPart::from_stream_event(
-    StreamError("broken"),
+    StreamError(StreamErrorInfo::new("broken", data={ "code": "bad" })),
   )
-  assert_true(error is V4Error("broken"))
+  match error {
+    Some(V4Error(value)) => {
+      assert_eq(value.message, "broken")
+      assert_eq(value.data, Some(({ "code": "bad" } : Json)))
+    }
+    _ => fail("expected a structured V4 error")
+  }
 }
 
 ///|
@@ -130,13 +146,46 @@ test "V4 prompt bridge preserves text and normalizes wire tool content" {
 }
 
 ///|
+test "V4 prompt bridge keeps single text part provider options" {
+  let prompt = [
+    LanguageModelMessage::user_parts(
+      [
+        LanguageModelContentPart::text("cached").with_provider_options({
+          "openai": { "promptCacheBreakpoint": { "mode": "explicit" } },
+        }),
+      ],
+      provider_options={ "message": { "keep": true } },
+    ),
+    LanguageModelMessage::assistant_parts([
+      LanguageModelContentPart::text("answer").with_provider_options({
+        "openaiCompatible": { "messageLevel": true },
+      }),
+    ]),
+  ]
+  let round_trip = LanguageModelV4Prompt::from_language_model_prompt(prompt).to_language_model_prompt()
+  assert_true(round_trip[0].parts.length() == 1)
+  assert_true(
+    round_trip[0].parts[0].provider_options()
+    is {
+      "openai": { "promptCacheBreakpoint": { "mode": "explicit", .. }, .. },
+      ..
+    },
+  )
+  assert_true(round_trip[1].parts.length() == 1)
+  assert_true(
+    round_trip[1].parts[0].provider_options()
+    is { "openaiCompatible": { "messageLevel": true, .. }, .. },
+  )
+}
+
+///|
 test "V4 call options merge provider values without mutating the source" {
   let original = LanguageModelV4CallOptions::new(
     LanguageModelV4Prompt::new([]),
     provider_options={ "provider": { "keep": true } },
   )
   let derived = original.with_provider_options({ "provider": { "added": 1 } })
-  let changed = original.with_reasoning_effort(High)
+  let changed = original.with_reasoning(V4ReasoningHigh)
   assert_true(
     original.provider_options is { "provider": { "keep": true, .. }, .. },
   )
@@ -144,6 +193,75 @@ test "V4 call options merge provider values without mutating the source" {
     derived.provider_options
     is { "provider": { "keep": true, "added": 1, .. }, .. },
   )
-  assert_eq(original.reasoning_effort, ProviderDefault)
-  assert_eq(changed.reasoning_effort, High)
+  assert_eq(original.reasoning, V4ReasoningProviderDefault)
+  assert_eq(changed.reasoning, V4ReasoningHigh)
+}
+
+///|
+test "V4 call option inputs are independent from legacy tool and format types" {
+  let legacy_tools = [
+    ToolDefinition::new(
+      "lookup",
+      { "type": "object", "properties": { "query": { "type": "string" } } },
+      input_examples=[{ "query": "moon" }],
+      strict=true,
+    ),
+    ToolDefinition::provider(id="anthropic.web_search", name="search", args={
+      "max_uses": 3,
+    }),
+  ]
+  let v4_tools = LanguageModelV4Tool::from_tool_definitions(legacy_tools)
+  match v4_tools[0] {
+    V4FunctionTool(value) =>
+      assert_eq(value.input_examples[0].input, { "query": "moon" })
+    _ => fail("expected a V4 function tool")
+  }
+  match v4_tools[1] {
+    V4ProviderTool(value) => {
+      assert_eq(value.id, "anthropic.web_search")
+      assert_eq(value.name, "search")
+    }
+    _ => fail("expected a V4 provider tool")
+  }
+  let round_trip_tools = LanguageModelV4Tool::to_tool_definitions(v4_tools)
+  match round_trip_tools[0] {
+    FunctionTool(name~, input_examples~, strict~, ..) => {
+      assert_eq(name, "lookup")
+      assert_eq(input_examples, [{ "query": "moon" }])
+      assert_eq(strict, Some(true))
+    }
+    _ => fail("expected a normalized function tool")
+  }
+  match round_trip_tools[1] {
+    ProviderTool(id~, name~, args~) => {
+      assert_eq(id, "anthropic.web_search")
+      assert_eq(name, "search")
+      assert_eq(args, { "max_uses": 3 })
+    }
+    _ => fail("expected a normalized provider tool")
+  }
+
+  let choice = LanguageModelV4ToolChoice::from_tool_choice(Named("lookup"))
+  assert_true(choice is V4ToolChoiceTool("lookup"))
+  assert_eq(choice.to_tool_choice(), Named("lookup"))
+
+  let format = LanguageModelV4ResponseFormat::json(
+    schema={ "type": "object" },
+    name="result",
+    description="A result object",
+  )
+  assert_true(
+    format
+    is V4ResponseJson(
+      {
+        schema: Some({ "type": "object", .. }),
+        name: Some("result"),
+        description: Some("A result object"),
+      }
+    ),
+  )
+  assert_true(
+    format.to_response_format()
+    is JsonResponse({ schema: Some({ "type": "object", .. }), .. }),
+  )
 }

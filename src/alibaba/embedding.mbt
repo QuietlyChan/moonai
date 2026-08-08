@@ -1,24 +1,24 @@
 ///|
 /// Native DashScope text embedding model.
-pub struct AlibabaEmbeddingModel {
-  priv provider_name : String
-  priv base_url : String
-  priv api_key : String
-  priv model_id : String
-  priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
-  priv http_transport : &@provider_utils.HttpTransport
+priv struct AlibabaEmbeddingModel {
+  provider_name : String
+  base_url : String
+  api_key : String
+  model_id : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
-/// Construct a native Alibaba text embedding model.
-pub fn alibaba_embedding(
+/// Construct the concrete embedding model behind the public V4 boundary.
+fn alibaba_embedding_value(
   model_id : AlibabaEmbeddingModelId,
-  api_key? : String = "",
-  base_url? : String = "https://dashscope-intl.aliyuncs.com/api/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
-  http_transport? : &@provider_utils.HttpTransport,
+  api_key~ : String,
+  base_url~ : String,
+  headers~ : Map[String, String],
+  idle_timeout_ms~ : Int,
+  http_transport~ : &@provider_utils.HttpTransport,
 ) -> AlibabaEmbeddingModel {
   {
     provider_name: "alibaba.embedding",
@@ -27,16 +27,14 @@ pub fn alibaba_embedding(
     model_id,
     headers: @provider_utils.copy_headers(headers),
     idle_timeout_ms,
-    http_transport: http_transport.unwrap_or(
-      @provider_utils.native_http_transport(),
-    ),
+    http_transport,
   }
 }
 
 ///|
-fn AlibabaEmbeddingModel::request_headers(
+fn AlibabaEmbeddingModel::request_headers_with(
   self : AlibabaEmbeddingModel,
-  options : @provider.EmbeddingOptions,
+  request_headers : Map[String, String],
 ) -> Map[String, String] raise @provider.LoadAPIKeyError {
   let headers : Map[String, String] = Map([])
   headers["Content-Type"] = "application/json"
@@ -47,7 +45,7 @@ fn AlibabaEmbeddingModel::request_headers(
       @provider_utils.merge_headers(headers, self.headers),
       ["moonai/alibaba/\{VERSION}"],
     ),
-    options.headers,
+    request_headers,
   )
 }
 
@@ -57,6 +55,44 @@ fn AlibabaEmbeddingModel::embedding_url(self : AlibabaEmbeddingModel) -> String 
     self.base_url,
     "/services/embeddings/text-embedding/text-embedding",
   )
+}
+
+///|
+fn alibaba_sparse_embedding(value : Json, response : Json) -> Json? raise {
+  match value {
+    { "sparse_embedding": Null, .. } => None
+    { "sparse_embedding": Array(items), .. } => {
+      let normalized : Array[Json] = []
+      for item in items {
+        match item {
+          { "index": Number(index, ..), "value": Number(weight, ..), .. } => {
+            let fields : Map[String, Json] = Map([
+              ("index", Json::number(index)),
+              ("value", Json::number(weight)),
+            ])
+            match item {
+              { "token": String(token), .. } =>
+                fields["token"] = Json::string(token)
+              { "token": Null, .. } | _ => ()
+            }
+            normalized.push(Json::object(fields))
+          }
+          _ =>
+            raise @provider.InvalidResponseDataError(
+              message="Alibaba sparse embedding contains an invalid entry",
+              data=response,
+            )
+        }
+      }
+      Some(Json::array(normalized))
+    }
+    { "sparse_embedding": _, .. } =>
+      raise @provider.InvalidResponseDataError(
+        message="Alibaba sparse embedding must be an array or null",
+        data=response,
+      )
+    _ => None
+  }
 }
 
 ///|
@@ -78,10 +114,7 @@ fn embedding_texts(json : Json) -> Array[(Int, Array[Double], Json?)] raise {
                   )
               }
             }
-            let sparse = match value {
-              { "sparse_embedding": sparse_value, .. } => Some(sparse_value)
-              _ => None
-            }
+            let sparse = alibaba_sparse_embedding(value, json)
             result.push((index.to_int(), vector, sparse))
           }
           _ =>
@@ -99,6 +132,16 @@ fn embedding_texts(json : Json) -> Array[(Int, Array[Double], Json?)] raise {
         data=json,
       )
   }
+}
+
+///|
+priv struct AlibabaEmbeddingCoreResult {
+  embeddings : Array[Array[Double]]
+  usage_tokens : Int?
+  provider_metadata : Map[String, Json]
+  warnings : Array[@provider.Warning]
+  request : @provider.RequestMetadata
+  response : @provider.ResponseMetadata
 }
 
 ///|
@@ -123,15 +166,18 @@ fn sort_embedding_values(
 }
 
 ///|
-async fn AlibabaEmbeddingModel::embed_values(
+async fn AlibabaEmbeddingModel::perform_embedding_request(
   self : AlibabaEmbeddingModel,
   values : Array[String],
-  options : @provider.EmbeddingOptions,
-) -> @provider.EmbeddingBatchResponse {
+  request_headers : Map[String, String],
+  raw_provider_options : Map[String, Json],
+  fallback_dimension : Int?,
+  retry_policy : @provider.RetryPolicy,
+  cancellation_token : @provider.CancellationToken?,
+) -> AlibabaEmbeddingCoreResult {
   let (provider_options, option_warnings) = parse_alibaba_embedding_options(
-    options.provider_options,
+    raw_provider_options,
   )
-  let cancellation_token = options.cancellation_token
   if provider_options.output_type == Some("sparse") {
     raise @provider.UnsupportedFunctionalityError(
       functionality="Alibaba embedding outputType 'sparse' is not supported; use 'dense' or 'dense&sparse'",
@@ -144,7 +190,7 @@ async fn AlibabaEmbeddingModel::embed_values(
   }
   let dimension = match provider_options.dimension {
     Some(value) => Some(value)
-    None => options.dimensions
+    None => fallback_dimension
   }
   match dimension {
     Some(value) => parameters["dimension"] = Json::number(value.to_double())
@@ -164,15 +210,29 @@ async fn AlibabaEmbeddingModel::embed_values(
   let response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=self.embedding_url(),
-    headers=self.request_headers(options),
+    headers=self.request_headers_with(request_headers),
     body~,
     timeout_ms=self.idle_timeout_ms,
-    retry_policy=options.retry_policy,
+    retry_policy~,
     cancellation_token?,
     error_to_message=alibaba_native_error_message,
     transport=self.http_transport,
   )
-  let records = sort_embedding_values(embedding_texts(response.value))
+  let (records, usage_tokens) = @provider_utils.handle_json_response(response, value => {
+    let records = sort_embedding_values(embedding_texts(value))
+    let usage_tokens = match value {
+      { "usage": Null, .. } => None
+      { "usage": { "total_tokens": Number(value, ..), .. }, .. } =>
+        Some(value.to_int())
+      { "usage": _, .. } =>
+        raise @provider.InvalidResponseDataError(
+          message="Alibaba embedding response contains invalid usage",
+          data=value,
+        )
+      _ => None
+    }
+    (records, usage_tokens)
+  })
   let embeddings : Array[Array[Double]] = [ for record in records => record.1 ]
   let sparse : Array[Json] = []
   for record in records {
@@ -186,17 +246,20 @@ async fn AlibabaEmbeddingModel::embed_values(
   if sparse.length() > 0 {
     metadata["alibaba"] = { "sparseEmbeddings": Json::array(sparse) }
   }
-  let usage = match response.value {
-    { "usage": usage, .. } => convert_alibaba_embedding_usage(usage)
-    _ => @provider.Usage::zero()
+  {
+    embeddings,
+    usage_tokens,
+    provider_metadata: metadata,
+    warnings: option_warnings,
+    request: response.request,
+    response: response.response,
   }
-  @provider.EmbeddingBatchResponse::new(embeddings, usage)
-  .with_diagnostics(None, None, metadata, option_warnings)
-  .with_transport(response.request, response.response)
 }
 
 ///|
-fn alibaba_native_error_message(json : Json) -> String? {
+fn alibaba_native_error_message(json : Json) -> String? raise {
+  // Adapt the pure built-in parser to the fallible transport hook contract.
+  @provider.check_cancellation(None)
   match json {
     { "message": String(message), .. } => Some(message)
     { "error": { "message": String(message), .. }, .. } => Some(message)
@@ -205,101 +268,68 @@ fn alibaba_native_error_message(json : Json) -> String? {
 }
 
 ///|
-pub impl @provider.EmbeddingWireModel for AlibabaEmbeddingModel with fn provider(
-  self,
-) -> String {
-  self.provider_name
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for AlibabaEmbeddingModel with fn model_id(
-  self,
-) -> String {
-  self.model_id
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for AlibabaEmbeddingModel with fn max_embeddings_per_call(
-  _self,
-) -> Int {
-  10
-}
-
-///|
-/// DashScope embedding requests are serialized to avoid provider throttling.
-pub impl @provider.EmbeddingWireModel for AlibabaEmbeddingModel with fn supports_parallel_calls(
-  _self,
-) -> Bool {
-  false
-}
-
-///|
-pub impl @provider.EmbeddingWireModel for AlibabaEmbeddingModel with fn embed(
-  self,
-  values,
-  options,
-) {
-  guard values.length() <= 10 else {
-    raise @provider.TooManyEmbeddingValuesForCallError(
-      provider=self.provider_name,
-      model_id=self.model_id,
-      max_embeddings_per_call=10,
-      values=values.copy(),
-    )
-  }
-  self.embed_values(values, options)
-}
-
-///|
 /// Versioned V4 boundary for DashScope embeddings.
-pub impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn specification_version(
+impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn specification_version(
   _self,
 ) -> String {
   "v4"
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn provider(
-  self,
-) -> String {
+impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn provider(self) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn model_id(
-  self,
-) -> String {
+impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn model_id(self) -> String {
   self.model_id
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn max_embeddings_per_call(
+impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn max_embeddings_per_call(
   _self,
 ) -> Int? {
   Some(10)
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn supports_parallel_calls(
+impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn supports_parallel_calls(
   _self,
 ) -> Bool {
   false
 }
 
 ///|
-pub impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn do_embed(
+impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn do_embed(
   self,
   options,
 ) {
-  let legacy_options = @provider.EmbeddingOptions::new(
-    dimensions?=None,
-    user?=None,
-    headers=options.headers,
-    provider_options=options.provider_options,
-    retry_policy=options.retry_policy,
-    cancellation_token?=options.cancellation_token,
+  guard options.values.length() <= 10 else {
+    raise @provider.TooManyEmbeddingValuesForCallError(
+      provider=self.provider_name,
+      model_id=self.model_id,
+      max_embeddings_per_call=10,
+      values=options.values.copy(),
+    )
+  }
+  let result = self.perform_embedding_request(
+    options.values,
+    options.headers,
+    options.provider_options,
+    None,
+    options.retry_policy,
+    options.cancellation_token,
   )
-  @provider.EmbeddingModelV4Result::from_batch_response(
-    self.embed_values(options.values, legacy_options),
+  let usage = match result.usage_tokens {
+    Some(value) => Some(@provider.EmbeddingModelV4Usage::new(value))
+    None => None
+  }
+  @provider.EmbeddingModelV4Result::new(
+    result.embeddings,
+    usage?,
+    provider_metadata=result.provider_metadata,
+    request=result.request,
+    response=result.response,
+    warnings=result.warnings,
   )
 }

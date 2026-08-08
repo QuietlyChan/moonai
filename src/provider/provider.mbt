@@ -1,33 +1,20 @@
 ///|
-/// Provider factory that selects models and provider-level file services.
+/// Provider factory that selects models and provider-level services.
 ///
-/// This is the MoonBit counterpart of AI SDK's `ProviderV4`. Unsupported
-/// model families return `None`; supported families may accept forward-
-/// compatible model identifiers and return the corresponding model object.
-pub(open) trait Provider {
-  /// Version of the provider factory contract exposed by this package.
-  ///
-  /// Providers currently implement the AI SDK-aligned V4 surface. Keeping
-  /// this on the factory (rather than inferring it from a model) lets a
-  /// registry validate provider capabilities before selecting a model.
+/// This is the MoonBit counterpart of AI SDK's `ProviderV4`. Language,
+/// embedding, and image selectors are required by that contract and raise
+/// `NoSuchModelError` when unsupported. Optional TypeScript members are
+/// represented as nullable results because MoonBit traits are nominal.
+pub(open) trait ProviderV4 {
   fn specification_version(Self) -> String
-  fn provider_name(Self) -> String
-  /// Resolve a language model through the versioned AI SDK contract.
-  ///
-  /// Provider implementations may use `ChatModel` internally for wire
-  /// encoding, but callers always receive the normalized V4 boundary.
-  fn language_model(Self, String) -> &LanguageModelV4? raise
-  fn completion_model(Self, String) -> &CompletionModel? raise
-  fn embedding_model(Self, String) -> &EmbeddingModelV4? raise
-  fn reranking_model(Self, String) -> &RerankingModel? raise
-  fn image_model(Self, String) -> &ImageModelV4? raise
-  fn video_model(Self, String) -> &VideoModelV4? raise
-  fn speech_model(Self, String) -> &SpeechModelV4? raise
+  fn language_model(Self, String) -> &LanguageModelV4 raise
+  fn embedding_model(Self, String) -> &EmbeddingModelV4 raise
+  fn image_model(Self, String) -> &ImageModelV4 raise
   fn transcription_model(Self, String) -> &TranscriptionModelV4? raise
-  fn speech_translation_model(Self, String) -> &SpeechTranslationModelV4? raise
-  fn realtime_model(Self, String) -> &RealtimeModelV4? raise
-  fn files(Self) -> &Files? raise
-  fn skills(Self) -> &Skills? raise
+  fn speech_model(Self, String) -> &SpeechModelV4? raise
+  fn reranking_model(Self, String) -> &RerankingModelV4? raise
+  fn files(Self) -> &FilesV4? raise
+  fn skills(Self) -> &SkillsV4? raise
 }
 
 ///|
@@ -62,11 +49,12 @@ pub(open) trait EmbeddingWireModel {
 }
 
 ///|
-/// Provider-neutral reranking model.
-pub(open) trait RerankingModel {
+/// Provider-neutral V4 reranking model.
+pub(open) trait RerankingModelV4 {
+  fn specification_version(Self) -> String
   fn provider(Self) -> String
   fn model_id(Self) -> String
-  async fn rerank(Self, RerankingCallOptions) -> RerankingResponse
+  async fn do_rerank(Self, RerankingModelV4CallOptions) -> RerankingModelV4Result
 }
 
 ///|
@@ -105,9 +93,10 @@ pub(open) trait VideoWireModel {
 ///|
 /// Provider-neutral interface for uploading files and receiving reusable
 /// provider references.
-pub(open) trait Files {
+pub(open) trait FilesV4 {
+  fn specification_version(Self) -> String
   fn provider(Self) -> String
-  async fn upload_file(Self, FileUploadOptions) -> FileUploadResult
+  async fn upload_file(Self, FilesV4UploadFileCallOptions) -> FilesV4UploadFileResult
 }
 
 ///|
@@ -163,7 +152,8 @@ pub(open) trait RealtimeWireModel {
 
 ///|
 /// Provider-neutral interface for uploading reusable skill bundles.
-pub(open) trait Skills {
+pub(open) trait SkillsV4 {
+  fn specification_version(Self) -> String
   fn provider(Self) -> String
-  async fn upload_skill(Self, SkillUploadOptions) -> SkillUploadResult
+  async fn upload_skill(Self, SkillsV4UploadSkillCallOptions) -> SkillsV4UploadSkillResult
 }

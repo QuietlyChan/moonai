@@ -903,5 +903,5 @@ pub(all) enum StreamEvent {
   ResponseMetadataReady(ResponseMetadata)
   Finish(usage~ : Usage, reason~ : FinishReason)
   Raw(Json)
-  StreamError(String)
+  StreamError(StreamErrorInfo)
 } derive(Debug)

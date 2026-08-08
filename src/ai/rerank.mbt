@@ -16,32 +16,30 @@ pub(all) struct RerankItem {
 ///|
 /// Result of a high-level reranking operation.
 pub(all) struct RerankResult {
-  original_documents : RerankingDocuments
-  reranked_documents : RerankingDocuments
+  original_documents : RerankingModelV4Documents
+  reranked_documents : RerankingModelV4Documents
   ranking : Array[RerankItem]
-  usage : Usage
   response : ResponseMetadata
   provider_metadata : Map[String, Json]
-  warnings : Array[Warning]
 } derive(Debug, Eq)
 
 ///|
 /// Return a document at an original index.
 fn reranking_document_at(
-  documents : RerankingDocuments,
+  documents : RerankingModelV4Documents,
   index : Int,
 ) -> RerankingDocument? {
   if index < 0 {
     return None
   }
   match documents {
-    @provider.RerankingDocuments::TextDocuments(values) =>
+    @provider.RerankingModelV4Documents::TextDocuments(values) =>
       if index >= values.length() {
         None
       } else {
         Some(RerankingDocument::TextDocument(values[index]))
       }
-    @provider.RerankingDocuments::ObjectDocuments(values) =>
+    @provider.RerankingModelV4Documents::ObjectDocuments(values) =>
       if index >= values.length() {
         None
       } else {
@@ -54,14 +52,14 @@ fn reranking_document_at(
 /// Convert a selected ranking to the homogeneous document representation.
 fn reranking_documents_from_items(
   items : Array[RerankItem],
-  template : RerankingDocuments,
-) -> RerankingDocuments {
+  template : RerankingModelV4Documents,
+) -> RerankingModelV4Documents {
   if items.length() == 0 {
     match template {
-      @provider.RerankingDocuments::TextDocuments(_) =>
-        @provider.RerankingDocuments::TextDocuments([])
-      @provider.RerankingDocuments::ObjectDocuments(_) =>
-        @provider.RerankingDocuments::ObjectDocuments([])
+      @provider.RerankingModelV4Documents::TextDocuments(_) =>
+        @provider.RerankingModelV4Documents::TextDocuments([])
+      @provider.RerankingModelV4Documents::ObjectDocuments(_) =>
+        @provider.RerankingModelV4Documents::ObjectDocuments([])
     }
   } else {
     match items[0].document {
@@ -73,7 +71,7 @@ fn reranking_documents_from_items(
             RerankingDocument::ObjectDocument(_) => ()
           }
         }
-        @provider.RerankingDocuments::TextDocuments(values)
+        @provider.RerankingModelV4Documents::TextDocuments(values)
       }
       RerankingDocument::ObjectDocument(_) => {
         let values : Array[Json] = []
@@ -83,7 +81,7 @@ fn reranking_documents_from_items(
             RerankingDocument::TextDocument(_) => ()
           }
         }
-        @provider.RerankingDocuments::ObjectDocuments(values)
+        @provider.RerankingModelV4Documents::ObjectDocuments(values)
       }
     }
   }
@@ -96,8 +94,8 @@ fn reranking_documents_from_items(
 /// indices, preserves provider ordering, and reconstructs the selected
 /// documents without exposing provider wire formats to callers.
 pub async fn rerank(
-  model : &RerankingModel,
-  documents : RerankingDocuments,
+  model : &RerankingModelV4,
+  documents : RerankingModelV4Documents,
   query : String,
   top_n? : Int,
   headers? : Map[String, String] = Map([]),
@@ -113,24 +111,22 @@ pub async fn rerank(
     )
   }
   let original_documents = match documents {
-    @provider.RerankingDocuments::TextDocuments(values) =>
-      @provider.RerankingDocuments::TextDocuments(values.copy())
-    @provider.RerankingDocuments::ObjectDocuments(values) =>
-      @provider.RerankingDocuments::ObjectDocuments(values.copy())
+    @provider.RerankingModelV4Documents::TextDocuments(values) =>
+      @provider.RerankingModelV4Documents::TextDocuments(values.copy())
+    @provider.RerankingModelV4Documents::ObjectDocuments(values) =>
+      @provider.RerankingModelV4Documents::ObjectDocuments(values.copy())
   }
   if original_documents.length() == 0 {
     return {
       original_documents,
       reranked_documents: reranking_documents_from_items([], original_documents),
       ranking: [],
-      usage: Usage::zero(),
       response: ResponseMetadata::new(model_id=model.model_id()),
       provider_metadata: Map([]),
-      warnings: [],
     }
   }
-  let response = model.rerank(
-    RerankingCallOptions::new(
+  let response = model.do_rerank(
+    RerankingModelV4CallOptions::new(
       original_documents,
       query,
       top_n?,
@@ -170,19 +166,17 @@ pub async fn rerank(
     original_documents,
     reranked_documents,
     ranking: items,
-    usage: response.usage,
     response: response.response.unwrap_or(
       ResponseMetadata::new(model_id=model.model_id()),
     ),
     provider_metadata: response.provider_metadata,
-    warnings: response.warnings,
   }
 }
 
 ///|
 /// Rerank text documents without constructing the representation enum.
 pub async fn rerank_text(
-  model : &RerankingModel,
+  model : &RerankingModelV4,
   documents : Array[String],
   query : String,
   top_n? : Int,
@@ -193,7 +187,7 @@ pub async fn rerank_text(
 ) -> RerankResult {
   rerank(
     model,
-    RerankingDocuments::text(documents),
+    RerankingModelV4Documents::text(documents),
     query,
     top_n?,
     headers~,
@@ -206,7 +200,7 @@ pub async fn rerank_text(
 ///|
 /// AI SDK-style camel-case spelling for `rerank`.
 pub async fn rerankText(
-  model : &RerankingModel,
+  model : &RerankingModelV4,
   documents : Array[String],
   query : String,
   top_n? : Int,

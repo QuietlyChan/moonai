@@ -17,7 +17,7 @@ pub struct AnthropicFiles {
 pub fn anthropic_files(
   api_key? : String = "",
   auth_token? : String = "",
-  base_url? : String = "",
+  base_url? : String,
   provider_name? : String = "anthropic.files",
   headers? : Map[String, String] = Map([]),
   anthropic_version? : String = "2023-06-01",
@@ -47,7 +47,7 @@ pub fn anthropic_files(
 }
 
 ///|
-/// Select the Files API from an Anthropic provider factory.
+/// Select the FilesV4 API from an Anthropic provider factory.
 pub fn AnthropicProvider::files(
   self : AnthropicProvider,
 ) -> AnthropicFiles raise {
@@ -127,8 +127,8 @@ fn anthropic_file_metadata(json : Json) -> Map[String, Json] {
 ///|
 fn decode_anthropic_file_upload(
   json : Json,
-  options : @provider.FileUploadOptions,
-) -> @provider.FileUploadResult raise {
+  options : @provider.FilesV4UploadFileCallOptions,
+) -> @provider.FilesV4UploadFileResult raise {
   match anthropic_error_message(json) {
     Some(message) =>
       raise @provider.InvalidResponseDataError(
@@ -153,7 +153,7 @@ fn decode_anthropic_file_upload(
     { "mime_type": String(value), .. } => Some(value)
     _ => Some(options.media_type)
   }
-  @provider.FileUploadResult::new(
+  @provider.FilesV4UploadFileResult::new(
     provider_reference=@provider.ProviderReference::single(
       provider="anthropic",
       id~,
@@ -167,14 +167,14 @@ fn decode_anthropic_file_upload(
 ///|
 async fn AnthropicFiles::upload(
   self : AnthropicFiles,
-  options : @provider.FileUploadOptions,
-) -> @provider.FileUploadResult {
+  options : @provider.FilesV4UploadFileCallOptions,
+) -> @provider.FilesV4UploadFileResult {
   let fields : Array[@provider_utils.MultipartField] = [
     @provider_utils.MultipartField::file(
       name="file",
       filename=options.filename.unwrap_or("blob"),
       media_type=options.media_type,
-      data=@provider_utils.resolve_upload_file_data(options.data),
+      data=@provider_utils.convert_inline_file_data_to_bytes(options.data),
     ),
   ]
   let form_data = @provider_utils.encode_multipart_form_data(fields)
@@ -187,20 +187,29 @@ async fn AnthropicFiles::upload(
     error_to_message=anthropic_error_message,
     transport=self.http_transport,
   )
-  decode_anthropic_file_upload(response.value, options)
+  @provider_utils.handle_json_response(response, value => {
+    decode_anthropic_file_upload(value, options)
+  })
 }
 
 ///|
-pub impl @provider.Files for AnthropicFiles with fn provider(
+pub impl @provider.FilesV4 for AnthropicFiles with fn specification_version(
+  _self : AnthropicFiles,
+) -> String {
+  "v4"
+}
+
+///|
+pub impl @provider.FilesV4 for AnthropicFiles with fn provider(
   self : AnthropicFiles,
 ) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @provider.Files for AnthropicFiles with fn upload_file(
+pub impl @provider.FilesV4 for AnthropicFiles with fn upload_file(
   self : AnthropicFiles,
-  options : @provider.FileUploadOptions,
-) -> @provider.FileUploadResult {
+  options : @provider.FilesV4UploadFileCallOptions,
+) -> @provider.FilesV4UploadFileResult {
   self.upload(options)
 }

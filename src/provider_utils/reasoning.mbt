@@ -18,6 +18,62 @@ pub fn isCustomReasoning(reasoning : @provider.ReasoningEffort) -> Bool {
 }
 
 ///|
+/// Read assistant reasoning from the normalized prompt representation.
+///
+/// V4 prompts may carry reasoning as content parts, while older callers use
+/// `LanguageModelMessage.reasoning_content`. Prefer content parts when they
+/// exist so adapters do not serialize the same reasoning twice.
+pub fn assistant_reasoning_content(
+  message : @provider.LanguageModelMessage,
+) -> String? {
+  let reasoning = StringBuilder::new()
+  let mut has_reasoning_part = false
+  for part in message.parts {
+    match part.without_provider_options() {
+      @provider.Reasoning(value) => {
+        has_reasoning_part = true
+        reasoning.write_string(value)
+      }
+      _ => ()
+    }
+  }
+  if has_reasoning_part {
+    Some(reasoning.to_string())
+  } else {
+    message.reasoning_content
+  }
+}
+
+///|
+/// Camel-case alias matching the naming used by the TypeScript AI SDK.
+pub fn assistantReasoningContent(
+  message : @provider.LanguageModelMessage,
+) -> String? {
+  assistant_reasoning_content(message)
+}
+
+///|
+/// Return whether a provider-facing tool message contains only approval
+/// responses. Chat Completions adapters do not have a wire representation for
+/// these parts and should omit the message instead of encoding it as ordinary
+/// tool content.
+pub fn is_tool_approval_only_message(
+  message : @provider.LanguageModelMessage,
+) -> Bool {
+  guard message.role is @provider.Tool(_) && message.parts.length() > 0 else {
+    return false
+  }
+  let mut has_approval = false
+  for part in message.parts {
+    match part.without_provider_options() {
+      @provider.ToolApprovalResponsePart(_) => has_approval = true
+      _ => return false
+    }
+  }
+  has_approval
+}
+
+///|
 fn reasoning_key(reasoning : @provider.ReasoningEffort) -> String {
   match reasoning {
     @provider.ProviderDefault => "provider-default"
@@ -48,7 +104,7 @@ pub fn map_reasoning_to_provider_effort(
         warnings.push(
           @provider.Warning::Compatibility(
             feature="reasoning",
-            details="reasoning \"\{key}\" is not directly supported by this model; mapped to effort \"\{mapped}\".",
+            details="reasoning \"\{key}\" is not directly supported by this model. mapped to effort \"\{mapped}\".",
           ),
         )
       }

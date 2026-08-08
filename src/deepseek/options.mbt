@@ -99,34 +99,3 @@ fn parse_deepseek_options(
   }
   { options, warnings: reader.diagnostics() }
 }
-
-///|
-fn deepseek_reasoning_effort(
-  effort : @provider.ReasoningEffort,
-  warnings : Array[@provider.Warning],
-) -> String? {
-  match effort {
-    @provider.ProviderDefault | @provider.Disabled => None
-    @provider.Minimal => {
-      warnings.push(
-        @provider.Warning::Compatibility(
-          feature="reasoning",
-          details="reasoning \"minimal\" is not directly supported by this model; mapped to effort \"low\".",
-        ),
-      )
-      Some("low")
-    }
-    @provider.Low => Some("low")
-    @provider.Medium => Some("medium")
-    @provider.High => Some("high")
-    @provider.XHigh => {
-      warnings.push(
-        @provider.Warning::Compatibility(
-          feature="reasoning",
-          details="reasoning \"xhigh\" is not directly supported by this model; mapped to effort \"max\".",
-        ),
-      )
-      Some("max")
-    }
-  }
-}

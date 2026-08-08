@@ -10,75 +10,27 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn apply_patch_tool(name? : String) -> @provider.ToolDefinition
+pub fn createOpenAI(api_key? : String, base_url? : String, provider_name? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIProvider raise @provider.InvalidArgumentError
 
-pub fn build_openai_realtime_session_config(@provider.RealtimeSessionConfig, String) -> Json
+pub fn create_openai(api_key? : String, base_url? : String, provider_name? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIProvider raise @provider.InvalidArgumentError
 
-pub fn code_interpreter_tool(args? : Json, container? : OpenAICodeInterpreterContainer, name? : String) -> @provider.ToolDefinition
+pub fn openai(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
 
-pub fn computer_tool(name? : String) -> @provider.ToolDefinition
+pub fn openai_chat(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
 
-pub fn createOpenAI(api_key? : String, base_url? : String, provider_name? : String, organization? : String, project? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIProvider
+pub fn openai_completion(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
 
-pub fn create_openai(api_key? : String, base_url? : String, provider_name? : String, organization? : String, project? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIProvider
+pub fn openai_embedding(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.EmbeddingModelV4 raise @provider.InvalidArgumentError
 
-pub fn custom_tool(String, args? : Json, options? : OpenAICustomToolOptions) -> @provider.ToolDefinition
+pub fn openai_image(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4 raise @provider.InvalidArgumentError
 
-pub fn decode_openai_computer_action(Json) -> OpenAIComputerAction raise
+pub fn openai_realtime(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAIRealtimeModel raise @provider.InvalidArgumentError
 
-pub fn decode_openai_computer_safety_check(Json) -> OpenAIComputerSafetyCheck raise
+pub fn openai_speech(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.SpeechModelV4 raise @provider.InvalidArgumentError
 
-pub fn decode_openai_responses_provider_metadata(Map[String, Json], provider_name? : String) -> OpenaiResponsesProviderMetadata?
+pub fn openai_transcription(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport) -> &@provider.TranscriptionModelV4 raise @provider.InvalidArgumentError
 
-pub fn decode_openai_responses_response(Json, provider_name? : String, tool_name_mapping? : @provider_utils.ToolNameMapping, id_generator? : () -> String) -> @provider.ChatResponse raise
-
-pub fn encode_openai_chat_request(String, @provider.ChatCallOptions, provider_name? : String, stream? : Bool, preserve_reasoning? : Bool, include_usage? : Bool) -> Json raise
-
-pub fn encode_openai_responses_request(String, @provider.ChatCallOptions, provider_name? : String, stream? : Bool) -> Json raise
-
-pub fn file_search_tool(args? : Json, options? : OpenAIFileSearchOptions, name? : String) -> @provider.ToolDefinition
-
-pub fn image_generation_tool(args? : Json, options? : OpenAIImageGenerationOptions, name? : String) -> @provider.ToolDefinition
-
-pub fn local_shell_tool(name? : String) -> @provider.ToolDefinition
-
-pub fn mcp_tool(args? : Json, options? : OpenAIMCPOptions, name? : String) -> @provider.ToolDefinition
-
-pub fn openai(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIResponsesLanguageModelV4
-
-pub fn openai_chat(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIChatLanguageModelV4
-
-pub fn openai_chat_wire(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], preserve_reasoning? : Bool, include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIChatModel
-
-pub fn openai_completion(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAICompletionLanguageModelV4
-
-pub fn openai_completion_wire(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAICompletionModel
-
-pub fn openai_embedding(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAIEmbeddingModel
-
-pub fn openai_image(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAIImageModel
-
-pub fn openai_realtime(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAIRealtimeModel
-
-pub fn openai_speech(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAISpeechModel
-
-pub fn openai_transcription(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport) -> OpenAITranscriptionModel
-
-pub fn openai_translation(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], websocket_connector? : &@provider_utils.WebSocketConnector) -> OpenAITranslationModel
-
-pub fn parse_openai_realtime_server_event(Json) -> @provider.RealtimeServerEvent
-
-pub fn programmatic_tool_calling_tool(name? : String) -> @provider.ToolDefinition
-
-pub fn serialize_openai_realtime_client_event(@provider.RealtimeClientEvent, String) -> Json
-
-pub fn shell_tool(args? : Json, environment? : OpenAIShellEnvironment, name? : String) -> @provider.ToolDefinition
-
-pub fn tool_search_tool(args? : Json, options? : OpenAIToolSearchOptions, name? : String) -> @provider.ToolDefinition
-
-pub fn web_search_preview_tool(args? : Json, options? : OpenAIWebSearchPreviewOptions, name? : String) -> @provider.ToolDefinition
-
-pub fn web_search_tool(args? : Json, options? : OpenAIWebSearchOptions, name? : String) -> @provider.ToolDefinition
+pub fn openai_translation(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], websocket_connector? : &@provider_utils.WebSocketConnector) -> &@provider.SpeechTranslationModelV4 raise @provider.InvalidArgumentError
 
 // Errors
 
@@ -94,34 +46,12 @@ pub(all) enum OpenAIAllowedToolsMode {
   OpenAIAllowedToolsRequired
 } derive(Eq, @debug.Debug)
 
-pub struct OpenAIChatLanguageModelV4 {
-  model : OpenAIChatModel
-}
-pub fn OpenAIChatLanguageModelV4::new(OpenAIChatModel) -> Self
-pub impl @provider.LanguageModelV4 for OpenAIChatLanguageModelV4
-
-pub struct OpenAIChatModel {
-  // private fields
-}
-pub impl @provider.ChatModel for OpenAIChatModel
-
 pub(all) enum OpenAICodeInterpreterContainer {
   ExistingContainer(String)
   AutoContainer(file_ids~ : Array[String]?)
 } derive(Eq, @debug.Debug)
 pub fn OpenAICodeInterpreterContainer::auto(file_ids? : Array[String]) -> Self
 pub fn OpenAICodeInterpreterContainer::existing(String) -> Self
-
-pub struct OpenAICompletionLanguageModelV4 {
-  model : OpenAICompletionModel
-}
-pub fn OpenAICompletionLanguageModelV4::new(OpenAICompletionModel) -> Self
-pub impl @provider.LanguageModelV4 for OpenAICompletionLanguageModelV4
-
-pub struct OpenAICompletionModel {
-  // private fields
-}
-pub impl @provider.CompletionModel for OpenAICompletionModel
 
 pub(all) enum OpenAIComputerAction {
   ComputerClick(button~ : OpenAIComputerButton, x~ : Double, y~ : Double, keys~ : Array[String]?)
@@ -180,12 +110,6 @@ pub(all) struct OpenAICustomToolOptions {
 pub fn OpenAICustomToolOptions::new(description? : String, format? : OpenAICustomToolFormat) -> Self
 pub fn OpenAICustomToolOptions::to_args_json(Self) -> Json
 
-pub struct OpenAIEmbeddingModel {
-  // private fields
-}
-pub impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel
-pub impl @provider.EmbeddingWireModel for OpenAIEmbeddingModel
-
 pub(all) struct OpenAIEmbeddingModelOptions {
   dimensions : Int?
   user : String?
@@ -227,11 +151,6 @@ pub(all) struct OpenAIFileSearchRanking {
   score_threshold : Double?
 } derive(Eq, @debug.Debug)
 pub fn OpenAIFileSearchRanking::new(ranker? : String, score_threshold? : Double) -> Self raise
-
-pub struct OpenAIFiles {
-  // private fields
-}
-pub impl @provider.Files for OpenAIFiles
 
 pub(all) struct OpenAIFilesOptions {
   purpose : String?
@@ -306,12 +225,6 @@ pub(all) enum OpenAIImageInputFidelity {
   OpenAIImageInputFidelityHigh
   OpenAIImageInputFidelityLow
 } derive(Eq, @debug.Debug)
-
-pub struct OpenAIImageModel {
-  // private fields
-}
-pub impl @provider.ImageModelV4 for OpenAIImageModel
-pub impl @provider.ImageWireModel for OpenAIImageModel
 
 pub(all) struct OpenAIImageModelEditOptions {
   quality : OpenAIImageQuality?
@@ -502,47 +415,45 @@ pub(all) enum OpenAIPromptCacheTtl {
 pub struct OpenAIProvider {
   // private fields
 }
-pub fn OpenAIProvider::chat(Self, String) -> OpenAIChatLanguageModelV4
-pub fn OpenAIProvider::chatModel(Self, String) -> OpenAIChatLanguageModelV4
-pub fn OpenAIProvider::chat_model(Self, String) -> OpenAIChatLanguageModelV4
-pub fn OpenAIProvider::chat_wire(Self, String) -> OpenAIChatModel
-pub fn OpenAIProvider::completion(Self, String) -> OpenAICompletionLanguageModelV4
-pub fn OpenAIProvider::completionModel(Self, String) -> OpenAICompletionLanguageModelV4
-pub fn OpenAIProvider::completion_model(Self, String) -> OpenAICompletionLanguageModelV4
-pub fn OpenAIProvider::completion_wire(Self, String) -> OpenAICompletionModel
-pub fn OpenAIProvider::embedding(Self, String) -> OpenAIEmbeddingModel
-pub fn OpenAIProvider::embeddingModel(Self, String) -> OpenAIEmbeddingModel
-pub fn OpenAIProvider::embedding_model(Self, String) -> OpenAIEmbeddingModel
+pub fn OpenAIProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::chat_model(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::completion(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::completionModel(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::completion_model(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn OpenAIProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn OpenAIProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
 pub fn OpenAIProvider::experimentalRealtime(Self) -> OpenAIRealtimeFactory
 pub fn OpenAIProvider::experimental_realtime(Self) -> OpenAIRealtimeFactory
-pub fn OpenAIProvider::files(Self) -> OpenAIFiles
-pub fn OpenAIProvider::image(Self, String) -> OpenAIImageModel
-pub fn OpenAIProvider::imageModel(Self, String) -> OpenAIImageModel
-pub fn OpenAIProvider::image_model(Self, String) -> OpenAIImageModel
-pub fn OpenAIProvider::languageModel(Self, String) -> OpenAIResponsesLanguageModelV4
-pub fn OpenAIProvider::language_model(Self, String) -> OpenAIResponsesLanguageModelV4
+pub fn OpenAIProvider::files(Self) -> &@provider.FilesV4
+pub fn OpenAIProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn OpenAIProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn OpenAIProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn OpenAIProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::language_model(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::realtime(Self, String) -> OpenAIRealtimeModel
 pub fn OpenAIProvider::realtimeModel(Self, String) -> OpenAIRealtimeModel
 pub fn OpenAIProvider::realtime_model(Self, String) -> OpenAIRealtimeModel
-pub fn OpenAIProvider::responses(Self, String) -> OpenAIResponsesLanguageModelV4
-pub fn OpenAIProvider::responsesModel(Self, String) -> OpenAIResponsesLanguageModelV4
-pub fn OpenAIProvider::responses_model(Self, String) -> OpenAIResponsesLanguageModelV4
-pub fn OpenAIProvider::responses_wire(Self, String) -> OpenAIResponsesModel
-pub fn OpenAIProvider::skills(Self) -> OpenAISkills
-pub fn OpenAIProvider::speech(Self, String) -> OpenAISpeechModel
-pub fn OpenAIProvider::speechModel(Self, String) -> OpenAISpeechModel
-pub fn OpenAIProvider::speechTranslationModel(Self, String) -> OpenAITranslationModel
-pub fn OpenAIProvider::speech_model(Self, String) -> OpenAISpeechModel
-pub fn OpenAIProvider::speech_translation_model(Self, String) -> OpenAITranslationModel
-pub fn OpenAIProvider::textEmbedding(Self, String) -> OpenAIEmbeddingModel
-pub fn OpenAIProvider::textEmbeddingModel(Self, String) -> OpenAIEmbeddingModel
-pub fn OpenAIProvider::text_embedding(Self, String) -> OpenAIEmbeddingModel
-pub fn OpenAIProvider::text_embedding_model(Self, String) -> OpenAIEmbeddingModel
-pub fn OpenAIProvider::transcription(Self, String) -> OpenAITranscriptionModel
-pub fn OpenAIProvider::transcriptionModel(Self, String) -> OpenAITranscriptionModel
-pub fn OpenAIProvider::transcription_model(Self, String) -> OpenAITranscriptionModel
-pub fn OpenAIProvider::translation(Self, String) -> OpenAITranslationModel
-pub impl @provider.Provider for OpenAIProvider
+pub fn OpenAIProvider::responses(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::responsesModel(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::responses_model(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAIProvider::skills(Self) -> &@provider.SkillsV4
+pub fn OpenAIProvider::speech(Self, String) -> &@provider.SpeechModelV4
+pub fn OpenAIProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
+pub fn OpenAIProvider::speechTranslationModel(Self, String) -> &@provider.SpeechTranslationModelV4
+pub fn OpenAIProvider::speech_model(Self, String) -> &@provider.SpeechModelV4
+pub fn OpenAIProvider::speech_translation_model(Self, String) -> &@provider.SpeechTranslationModelV4
+pub fn OpenAIProvider::textEmbedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn OpenAIProvider::textEmbeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn OpenAIProvider::text_embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn OpenAIProvider::text_embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn OpenAIProvider::tools(Self) -> OpenAITools
+pub fn OpenAIProvider::transcription(Self, String) -> &@provider.TranscriptionModelV4
+pub fn OpenAIProvider::transcriptionModel(Self, String) -> &@provider.TranscriptionModelV4
+pub fn OpenAIProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4
+pub fn OpenAIProvider::translation(Self, String) -> &@provider.SpeechTranslationModelV4
+pub impl @provider.ProviderV4 for OpenAIProvider
 
 pub struct OpenAIRealtimeFactory {
   // private fields
@@ -584,12 +495,6 @@ pub(all) enum OpenAIResponsesInclude {
   OpenAIIncludeMessageOutputTextLogprobs
 } derive(Eq, @debug.Debug)
 
-pub struct OpenAIResponsesLanguageModelV4 {
-  model : OpenAIResponsesModel
-}
-pub fn OpenAIResponsesLanguageModelV4::new(OpenAIResponsesModel) -> Self
-pub impl @provider.LanguageModelV4 for OpenAIResponsesLanguageModelV4
-
 pub(all) struct OpenAIResponsesMetadata {
   response_id : String?
   logprobs : Array[Json]?
@@ -597,11 +502,6 @@ pub(all) struct OpenAIResponsesMetadata {
   reasoning_context : String?
 } derive(Eq, @debug.Debug)
 pub fn OpenAIResponsesMetadata::new(response_id? : String, logprobs? : Array[Json], service_tier? : String, reasoning_context? : String) -> Self
-
-pub struct OpenAIResponsesModel {
-  // private fields
-}
-pub impl @provider.ChatModel for OpenAIResponsesModel
 
 pub(all) struct OpenAIResponsesReasoningMetadata {
   item_id : String
@@ -669,17 +569,6 @@ pub(all) enum OpenAIShellSkill {
 pub fn OpenAIShellSkill::inline(name~ : String, description~ : String, data~ : String) -> Self
 pub fn OpenAIShellSkill::reference(@provider.ProviderReference, version? : String) -> Self
 
-pub struct OpenAISkills {
-  // private fields
-}
-pub impl @provider.Skills for OpenAISkills
-
-pub struct OpenAISpeechModel {
-  // private fields
-}
-pub impl @provider.SpeechModelV4 for OpenAISpeechModel
-pub impl @provider.SpeechWireModel for OpenAISpeechModel
-
 pub(all) struct OpenAISpeechModelOptions {
   instructions : String?
   speed : Double?
@@ -732,11 +621,31 @@ pub(all) struct OpenAIToolSearchOptions {
 pub fn OpenAIToolSearchOptions::new(execution? : OpenAIToolSearchExecution, description? : String, parameters? : Json) -> Self raise
 pub fn OpenAIToolSearchOptions::to_args_json(Self) -> Json
 
-pub struct OpenAITranscriptionModel {
-  // private fields
+pub struct OpenAITools {
 }
-pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel
-pub impl @provider.TranscriptionWireModel for OpenAITranscriptionModel
+pub fn OpenAITools::applyPatch(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::apply_patch(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::codeInterpreter(Self, container? : OpenAICodeInterpreterContainer, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::code_interpreter(Self, container? : OpenAICodeInterpreterContainer, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::computer(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::customTool(Self, options? : OpenAICustomToolOptions, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::custom_tool(Self, options? : OpenAICustomToolOptions, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::fileSearch(Self, OpenAIFileSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::file_search(Self, OpenAIFileSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::imageGeneration(Self, options? : OpenAIImageGenerationOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::image_generation(Self, options? : OpenAIImageGenerationOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::localShell(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::local_shell(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::mcp(Self, OpenAIMCPOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::programmaticToolCalling(Self) -> @provider_utils.Tool
+pub fn OpenAITools::programmatic_tool_calling(Self) -> @provider_utils.Tool
+pub fn OpenAITools::shell(Self, environment? : OpenAIShellEnvironment, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::toolSearch(Self, options? : OpenAIToolSearchOptions, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::tool_search(Self, options? : OpenAIToolSearchOptions, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::webSearch(Self, options? : OpenAIWebSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::webSearchPreview(Self, options? : OpenAIWebSearchPreviewOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::web_search(Self, options? : OpenAIWebSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::web_search_preview(Self, options? : OpenAIWebSearchPreviewOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub(all) struct OpenAITranscriptionModelOptions {
   include_values : Array[String]?
@@ -774,7 +683,6 @@ pub struct OpenAITranslationModel {
 pub fn OpenAITranslationModel::model_id(Self) -> String
 pub fn OpenAITranslationModel::provider(Self) -> String
 pub impl @provider.SpeechTranslationModelV4 for OpenAITranslationModel
-pub impl @provider.SpeechTranslationWireModel for OpenAITranslationModel
 
 pub(all) struct OpenAITranslationModelOptions {
 } derive(Eq, @debug.Debug)

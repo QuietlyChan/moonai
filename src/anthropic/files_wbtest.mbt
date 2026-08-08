@@ -1,6 +1,6 @@
 ///|
 test "Anthropic Files preserves a successful response error as typed data" {
-  let options = @provider.FileUploadOptions::new(
+  let options = @provider.FilesV4UploadFileCallOptions::new(
     data=@provider.UploadFileData::text("MoonBit"),
     media_type="text/plain",
   )
@@ -22,7 +22,7 @@ test "Anthropic Files preserves a successful response error as typed data" {
 
 ///|
 test "Anthropic Files rejects a successful response without an id" {
-  let options = @provider.FileUploadOptions::new(
+  let options = @provider.FilesV4UploadFileCallOptions::new(
     data=@provider.UploadFileData::text("MoonBit"),
     media_type="text/plain",
   )

@@ -95,7 +95,7 @@ fn openai_realtime_turn_detection(
 ///|
 /// Build OpenAI's Realtime `session` object from the provider-neutral V4
 /// configuration.
-pub fn build_openai_realtime_session_config(
+fn build_openai_realtime_session_config(
   config : @provider.RealtimeSessionConfig,
   model_id : String,
 ) -> Json {
@@ -172,7 +172,7 @@ pub fn build_openai_realtime_session_config(
 
 ///|
 /// Serialize one normalized realtime client event to OpenAI's wire format.
-pub fn serialize_openai_realtime_client_event(
+fn serialize_openai_realtime_client_event(
   event : @provider.RealtimeClientEvent,
   model_id : String,
 ) -> Json {
@@ -267,7 +267,7 @@ fn openai_realtime_response_id(raw : Json) -> String {
 ///|
 /// Parse one OpenAI Realtime server event into the provider-neutral V4 event
 /// union.
-pub fn parse_openai_realtime_server_event(
+fn parse_openai_realtime_server_event(
   raw : Json,
 ) -> @provider.RealtimeServerEvent {
   let event_type = @provider_utils.json_string_field(raw, "type").unwrap_or("")

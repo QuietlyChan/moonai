@@ -24,7 +24,10 @@ async test "typed image size overrides the standard size in multipart edits" {
     model.provider_name,
     image_reserved_fields(),
   )
-  let form_data = model.edit_form_data(options, resolution.values)
+  let form_data = model.edit_form_data(
+    @provider.ImageModelV4CallOptions::from_image_call_options(options),
+    resolution.values,
+  )
   assert_true(form_data.diagnostic_body.contains("name=\"size\"\r\n\r\nauto"))
   assert_false(form_data.diagnostic_body.contains("1024x1024"))
 }

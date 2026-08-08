@@ -92,6 +92,7 @@ async test "prompt conversion serializes structured high-level tool input" {
         "city": "Shanghai",
       }),
     ]),
+    @provider_utils.ModelMessage::tool("call-1", "18 degrees"),
   ]
   let converted = convert_to_language_model_prompt(
     standardize_prompt(None, messages),
@@ -100,9 +101,110 @@ async test "prompt conversion serializes structured high-level tool input" {
     @provider.RetryPolicy::none(),
     None,
   )
-  assert_eq(converted.length(), 1)
+  assert_eq(converted.length(), 2)
   assert_eq(converted[0].tool_calls.length(), 1)
   assert_eq(converted[0].tool_calls[0].arguments, "{\"city\":\"Shanghai\"}")
+  assert_eq(converted[1].content, "18 degrees")
+}
+
+///|
+async test "prompt conversion accepts tool_parts as a matching structured result" {
+  let messages = [
+    @provider_utils.ModelMessage::assistant("", tool_calls=[
+      @provider_utils.ModelToolCall::new(
+        id="call-parts",
+        name="weather",
+        input=Json::empty_object(),
+      ),
+    ]),
+    @provider_utils.ModelMessage::tool_parts("call-parts", [
+      @provider_utils.ModelContentPart::tool_result(
+        @provider_utils.ModelToolResult::text(
+          tool_call_id="call-parts",
+          tool_name="weather",
+          value="18 degrees",
+        ),
+      ),
+    ]),
+  ]
+  let converted = convert_to_language_model_prompt(
+    standardize_prompt(None, messages),
+    PromptTestModel::{  },
+    None,
+    @provider.RetryPolicy::none(),
+    None,
+  )
+  assert_eq(converted.length(), 2)
+  assert_true(converted[1].role is @provider.Tool("call-parts"))
+  assert_true(converted[1].parts[0] is @provider.ToolResultPart(_))
+}
+
+///|
+async test "prompt conversion rejects missing client tool results" {
+  let messages = [
+    @provider_utils.ModelMessage::assistant("", tool_calls=[
+      @provider_utils.ModelToolCall::new(
+        id="call-missing",
+        name="weather",
+        input=Json::empty_object(),
+      ),
+    ]),
+  ]
+  try
+    ignore(
+      convert_to_language_model_prompt(
+        standardize_prompt(None, messages),
+        PromptTestModel::{  },
+        None,
+        @provider.RetryPolicy::none(),
+        None,
+      ),
+    )
+  catch {
+    @provider.MissingToolResultsError(tool_call_ids~) =>
+      assert_eq(tool_call_ids, ["call-missing"])
+    error => fail("unexpected missing tool result error: \{error}")
+  } noraise {
+    _ => fail("expected missing tool result validation to fail")
+  }
+}
+
+///|
+async test "prompt conversion filters client approvals and assistant approval requests" {
+  let call = @provider_utils.ModelToolCall::new(
+    id="call-approved",
+    name="weather",
+    input=Json::empty_object(),
+  )
+  let request = @provider_utils.ModelToolApprovalRequest::new(
+    approval_id="approval-client",
+    tool_call_id="call-approved",
+  )
+  let response = @provider_utils.ModelToolApprovalResponse::new(
+    approval_id="approval-client",
+    approved=true,
+  )
+  let messages = [
+    @provider_utils.ModelMessage::assistant_parts([
+      @provider_utils.ModelContentPart::tool_call(call),
+      @provider_utils.ModelContentPart::tool_approval_request(request),
+    ]),
+    @provider_utils.ModelMessage::tool_content([
+      @provider_utils.ModelContentPart::tool_approval_response(response),
+    ]),
+    @provider_utils.ModelMessage::user("continue"),
+  ]
+  let converted = convert_to_language_model_prompt(
+    standardize_prompt(None, messages),
+    PromptTestModel::{  },
+    None,
+    @provider.RetryPolicy::none(),
+    None,
+  )
+  assert_eq(converted.length(), 2)
+  assert_eq(converted[0].parts.length(), 1)
+  assert_true(converted[0].parts[0] is @provider.ToolCallPart(_))
+  assert_eq(converted[1].content, "continue")
 }
 
 ///|

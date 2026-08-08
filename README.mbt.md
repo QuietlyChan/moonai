@@ -21,6 +21,10 @@ This is an independent community project and is not affiliated with Vercel.
 - `generate_text`, `stream_text`, `generate_object`, `embed`, `embed_many`,
   media generation, upload, buffered transcription, and live
   `stream_transcribe` standard-layer APIs.
+- Shared multi-step tool execution for `generate_text` and `stream_text`,
+  including `prepare_step` model/message/settings overrides, active tool
+  filtering and ordering, stop conditions, provider-deferred results,
+  sandbox-aware dynamic descriptions, and experimental tool caller routing.
 - Reusable Open Responses generation over JSON and streaming over SSE, plus a
   separate official OpenAI Responses model and options layer.
 - OpenAI-compatible Chat Completions generation over JSON and SSE, plus
@@ -51,11 +55,13 @@ This is an independent community project and is not affiliated with Vercel.
 | Package | Purpose |
 | --- | --- |
 | `QuietlyChan/moonai/ai` | High-level generation, embedding, media, upload, and realtime workflows |
+| `QuietlyChan/moonai/ai/generate_text` | Multi-step text generation, per-step preparation, streaming, tool execution, and result aggregation |
+| `QuietlyChan/moonai/ai/tool` | Tool caller routing and per-step tool preparation |
 | `QuietlyChan/moonai/ai/prompt` | Prompt URL/file normalization and model-supported asset downloading |
 | `QuietlyChan/moonai/ai/model` | Provider-qualified model identities, references, and registry resolution |
 | `QuietlyChan/moonai/ai/registry` | Provider-qualified model lookup and provider-level Files/Skills registry |
 | `QuietlyChan/moonai/provider` | Provider-neutral model contracts, call options, responses, events, and diagnostics |
-| `QuietlyChan/moonai/provider_utils` | Reusable HTTP, SSE, JSON, multipart, URL, WebSocket, retry, and streaming helpers |
+| `QuietlyChan/moonai/provider_utils` | Reusable tool and sandbox contracts, HTTP, SSE, JSON, multipart, URL, WebSocket, retry, and streaming helpers |
 | `QuietlyChan/moonai/openai` | Official OpenAI Chat and Responses models with typed options and model capabilities |
 | `QuietlyChan/moonai/open_responses` | Reusable Open Responses protocol encoder, decoder, and transport |
 | `QuietlyChan/moonai/openai_compatible` | Reusable Chat Completions, embeddings, completions, and image adapter |
@@ -75,9 +81,10 @@ not re-exportable, so values such as `V4TextDelta`, `V4FinishStop`, and `High` a
 through the `@provider` package directly.
 
 The `src` tree follows the same dependency boundaries while preserving the
-useful internal domains from the TypeScript SDK. `src/ai`, `src/ai/prompt`,
-`src/ai/model`, `src/ai/registry`, `src/provider`, and `src/provider_utils` are
-MoonBit packages.
+useful internal domains from the TypeScript SDK. `src/ai`,
+`src/ai/generate_text`, `src/ai/tool`, `src/ai/prompt`, `src/ai/model`,
+`src/ai/registry`, `src/provider`, and `src/provider_utils` are MoonBit
+packages.
 A source domain becomes a package when it has a stable dependency boundary;
 smaller helpers remain grouped by responsibility inside their owning package.
 There is intentionally no module-root compatibility package. The pre-`1.0.0`
@@ -95,11 +102,12 @@ binary, download, and polling requests. `ChatModel`, `EmbeddingWireModel`, and
 `ImageWireModel` are reserved for explicit wire and third-party adapter
 boundaries, not the high-level model API.
 
-`ai/model` also provides V4 middleware and wrapper/chain helpers for language,
-embedding, and image models. `ProviderRegistry` accepts language and image V4
-middleware and applies parameter transforms, identity overrides, and operation
-wrappers after model resolution. These are MoonBit public counterparts of AI
-SDK's V4 middleware contracts, not legacy API compatibility code. The current
+`provider` defines the V4 middleware contracts for language, embedding, and
+image models, while `ai/model` owns their wrapper/chain helpers. This matches
+AI SDK's package boundary: provider and middleware libraries share contract
+types without depending on high-level workflows. `ProviderRegistry` accepts
+language and image V4 middleware and applies parameter transforms, identity
+overrides, and operation wrappers after model resolution. The current
 `ChatModel`-to-V4 adapter is reserved for explicit third-party and wire-level
 integration boundaries.
 
@@ -209,6 +217,24 @@ Set `include_raw_chunks=true` to receive each parsed provider chunk as
 `StreamEvent::Raw` before its normalized events. Text, completion, embedding,
 and image calls also accept per-call `headers`; these override matching headers
 configured on the provider.
+
+## Multi-step tools and sandbox
+
+`generate_text` and `stream_text` share the same high-level `Tool` execution
+layer. On every step, a tool's `description_resolver` receives its entry from
+`tools_context` and the active `experimental_sandbox`; the resulting description
+is sent to the model without replacing the executable tool. The same sandbox is
+available to tool execution and streaming input callbacks.
+
+`prepare_step` can override `tools_context` and `experimental_sandbox` for one
+step. The following step starts from the outer values again, matching AI SDK's
+step-local override semantics.
+
+`provider_utils::SandboxSession` is the provider-neutral runtime contract. Its
+`run` callback is required, while process spawning, streamed and buffered file
+reads, and file writes are optional capabilities. Calling an unavailable
+capability raises `UnsupportedFunctionalityError`; applications remain
+responsible for supplying the concrete isolated runtime.
 
 ## Diagnostics, retries, and cancellation
 
@@ -326,6 +352,37 @@ remain available under `provider_options.anthropic`.
 Messages accept text, URL/base64 images, and document file parts such as PDFs.
 Audio parts are rejected before transport because the Messages API does not
 accept them.
+
+Provider-executed Anthropic tools use the shared `provider_utils` tool factory.
+For example, the advisor tool has typed cache settings, validated empty input
+and result schemas, deferred-result semantics, and automatic multi-turn replay:
+
+```moonbit
+///|
+let advisor = @anthropic.advisor_20260301(
+  model="claude-opus-4-8",
+  max_uses=3,
+  caching=@anthropic.AnthropicAdvisorCaching::new(
+    ttl=@anthropic.AnthropicCacheOneHour,
+  ),
+)
+
+///|
+let result = @ai.generate_text(
+  model,
+  prompt="Implement the migration and ask the advisor to review the plan.",
+  tools=@ai.tool_set([("advisor", advisor)]),
+)
+```
+
+The `advisor-tool-2026-03-01` beta header is selected automatically. Plain,
+redacted, and error advisor results are normalized on output and converted
+back to Anthropic's wire format when the result history is sent again.
+
+The application-executed `bash_20241022` and `bash_20250124` tools use the
+current `SandboxSession::run` callback by default. A custom `execute` callback
+takes precedence; `disable_default_execute=true` creates a non-executable tool,
+corresponding to AI SDK's explicit `execute: null` configuration.
 
 The provider also exposes `files()` and `skills()`. Files are uploaded through
 Anthropic's Files API and returned as provider-neutral references. Skills
@@ -544,11 +601,13 @@ requiring MoonBit code to copy TypeScript naming everywhere:
 
 The core library will remain provider-neutral. Provider-specific wire formats,
 authentication, and options belong in adapter packages. Planned milestones
-include richer generated content such as sources and files, middleware,
-telemetry hooks, and higher-level multi-step tool execution.
+include richer generated content such as sources and files, image editing,
+telemetry hooks, and higher-level agent orchestration.
 
-Agent workflows and sandboxed tool runtimes are intentionally later layers.
-They will build on this SDK rather than being coupled to the provider protocol.
+The sandbox abstraction is already part of the shared tool boundary, but a
+concrete sandbox runtime remains an application or runtime integration concern.
+Higher-level agent workflows will build on these contracts rather than being
+coupled to a provider protocol.
 
 ## Development
 

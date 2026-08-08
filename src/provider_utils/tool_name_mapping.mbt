@@ -83,3 +83,36 @@ pub fn createToolNameMapping(
 ) -> ToolNameMapping {
   create_tool_name_mapping(tools, provider_tool_names)
 }
+
+///|
+/// Build a tool-name mapping directly from V4 language-model tools.
+///
+/// V4 provider implementations should use this form so the versioned
+/// contract does not need to be lowered to `ToolDefinition` merely to map
+/// provider-defined names.
+pub fn create_v4_tool_name_mapping(
+  tools : Array[@provider.LanguageModelV4Tool],
+  provider_tool_names : Map[String, String],
+) -> ToolNameMapping {
+  let mapping = ToolNameMapping::identity()
+  for tool in tools {
+    match tool {
+      @provider.LanguageModelV4Tool::V4ProviderTool(value) =>
+        if provider_tool_names.get(value.id) is Some(provider_tool_name) {
+          mapping.custom_to_provider[value.name] = provider_tool_name
+          mapping.provider_to_custom[provider_tool_name] = value.name
+        }
+      @provider.LanguageModelV4Tool::V4FunctionTool(_) => ()
+    }
+  }
+  mapping
+}
+
+///|
+/// AI SDK-style spelling for `create_v4_tool_name_mapping`.
+pub fn createV4ToolNameMapping(
+  tools : Array[@provider.LanguageModelV4Tool],
+  provider_tool_names : Map[String, String],
+) -> ToolNameMapping {
+  create_v4_tool_name_mapping(tools, provider_tool_names)
+}

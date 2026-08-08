@@ -5,9 +5,9 @@ async fn bind_test_server() -> @http.Server {
 
 ///|
 fn compatible_v4(
-  model : OpenAICompatibleLanguageModelV4,
+  model : &@provider.LanguageModelV4,
 ) -> &@provider.LanguageModelV4 {
-  model as &@provider.LanguageModelV4
+  model
 }
 
 ///|
@@ -99,7 +99,7 @@ async test "OpenAI-compatible V4 preserves native stream usage and finish reason
       api_key="test-key",
       idle_timeout_ms=2_000,
     )
-    let model = concrete as &@provider.LanguageModelV4
+    let model = concrete
     let mut finish_raw : String? = None
     let result = @ai.stream_text(model, prompt="hello", on_event=event => {
       match event {
@@ -113,6 +113,54 @@ async test "OpenAI-compatible V4 preserves native stream usage and finish reason
     assert_eq(result.usage.input_tokens.total, Some(4))
     assert_eq(result.usage.output_tokens.total, Some(3))
     assert_eq(result.response.unwrap().id, Some("v4-stream"))
+  }
+}
+
+///|
+async test "OpenAI-compatible V4 preserves streamed tool thought signatures" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let _ = body.read_all()
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/event-stream",
+          })
+          connection.write(
+            "data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call-1\",\"function\":{\"arguments\":\"{\\\"city\\\"\"},\"extra_content\":{\"google\":{\"thought_signature\":\"signature-1\"}}}]},\"finish_reason\":null}]}\n\n",
+          )
+          connection.write(
+            "data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"name\":\"lookup\",\"arguments\":\":\\\"Hangzhou\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}]}\n\n",
+          )
+          connection.write("data: [DONE]\n\n")
+        },
+        max_connections=1,
+      )
+    }
+    let concrete = openai_compatible(
+      provider_name="google",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      model_id="gemini-compatible",
+      idle_timeout_ms=2_000,
+    )
+    let model = concrete
+    let tool_calls : Array[@provider.LanguageModelV4ToolCall] = []
+    let result = @ai.stream_text(model, prompt="weather", on_event=event => {
+      match event {
+        @provider.V4ToolCallReady(call) => tool_calls.push(call)
+        _ => ()
+      }
+    })
+    assert_eq(tool_calls.length(), 1)
+    assert_eq(tool_calls[0].tool_call_id, "call-1")
+    assert_eq(tool_calls[0].tool_name, "lookup")
+    assert_eq(tool_calls[0].input, "{\"city\":\"Hangzhou\"}")
+    json_inspect(tool_calls[0].provider_metadata["google"], content={
+      "thoughtSignature": "signature-1",
+    })
+    assert_eq(result.finish_reason.unified, @provider.V4FinishToolCalls)
+    assert_eq(result.finish_reason.raw, Some("tool_calls"))
   }
 }
 
@@ -215,15 +263,26 @@ async test "compatible chat applies custom metadata and usage converters" {
       model_id="test-model",
       metadata_extractor~,
       convert_usage=usage => {
-        let input_tokens = @provider_utils.json_int_field(usage, "input")
-        let output_tokens = @provider_utils.json_int_field(usage, "output")
-        {
-          input_tokens,
-          output_tokens,
-          total_tokens: input_tokens + output_tokens,
-          reasoning_tokens: 0,
-          cached_input_tokens: 0,
-          cache_write_input_tokens: 0,
+        match usage {
+          Some(raw) if !(raw is Null) => {
+            let input_tokens = @provider_utils.json_int_field(raw, "input")
+            let output_tokens = @provider_utils.json_int_field(raw, "output")
+            {
+              input_tokens: {
+                total: Some(input_tokens),
+                no_cache: Some(input_tokens),
+                cache_read: None,
+                cache_write: None,
+              },
+              output_tokens: {
+                total: Some(output_tokens),
+                text: Some(output_tokens),
+                reasoning: None,
+              },
+              raw: Some(raw),
+            }
+          }
+          _ => @provider.LanguageModelV4Usage::unknown()
         }
       },
       idle_timeout_ms=2_000,
@@ -356,6 +415,77 @@ async test "custom error structure can mark a provider response retryable" {
     )
     assert_eq(response.text(), "retried custom error")
     assert_eq(request_count, 2)
+  }
+}
+
+///|
+async test "custom error parser failures use the shared API call boundary" {
+  @async.with_task_group() <| group => {
+    let server = bind_test_server()
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (_request, body, connection) => {
+          let _ = body.read_all()
+          connection.send_response(400, "Bad Request", extra_headers={
+            "Content-Type": "application/json",
+            "X-Request-Id": "compatible-parser-error",
+          })
+          connection.write("{\"problem\":{\"detail\":\"invalid input\"}}")
+        },
+        max_connections=1,
+      )
+    }
+    let error_structure = OpenAICompatibleErrorStructure::new(error_to_message=value => {
+      raise @provider.InvalidResponseDataError(
+        message="custom compatible parser failed",
+        data=value,
+      )
+    })
+    let model = openai_compatible(
+      provider_name="custom-error",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      model_id="test-model",
+      error_structure~,
+      idle_timeout_ms=2_000,
+    )
+    try
+      @ai.generate_text(
+        compatible_v4(model),
+        prompt="reject custom response",
+        retry_policy=@provider.RetryPolicy::none(),
+      )
+    catch {
+      @provider.APICallError(
+        message~,
+        url~,
+        request_body~,
+        status_code~,
+        response_headers~,
+        response_body~,
+        is_retryable~,
+        data~,
+        cause~,
+        ..
+      ) => {
+        assert_eq(message, "Failed to process error response")
+        assert_true(url.has_suffix("/v1/chat/completions"))
+        assert_true(request_body.contains("\"model\":\"test-model\""))
+        assert_eq(status_code, Some(400))
+        assert_eq(
+          response_headers.get("x-request-id"),
+          Some("compatible-parser-error"),
+        )
+        assert_true(response_body.contains("invalid input"))
+        assert_false(is_retryable)
+        assert_eq(data, None)
+        assert_true(
+          cause.unwrap_or("").contains("custom compatible parser failed"),
+        )
+      }
+      error => fail("unexpected compatible parser error: \{error}")
+    } noraise {
+      _ => fail("expected custom compatible parser failure")
+    }
   }
 }
 
@@ -595,6 +725,7 @@ async test "SSE transport does not retry after stream events are emitted" {
           connection.write(
             "data: {\"choices\":[{\"delta\":{\"content\":\"partial\"},\"finish_reason\":null}]}\n\n",
           )
+          @async.sleep(100)
         },
         max_connections=1,
       )
@@ -603,7 +734,7 @@ async test "SSE transport does not retry after stream events are emitted" {
       provider_name="sse-no-retry-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
-      idle_timeout_ms=2_000,
+      idle_timeout_ms=20,
     )
     let policy : @provider.RetryPolicy = {
       max_retries: 2,
@@ -620,8 +751,74 @@ async test "SSE transport does not retry after stream events are emitted" {
     catch {
       _ => ()
     } noraise {
-      _ => fail("expected an incomplete stream error")
+      _ => fail("expected a stream idle timeout")
     }
     assert_eq(request_count, 1)
   }
+}
+
+///|
+priv struct CompatibleNetworkFailureTransport {
+  calls : Ref[Int]
+}
+
+///|
+impl @provider_utils.HttpTransport for CompatibleNetworkFailureTransport with fn fetch(
+  self,
+  _request,
+) {
+  self.calls.val = self.calls.val + 1
+  fail("compatible connection refused")
+}
+
+///|
+impl @provider_utils.HttpTransport for CompatibleNetworkFailureTransport with fn fetch_stream(
+  _self,
+  _request,
+) {
+  fail("unused compatible stream transport")
+}
+
+///|
+async test "OpenAI-compatible exposes network failures as API call errors" {
+  let transport = CompatibleNetworkFailureTransport::{ calls: Ref(0) }
+  let model = openai_compatible(
+    provider_name="network-test",
+    base_url="https://gateway.example/v1",
+    model_id="test-model",
+    api_key="test-key",
+    http_transport=transport,
+  )
+  try
+    @ai.generate_text(
+      compatible_v4(model),
+      prompt="network failure",
+      retry_policy=@provider.RetryPolicy::none(),
+    )
+  catch {
+    @provider.APICallError(
+      message~,
+      url~,
+      request_body~,
+      request_headers~,
+      status_code=None,
+      response_headers~,
+      response_body="",
+      is_retryable=true,
+      cause~,
+      ..
+    ) => {
+      assert_true(message.contains("Cannot connect to API"))
+      assert_true(message.contains("compatible connection refused"))
+      assert_true(url.has_suffix("/chat/completions"))
+      assert_true(request_body.contains("\"model\":\"test-model\""))
+      assert_eq(request_headers.get("Authorization"), Some("Bearer test-key"))
+      assert_eq(response_headers.length(), 0)
+      assert_true(cause.unwrap_or("").contains("compatible connection refused"))
+    }
+    error => fail("unexpected compatible network error: \{error}")
+  } noraise {
+    _ => fail("expected a compatible network error")
+  }
+  assert_eq(transport.calls.val, 1)
 }

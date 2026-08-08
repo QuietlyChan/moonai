@@ -122,8 +122,8 @@ test "registry resolves completion and image models" {
 
 ///|
 test "registry resolves reranking models by provider-qualified identity" {
-  let model = @testing.MockRerankingModel::new(
-    @provider.RerankingResponse::new([]),
+  let model = @testing.MockRerankingModelV4::new(
+    @provider.RerankingModelV4Result::new([]),
     provider_name="test-reranker-provider",
     model_id="test-reranker",
   )

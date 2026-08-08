@@ -1,12 +1,12 @@
 ///|
 /// Official OpenAI Skills API implementation.
-pub struct OpenAISkills {
-  priv provider_name : String
-  priv base_url : String
-  priv api_key : String
-  priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
-  priv http_transport : &@provider_utils.HttpTransport
+priv struct OpenAISkills {
+  provider_name : String
+  base_url : String
+  api_key : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
@@ -48,7 +48,7 @@ fn OpenAISkills::request_headers(
 ///|
 fn OpenAISkills::form_data(
   _self : OpenAISkills,
-  call_options : @provider.SkillUploadOptions,
+  call_options : @provider.SkillsV4UploadSkillCallOptions,
 ) -> @provider_utils.MultipartFormData raise {
   let fields : Array[@provider_utils.MultipartField] = []
   for file in call_options.files {
@@ -57,7 +57,7 @@ fn OpenAISkills::form_data(
         name="files[]",
         filename=file.path,
         media_type="application/octet-stream",
-        data=@provider_utils.resolve_upload_file_data(file.data),
+        data=@provider_utils.convert_inline_file_data_to_bytes(file.data),
       ),
     )
   }
@@ -89,7 +89,7 @@ fn openai_skills_provider_metadata(json : Json) -> Map[String, Json] {
 fn decode_openai_skill_upload(
   json : Json,
   warnings : Array[@provider.Warning],
-) -> @provider.SkillUploadResult raise {
+) -> @provider.SkillsV4UploadSkillResult raise {
   if openai_error_message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI Skills request failed: \{message}",
@@ -116,7 +116,7 @@ fn decode_openai_skill_upload(
     { "latest_version": String(value), .. } => Some(value)
     _ => None
   }
-  @provider.SkillUploadResult::new(
+  @provider.SkillsV4UploadSkillResult::new(
     provider_reference=@provider.ProviderReference::single(
       provider="openai",
       id~,
@@ -132,8 +132,8 @@ fn decode_openai_skill_upload(
 ///|
 async fn OpenAISkills::upload(
   self : OpenAISkills,
-  call_options : @provider.SkillUploadOptions,
-) -> @provider.SkillUploadResult {
+  call_options : @provider.SkillsV4UploadSkillCallOptions,
+) -> @provider.SkillsV4UploadSkillResult {
   let warnings : Array[@provider.Warning] = []
   if call_options.display_title is Some(_) {
     warnings.push(@provider.Warning::unsupported("displayTitle"))
@@ -147,18 +147,27 @@ async fn OpenAISkills::upload(
     error_to_message=openai_error_message,
     transport=self.http_transport,
   )
-  decode_openai_skill_upload(response.value, warnings)
+  @provider_utils.handle_json_response(response, value => {
+    decode_openai_skill_upload(value, warnings)
+  })
 }
 
 ///|
-pub impl @provider.Skills for OpenAISkills with fn provider(self : OpenAISkills) -> String {
+impl @provider.SkillsV4 for OpenAISkills with fn specification_version(
+  _self : OpenAISkills,
+) -> String {
+  "v4"
+}
+
+///|
+impl @provider.SkillsV4 for OpenAISkills with fn provider(self : OpenAISkills) -> String {
   self.provider_name
 }
 
 ///|
-pub impl @provider.Skills for OpenAISkills with fn upload_skill(
+impl @provider.SkillsV4 for OpenAISkills with fn upload_skill(
   self : OpenAISkills,
-  call_options : @provider.SkillUploadOptions,
-) -> @provider.SkillUploadResult {
+  call_options : @provider.SkillsV4UploadSkillCallOptions,
+) -> @provider.SkillsV4UploadSkillResult {
   self.upload(call_options)
 }

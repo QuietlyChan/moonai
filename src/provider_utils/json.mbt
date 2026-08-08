@@ -1,4 +1,19 @@
 ///|
+/// Return whether a JSON value is an object record.
+///
+/// MoonBit's `Json` enum already distinguishes objects from arrays and null,
+/// so this is the typed equivalent of AI SDK's shared `isRecord` guard.
+pub fn is_record(value : Json) -> Bool {
+  value is Object(_)
+}
+
+///|
+/// AI SDK-style camel-case spelling for `is_record`.
+pub fn isRecord(value : Json) -> Bool {
+  is_record(value)
+}
+
+///|
 /// Read a string field from a JSON object.
 pub fn json_string_field(json : Json, field : String) -> String? {
   match json {

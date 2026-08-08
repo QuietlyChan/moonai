@@ -59,3 +59,27 @@ test "video V4 frame helpers retain semantic roles" {
   let restored = VideoModelV4FrameImage::from_video_frame_image(wire)
   assert_true(restored.frame_type is VideoV4FirstFrame)
 }
+
+///|
+test "legacy video options lift into V4 without losing file roles" {
+  let v4 = VideoModelV4CallOptions::from_video_call_options(
+    VideoCallOptions::new(
+      "animate",
+      image=VideoInput::base64(data="aW1hZ2U=", media_type="image/png"),
+      frame_images=[
+        VideoFrameImage::new(
+          VideoInput::url("https://example.com/last.png"),
+          LastFrame,
+        ),
+      ],
+      input_references=[VideoInput::url("https://example.com/ref.mp4")],
+    ),
+  )
+  assert_eq(v4.prompt, Some("animate"))
+  assert_true(v4.image is Some(VideoV4Data(data="aW1hZ2U=", ..)))
+  assert_true(v4.frame_images.unwrap()[0].frame_type is VideoV4LastFrame)
+  assert_true(
+    v4.input_references.unwrap()[0]
+    is VideoV4Url(url="https://example.com/ref.mp4", ..),
+  )
+}

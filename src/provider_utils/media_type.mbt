@@ -8,6 +8,12 @@ pub fn get_top_level_media_type(media_type : String) -> String {
 }
 
 ///|
+/// AI SDK-style spelling for `get_top_level_media_type`.
+pub fn getTopLevelMediaType(media_type : String) -> String {
+  get_top_level_media_type(media_type)
+}
+
+///|
 /// Return whether a media type contains a concrete non-wildcard subtype.
 pub fn is_full_media_type(media_type : String) -> Bool {
   match media_type.find("/") {
@@ -17,6 +23,12 @@ pub fn is_full_media_type(media_type : String) -> Bool {
     }
     None => false
   }
+}
+
+///|
+/// AI SDK-style spelling for `is_full_media_type`.
+pub fn isFullMediaType(media_type : String) -> Bool {
+  is_full_media_type(media_type)
 }
 
 ///|
@@ -182,6 +194,12 @@ pub fn detect_media_type(data : String, top_level_type? : String) -> String? {
 }
 
 ///|
+/// AI SDK-style spelling for `detect_media_type`.
+pub fn detectMediaType(data : String, top_level_type? : String) -> String? {
+  detect_media_type(data, top_level_type?)
+}
+
+///|
 /// Resolve a concrete media type for inline Base64 data.
 pub fn resolve_full_media_type(
   media_type : String,
@@ -201,9 +219,15 @@ pub fn resolve_full_media_type(
 }
 
 ///|
+/// AI SDK-style spelling for `resolve_full_media_type`.
+pub fn resolveFullMediaType(media_type : String, data : String) -> String raise {
+  resolve_full_media_type(media_type, data)
+}
+
+///|
 /// Decode Base64-backed text content as UTF-8.
 pub fn decode_base64_text(data : String) -> String raise {
-  let bytes = @base64.decode(data) catch {
+  let bytes = convert_base64_to_bytes(data) catch {
     _ => fail("invalid Base64 text content")
   }
   @utf8.decode_lossy(bytes)

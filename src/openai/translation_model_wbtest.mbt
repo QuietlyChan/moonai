@@ -204,6 +204,7 @@ async test "OpenAI translation streams realtime audio and transcripts" {
   assert_eq(result.source_text, "Hello world")
   assert_eq(result.output_text, "Hola mundo")
   assert_eq(result.response.unwrap().model_id, Some("gpt-realtime-translate"))
+  assert_true(result.response.unwrap().created_at is Some(_))
   assert_true(audio.cancelled.val)
   assert_eq(connector.urls, [
     "wss://api.openai.com/v1/realtime/translations?model=gpt-realtime-translate",

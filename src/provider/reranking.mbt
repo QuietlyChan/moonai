@@ -1,26 +1,32 @@
 ///|
-/// Documents accepted by a reranking model. A call must use one document
-/// representation consistently, matching AI SDK's v4 contract.
-pub(all) enum RerankingDocuments {
+/// Documents accepted by a V4 reranking model. A call must use one document
+/// representation consistently.
+pub(all) enum RerankingModelV4Documents {
   TextDocuments(Array[String])
   ObjectDocuments(Array[Json])
 } derive(Debug, Eq)
 
 ///|
 /// Construct text documents for reranking.
-pub fn RerankingDocuments::text(values : Array[String]) -> RerankingDocuments {
+pub fn RerankingModelV4Documents::text(
+  values : Array[String],
+) -> RerankingModelV4Documents {
   TextDocuments(values.copy())
 }
 
 ///|
 /// Construct JSON object documents for reranking.
-pub fn RerankingDocuments::objects(values : Array[Json]) -> RerankingDocuments {
+pub fn RerankingModelV4Documents::objects(
+  values : Array[Json],
+) -> RerankingModelV4Documents {
   ObjectDocuments(values.copy())
 }
 
 ///|
 /// Return the number of documents in a reranking request.
-pub fn RerankingDocuments::length(self : RerankingDocuments) -> Int {
+pub fn RerankingModelV4Documents::length(
+  self : RerankingModelV4Documents,
+) -> Int {
   match self {
     TextDocuments(values) => values.length()
     ObjectDocuments(values) => values.length()
@@ -29,24 +35,24 @@ pub fn RerankingDocuments::length(self : RerankingDocuments) -> Int {
 
 ///|
 /// A single provider-produced reranking entry.
-pub(all) struct RerankingEntry {
+pub(all) struct RerankingModelV4Ranking {
   index : Int
   relevance_score : Double
 } derive(Debug, Eq)
 
 ///|
 /// Construct a reranking entry.
-pub fn RerankingEntry::new(
+pub fn RerankingModelV4Ranking::new(
   index : Int,
   relevance_score : Double,
-) -> RerankingEntry {
+) -> RerankingModelV4Ranking {
   { index, relevance_score }
 }
 
 ///|
 /// Normalized options passed to a reranking model.
-pub(all) struct RerankingCallOptions {
-  documents : RerankingDocuments
+pub(all) struct RerankingModelV4CallOptions {
+  documents : RerankingModelV4Documents
   query : String
   top_n : Int?
   headers : Map[String, String]
@@ -57,15 +63,15 @@ pub(all) struct RerankingCallOptions {
 
 ///|
 /// Construct reranking call options.
-pub fn RerankingCallOptions::new(
-  documents : RerankingDocuments,
+pub fn RerankingModelV4CallOptions::new(
+  documents : RerankingModelV4Documents,
   query : String,
   top_n? : Int,
   headers? : Map[String, String] = Map([]),
   provider_options? : Map[String, Json] = Map([]),
   retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
-) -> RerankingCallOptions {
+) -> RerankingModelV4CallOptions {
   {
     documents,
     query,
@@ -79,10 +85,8 @@ pub fn RerankingCallOptions::new(
 
 ///|
 /// Response returned by a reranking provider.
-pub(all) struct RerankingResponse {
-  ranking : Array[RerankingEntry]
-  usage : Usage
-  request : RequestMetadata?
+pub(all) struct RerankingModelV4Result {
+  ranking : Array[RerankingModelV4Ranking]
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
@@ -90,13 +94,16 @@ pub(all) struct RerankingResponse {
 
 ///|
 /// Construct a reranking response.
-pub fn RerankingResponse::new(
-  ranking : Array[RerankingEntry],
-  usage? : Usage = Usage::zero(),
-  request? : RequestMetadata,
+pub fn RerankingModelV4Result::new(
+  ranking : Array[RerankingModelV4Ranking],
   response? : ResponseMetadata,
   provider_metadata? : Map[String, Json] = Map([]),
   warnings? : Array[Warning] = [],
-) -> RerankingResponse {
-  { ranking, usage, request, response, provider_metadata, warnings }
+) -> RerankingModelV4Result {
+  {
+    ranking: ranking.copy(),
+    response,
+    provider_metadata: copy_provider_metadata(provider_metadata),
+    warnings: copy_warnings(warnings),
+  }
 }

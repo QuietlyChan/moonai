@@ -1,14 +1,54 @@
 ///|
+fn convert_openai_compatible_completion_usage(
+  usage : Json?,
+) -> @provider.LanguageModelV4Usage {
+  match usage {
+    Some(json) if !(json is Null) => {
+      let input_tokens = @provider_utils.json_int_field(json, "prompt_tokens")
+      let output_tokens = @provider_utils.json_int_field(
+        json, "completion_tokens",
+      )
+      {
+        input_tokens: {
+          total: Some(input_tokens),
+          no_cache: Some(input_tokens),
+          cache_read: None,
+          cache_write: None,
+        },
+        output_tokens: {
+          total: Some(output_tokens),
+          text: Some(output_tokens),
+          reasoning: None,
+        },
+        raw: Some(json),
+      }
+    }
+    _ => @provider_utils.create_null_language_model_usage()
+  }
+}
+
+///|
+priv struct OpenAICompatibleDecodedCompletionResponse {
+  content : Array[@provider.LanguageModelV4Content]
+  finish_reason : @provider.LanguageModelV4FinishReason
+  usage : @provider.LanguageModelV4Usage
+  response : @provider.ResponseMetadata?
+}
+
+///|
 /// Decode one non-streaming legacy OpenAI completion response.
-pub fn decode_completion_response(
+fn decode_completion_response(
   json : Json,
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-) -> @provider.CompletionResponse raise {
+  error_structure : OpenAICompatibleErrorStructure,
+) -> OpenAICompatibleDecodedCompletionResponse raise {
   if error_structure.message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI-compatible completion request failed: \{message}",
       data=json,
     )
+  }
+  if validate_openai_compatible_completion_response(json) is Some(message) {
+    raise @provider.InvalidResponseDataError(message~, data=json)
   }
   let (text, raw_finish_reason) = match json {
     {
@@ -32,12 +72,26 @@ pub fn decode_completion_response(
   }
   let usage = match json {
     { "usage": value, .. } if !(value is Null) =>
-      convert_openai_compatible_chat_usage(value)
-    _ => @provider.Usage::zero()
+      convert_openai_compatible_completion_usage(Some(value))
+    _ => convert_openai_compatible_completion_usage(None)
   }
-  let finish_reason = match raw_finish_reason {
-    Some(value) => @provider.FinishReason::from_openai(value)
-    None => @provider.Stop
+  let response_metadata = @provider_utils.create_language_model_response_metadata(
+    id?=@provider_utils.json_string_field(json, "id"),
+    model?=@provider_utils.json_string_field(json, "model"),
+    created?=@provider_utils.json_int_field_opt(json, "created"),
+  )
+  {
+    content: if text == "" {
+      []
+    } else {
+      [@provider.LanguageModelV4Content::text(text)]
+    },
+    finish_reason: openai_compatible_v4_finish_reason(raw_finish_reason),
+    usage,
+    response: if response_metadata.is_empty() {
+      None
+    } else {
+      Some(response_metadata)
+    },
   }
-  @provider.CompletionResponse::new(text, usage, finish_reason)
 }

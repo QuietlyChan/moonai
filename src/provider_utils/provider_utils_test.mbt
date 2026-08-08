@@ -20,6 +20,44 @@ test "call headers override provider headers" {
 }
 
 ///|
+test "header utility aliases match AI SDK record behavior" {
+  let first = { "Authorization": "provider", "X-First": "one" }
+  let second = { "Authorization": "call", "X-Second": "two" }
+  let combined = combineHeaders([first, second])
+  assert_eq(combined["Authorization"], "call")
+  assert_eq(combined["X-First"], "one")
+  assert_eq(combined["X-Second"], "two")
+  let normalized = normalizeHeaders(combined)
+  assert_eq(normalized.get("Authorization"), None)
+  assert_eq(normalized["authorization"], "call")
+  assert_eq(first["Authorization"], "provider")
+}
+
+///|
+test "request header sanitizer removes untrusted forwarding headers" {
+  let input = {
+    "Host": "metadata.internal",
+    "Connection": "keep-alive",
+    "X-Forwarded-For": "127.0.0.1",
+    "Metadata-Flavor": "Google",
+    "Cookie": "session=secret",
+    "Authorization": "Bearer provider-token",
+    "User-Agent": "moonai-test",
+    "X-Request-Id": "request-1",
+  }
+  let sanitized = sanitizeRequestHeaders(input)
+  assert_eq(sanitized.get("Host"), None)
+  assert_eq(sanitized.get("Connection"), None)
+  assert_eq(sanitized.get("X-Forwarded-For"), None)
+  assert_eq(sanitized.get("Metadata-Flavor"), None)
+  assert_eq(sanitized.get("Cookie"), None)
+  assert_eq(sanitized.get("Authorization"), Some("Bearer provider-token"))
+  assert_eq(sanitized.get("User-Agent"), Some("moonai-test"))
+  assert_eq(sanitized.get("X-Request-Id"), Some("request-1"))
+  assert_eq(input.get("Host"), Some("metadata.internal"))
+}
+
+///|
 test "user agent suffix appends case-insensitively without mutating input" {
   let headers = {
     "User-Agent": "moon-app/1.0",
@@ -34,6 +72,14 @@ test "user agent suffix appends case-insensitively without mutating input" {
   )
   assert_eq(result.get("Authorization"), Some("Bearer token"))
   assert_eq(headers.get("User-Agent"), Some("moon-app/1.0"))
+}
+
+///|
+test "AI SDK-style user agent alias shares the header normalization" {
+  let result = withUserAgentSuffix({ "User-Agent": "moon-app/1.0" }, [
+    "moonai/0.1.0",
+  ])
+  assert_eq(result.get("user-agent"), Some("moon-app/1.0 moonai/0.1.0"))
 }
 
 ///|
@@ -69,6 +115,17 @@ test "provider options can preserve an exact configurable provider key" {
 }
 
 ///|
+test "exact provider option keys retain dotted configurable names" {
+  let resolution = resolve_provider_options(
+    { "local.responses": { "reasoningSummary": "auto" } },
+    provider_name=" local.responses ",
+    prefer_exact_provider_name=true,
+  )
+  assert_eq(resolution.namespace_key, Some("local.responses"))
+  assert_eq(resolution.values["reasoningSummary"], "auto")
+}
+
+///|
 test "flat provider options are ignored" {
   let resolution = resolve_provider_options(
     { "quality": "high" },
@@ -77,6 +134,23 @@ test "flat provider options are ignored" {
   assert_eq(resolution.values.length(), 0)
   assert_eq(resolution.warnings, [])
   assert_eq(resolution.namespace_key, None)
+}
+
+///|
+test "base URL validation preserves valid values and rejects blanks" {
+  assert_eq(
+    validate_base_url(Some("https://example.com/v1/")),
+    Some("https://example.com/v1/"),
+  )
+  assert_eq(validate_base_url(None), None)
+  try validate_base_url(Some("  ")) catch {
+    @provider.InvalidArgumentError(argument~, message~) => {
+      assert_eq(argument, "baseURL")
+      assert_eq(message, "baseURL must be a non-empty string.")
+    }
+  } noraise {
+    _ => fail("expected an invalid base URL error")
+  }
 }
 
 ///|
@@ -158,8 +232,18 @@ test "provider metadata key follows the selected camel-case namespace" {
   )
   assert_eq(
     resolve_provider_options_key(" anthropic.beta.responses ", Map([])),
-    "anthropic.beta",
+    "anthropic",
   )
+}
+
+///|
+test "provider options use the leading provider segment" {
+  let resolution = resolve_provider_options(
+    { "anthropic": { "thinking": { "type": "adaptive" } } },
+    provider_name="anthropic.beta.messages",
+  )
+  assert_eq(resolution.namespace_key, Some("anthropic"))
+  json_inspect(resolution.values, content={ "thinking": { "type": "adaptive" } })
 }
 
 ///|
@@ -172,6 +256,15 @@ test "append_path normalizes one trailing slash and avoids duplicates" {
     append_path("https://example.com/v1/responses", "responses"),
     "https://example.com/v1/responses",
   )
+}
+
+///|
+test "AI SDK-style URL helper preserves optional endpoints" {
+  assert_eq(
+    withoutTrailingSlash(Some("https://example.com/v1/")),
+    Some("https://example.com/v1"),
+  )
+  assert_eq(withoutTrailingSlash(None), None)
 }
 
 ///|
@@ -251,6 +344,7 @@ test "provider utils resolves shared provider references" {
     id="file-123",
   )
   assert_eq(resolve_provider_reference(reference, "openai"), "file-123")
+  assert_eq(resolveProviderReference(reference, "openai"), "file-123")
 }
 
 ///|
@@ -264,6 +358,10 @@ test "media type helpers resolve full and top-level-only inputs" {
     "application/pdf",
   )
   assert_eq(decode_base64_text("TW9vbkJpdA=="), "MoonBit")
+  assert_eq(getTopLevelMediaType("image/png"), "image")
+  assert_eq(isFullMediaType("image/png"), true)
+  assert_eq(resolveFullMediaType("image", "iVBORw0KGgo="), "image/png")
+  assert_eq(mediaTypeToExtension("audio/mpeg"), "mp3")
 }
 
 ///|
@@ -273,6 +371,10 @@ test "media type detection skips bounded ID3v2 tags and accepts base64url" {
     Some("audio/mpeg"),
   )
   assert_eq(resolve_full_media_type("image/*", "iVBORw0KGgo"), "image/png")
+  assert_eq(
+    detectMediaType("SUQzBAAAAAAABQAAAAAA//s=", top_level_type="audio"),
+    Some("audio/mpeg"),
+  )
 }
 
 ///|
@@ -328,4 +430,26 @@ test "multipart form data extends colliding boundaries" {
   )
   assert_eq(form.boundary, "test-boundaryx")
   assert_true(form.content_type.has_suffix("test-boundaryx"))
+}
+
+///|
+async test "V4 image files resolve without legacy image conversion" {
+  let bytes = resolve_image_model_v4_file(
+    @provider.ImageModelV4File::bytes(data=b"raw-image", media_type="image/png"),
+    filename="input.png",
+    provider_name="test",
+  )
+  assert_eq(bytes.filename, "input.png")
+  assert_eq(bytes.media_type, "image/png")
+  assert_eq(bytes.data, b"raw-image")
+  let base64 = resolve_image_model_v4_file(
+    @provider.ImageModelV4File::base64(
+      data="iVBORw0KGgo=",
+      media_type="image/*",
+    ),
+    provider_name="test",
+  )
+  assert_eq(base64.filename, "image")
+  assert_eq(base64.media_type, "image/png")
+  assert_eq(base64.data, b"\x89PNG\r\n\x1a\n")
 }

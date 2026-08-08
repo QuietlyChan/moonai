@@ -5,18 +5,18 @@
 /// factory. It mirrors AI SDK's `createProviderRegistry` abstraction and keeps
 /// model selection independent from concrete provider packages.
 pub struct ProviderRegistry {
-  priv providers : Map[String, &@provider.Provider]
+  priv providers : Map[String, &@provider.ProviderV4]
   priv separator : String
-  priv language_model_middleware : @model.LanguageModelV4Middleware?
-  priv image_model_middleware : @model.ImageModelV4Middleware?
+  priv language_model_middleware : @provider.LanguageModelV4Middleware?
+  priv image_model_middleware : @provider.ImageModelV4Middleware?
 }
 
 ///|
 /// Create an empty provider registry.
 pub fn ProviderRegistry::new(
   separator? : String = ":",
-  language_model_middleware? : @model.LanguageModelV4Middleware,
-  image_model_middleware? : @model.ImageModelV4Middleware,
+  language_model_middleware? : @provider.LanguageModelV4Middleware,
+  image_model_middleware? : @provider.ImageModelV4Middleware,
 ) -> ProviderRegistry raise @provider.InvalidArgumentError {
   guard separator != "" else {
     raise @provider.InvalidArgumentError(
@@ -43,7 +43,7 @@ pub fn ProviderRegistry::separator(self : ProviderRegistry) -> String {
 pub fn ProviderRegistry::with_provider(
   self : ProviderRegistry,
   provider_id : String,
-  provider : &@provider.Provider,
+  provider : &@provider.ProviderV4,
 ) -> ProviderRegistry raise @provider.InvalidArgumentError {
   let normalized = provider_id.trim().to_owned()
   guard normalized != "" else {
@@ -63,15 +63,6 @@ pub fn ProviderRegistry::with_provider(
 }
 
 ///|
-/// Register a provider under the id reported by the provider factory.
-pub fn ProviderRegistry::register_provider(
-  self : ProviderRegistry,
-  provider : &@provider.Provider,
-) -> ProviderRegistry raise @provider.InvalidArgumentError {
-  self.with_provider(provider.provider_name(), provider)
-}
-
-///|
 /// Return the currently registered provider ids.
 pub fn ProviderRegistry::provider_ids(self : ProviderRegistry) -> Array[String] {
   let ids : Array[String] = []
@@ -86,7 +77,7 @@ pub fn ProviderRegistry::provider_ids(self : ProviderRegistry) -> Array[String] 
 fn ProviderRegistry::provider(
   self : ProviderRegistry,
   provider_id : String,
-) -> &@provider.Provider raise NoSuchProviderError {
+) -> &@provider.ProviderV4 raise NoSuchProviderError {
   match self.providers.get(provider_id) {
     Some(provider) => provider
     None =>
@@ -129,14 +120,10 @@ fn ProviderRegistry::split_model_id(
 
 ///|
 fn no_such_model(
-  provider_id : String,
   model_id : String,
-  model_type : @model.ModelType,
-) -> @model.NoSuchModelError {
-  @model.NoSuchModelError(
-    model_id=@model.ModelId::new(provider=provider_id, model_id~),
-    model_type~,
-  )
+  model_type : @provider.NoSuchModelType,
+) -> @provider.NoSuchModelError {
+  @provider.NoSuchModelError(model_id~, model_type~)
 }
 
 ///|
@@ -146,26 +133,10 @@ pub fn ProviderRegistry::language_model(
   id : String,
 ) -> &@provider.LanguageModelV4 raise {
   let (provider_id, model_id) = self.split_model_id(id, @model.Chat)
-  match self.provider(provider_id).language_model(model_id) {
-    Some(model) =>
-      match self.language_model_middleware {
-        Some(middleware) => @model.wrap_language_model_v4(model, middleware)
-        None => model
-      }
-    None => raise no_such_model(provider_id, model_id, @model.Chat)
-  }
-}
-
-///|
-/// Resolve a completion model from a provider-qualified id.
-pub fn ProviderRegistry::completion_model(
-  self : ProviderRegistry,
-  id : String,
-) -> &@provider.CompletionModel raise {
-  let (provider_id, model_id) = self.split_model_id(id, @model.Completion)
-  match self.provider(provider_id).completion_model(model_id) {
-    Some(model) => model
-    None => raise no_such_model(provider_id, model_id, @model.Completion)
+  let model = self.provider(provider_id).language_model(model_id)
+  match self.language_model_middleware {
+    Some(middleware) => @model.wrap_language_model_v4(model, middleware)
+    None => model
   }
 }
 
@@ -176,10 +147,7 @@ pub fn ProviderRegistry::embedding_model(
   id : String,
 ) -> &@provider.EmbeddingModelV4 raise {
   let (provider_id, model_id) = self.split_model_id(id, @model.Embedding)
-  match self.provider(provider_id).embedding_model(model_id) {
-    Some(model) => model
-    None => raise no_such_model(provider_id, model_id, @model.Embedding)
-  }
+  self.provider(provider_id).embedding_model(model_id)
 }
 
 ///|
@@ -187,11 +155,11 @@ pub fn ProviderRegistry::embedding_model(
 pub fn ProviderRegistry::reranking_model(
   self : ProviderRegistry,
   id : String,
-) -> &@provider.RerankingModel raise {
+) -> &@provider.RerankingModelV4 raise {
   let (provider_id, model_id) = self.split_model_id(id, @model.Reranking)
   match self.provider(provider_id).reranking_model(model_id) {
     Some(model) => model
-    None => raise no_such_model(provider_id, model_id, @model.Reranking)
+    None => raise no_such_model(id, @provider.RerankingModel)
   }
 }
 
@@ -202,26 +170,10 @@ pub fn ProviderRegistry::image_model(
   id : String,
 ) -> &@provider.ImageModelV4 raise {
   let (provider_id, model_id) = self.split_model_id(id, @model.Image)
-  match self.provider(provider_id).image_model(model_id) {
-    Some(model) =>
-      match self.image_model_middleware {
-        Some(middleware) => @model.wrap_image_model_v4(model, middleware)
-        None => model
-      }
-    None => raise no_such_model(provider_id, model_id, @model.Image)
-  }
-}
-
-///|
-/// Resolve a video model from a provider-qualified id.
-pub fn ProviderRegistry::video_model(
-  self : ProviderRegistry,
-  id : String,
-) -> &@provider.VideoModelV4 raise {
-  let (provider_id, model_id) = self.split_model_id(id, @model.Video)
-  match self.provider(provider_id).video_model(model_id) {
-    Some(model) => model
-    None => raise no_such_model(provider_id, model_id, @model.Video)
+  let model = self.provider(provider_id).image_model(model_id)
+  match self.image_model_middleware {
+    Some(middleware) => @model.wrap_image_model_v4(model, middleware)
+    None => model
   }
 }
 
@@ -234,7 +186,7 @@ pub fn ProviderRegistry::speech_model(
   let (provider_id, model_id) = self.split_model_id(id, @model.Speech)
   match self.provider(provider_id).speech_model(model_id) {
     Some(model) => model
-    None => raise no_such_model(provider_id, model_id, @model.Speech)
+    None => raise no_such_model(id, @provider.SpeechModel)
   }
 }
 
@@ -247,45 +199,16 @@ pub fn ProviderRegistry::transcription_model(
   let (provider_id, model_id) = self.split_model_id(id, @model.Transcription)
   match self.provider(provider_id).transcription_model(model_id) {
     Some(model) => model
-    None => raise no_such_model(provider_id, model_id, @model.Transcription)
+    None => raise no_such_model(id, @provider.TranscriptionModel)
   }
 }
 
 ///|
-/// Resolve a speech translation model from a provider-qualified id.
-pub fn ProviderRegistry::speech_translation_model(
-  self : ProviderRegistry,
-  id : String,
-) -> &@provider.SpeechTranslationModelV4 raise {
-  let (provider_id, model_id) = self.split_model_id(
-    id,
-    @model.SpeechTranslation,
-  )
-  match self.provider(provider_id).speech_translation_model(model_id) {
-    Some(model) => model
-    None => raise no_such_model(provider_id, model_id, @model.SpeechTranslation)
-  }
-}
-
-///|
-/// Resolve a realtime model from a provider-qualified id.
-pub fn ProviderRegistry::realtime_model(
-  self : ProviderRegistry,
-  id : String,
-) -> &@provider.RealtimeModelV4 raise {
-  let (provider_id, model_id) = self.split_model_id(id, @model.Realtime)
-  match self.provider(provider_id).realtime_model(model_id) {
-    Some(model) => model
-    None => raise no_such_model(provider_id, model_id, @model.Realtime)
-  }
-}
-
-///|
-/// Resolve a provider-level Files service.
+/// Resolve a provider-level FilesV4 service.
 pub fn ProviderRegistry::files(
   self : ProviderRegistry,
   provider_id : String,
-) -> &@provider.Files raise {
+) -> &@provider.FilesV4 raise {
   match self.provider(provider_id).files() {
     Some(files) => files
     None =>
@@ -294,11 +217,11 @@ pub fn ProviderRegistry::files(
 }
 
 ///|
-/// Resolve a provider-level Skills service.
+/// Resolve a provider-level SkillsV4 service.
 pub fn ProviderRegistry::skills(
   self : ProviderRegistry,
   provider_id : String,
-) -> &@provider.Skills raise {
+) -> &@provider.SkillsV4 raise {
   match self.provider(provider_id).skills() {
     Some(skills) => skills
     None =>
@@ -309,10 +232,10 @@ pub fn ProviderRegistry::skills(
 ///|
 /// Construct a registry from a provider map.
 pub fn create_provider_registry(
-  providers : Map[String, &@provider.Provider],
+  providers : Map[String, &@provider.ProviderV4],
   separator? : String = ":",
-  language_model_middleware? : @model.LanguageModelV4Middleware,
-  image_model_middleware? : @model.ImageModelV4Middleware,
+  language_model_middleware? : @provider.LanguageModelV4Middleware,
+  image_model_middleware? : @provider.ImageModelV4Middleware,
 ) -> ProviderRegistry raise @provider.InvalidArgumentError {
   let registry = ProviderRegistry::new(
     separator~,
@@ -329,10 +252,10 @@ pub fn create_provider_registry(
 ///|
 /// AI SDK-style camel-case spelling for `create_provider_registry`.
 pub fn createProviderRegistry(
-  providers : Map[String, &@provider.Provider],
+  providers : Map[String, &@provider.ProviderV4],
   separator? : String = ":",
-  language_model_middleware? : @model.LanguageModelV4Middleware,
-  image_model_middleware? : @model.ImageModelV4Middleware,
+  language_model_middleware? : @provider.LanguageModelV4Middleware,
+  image_model_middleware? : @provider.ImageModelV4Middleware,
 ) -> ProviderRegistry raise @provider.InvalidArgumentError {
   create_provider_registry(
     providers,

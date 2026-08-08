@@ -14,22 +14,28 @@ test "compatible provider credential setting applies to every model family" {
   )
   let expected = Some("Bearer environment-key")
   assert_eq(
-    provider.chat_model_wire("chat").request_headers().get("Authorization"),
+    provider
+    .chat_language_model("chat")
+    .request_headers_with(Map([]))
+    .get("Authorization"),
     expected,
   )
   assert_eq(
     provider
-    .completion_model_wire("completion")
+    .completion_language_model("completion")
+    .request_headers_with(Map([]))
+    .get("Authorization"),
+    expected,
+  )
+  assert_eq(
+    provider
+    .embedding_model_value("embedding")
     .request_headers()
     .get("Authorization"),
     expected,
   )
   assert_eq(
-    provider.embedding_model("embedding").request_headers().get("Authorization"),
-    expected,
-  )
-  assert_eq(
-    provider.image_model("image").request_headers().get("Authorization"),
+    provider.image_model_value("image").request_headers().get("Authorization"),
     expected,
   )
 }

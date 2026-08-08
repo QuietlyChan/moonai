@@ -25,9 +25,9 @@ test "provider registry raises typed resolution errors" {
     _ => fail("expected missing provider")
   }
   try registry.image_model("local:image-model") catch {
-    @model.NoSuchModelError(model_id~, model_type~) => {
-      assert_eq(model_id.key(), "local:image-model")
-      assert_eq(model_type, @model.Image)
+    @provider.NoSuchModelError(model_id~, model_type~) => {
+      assert_eq(model_id, "image-model")
+      assert_eq(model_type, @provider.ImageModel)
     }
     error => fail("unexpected error: \{error}")
   } noraise {

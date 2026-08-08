@@ -35,3 +35,18 @@ test "OpenAI base URL prefers an explicit value over OPENAI_BASE_URL" {
   )
   assert_eq(provider.base_url, "https://option.openai.example/v1")
 }
+
+///|
+test "OpenAI rejects an explicitly empty base URL" {
+  let previous = @env.get_env_var("OPENAI_BASE_URL")
+  defer restore_openai_base_url(previous)
+  @env.set_env_var("OPENAI_BASE_URL", "https://env.openai.example/v1")
+  try create_openai(api_key="test-key", base_url="") catch {
+    @provider.InvalidArgumentError(argument~, message~) => {
+      assert_eq(argument, "baseURL")
+      assert_eq(message, "baseURL must be a non-empty string.")
+    }
+  } noraise {
+    _ => fail("expected an invalid base URL error")
+  }
+}

@@ -15,7 +15,7 @@ async fn transform_embedding_values(
 
 ///|
 async fn passthrough_embedding_result(
-  context : EmbeddingModelV4MiddlewareContext,
+  context : @provider.EmbeddingModelV4MiddlewareContext,
 ) -> @provider.EmbeddingModelV4Result {
   context.embed()
 }
@@ -34,7 +34,7 @@ async test "embedding V4 middleware transforms and delegates calls" {
   )
   let wrapped = wrapEmbeddingModel(
     base,
-    EmbeddingModelV4Middleware::new(
+    @provider.EmbeddingModelV4Middleware::new(
       transform_params=transform_embedding_values,
       override_provider=_ => "wrapped",
       override_model_id=_ => "wrapped-embedding",
@@ -61,8 +61,10 @@ test "embedding V4 middleware chain keeps the first wrapper outermost" {
     @provider.EmbeddingBatchResponse::new([[1.0]], @provider.Usage::zero()),
   )
   let wrapped = wrapEmbeddingModelChain(base, [
-    EmbeddingModelV4Middleware::new(override_provider=_ => "outer"),
-    EmbeddingModelV4Middleware::new(override_model_id=_ => "inner-model"),
+    @provider.EmbeddingModelV4Middleware::new(override_provider=_ => "outer"),
+    @provider.EmbeddingModelV4Middleware::new(override_model_id=_ => {
+      "inner-model"
+    }),
   ])
   assert_eq(wrapped.provider(), "outer")
   assert_eq(wrapped.model_id(), "inner-model")

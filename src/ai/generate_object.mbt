@@ -2,7 +2,7 @@
 /// A parsed structured output together with its normalized model response.
 pub(all) struct ObjectResponse {
   object : Json
-  response : @provider.LanguageModelV4GenerateResult
+  response : GenerateTextResult
 } derive(Debug)
 
 ///|
@@ -30,7 +30,7 @@ pub suberror NoObjectGeneratedError {
   NoObjectGeneratedError(
     message~ : String,
     text~ : String?,
-    response~ : @provider.LanguageModelV4GenerateResult,
+    response~ : GenerateTextResult,
     failure~ : ObjectGenerationFailure
   )
 } derive(Debug)

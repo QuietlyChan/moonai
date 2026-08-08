@@ -45,6 +45,25 @@ pub fn SpeechModelV4CallOptions::new(
 }
 
 ///|
+/// Lift the legacy speech call into the V4 provider contract.
+pub fn SpeechModelV4CallOptions::from_speech_call_options(
+  options : SpeechCallOptions,
+) -> SpeechModelV4CallOptions {
+  SpeechModelV4CallOptions::new(
+    text=options.text,
+    voice?=options.voice,
+    output_format?=options.output_format,
+    instructions?=options.instructions,
+    speed?=options.speed,
+    language?=options.language,
+    provider_options=options.provider_options,
+    headers=options.headers,
+    retry_policy=options.retry_policy,
+    cancellation_token?=options.cancellation_token,
+  )
+}
+
+///|
 /// Convert V4 options at the explicit wire-adapter boundary.
 pub fn SpeechModelV4CallOptions::to_speech_call_options(
   self : SpeechModelV4CallOptions,

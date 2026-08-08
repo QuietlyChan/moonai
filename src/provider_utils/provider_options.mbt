@@ -47,24 +47,24 @@ fn copy_json_map(values : Map[String, Json]) -> Map[String, Json] {
 }
 
 ///|
-/// Drop the model-kind suffix used by moonai provider identifiers.
+/// Extract the provider-options namespace from a provider identifier.
+///
+/// AI SDK providers append model or implementation qualifiers after the first
+/// dot, for example `anthropic.beta` and `openai.chat`. Provider options remain
+/// scoped to the leading provider name in both cases.
 fn provider_options_base_name(provider_name : String) -> String {
   let trimmed = provider_name.trim().to_owned()
-  let suffixes = [
-    ".responses", ".messages", ".chat", ".completion", ".embedding", ".image", ".speech",
-    ".transcription", ".translation", ".files", ".skills", ".video", ".realtime",
-  ]
-  for suffix in suffixes {
-    if trimmed.strip_suffix(suffix) is Some(base) {
-      return base.to_owned()
-    }
+  let parts = trimmed.split(".").to_array()
+  if parts.length() == 0 {
+    trimmed
+  } else {
+    parts[0].trim().to_owned()
   }
-  trimmed
 }
 
 ///|
 /// Convert provider identifiers such as `openai-compatible` to camel case.
-fn provider_options_camel_case(value : String) -> String {
+pub fn provider_options_camel_case(value : String) -> String {
   let result = StringBuilder::new(size_hint=value.length())
   let mut capitalize_next = false
   for character in value {
@@ -83,8 +83,8 @@ fn provider_options_camel_case(value : String) -> String {
 ///|
 /// Resolve the provider-metadata key paired with a provider-options namespace.
 ///
-/// AI SDK preserves the raw provider name unless the caller selected its
-/// camel-case namespace. Model-kind suffixes are ignored in both cases.
+/// AI SDK preserves the leading raw provider name unless the caller selected
+/// its camel-case namespace. Provider qualifiers are ignored in both cases.
 pub fn resolve_provider_options_key(
   provider_name : String,
   options : Map[String, Json],
@@ -115,12 +115,13 @@ pub fn resolve_provider_options(
   prefer_exact_provider_name? : Bool = false,
 ) -> ProviderOptionsResolution {
   let warnings : Array[@provider.Warning] = []
+  let exact_name = provider_name.trim().to_owned()
   let base_name = provider_options_base_name(provider_name)
   let camel_name = provider_options_camel_case(base_name)
   let candidates : Array[String] = []
   if prefer_exact_provider_name {
-    add_candidate(candidates, base_name)
-    add_candidate(candidates, camel_name)
+    add_candidate(candidates, exact_name)
+    add_candidate(candidates, provider_options_camel_case(exact_name))
   } else {
     add_candidate(candidates, camel_name)
     add_candidate(candidates, base_name)

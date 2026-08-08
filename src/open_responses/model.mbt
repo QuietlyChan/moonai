@@ -61,8 +61,9 @@ pub fn createOpenResponses(
 pub fn OpenResponsesProvider::language_model(
   self : OpenResponsesProvider,
   model_id : String,
-) -> OpenResponsesLanguageModelV4 {
-  self.responses(model_id)
+) -> &@provider.LanguageModelV4 {
+  let model = OpenResponsesLanguageModelV4::new(self.responses_wire(model_id))
+  model as &@provider.LanguageModelV4
 }
 
 ///|
@@ -70,22 +71,12 @@ pub fn OpenResponsesProvider::language_model(
 pub fn OpenResponsesProvider::languageModel(
   self : OpenResponsesProvider,
   model_id : String,
-) -> OpenResponsesLanguageModelV4 {
+) -> &@provider.LanguageModelV4 {
   self.language_model(model_id)
 }
 
 ///|
-/// Select a model using the Responses API name.
-pub fn OpenResponsesProvider::responses(
-  self : OpenResponsesProvider,
-  model_id : String,
-) -> OpenResponsesLanguageModelV4 {
-  OpenResponsesLanguageModelV4::new(self.responses_wire(model_id))
-}
-
-///|
-/// Select the protocol-level model used to test or extend the wire adapter.
-pub fn OpenResponsesProvider::responses_wire(
+fn OpenResponsesProvider::responses_wire(
   self : OpenResponsesProvider,
   model_id : String,
 ) -> OpenResponsesLanguageModel {
@@ -103,72 +94,17 @@ pub fn OpenResponsesProvider::responses_wire(
 }
 
 ///|
-/// Short alias for `language_model`.
-pub fn OpenResponsesProvider::model(
-  self : OpenResponsesProvider,
-  model_id : String,
-) -> OpenResponsesLanguageModelV4 {
-  self.responses(model_id)
-}
-
-///|
 /// A model served through the Open Responses protocol.
-pub struct OpenResponsesLanguageModel {
-  priv provider_name : String
-  priv provider_options_name : String
-  priv url : String
-  priv api_key : String
-  priv model_id : String
-  priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
-  priv id_generator : @provider_utils.IdGenerator
-  priv http_transport : &@provider_utils.HttpTransport
-}
-
-///|
-/// Construct the low-level Open Responses wire model directly.
-pub fn open_responses_wire(
-  model_id~ : String,
-  provider_name~ : String,
-  url~ : String,
-  api_key? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
-  id_generator? : @provider_utils.IdGenerator,
-  http_transport? : &@provider_utils.HttpTransport,
-) -> OpenResponsesLanguageModel {
-  create_open_responses(
-    provider_name~,
-    url~,
-    api_key~,
-    headers~,
-    idle_timeout_ms~,
-    id_generator?,
-    http_transport?,
-  ).responses_wire(model_id)
-}
-
-///|
-/// Construct the default V4 Open Responses language model directly.
-pub fn open_responses(
-  model_id~ : String,
-  provider_name~ : String,
-  url~ : String,
-  api_key? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
-  id_generator? : @provider_utils.IdGenerator,
-  http_transport? : &@provider_utils.HttpTransport,
-) -> OpenResponsesLanguageModelV4 {
-  create_open_responses(
-    provider_name~,
-    url~,
-    api_key~,
-    headers~,
-    idle_timeout_ms~,
-    id_generator?,
-    http_transport?,
-  ).language_model(model_id)
+priv struct OpenResponsesLanguageModel {
+  provider_name : String
+  provider_options_name : String
+  url : String
+  api_key : String
+  model_id : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  id_generator : @provider_utils.IdGenerator
+  http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
@@ -185,42 +121,4 @@ fn OpenResponsesLanguageModel::request_headers(
     @provider_utils.merge_headers(headers, self.headers),
     ["moonai/open-responses/\{VERSION}"],
   )
-}
-
-///|
-pub impl @provider.ChatModel for OpenResponsesLanguageModel with fn provider(
-  self,
-) -> String {
-  self.provider_name
-}
-
-///|
-pub impl @provider.ChatModel for OpenResponsesLanguageModel with fn model_id(
-  self,
-) -> String {
-  self.model_id
-}
-
-///|
-pub impl @provider.ChatModel for OpenResponsesLanguageModel with fn supported_urls(
-  _self,
-) -> Array[@provider.SupportedUrlRule] {
-  [@provider.SupportedUrlRule::http("image/*")]
-}
-
-///|
-pub impl @provider.ChatModel for OpenResponsesLanguageModel with fn generate(
-  self,
-  options,
-) {
-  self.generate_responses(options)
-}
-
-///|
-pub impl @provider.ChatModel for OpenResponsesLanguageModel with fn stream(
-  self,
-  options,
-  on_event,
-) {
-  self.stream_responses(options, on_event)
 }

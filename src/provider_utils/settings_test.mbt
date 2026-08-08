@@ -23,6 +23,30 @@ test "explicit API key takes precedence over the environment" {
 }
 
 ///|
+test "AI SDK-style API key loader preserves an explicit empty value" {
+  let name = "MOONAI_TEST_EXPLICIT_EMPTY_API_KEY"
+  let previous = @env.get_env_var(name)
+  defer restore_test_environment_variable(name, previous)
+  @env.set_env_var(name, "environment-key")
+  assert_eq(
+    loadApiKey(
+      Some(""),
+      environment_variable_name=name,
+      description="Test provider",
+    ),
+    "",
+  )
+  assert_eq(
+    loadApiKey(
+      None,
+      environment_variable_name=name,
+      description="Test provider",
+    ),
+    "environment-key",
+  )
+}
+
+///|
 test "API key falls back to the environment" {
   let name = "MOONAI_TEST_ENVIRONMENT_API_KEY"
   let previous = @env.get_env_var(name)
@@ -93,9 +117,34 @@ test "required and optional settings use the same precedence" {
     "environment-value",
   )
   assert_eq(
-    load_optional_setting("", environment_variable_name=name),
+    load_optional_setting(None, environment_variable_name=name),
     Some("environment-value"),
   )
   @env.unset_env_var(name)
-  assert_eq(load_optional_setting("", environment_variable_name=name), None)
+  assert_eq(load_optional_setting(None, environment_variable_name=name), None)
+}
+
+///|
+test "optional settings preserve an explicit empty value" {
+  let name = "MOONAI_TEST_EXPLICIT_EMPTY_SETTING"
+  let previous = @env.get_env_var(name)
+  defer restore_test_environment_variable(name, previous)
+  @env.set_env_var(name, "environment-value")
+  assert_eq(
+    load_optional_setting(Some(""), environment_variable_name=name),
+    Some(""),
+  )
+  assert_eq(
+    loadOptionalSetting(Some(""), environment_variable_name=name),
+    Some(""),
+  )
+  assert_eq(
+    loadSetting(
+      Some(""),
+      environment_variable_name=name,
+      setting_name="baseURL",
+      description="Test provider",
+    ),
+    "",
+  )
 }

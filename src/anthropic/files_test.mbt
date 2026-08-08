@@ -40,6 +40,7 @@ async test "official Anthropic Files uploads multipart data and maps metadata" {
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
     ).files()
+    assert_eq(files.specification_version(), "v4")
     assert_eq(files.provider(), "anthropic.messages")
     let result = @ai.upload_file(
       files,

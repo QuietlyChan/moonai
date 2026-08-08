@@ -41,3 +41,18 @@ test "OpenAI image metadata omits absent token details" {
   })
   json_inspect(metadata["openai"], content={ "images": [Json::empty_object()] })
 }
+
+///|
+test "OpenAI image response rejects URL-only image items" {
+  try
+    decode_openai_image_response_data({
+      "data": [{ "url": "https://example.com/image.png" }],
+    })
+  catch {
+    @provider.InvalidResponseDataError(message~, ..) =>
+      assert_true(message.contains("no b64_json"))
+    error => fail("unexpected error: \{error}")
+  } noraise {
+    _ => fail("expected URL-only image item to be rejected")
+  }
+}

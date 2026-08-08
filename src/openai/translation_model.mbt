@@ -36,6 +36,12 @@ pub struct OpenAITranslationModel {
 }
 
 ///|
+priv struct OpenAITranslationStreamResult {
+  request : @provider.RequestMetadata?
+  response : @provider.ResponseMetadata?
+}
+
+///|
 fn openai_translation_model(
   provider_name~ : String,
   base_url~ : String,
@@ -123,7 +129,7 @@ fn OpenAITranslationModel::url(self : OpenAITranslationModel) -> String {
 ///|
 fn OpenAITranslationModel::request_headers(
   self : OpenAITranslationModel,
-  call_options : @provider.SpeechTranslationCallOptions,
+  call_headers : Map[String, String],
 ) -> Map[String, String] raise @provider.LoadAPIKeyError {
   let headers : Map[String, String] = Map([])
   headers["Authorization"] = "Bearer \{load_openai_api_key(self.api_key)}"
@@ -132,7 +138,7 @@ fn OpenAITranslationModel::request_headers(
       @provider_utils.merge_headers(headers, self.headers),
       ["moonai/openai/\{VERSION}"],
     ),
-    call_options.headers,
+    call_headers,
   )
 }
 
@@ -154,13 +160,11 @@ fn openai_translation_session(target_language : String) -> Json {
 
 ///|
 fn openai_translation_warnings(
-  call_options : @provider.SpeechTranslationCallOptions,
-  provider_name : String,
+  call_options : @provider.SpeechTranslationModelV4StreamOptions,
+  _provider_name : String,
 ) -> Array[@provider.Warning] {
-  let resolution = @provider_utils.resolve_provider_options(
+  let resolution = resolve_official_openai_provider_options(
     call_options.provider_options,
-    provider_name~,
-    aliases=["openai"],
   )
   let reader = @provider_utils.ProviderOptionsReader::new(
     resolution,
@@ -189,7 +193,7 @@ fn openai_translation_warnings(
 ///|
 fn OpenAITranslationModel::validate_openai_translation_options(
   self : OpenAITranslationModel,
-  call_options : @provider.SpeechTranslationCallOptions,
+  call_options : @provider.SpeechTranslationModelV4StreamOptions,
 ) -> Unit raise {
   guard call_options.target_language.trim() != "" else {
     fail("targetLanguage is required for translation model '\{self.model_id}'.")
@@ -217,7 +221,8 @@ async fn send_openai_translation_audio(
     match audio.read_next() {
       Some(chunk) => {
         let encoded = match chunk {
-          @provider.AudioBytes(data) => @base64.encode(data)
+          @provider.AudioBytes(data) =>
+            @provider_utils.convert_bytes_to_base64(data)
           @provider.AudioBase64(data) => data
         }
         connection.send_text(
@@ -247,18 +252,19 @@ fn openai_translation_close_error(code : Int?, reason : String?) -> String {
 }
 
 ///|
-async fn OpenAITranslationModel::stream_translation(
+async fn OpenAITranslationModel::stream_translation_v4(
   self : OpenAITranslationModel,
-  call_options : @provider.SpeechTranslationCallOptions,
-  on_event : async (@provider.SpeechTranslationStreamEvent) -> Unit,
-) -> @provider.SpeechTranslationResponse {
+  call_options : @provider.SpeechTranslationModelV4StreamOptions,
+  on_event : async (@provider.SpeechTranslationModelV4StreamPart) -> Unit,
+) -> OpenAITranslationStreamResult {
+  let request_created_at = (@env.now() / 1000UL).to_int()
   self.validate_openai_translation_options(call_options)
   @provider.check_cancellation(call_options.cancellation_token)
   let warnings = openai_translation_warnings(call_options, self.provider_name)
   let session_update = openai_translation_session(call_options.target_language)
   let url = self.url()
   let realtime = openai_realtime_connection_options(
-    self.request_headers(call_options),
+    self.request_headers(call_options.headers),
   )
   defer call_options.audio.cancel()
   let connection = self.websocket_connector.connect(
@@ -267,7 +273,7 @@ async fn OpenAITranslationModel::stream_translation(
     realtime.headers,
   )
   defer connection.close()
-  on_event(@provider.SpeechTranslationStreamStart(warnings~))
+  on_event(@provider.SpeechTranslationV4StreamStart(warnings~))
   connection.send_text(session_update.stringify())
   let source_text = StringBuilder::new()
   let output_text = StringBuilder::new()
@@ -308,7 +314,7 @@ async fn OpenAITranslationModel::stream_translation(
             None => ()
             Some(event) => {
               if call_options.include_raw_chunks {
-                on_event(@provider.SpeechTranslationRaw(event))
+                on_event(@provider.SpeechTranslationV4Raw(event))
               }
               let event_type = @provider_utils.json_string_field(event, "type")
               match event_type {
@@ -316,7 +322,7 @@ async fn OpenAITranslationModel::stream_translation(
                   match @provider_utils.json_string_field(event, "delta") {
                     Some(delta) if delta != "" =>
                       on_event(
-                        @provider.SpeechTranslationAudio(
+                        @provider.SpeechTranslationV4Audio(
                           id=None,
                           audio=@provider.SpeechAudioData::base64(delta),
                           provider_metadata=Map([]),
@@ -330,7 +336,7 @@ async fn OpenAITranslationModel::stream_translation(
                   )
                   output_text.write_string(delta)
                   on_event(
-                    @provider.SpeechTranslationOutputTextDelta(
+                    @provider.SpeechTranslationV4OutputTextDelta(
                       id=None,
                       delta~,
                       provider_metadata=Map([]),
@@ -343,7 +349,7 @@ async fn OpenAITranslationModel::stream_translation(
                   )
                   source_text.write_string(delta)
                   on_event(
-                    @provider.SpeechTranslationSourceTranscriptDelta(
+                    @provider.SpeechTranslationV4SourceTranscriptDelta(
                       id=None,
                       delta~,
                       provider_metadata=Map([]),
@@ -353,7 +359,7 @@ async fn OpenAITranslationModel::stream_translation(
                 Some("session.closed") => finished = true
                 Some("error") =>
                   on_event(
-                    @provider.SpeechTranslationStreamError(
+                    @provider.SpeechTranslationV4Error(
                       openai_error_message(event).unwrap_or(
                         "OpenAI realtime error",
                       ),
@@ -372,7 +378,7 @@ async fn OpenAITranslationModel::stream_translation(
   let final_output_text = output_text.to_string()
   if final_source_text != "" {
     on_event(
-      @provider.SpeechTranslationSourceTranscriptFinal(
+      @provider.SpeechTranslationV4SourceTranscriptFinal(
         id=None,
         text=final_source_text,
         start_second=None,
@@ -384,7 +390,7 @@ async fn OpenAITranslationModel::stream_translation(
   }
   if final_output_text != "" {
     on_event(
-      @provider.SpeechTranslationOutputTextFinal(
+      @provider.SpeechTranslationV4OutputTextFinal(
         id=None,
         text=final_output_text,
         provider_metadata=Map([]),
@@ -392,52 +398,29 @@ async fn OpenAITranslationModel::stream_translation(
     )
   }
   on_event(
-    @provider.SpeechTranslationFinish(
+    @provider.SpeechTranslationV4Finish(
       source_text=final_source_text,
       output_text=final_output_text,
-      duration_seconds=None,
+      duration_in_seconds=None,
       usage=None,
       provider_metadata=Map([]),
     ),
   )
-  @provider.SpeechTranslationResponse::new(
-    source_text=final_source_text,
-    output_text=final_output_text,
-  ).with_diagnostics(
-    Some(
+  {
+    request: Some(
       @provider.RequestMetadata::new(
         url~,
         headers=realtime.headers,
         body=session_update.stringify(),
       ),
     ),
-    Some(@provider.ResponseMetadata::new(model_id=self.model_id)),
-    Map([]),
-    warnings,
-  )
-}
-
-///|
-pub impl @provider.SpeechTranslationWireModel for OpenAITranslationModel with fn provider(
-  self,
-) {
-  self.provider_name
-}
-
-///|
-pub impl @provider.SpeechTranslationWireModel for OpenAITranslationModel with fn model_id(
-  self,
-) {
-  self.model_id
-}
-
-///|
-pub impl @provider.SpeechTranslationWireModel for OpenAITranslationModel with fn stream(
-  self,
-  call_options,
-  on_event,
-) {
-  self.stream_translation(call_options, on_event)
+    response: Some(
+      @provider.ResponseMetadata::new(
+        model_id=self.model_id,
+        created_at=request_created_at,
+      ),
+    ),
+  }
 }
 
 ///|
@@ -467,14 +450,7 @@ pub impl @provider.SpeechTranslationModelV4 for OpenAITranslationModel with fn d
   options,
   on_part,
 ) {
-  let response = self.stream_translation(
-    options.to_speech_translation_call_options(),
-    event => {
-      on_part(
-        @provider.SpeechTranslationModelV4StreamPart::from_stream_event(event),
-      )
-    },
-  )
+  let response = self.stream_translation_v4(options, on_part)
   @provider.SpeechTranslationModelV4StreamResult::new(
     request?=response.request,
     response?=response.response,

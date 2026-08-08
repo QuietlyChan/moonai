@@ -1,8 +1,4 @@
 ///|
-/// MiniMax Chat is served through an Anthropic-compatible Messages endpoint.
-pub type MiniMaxChatModel = @anthropic.AnthropicMessagesModel
-
-///|
 /// MiniMax provider factory.
 pub struct MiniMaxProvider {
   priv api_key : String
@@ -72,11 +68,11 @@ pub fn createMiniMax(
 }
 
 ///|
-/// Select the protocol-level MiniMax Messages model.
-pub fn MiniMaxProvider::chat_wire(
+/// Construct the MiniMax language model through Anthropic's V4 boundary.
+fn MiniMaxProvider::language_model_value(
   self : MiniMaxProvider,
   model_id : MiniMaxChatModelId,
-) -> MiniMaxChatModel raise {
+) -> &@provider.LanguageModelV4 raise {
   @anthropic.create_anthropic(
     api_key=self.api_key,
     base_url=self.base_url,
@@ -88,7 +84,7 @@ pub fn MiniMaxProvider::chat_wire(
     http_transport=self.http_transport,
     api_key_environment_variable="MINIMAX_API_KEY",
     id_generator=self.id_generator,
-  ).messages_wire(model_id)
+  ).messages(model_id)
 }
 
 ///|
@@ -96,8 +92,8 @@ pub fn MiniMaxProvider::chat_wire(
 pub fn MiniMaxProvider::chat(
   self : MiniMaxProvider,
   model_id : MiniMaxChatModelId,
-) -> MiniMaxLanguageModelV4 raise {
-  MiniMaxLanguageModelV4::new(self.chat_wire(model_id))
+) -> &@provider.LanguageModelV4 raise {
+  self.language_model_value(model_id)
 }
 
 ///|
@@ -105,7 +101,7 @@ pub fn MiniMaxProvider::chat(
 pub fn MiniMaxProvider::language_model(
   self : MiniMaxProvider,
   model_id : MiniMaxChatModelId,
-) -> MiniMaxLanguageModelV4 raise {
+) -> &@provider.LanguageModelV4 raise {
   self.chat(model_id)
 }
 
@@ -114,17 +110,17 @@ pub fn MiniMaxProvider::language_model(
 pub fn MiniMaxProvider::languageModel(
   self : MiniMaxProvider,
   model_id : MiniMaxChatModelId,
-) -> MiniMaxLanguageModelV4 raise {
+) -> &@provider.LanguageModelV4 raise {
   self.language_model(model_id)
 }
 
 ///|
-/// Select a MiniMax native video generation model.
-pub fn MiniMaxProvider::video(
+/// Construct the concrete video model behind the public V4 boundary.
+fn MiniMaxProvider::video_model_value(
   self : MiniMaxProvider,
   model_id : MiniMaxVideoModelId,
 ) -> MiniMaxVideoModel {
-  minimax_video(
+  minimax_video_value(
     model_id,
     api_key=self.api_key,
     base_url=self.video_base_url,
@@ -135,33 +131,22 @@ pub fn MiniMaxProvider::video(
 }
 
 ///|
+/// Select a MiniMax native video generation model.
+pub fn MiniMaxProvider::video(
+  self : MiniMaxProvider,
+  model_id : MiniMaxVideoModelId,
+) -> &@provider.VideoModelV4 {
+  let model = self.video_model_value(model_id)
+  model as &@provider.VideoModelV4
+}
+
+///|
 /// Camel-case alias for `video`.
 pub fn MiniMaxProvider::videoModel(
   self : MiniMaxProvider,
   model_id : MiniMaxVideoModelId,
-) -> MiniMaxVideoModel {
+) -> &@provider.VideoModelV4 {
   self.video(model_id)
-}
-
-///|
-/// Construct the low-level MiniMax Messages wire model directly.
-pub fn minimax_messages(
-  model_id : MiniMaxChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.minimax.io/anthropic/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
-  http_transport? : &@provider_utils.HttpTransport,
-  id_generator? : @provider_utils.IdGenerator,
-) -> MiniMaxChatModel raise {
-  create_minimax(
-    api_key~,
-    base_url~,
-    headers~,
-    idle_timeout_ms~,
-    http_transport?,
-    id_generator?,
-  ).chat_wire(model_id)
 }
 
 ///|
@@ -174,16 +159,13 @@ pub fn minimax(
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
-) -> MiniMaxLanguageModelV4 raise {
-  MiniMaxLanguageModelV4::new(
-    minimax_messages(
-      model_id,
-      api_key~,
-      base_url~,
-      headers~,
-      idle_timeout_ms~,
-      http_transport?,
-      id_generator?,
-    ),
-  )
+) -> &@provider.LanguageModelV4 raise {
+  create_minimax(
+    api_key~,
+    base_url~,
+    headers~,
+    idle_timeout_ms~,
+    http_transport?,
+    id_generator?,
+  ).language_model(model_id)
 }

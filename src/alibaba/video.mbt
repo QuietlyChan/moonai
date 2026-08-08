@@ -1,24 +1,24 @@
 ///|
 /// Alibaba DashScope asynchronous video-generation model.
-pub struct AlibabaVideoModel {
-  priv provider_name : String
-  priv base_url : String
-  priv api_key : String
-  priv model_id : String
-  priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
-  priv http_transport : &@provider_utils.HttpTransport
+priv struct AlibabaVideoModel {
+  provider_name : String
+  base_url : String
+  api_key : String
+  model_id : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
-/// Construct an Alibaba asynchronous video model.
-pub fn alibaba_video(
+/// Construct the concrete video model behind the public V4 boundary.
+fn alibaba_video_value(
   model_id : AlibabaVideoModelId,
-  api_key? : String = "",
-  base_url? : String = "https://dashscope-intl.aliyuncs.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
-  http_transport? : &@provider_utils.HttpTransport,
+  api_key~ : String,
+  base_url~ : String,
+  headers~ : Map[String, String],
+  idle_timeout_ms~ : Int,
+  http_transport~ : &@provider_utils.HttpTransport,
 ) -> AlibabaVideoModel {
   {
     provider_name: "alibaba.video",
@@ -27,36 +27,40 @@ pub fn alibaba_video(
     model_id,
     headers: @provider_utils.copy_headers(headers),
     idle_timeout_ms,
-    http_transport: http_transport.unwrap_or(
-      @provider_utils.native_http_transport(),
-    ),
+    http_transport,
   }
 }
 
 ///|
-fn AlibabaVideoModel::request_headers(
+fn AlibabaVideoModel::request_headers_with(
   self : AlibabaVideoModel,
-  options : @provider.VideoCallOptions,
+  request_headers : Map[String, String],
   async_request : Bool,
 ) -> Map[String, String] raise @provider.LoadAPIKeyError {
   let headers : Map[String, String] = Map([])
   headers["Content-Type"] = "application/json"
   headers["Accept-Encoding"] = "identity"
   headers["Authorization"] = "Bearer \{load_alibaba_api_key(self.api_key)}"
-  if async_request {
-    headers["X-DashScope-Async"] = "enable"
-  }
-  @provider_utils.merge_headers(
+  let merged = @provider_utils.merge_headers(
     @provider_utils.with_user_agent_suffix(
       @provider_utils.merge_headers(headers, self.headers),
       ["moonai/alibaba/\{VERSION}"],
     ),
-    options.headers,
+    request_headers,
   )
+  // DashScope requires this marker on task creation. Keep it provider-owned
+  // even when a caller supplies a differently-cased override.
+  if async_request {
+    @provider_utils.merge_headers(merged, { "X-DashScope-Async": "enable" })
+  } else {
+    merged
+  }
 }
 
 ///|
-fn alibaba_video_error_message(json : Json) -> String? {
+fn alibaba_video_error_message(json : Json) -> String? raise {
+  // Adapt the pure built-in parser to the fallible transport hook contract.
+  @provider.check_cancellation(None)
   match json {
     { "message": String(message), .. } => Some(message)
     { "error": { "message": String(message), .. }, .. } => Some(message)
@@ -70,70 +74,19 @@ fn alibaba_video_error_message(json : Json) -> String? {
 fn alibaba_video_task_metadata(
   task_id : String,
   video_url : String,
-  create_json : Json,
   final_json : Json,
-  model_id : String,
 ) -> Json {
   let fields : Map[String, Json] = Map([
     ("taskId", Json::string(task_id)),
     ("videoUrl", Json::string(video_url)),
-    ("modelId", Json::string(model_id)),
   ])
-  match create_json {
-    { "request_id": String(value), .. } =>
-      fields["createRequestId"] = Json::string(value)
+  match final_json {
+    { "output": { "actual_prompt": String(value), .. }, .. } if value != "" =>
+      fields["actualPrompt"] = Json::string(value)
     _ => ()
   }
-  let metadata = match final_json {
-    { "request_id": String(value), "output": output, .. } => {
-      fields["requestId"] = Json::string(value)
-      alibaba_video_output_metadata(output, fields)
-    }
-    { "output": output, .. } => alibaba_video_output_metadata(output, fields)
-    _ => Json::object(fields)
-  }
-  match metadata {
-    Object(values) => {
-      alibaba_video_usage_metadata(final_json, values)
-      Json::object(values)
-    }
-    _ => metadata
-  }
-}
-
-///|
-fn alibaba_video_output_metadata(
-  output : Json,
-  fields : Map[String, Json],
-) -> Json {
-  match output {
-    Object(values) => {
-      for
-        pair in [
-          ("task_status", "taskStatus"),
-          ("submit_time", "submitTime"),
-          ("scheduled_time", "scheduledTime"),
-          ("end_time", "endTime"),
-          ("orig_prompt", "originalPrompt"),
-          ("actual_prompt", "actualPrompt"),
-          ("code", "code"),
-          ("message", "message"),
-        ] {
-        let wire_name = pair.0
-        let metadata_name = pair.1
-        match values.get(wire_name) {
-          Some(value) => fields[metadata_name] = value
-          None => ()
-        }
-      }
-      match values.get("task_status") {
-        Some(value) => fields["taskStatus"] = value
-        None => ()
-      }
-      Json::object(fields)
-    }
-    _ => Json::object(fields)
-  }
+  alibaba_video_usage_metadata(final_json, fields)
+  Json::object(fields)
 }
 
 ///|
@@ -144,50 +97,46 @@ fn alibaba_video_usage_metadata(
   match final_json {
     { "usage": Object(usage), .. } => {
       let usage_fields : Map[String, Json] = Map([])
-      for
-        pair in [
-          ("duration", "duration"),
-          ("output_video_duration", "outputVideoDuration"),
-          ("SR", "resolution"),
-          ("size", "size"),
-        ] {
-        let wire_name = pair.0
-        let metadata_name = pair.1
-        match usage.get(wire_name) {
-          Some(value) => usage_fields[metadata_name] = value
-          None => ()
-        }
+      match usage.get("duration") {
+        Some(Number(value, ..)) =>
+          usage_fields["duration"] = Json::number(value)
+        _ => ()
       }
-      if usage_fields.length() > 0 {
-        fields["usage"] = Json::object(usage_fields)
+      match usage.get("output_video_duration") {
+        Some(Number(value, ..)) =>
+          usage_fields["outputVideoDuration"] = Json::number(value)
+        _ => ()
       }
+      match usage.get("SR") {
+        Some(Number(value, ..)) =>
+          usage_fields["resolution"] = Json::number(value)
+        _ => ()
+      }
+      match usage.get("size") {
+        Some(String(value)) => usage_fields["size"] = Json::string(value)
+        _ => ()
+      }
+      fields["usage"] = Json::object(usage_fields)
     }
     _ => ()
   }
 }
 
 ///|
-fn alibaba_video_input_value(input : @provider.VideoInput) -> String {
+fn alibaba_video_file_value(input : @provider.VideoModelV4File) -> String {
   match input {
-    @provider.Url(url~, ..) => url
-    @provider.Base64(data~, ..) => data
-  }
-}
-
-///|
-fn alibaba_video_input_data_uri(input : @provider.VideoInput) -> String {
-  match input {
-    @provider.Url(url~, ..) => url
-    @provider.Base64(data~, media_type~) =>
-      "data:" + media_type + ";base64," + data
+    @provider.VideoV4Url(url~, ..) => url
+    @provider.VideoV4Data(data~, ..) => data
+    @provider.VideoV4Bytes(data~, ..) =>
+      @provider_utils.convert_bytes_to_base64(data)
   }
 }
 
 ///|
 fn find_alibaba_frame(
-  frames : Array[@provider.VideoFrameImage],
-  frame_type : @provider.VideoFrameType,
-) -> @provider.VideoInput? {
+  frames : Array[@provider.VideoModelV4FrameImage],
+  frame_type : @provider.VideoModelV4FrameType,
+) -> @provider.VideoModelV4File? {
   for frame in frames {
     if frame.frame_type == frame_type {
       return Some(frame.image)
@@ -197,18 +146,223 @@ fn find_alibaba_frame(
 }
 
 ///|
-fn alibaba_reference_media_type(url : String, media_type : String?) -> String {
-  match media_type {
-    Some(value) if value.has_prefix("video/") => "reference_video"
-    _ => {
-      let normalized = url.to_lower()
-      if normalized.contains(".mp4") || normalized.contains(".mov") {
-        "reference_video"
-      } else {
-        "reference_image"
+fn alibaba_is_video_url(url : String) -> Bool {
+  let without_query = url.split("?").collect()[0]
+  let path = without_query.split("#").collect()[0].to_lower()
+  path.has_suffix(".mp4") || path.has_suffix(".mov")
+}
+
+///|
+fn alibaba_reference_media_type(url : String) -> String {
+  if alibaba_is_video_url(url) {
+    "reference_video"
+  } else {
+    "reference_image"
+  }
+}
+
+///|
+fn alibaba_video_file_url(input : @provider.VideoModelV4File) -> String? {
+  match input {
+    @provider.VideoV4Url(url~, ..) => Some(url)
+    _ => None
+  }
+}
+
+///|
+fn alibaba_video_frames(
+  options : @provider.VideoModelV4CallOptions,
+) -> Array[@provider.VideoModelV4FrameImage] {
+  match options.frame_images {
+    Some(values) => values
+    None => []
+  }
+}
+
+///|
+fn alibaba_video_references(
+  options : @provider.VideoModelV4CallOptions,
+) -> Array[@provider.VideoModelV4File] {
+  match options.input_references {
+    Some(values) => values
+    None => []
+  }
+}
+
+///|
+fn alibaba_video_start_image(
+  options : @provider.VideoModelV4CallOptions,
+) -> @provider.VideoModelV4File? {
+  match
+    find_alibaba_frame(
+      alibaba_video_frames(options),
+      @provider.VideoV4FirstFrame,
+    ) {
+    Some(value) => Some(value)
+    None => options.image
+  }
+}
+
+///|
+fn alibaba_video_last_frame(
+  options : @provider.VideoModelV4CallOptions,
+) -> @provider.VideoModelV4File? {
+  find_alibaba_frame(alibaba_video_frames(options), @provider.VideoV4LastFrame)
+}
+
+///|
+fn alibaba_video_provider_metadata(
+  task_id : String,
+  video_url : String,
+  final_json : Json,
+) -> Map[String, Json] {
+  Map([("alibaba", alibaba_video_task_metadata(task_id, video_url, final_json))])
+}
+
+///|
+fn alibaba_video_result(
+  task_id : String,
+  video_url : String,
+  final_json : Json,
+  warnings : Array[@provider.Warning],
+  request : @provider.RequestMetadata,
+  response : @provider.ResponseMetadata,
+) -> @provider.VideoModelV4Result {
+  @provider.VideoModelV4Result::new(
+    [@provider.VideoV4Url(url=video_url, media_type="video/mp4")],
+    warnings~,
+    provider_metadata=alibaba_video_provider_metadata(
+      task_id, video_url, final_json,
+    ),
+    request~,
+    response~,
+  )
+}
+
+///|
+fn alibaba_video_response_metadata(
+  model_id : String,
+  created_at : Int,
+  response : @provider.ResponseMetadata,
+) -> @provider.ResponseMetadata {
+  @provider.merge_response_metadata(
+    Some(@provider.ResponseMetadata::new(model_id~, created_at~)),
+    response,
+  )
+}
+
+///|
+fn alibaba_video_timeout(
+  provider_name : String,
+  timeout_ms : Int,
+) -> @provider.ProviderTimeoutError {
+  @provider.ProviderTimeoutError(
+    provider=provider_name,
+    operation="video_generation",
+    timeout_ms~,
+  )
+}
+
+///|
+fn alibaba_video_failure_message(
+  status : String,
+  task_id : String,
+  response : Json,
+) -> String {
+  let message = match response {
+    { "output": { "message": String(value), .. }, .. } => value
+    _ => ""
+  }
+  "Alibaba video generation \{status.to_lower()}. Task ID: \{task_id}. \{message}"
+}
+
+///|
+fn alibaba_video_task_id(json : Json) -> String raise {
+  match json {
+    { "output": { "task_id": String(id), .. }, .. } if id != "" => id
+    _ =>
+      raise @provider.InvalidResponseDataError(
+        message="Alibaba video response did not contain output.task_id",
+        data=json,
+      )
+  }
+}
+
+///|
+fn alibaba_video_task_status(json : Json) -> String raise {
+  match json {
+    { "output": { "task_status": String(value), .. }, .. } => value
+    _ =>
+      raise @provider.InvalidResponseDataError(
+        message="Alibaba video status response did not contain output.task_status",
+        data=json,
+      )
+  }
+}
+
+///|
+fn alibaba_video_url(json : Json) -> String raise {
+  match json {
+    { "output": { "video_url": String(url), .. }, .. } if url != "" => url
+    _ =>
+      raise @provider.InvalidResponseDataError(
+        message="Alibaba video generation completed without a video URL",
+        data=json,
+      )
+  }
+}
+
+///|
+fn alibaba_video_should_warn_fps(fps : Int?) -> Bool {
+  match fps {
+    Some(value) => value != 0
+    None => false
+  }
+}
+
+///|
+fn alibaba_video_should_warn_aspect_ratio(value : String?) -> Bool {
+  match value {
+    Some(ratio) => ratio != ""
+    None => false
+  }
+}
+
+///|
+fn alibaba_video_has_frames(
+  options : @provider.VideoModelV4CallOptions,
+) -> Bool {
+  alibaba_video_frames(options).length() > 0
+}
+
+///|
+fn alibaba_video_reference_urls(
+  options : @provider.VideoModelV4CallOptions,
+  provider_options : AlibabaVideoModelOptions,
+  warnings : Array[@provider.Warning],
+) -> Array[Json] {
+  let urls : Array[Json] = []
+  guard !alibaba_video_has_frames(options) else { return urls }
+  let references = alibaba_video_references(options)
+  if references.length() > 0 {
+    for reference in references {
+      match alibaba_video_file_url(reference) {
+        Some(url) => urls.push(Json::string(url))
+        None =>
+          warnings.push(
+            @provider.Warning::Unsupported(
+              feature="inputReferences",
+              details="Alibaba reference-to-video requires URL references. The inline reference was ignored.",
+            ),
+          )
       }
     }
+  } else {
+    for url in provider_options.reference_urls {
+      urls.push(Json::string(url))
+    }
   }
+  urls
 }
 
 ///|
@@ -260,25 +414,18 @@ fn ratio_from_resolution(value : String) -> String? {
 }
 
 ///|
-fn AlibabaVideoModel::create_body(
+fn AlibabaVideoModel::create_v4_body(
   self : AlibabaVideoModel,
-  options : @provider.VideoCallOptions,
+  options : @provider.VideoModelV4CallOptions,
   provider_options : AlibabaVideoModelOptions,
   warnings : Array[@provider.Warning],
 ) -> Json {
-  if options.n > 1 {
-    warnings.push(
-      @provider.Warning::Unsupported(
-        feature="n",
-        details="Alibaba video models only support generating 1 video per call.",
-      ),
-    )
-  }
   let mode = alibaba_video_mode(self.model_id)
   let wan27 = is_wan27(self.model_id)
+  let supports_ratio = wan27 && mode != "i2v"
   let input : Map[String, Json] = Map([])
-  if options.prompt != "" {
-    input["prompt"] = Json::string(options.prompt)
+  if options.prompt is Some(value) {
+    input["prompt"] = Json::string(value)
   }
   match provider_options.negative_prompt {
     Some(value) => input["negative_prompt"] = Json::string(value)
@@ -288,19 +435,18 @@ fn AlibabaVideoModel::create_body(
     Some(value) => input["audio_url"] = Json::string(value)
     None => ()
   }
+  let frames = alibaba_video_frames(options)
+  let references = alibaba_video_references(options)
   let first_frame_image = find_alibaba_frame(
-    options.frame_images,
-    @provider.FirstFrame,
+    frames,
+    @provider.VideoV4FirstFrame,
   )
-  let first_frame = match first_frame_image {
-    Some(value) => Some(value)
-    None => options.image
-  }
-  let last_frame = find_alibaba_frame(options.frame_images, @provider.LastFrame)
+  let first_frame = alibaba_video_start_image(options)
+  let last_frame = alibaba_video_last_frame(options)
   if mode == "i2v" {
     match first_frame {
       Some(value) =>
-        input["img_url"] = Json::string(alibaba_video_input_value(value))
+        input["img_url"] = Json::string(alibaba_video_file_value(value))
       None => ()
     }
   }
@@ -320,17 +466,20 @@ fn AlibabaVideoModel::create_body(
           media.push(Json::object(fields))
         }
       } else {
-        for reference in options.input_references {
+        for reference in references {
           match reference {
-            @provider.Url(url~, media_type~) => {
-              let kind = alibaba_reference_media_type(url, media_type)
+            @provider.VideoV4Url(url~, ..) => {
+              let kind = alibaba_reference_media_type(url)
               media.push({ "type": kind, "url": url })
             }
-            @provider.Base64(media_type~, ..) =>
+            @provider.VideoV4Data(media_type~, ..)
+            | @provider.VideoV4Bytes(media_type~, ..) =>
               if media_type.has_prefix("image/") {
                 media.push({
                   "type": "reference_image",
-                  "url": alibaba_video_input_data_uri(reference),
+                  "url": @provider_utils.convert_video_model_file_to_data_uri(
+                    reference,
+                  ),
                 })
               } else {
                 warnings.push(
@@ -346,7 +495,7 @@ fn AlibabaVideoModel::create_body(
           Some(value) =>
             media.push({
               "type": "first_frame",
-              "url": alibaba_video_input_data_uri(value),
+              "url": @provider_utils.convert_video_model_file_to_data_uri(value),
             })
           None => ()
         }
@@ -355,44 +504,27 @@ fn AlibabaVideoModel::create_body(
         input["media"] = Json::array(media)
       }
     } else {
-      let urls : Array[Json] = []
-      if options.frame_images.length() == 0 &&
-        options.input_references.length() > 0 {
-        for reference in options.input_references {
-          match reference {
-            @provider.Url(url~, ..) => urls.push(Json::string(url))
-            @provider.Base64(..) =>
-              warnings.push(
-                @provider.Warning::Unsupported(
-                  feature="inputReferences",
-                  details="Alibaba wan2.6 requires URL references; an inline reference was ignored.",
-                ),
-              )
-          }
-        }
-      } else if options.frame_images.length() == 0 {
-        for url in provider_options.reference_urls {
-          urls.push(Json::string(url))
-        }
-      }
+      let urls = alibaba_video_reference_urls(
+        options, provider_options, warnings,
+      )
       if urls.length() > 0 {
         input["reference_urls"] = Json::array(urls)
       }
     }
-  }
-  if options.input_references.length() > 0 && mode != "r2v" {
-    warnings.push(
-      @provider.Warning::Unsupported(
-        feature="inputReferences",
-        details="Alibaba only supports inputReferences on reference-to-video models; the references were ignored.",
-      ),
-    )
   }
   if last_frame is Some(_) {
     warnings.push(
       @provider.Warning::Unsupported(
         feature="frameImages",
         details="Alibaba video models do not support last_frame; the last frame image was ignored.",
+      ),
+    )
+  }
+  if references.length() > 0 && mode != "r2v" {
+    warnings.push(
+      @provider.Warning::Unsupported(
+        feature="inputReferences",
+        details="Alibaba only supports inputReferences on reference-to-video models; the references were ignored.",
       ),
     )
   }
@@ -406,11 +538,9 @@ fn AlibabaVideoModel::create_body(
     None => ()
   }
   match options.resolution {
-    Some(value) if mode == "i2v" =>
-      parameters["resolution"] = Json::string(resolution_tier(value))
-    Some(value) if wan27 => {
+    Some(value) if mode == "i2v" || wan27 => {
       let tier = resolution_tier(value)
-      if tier == "720P" || tier == "1080P" {
+      if !wan27 || tier == "720P" || tier == "1080P" {
         parameters["resolution"] = Json::string(tier)
       } else {
         warnings.push(
@@ -425,7 +555,7 @@ fn AlibabaVideoModel::create_body(
       parameters["size"] = Json::string(value.replace(old="x", new="*"))
     None => ()
   }
-  if wan27 && mode != "i2v" {
+  if supports_ratio {
     let ratio = match provider_options.ratio {
       Some(value) => Some(value)
       None =>
@@ -442,13 +572,6 @@ fn AlibabaVideoModel::create_body(
       Some(value) => parameters["ratio"] = Json::string(value)
       None => ()
     }
-  } else if options.aspect_ratio is Some(_) {
-    warnings.push(
-      @provider.Warning::Unsupported(
-        feature="aspectRatio",
-        details="Alibaba video uses model-specific resolution parameters; aspectRatio was ignored.",
-      ),
-    )
   }
   match provider_options.prompt_extend {
     Some(value) => parameters["prompt_extend"] = Json::boolean(value)
@@ -484,11 +607,28 @@ fn AlibabaVideoModel::create_body(
     Some(value) => parameters["audio"] = Json::boolean(value)
     None => ()
   }
-  if options.fps is Some(_) {
+  if alibaba_video_should_warn_aspect_ratio(options.aspect_ratio) &&
+    !supports_ratio {
+    warnings.push(
+      @provider.Warning::Unsupported(
+        feature="aspectRatio",
+        details="Alibaba video uses model-specific resolution parameters; aspectRatio was ignored.",
+      ),
+    )
+  }
+  if alibaba_video_should_warn_fps(options.fps) {
     warnings.push(
       @provider.Warning::Unsupported(
         feature="fps",
         details="Alibaba video models do not support a custom frame rate.",
+      ),
+    )
+  }
+  if options.n > 1 {
+    warnings.push(
+      @provider.Warning::Unsupported(
+        feature="n",
+        details="Alibaba video models only support generating 1 video per call.",
       ),
     )
   }
@@ -500,23 +640,24 @@ fn AlibabaVideoModel::create_body(
 }
 
 ///|
-async fn AlibabaVideoModel::generate_video(
+async fn AlibabaVideoModel::generate_video_v4(
   self : AlibabaVideoModel,
-  options : @provider.VideoCallOptions,
-) -> @provider.VideoResponse {
+  options : @provider.VideoModelV4CallOptions,
+) -> @provider.VideoModelV4Result {
+  let request_created_at = (@env.now() / 1000UL).to_int()
   let (provider_options, option_warnings) = parse_alibaba_video_options(
     options.provider_options,
   )
   let cancellation_token = options.cancellation_token
   let warnings = option_warnings
-  let body = self.create_body(options, provider_options, warnings)
+  let body = self.create_v4_body(options, provider_options, warnings)
   let create_response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=@provider_utils.append_path(
       self.base_url,
       "/api/v1/services/aigc/video-generation/video-synthesis",
     ),
-    headers=self.request_headers(options, true),
+    headers=self.request_headers_with(options.headers, true),
     body~,
     timeout_ms=self.idle_timeout_ms,
     retry_policy=options.retry_policy,
@@ -524,119 +665,55 @@ async fn AlibabaVideoModel::generate_video(
     error_to_message=alibaba_video_error_message,
     transport=self.http_transport,
   )
-  let task_id = match create_response.value {
-    { "output": { "task_id": String(id), .. }, .. } if id != "" => id
-    _ =>
-      raise @provider.InvalidResponseDataError(
-        message="Alibaba video response did not contain output.task_id",
-        data=create_response.value,
-      )
-  }
-  let mut elapsed = 0
+  let task_id = alibaba_video_task_id(create_response.value)
   let mut status_response : @provider_utils.JsonHttpResponse? = None
   let poll_interval_ms = provider_options.poll_interval_ms.unwrap_or(5000)
   let poll_timeout_ms = provider_options.poll_timeout_ms.unwrap_or(600_000)
+  let poll_started_at = @env.now()
   while true {
     @provider_utils.sleep_with_cancellation(
       poll_interval_ms,
       options.cancellation_token,
     )
-    elapsed = elapsed + poll_interval_ms
-    if elapsed > poll_timeout_ms {
-      raise @provider.ProviderTimeoutError(
-        provider=self.provider_name,
-        operation="video_generation",
-        timeout_ms=poll_timeout_ms,
-      )
+    if @env.now() - poll_started_at > poll_timeout_ms.to_uint64() {
+      raise alibaba_video_timeout(self.provider_name, poll_timeout_ms)
     }
     let response = @provider_utils.get_json(
       provider_name=self.provider_name,
       url=@provider_utils.append_path(self.base_url, "/api/v1/tasks/" + task_id),
-      headers=self.request_headers(options, false),
+      headers=self.request_headers_with(options.headers, false),
       timeout_ms=self.idle_timeout_ms,
       retry_policy=options.retry_policy,
       cancellation_token?,
       error_to_message=alibaba_video_error_message,
       transport=self.http_transport,
     )
-    let status = match response.value {
-      { "output": { "task_status": String(value), .. }, .. } => value
-      _ =>
-        raise @provider.InvalidResponseDataError(
-          message="Alibaba video status response did not contain output.task_status",
-          data=response.value,
-        )
-    }
+    let status = alibaba_video_task_status(response.value)
     if status == "SUCCEEDED" {
       status_response = Some(response)
       break
     }
     if status == "FAILED" || status == "CANCELED" {
-      let message = match response.value {
-        { "output": { "message": String(value), .. }, .. } => value
-        _ => "Alibaba video generation failed"
-      }
       raise @provider.InvalidResponseDataError(
-        message="Alibaba video generation \{status.to_lower()}. Task ID: \{task_id}. \{message}",
+        message=alibaba_video_failure_message(status, task_id, response.value),
         data=response.value,
       )
     }
   }
   let final_response = status_response.unwrap()
-  let video_url = match final_response.value {
-    { "output": { "video_url": String(url), .. }, .. } => url
-    _ =>
-      raise @provider.InvalidResponseDataError(
-        message="Alibaba video generation completed without a video URL",
-        data=final_response.value,
-      )
-  }
-  let metadata : Map[String, Json] = Map([])
-  metadata["alibaba"] = alibaba_video_task_metadata(
+  let video_url = alibaba_video_url(final_response.value)
+  alibaba_video_result(
     task_id,
     video_url,
-    create_response.value,
     final_response.value,
-    self.model_id,
-  )
-  let response_metadata = @provider.merge_response_metadata(
-    Some(@provider.ResponseMetadata::new(model_id=self.model_id)),
-    final_response.response,
-  )
-  @provider.VideoResponse::new([
-    @provider.GeneratedVideo::new(
-      @provider.GeneratedVideoData::Url(video_url),
-      "video/mp4",
-    ),
-  ]).with_diagnostics(
-    Some(create_response.request),
-    Some(response_metadata),
-    metadata,
     warnings,
+    create_response.request,
+    alibaba_video_response_metadata(
+      self.model_id,
+      request_created_at,
+      final_response.response,
+    ),
   )
 }
 
 ///|
-pub impl @provider.VideoWireModel for AlibabaVideoModel with fn provider(self) -> String {
-  self.provider_name
-}
-
-///|
-pub impl @provider.VideoWireModel for AlibabaVideoModel with fn model_id(self) -> String {
-  self.model_id
-}
-
-///|
-pub impl @provider.VideoWireModel for AlibabaVideoModel with fn max_videos_per_call(
-  _self,
-) -> Int {
-  1
-}
-
-///|
-pub impl @provider.VideoWireModel for AlibabaVideoModel with fn generate(
-  self,
-  options,
-) {
-  self.generate_video(options)
-}

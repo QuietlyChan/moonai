@@ -24,6 +24,9 @@ MoonBit，包括统一模型接口、标准化流事件、服务商适配器、�
   Files 与 Skills 模型/服务契约。
 - 提供 `generate_text`、`stream_text`、`generate_object`、`embed`、
   `embed_many`、媒体生成、上传、缓冲转录与实时 `stream_transcribe` 标准层 API。
+- `generate_text` 与 `stream_text` 共享多步骤工具执行，支持 `prepare_step`
+  模型/消息/参数覆盖、工具筛选与排序、停止条件、provider deferred result 与
+  sandbox-aware 动态描述和 experimental tool caller 路由。
 - 通过 JSON 和 SSE 实现可复用的 Open Responses 协议层，并在其上提供独立的官方
   OpenAI Responses 模型与 options 层。
 - 通过 JSON 和 SSE 实现 OpenAI-compatible Chat Completions，并支持
@@ -45,11 +48,13 @@ MoonBit，包括统一模型接口、标准化流事件、服务商适配器、�
 | 包 | 用途 |
 | --- | --- |
 | `QuietlyChan/moonai/ai` | 生成、embedding、媒体、上传和 realtime 等高层工作流 |
+| `QuietlyChan/moonai/ai/generate_text` | 多步骤文本生成、逐步骤准备、流式调用、工具执行与结果聚合 |
+| `QuietlyChan/moonai/ai/tool` | Tool caller 路由与逐步骤工具准备 |
 | `QuietlyChan/moonai/ai/prompt` | Prompt URL/文件规范化，以及按模型能力下载资源 |
 | `QuietlyChan/moonai/ai/model` | Provider-qualified 模型身份、直接/命名引用和 registry 解析 |
 | `QuietlyChan/moonai/ai/registry` | Provider-qualified 模型查找，以及 provider 级 Files/Skills registry |
 | `QuietlyChan/moonai/provider` | 模型无关的契约、调用参数、响应、事件和诊断类型 |
-| `QuietlyChan/moonai/provider_utils` | 可复用的 HTTP、SSE、JSON、multipart、URL、WebSocket、重试和流式工具 |
+| `QuietlyChan/moonai/provider_utils` | 可复用的工具与 sandbox 契约、HTTP、SSE、JSON、multipart、URL、WebSocket、重试和流式工具 |
 | `QuietlyChan/moonai/openai` | 带 typed options 和模型能力解析的官方 OpenAI Chat/Responses 模型 |
 | `QuietlyChan/moonai/open_responses` | 可复用的 Open Responses 编码、解码与 transport 协议层 |
 | `QuietlyChan/moonai/openai_compatible` | 可复用的 Chat Completions、embedding、completion 和图片适配器 |
@@ -66,8 +71,10 @@ MoonBit，包括统一模型接口、标准化流事件、服务商适配器、�
 应用通常组合使用 `ai`、`provider` 和一个具体 provider 包。MoonBit 目前不能重导出
 enum 构造器，因此 `V4TextDelta`、`V4FinishStop`、`High` 等值应直接通过 `@provider` 使用。
 
-`src/ai/prompt` 对应 AI SDK 的 prompt 转换边界，负责 URL/file 资源规范化，并独立于
-高层生成流程。项目不会提供根模块兼容包；在 `1.0.0` 之前 API 可以直接演进，使用者应
+`src/ai/generate_text` 对应 AI SDK 的文本生成工作流边界，统一承载非流式与流式的
+多步骤工具循环；`src/ai/tool` 负责 tool caller 路由。`src/ai/prompt` 对应 prompt
+转换边界，负责 URL/file 资源规范化，并独立于高层生成流程。项目不会提供根模块兼容包；在
+`1.0.0` 之前 API 可以直接演进，使用者应
 直接依赖上面的具名包。旧的 `src/internal` 实现包也已经删除；只有拥有稳定依赖边界的
 领域才会成为独立 MoonBit 包，较小的工具仍按职责放在所属包内。`ai/model` 与
 `ai/registry` 也是独立包，因为模型身份和 provider 注册表有稳定的依赖边界。
@@ -101,10 +108,11 @@ provider 级 Files 和 Skills 能力。后者对应 AI SDK 的 `createProviderRe
 能力会按需委托给 `fallback_provider`。这使 `provider` trait、`ai/prompt` 和
 `provider_utils::HttpTransport` 都能在应用层组合，而不需要根模块兼容门面。
 
-`ai/model` 还提供 language、embedding、image 三类 V4 middleware 及其 wrapper/chain；
-`ProviderRegistry` 的 language/image middleware 参数会在 V4 模型解析后应用参数变换、
-identity override 以及操作包装。它们是 MoonBit 对 AI SDK V4 middleware 契约的公共抽象，
-不是旧 API 兼容代码。`ChatModel` 到 V4 的 adapter 只用于显式的第三方模型与 wire 层集成边界。
+`provider` 定义 language、embedding、image 三类 V4 middleware 契约，`ai/model` 只负责
+wrapper/chain。这样 provider 和 middleware 库可以共享契约类型而不依赖高层工作流，与 AI SDK
+的包边界一致。`ProviderRegistry` 的 language/image middleware 参数会在 V4 模型解析后应用
+参数变换、identity override 以及操作包装。`ChatModel` 到 V4 的 adapter 只用于显式的第三方
+模型与 wire 层集成边界。
 
 ## 安装
 
@@ -181,6 +189,20 @@ TypeScript AI SDK API 的开发者理解和迁移。
 设置 `include_raw_chunks=true` 后，每个解析完成的服务商数据块会先以
 `StreamEvent::Raw` 发出，然后再发出标准化事件。文本、completion、embedding 和
 图片调用也支持调用级 `headers`，同名 header 会覆盖 provider 的默认配置。
+
+## 多步骤工具与 Sandbox
+
+`generate_text` 与 `stream_text` 共用同一套高层 `Tool` 执行层。每一步中，工具的
+`description_resolver` 都会收到对应的 `tools_context` 条目和当前
+`experimental_sandbox`；解析出的描述只用于发给模型，不会替换可执行的工具对象。
+同一个 sandbox 也会传给工具执行回调和流式输入回调。
+
+`prepare_step` 可以只为当前一步覆盖 `tools_context` 和 `experimental_sandbox`；
+下一步会重新从外层值开始，语义与 AI SDK 的 step-local override 一致。
+
+`provider_utils::SandboxSession` 是 provider-neutral 的运行时契约。`run` 回调是必需
+能力，进程 spawn、流式/缓冲文件读取及文件写入都是可选能力；调用未提供的能力会抛出
+`UnsupportedFunctionalityError`。具体的隔离运行时仍由应用负责注入。
 
 ## 诊断、重试与取消
 
@@ -288,6 +310,35 @@ provider 专有覆盖仍放在 `provider_options.anthropic` 下。
 
 Messages 支持文本、URL/base64 图片和 PDF 等 document 文件 part。由于 Messages API
 不接受音频，audio part 会在发出请求前明确报错。
+
+Anthropic 的 provider-executed tool 复用 `provider_utils` 的公共工具工厂。例如 advisor
+工具具备 typed cache 配置、空输入与结果 schema 校验、deferred result 语义和自动多轮回传：
+
+```moonbit
+///|
+let advisor = @anthropic.advisor_20260301(
+  model="claude-opus-4-8",
+  max_uses=3,
+  caching=@anthropic.AnthropicAdvisorCaching::new(
+    ttl=@anthropic.AnthropicCacheOneHour,
+  ),
+)
+
+///|
+let result = @ai.generate_text(
+  model,
+  prompt="实现迁移，并让 advisor 审查计划。",
+  tools=@ai.tool_set([("advisor", advisor)]),
+)
+```
+
+使用该工具时会自动选择 `advisor-tool-2026-03-01` beta header。明文、密文与错误三种
+advisor 结果都会在输出时规范化，并在后续请求携带历史记录时转换回 Anthropic wire 格式。
+
+应用侧执行的 `bash_20241022` 和 `bash_20250124` 默认调用当前
+`SandboxSession::run`。显式传入的 `execute` 回调优先；设置
+`disable_default_execute=true` 会创建不可执行工具，对应 AI SDK 中显式的
+`execute: null` 配置。
 
 Provider 还提供 `files()` 与 `skills()`。Files API 上传后返回 provider-neutral reference；
 Skills API 支持多个 `files[]`、可选 display title、必需的 beta header，并会继续读取最新
@@ -491,11 +542,11 @@ provider 的 snake_case 选择器同时提供 AI SDK 风格的 camelCase 别名�
 ## 设计方向
 
 核心库将保持模型服务商无关。服务商特有的协议格式、认证方式和配置应放在对应的
-适配包中。后续计划包括 source 和生成文件等更丰富的输出内容、图片编辑、中间件、
-遥测接口和更高层的多步工具执行能力。
+适配包中。后续计划包括 source 和生成文件等更丰富的输出内容、图片编辑、遥测接口和
+更高层的 Agent 编排能力。
 
-Agent 工作流和沙箱化工具运行时属于后续层次。它们会建立在该 SDK 之上，不会与
-具体服务商协议耦合。
+Sandbox 抽象已经属于公共工具边界，但具体 sandbox runtime 仍由应用或运行时集成层
+实现。更高层 Agent 工作流会建立在这些契约之上，不会与具体服务商协议耦合。
 
 ## 开发
 

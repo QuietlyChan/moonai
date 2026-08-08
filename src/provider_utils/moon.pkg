@@ -3,8 +3,11 @@ import {
   "moonbitlang/async",
   "moonbitlang/async/http",
   "moonbitlang/async/io",
+  "moonbitlang/async/socket",
+  "moonbitlang/async/tls",
   "moonbitlang/async/websocket",
   "moonbitlang/core/buffer",
+  "moonbitlang/core/cmp",
   "moonbitlang/core/debug",
   "moonbitlang/core/encoding/base64",
   "moonbitlang/core/encoding/utf8",
@@ -13,9 +16,5 @@ import {
   "moonbitlang/core/random",
   "moonbitlang/core/string",
 }
-
-import {
-  "moonbitlang/async/socket",
-} for "test"
 
 supported_targets = "+native"

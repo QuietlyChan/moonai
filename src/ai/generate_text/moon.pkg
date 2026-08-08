@@ -1,0 +1,21 @@
+import {
+  "cc06b/mooncry/lib" @mooncry,
+  "QuietlyChan/moonai/ai/prompt",
+  "QuietlyChan/moonai/ai/tool",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/async",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+import {
+  "QuietlyChan/moonai/anthropic",
+  "QuietlyChan/moonai/openai",
+} for "test"
+
+supported_targets = "+native"

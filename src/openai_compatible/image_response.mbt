@@ -2,10 +2,9 @@
 fn decode_generated_image(json : Json) -> @provider.GeneratedImage raise {
   let data = match json {
     { "b64_json": String(value), .. } => @provider.ImageData::Base64(value)
-    { "url": String(value), .. } => @provider.ImageData::Url(value)
     _ =>
       raise @provider.InvalidResponseDataError(
-        message="OpenAI-compatible image item has no b64_json or url",
+        message="OpenAI-compatible image item has no b64_json",
         data=json,
       )
   }
@@ -17,23 +16,10 @@ fn decode_generated_image(json : Json) -> @provider.GeneratedImage raise {
 }
 
 ///|
-fn image_usage_from_json(json : Json) -> @provider.Usage {
-  {
-    input_tokens: @provider_utils.json_int_field(json, "input_tokens"),
-    output_tokens: @provider_utils.json_int_field(json, "output_tokens"),
-    total_tokens: @provider_utils.json_int_field(json, "total_tokens"),
-    reasoning_tokens: 0,
-    cached_input_tokens: 0,
-    cache_write_input_tokens: 0,
-  }
-}
-
-///|
-/// Decode one OpenAI-compatible image generation response.
-pub fn decode_image_response(
+fn decode_image_response_data(
   json : Json,
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-) -> @provider.ImageResponse raise {
+  error_structure : OpenAICompatibleErrorStructure,
+) -> (Array[@provider.GeneratedImage], @provider.ImageModelV4Usage?) raise {
   if error_structure.message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI-compatible image request failed: \{message}",
@@ -53,8 +39,15 @@ pub fn decode_image_response(
     images.push(decode_generated_image(item))
   }
   let usage = match json {
-    { "usage": value, .. } if !(value is Null) => image_usage_from_json(value)
-    _ => @provider.Usage::zero()
+    { "usage": value, .. } if !(value is Null) =>
+      Some(
+        @provider.ImageModelV4Usage::new(
+          input_tokens=@provider_utils.json_int_field(value, "input_tokens"),
+          output_tokens=@provider_utils.json_int_field(value, "output_tokens"),
+          total_tokens=@provider_utils.json_int_field(value, "total_tokens"),
+        ),
+      )
+    _ => None
   }
-  @provider.ImageResponse::new(images, usage)
+  (images, usage)
 }

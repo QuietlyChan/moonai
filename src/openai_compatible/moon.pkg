@@ -1,13 +1,14 @@
 import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/env",
   "moonbitlang/core/json",
 }
 
 import {
   "QuietlyChan/moonai/ai",
   "moonbitlang/async",
-  "moonbitlang/async/fs",
   "moonbitlang/async/http",
   "moonbitlang/async/io",
   "moonbitlang/async/socket",
@@ -15,6 +16,7 @@ import {
 
 import {
   "moonbitlang/async",
+  "moonbitlang/async/fs",
   "moonbitlang/core/env",
 } for "wbtest"
 

@@ -1,6 +1,6 @@
 ///|
 /// Options for a V4 live speech translation call.
-pub struct SpeechTranslationModelV4StreamOptions {
+pub(all) struct SpeechTranslationModelV4StreamOptions {
   audio : &AudioStream
   input_audio_format : AudioFormat
   target_language : String
@@ -36,6 +36,24 @@ pub fn SpeechTranslationModelV4StreamOptions::new(
     include_raw_chunks,
     cancellation_token,
   }
+}
+
+///|
+/// Lift legacy realtime translation options into the V4 contract.
+pub fn SpeechTranslationModelV4StreamOptions::from_speech_translation_call_options(
+  options : SpeechTranslationCallOptions,
+) -> SpeechTranslationModelV4StreamOptions {
+  SpeechTranslationModelV4StreamOptions::new(
+    audio=options.audio,
+    input_audio_format=options.input_audio_format,
+    target_language=options.target_language,
+    source_language?=options.source_language,
+    output_audio_format?=options.output_audio_format,
+    provider_options=options.provider_options,
+    headers=options.headers,
+    include_raw_chunks=options.include_raw_chunks,
+    cancellation_token?=options.cancellation_token,
+  )
 }
 
 ///|

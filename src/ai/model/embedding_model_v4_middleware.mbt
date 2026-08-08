@@ -1,90 +1,21 @@
 ///|
-/// Context passed to an embedding V4 middleware's `wrap_embed` callback.
-pub(all) struct EmbeddingModelV4MiddlewareContext {
-  params : @provider.EmbeddingModelV4CallOptions
-  model : &@provider.EmbeddingModelV4
-  do_embed : async () -> @provider.EmbeddingModelV4Result
-}
-
-///|
-/// Delegate to the wrapped V4 embedding model.
-pub async fn EmbeddingModelV4MiddlewareContext::embed(
-  self : EmbeddingModelV4MiddlewareContext,
-) -> @provider.EmbeddingModelV4Result {
-  (self.do_embed)()
-}
-
-///|
-/// Middleware for the AI SDK-aligned embedding model contract.
-pub(all) struct EmbeddingModelV4Middleware {
-  transform_params : (async (
-    @provider.EmbeddingModelV4CallOptions,
-    &@provider.EmbeddingModelV4,
-  ) -> @provider.EmbeddingModelV4CallOptions)?
-  override_provider : ((&@provider.EmbeddingModelV4) -> String)?
-  override_model_id : ((&@provider.EmbeddingModelV4) -> String)?
-  override_max_embeddings_per_call : ((&@provider.EmbeddingModelV4) -> Int?)?
-  override_supports_parallel_calls : ((&@provider.EmbeddingModelV4) -> Bool)?
-  wrap_embed : (async (EmbeddingModelV4MiddlewareContext) -> @provider.EmbeddingModelV4Result)?
-}
-
-///|
-/// Construct V4 embedding-model middleware.
-pub fn EmbeddingModelV4Middleware::new(
-  transform_params? : async (
-    @provider.EmbeddingModelV4CallOptions,
-    &@provider.EmbeddingModelV4,
-  ) -> @provider.EmbeddingModelV4CallOptions,
-  override_provider? : (&@provider.EmbeddingModelV4) -> String,
-  override_model_id? : (&@provider.EmbeddingModelV4) -> String,
-  override_max_embeddings_per_call? : (&@provider.EmbeddingModelV4) -> Int?,
-  override_supports_parallel_calls? : (&@provider.EmbeddingModelV4) -> Bool,
-  wrap_embed? : async (EmbeddingModelV4MiddlewareContext) -> @provider.EmbeddingModelV4Result,
-) -> EmbeddingModelV4Middleware {
-  {
-    transform_params,
-    override_provider,
-    override_model_id,
-    override_max_embeddings_per_call,
-    override_supports_parallel_calls,
-    wrap_embed,
-  }
-}
-
-///|
-/// Return the middleware contract version.
-pub fn EmbeddingModelV4Middleware::specification_version(
-  _self : EmbeddingModelV4Middleware,
-) -> String {
-  "v4"
-}
-
-///|
-/// Apply the optional asynchronous parameter transform.
-pub async fn EmbeddingModelV4Middleware::transform(
-  self : EmbeddingModelV4Middleware,
-  model : &@provider.EmbeddingModelV4,
-  options : @provider.EmbeddingModelV4CallOptions,
-) -> @provider.EmbeddingModelV4CallOptions {
-  match self.transform_params {
-    Some(transform) => transform(options, model)
-    None => options
-  }
-}
-
-///|
+/// High-level wrapper for a provider-owned embedding middleware contract.
 struct MiddlewareEmbeddingModelV4 {
   model : &@provider.EmbeddingModelV4
-  middleware : EmbeddingModelV4Middleware
+  middleware : @provider.EmbeddingModelV4Middleware
+  provider_id : String?
+  model_id : String?
 }
 
 ///|
 /// Wrap one embedding model with V4 middleware.
 pub fn wrap_embedding_model_v4(
   model : &@provider.EmbeddingModelV4,
-  middleware : EmbeddingModelV4Middleware,
+  middleware : @provider.EmbeddingModelV4Middleware,
+  model_id? : String,
+  provider_id? : String,
 ) -> &@provider.EmbeddingModelV4 {
-  MiddlewareEmbeddingModelV4::{ model, middleware }
+  MiddlewareEmbeddingModelV4::{ model, middleware, provider_id, model_id }
   as &@provider.EmbeddingModelV4
 }
 
@@ -92,12 +23,19 @@ pub fn wrap_embedding_model_v4(
 /// Wrap an embedding model with V4 middleware in AI SDK order.
 pub fn wrap_embedding_model_v4_chain(
   model : &@provider.EmbeddingModelV4,
-  middlewares : Array[EmbeddingModelV4Middleware],
+  middlewares : Array[@provider.EmbeddingModelV4Middleware],
+  model_id? : String,
+  provider_id? : String,
 ) -> &@provider.EmbeddingModelV4 {
   let mut wrapped = model
   let mut index = middlewares.length() - 1
   while index >= 0 {
-    wrapped = wrap_embedding_model_v4(wrapped, middlewares[index])
+    wrapped = wrap_embedding_model_v4(
+      wrapped,
+      middlewares[index],
+      model_id?,
+      provider_id?,
+    )
     index = index - 1
   }
   wrapped
@@ -107,18 +45,22 @@ pub fn wrap_embedding_model_v4_chain(
 /// AI SDK-style spelling for `wrap_embedding_model_v4`.
 pub fn wrapEmbeddingModel(
   model : &@provider.EmbeddingModelV4,
-  middleware : EmbeddingModelV4Middleware,
+  middleware : @provider.EmbeddingModelV4Middleware,
+  model_id? : String,
+  provider_id? : String,
 ) -> &@provider.EmbeddingModelV4 {
-  wrap_embedding_model_v4(model, middleware)
+  wrap_embedding_model_v4(model, middleware, model_id?, provider_id?)
 }
 
 ///|
 /// AI SDK-style spelling for `wrap_embedding_model_v4_chain`.
 pub fn wrapEmbeddingModelChain(
   model : &@provider.EmbeddingModelV4,
-  middlewares : Array[EmbeddingModelV4Middleware],
+  middlewares : Array[@provider.EmbeddingModelV4Middleware],
+  model_id? : String,
+  provider_id? : String,
 ) -> &@provider.EmbeddingModelV4 {
-  wrap_embedding_model_v4_chain(model, middlewares)
+  wrap_embedding_model_v4_chain(model, middlewares, model_id?, provider_id?)
 }
 
 ///|
@@ -132,9 +74,13 @@ pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn speci
 pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn provider(
   self,
 ) -> String {
-  match self.middleware.override_provider {
-    Some(resolve) => resolve(self.model)
-    None => self.model.provider()
+  match self.provider_id {
+    Some(value) => value
+    None =>
+      match self.middleware.override_provider {
+        Some(resolve) => resolve(self.model)
+        None => self.model.provider()
+      }
   }
 }
 
@@ -142,9 +88,13 @@ pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn provi
 pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn model_id(
   self,
 ) -> String {
-  match self.middleware.override_model_id {
-    Some(resolve) => resolve(self.model)
-    None => self.model.model_id()
+  match self.model_id {
+    Some(value) => value
+    None =>
+      match self.middleware.override_model_id {
+        Some(resolve) => resolve(self.model)
+        None => self.model.model_id()
+      }
   }
 }
 
@@ -177,7 +127,7 @@ pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn do_em
   let do_embed : async () -> @provider.EmbeddingModelV4Result = () => {
     self.model.do_embed(transformed)
   }
-  let context = EmbeddingModelV4MiddlewareContext::{
+  let context = @provider.EmbeddingModelV4MiddlewareContext::{
     params: transformed,
     model: self.model,
     do_embed,

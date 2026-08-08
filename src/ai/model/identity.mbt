@@ -134,7 +134,7 @@ pub fn model_id_of_embedding(model : &@provider.EmbeddingModelV4) -> ModelId {
 
 ///|
 /// Extract the identity exposed by a reranking model.
-pub fn model_id_of_reranking(model : &@provider.RerankingModel) -> ModelId {
+pub fn model_id_of_reranking(model : &@provider.RerankingModelV4) -> ModelId {
   ModelId::new(provider=model.provider(), model_id=model.model_id())
 }
 

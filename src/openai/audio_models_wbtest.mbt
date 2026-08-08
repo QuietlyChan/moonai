@@ -11,9 +11,12 @@ test "official OpenAI transcription falls back to word timestamps" {
     },
     "gpt-4o-transcribe",
     "openai.transcription",
+    1700000000,
     [],
   )
   assert_eq(response.language, None)
+  assert_eq(response.response.unwrap().model_id, Some("gpt-4o-transcribe"))
+  assert_eq(response.response.unwrap().created_at, Some(1700000000))
   assert_eq(response.segments, [
     @provider.TranscriptionSegment::new(
       text="hello",

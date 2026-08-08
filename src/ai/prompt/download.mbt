@@ -640,6 +640,7 @@ pub async fn convert_to_language_model_prompt_with_context(
   let normalized = download_prompt_assets_with_context(
     messages, context, download, retry_policy, cancellation_token,
   )
+  let normalized = normalize_model_messages(normalized)
   [
     for message in normalized => convert_model_message(message)
   ]

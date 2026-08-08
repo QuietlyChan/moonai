@@ -26,7 +26,7 @@ pub fn UploadFileData::text(text : String) -> UploadFileData {
 
 ///|
 /// Provider-level options for uploading one file.
-pub(all) struct FileUploadOptions {
+pub(all) struct FilesV4UploadFileCallOptions {
   data : UploadFileData
   media_type : String
   filename : String?
@@ -35,18 +35,18 @@ pub(all) struct FileUploadOptions {
 
 ///|
 /// Construct one provider-level file upload call.
-pub fn FileUploadOptions::new(
+pub fn FilesV4UploadFileCallOptions::new(
   data~ : UploadFileData,
   media_type~ : String,
   filename? : String,
   provider_options? : Map[String, Json] = Map([]),
-) -> FileUploadOptions {
+) -> FilesV4UploadFileCallOptions {
   { data, media_type, filename, provider_options }
 }
 
 ///|
 /// Result returned after a provider accepts an uploaded file.
-pub(all) struct FileUploadResult {
+pub(all) struct FilesV4UploadFileResult {
   provider_reference : ProviderReference
   media_type : String?
   filename : String?
@@ -56,13 +56,13 @@ pub(all) struct FileUploadResult {
 
 ///|
 /// Construct a provider file-upload result.
-pub fn FileUploadResult::new(
+pub fn FilesV4UploadFileResult::new(
   provider_reference~ : ProviderReference,
   media_type? : String,
   filename? : String,
   provider_metadata? : Map[String, Json] = Map([]),
   warnings? : Array[Warning] = [],
-) -> FileUploadResult {
+) -> FilesV4UploadFileResult {
   {
     provider_reference,
     media_type,

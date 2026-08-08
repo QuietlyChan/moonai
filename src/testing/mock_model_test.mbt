@@ -446,11 +446,11 @@ async test "generateObject reports invalid JSON separately" {
 
 ///|
 async test "rerank reconstructs provider ordering and forwards options" {
-  let result = @provider.RerankingResponse::new([
-    @provider.RerankingEntry::new(2, 0.95),
-    @provider.RerankingEntry::new(0, 0.75),
+  let result = @provider.RerankingModelV4Result::new([
+    @provider.RerankingModelV4Ranking::new(2, 0.95),
+    @provider.RerankingModelV4Ranking::new(0, 0.75),
   ])
-  let model = MockRerankingModel::new(result)
+  let model = MockRerankingModelV4::new(result)
   let actual = @ai.rerankText(
     model,
     ["first", "second", "third"],
@@ -488,13 +488,13 @@ async test "rerank reconstructs provider ordering and forwards options" {
 
 ///|
 async test "rerank preserves object document representation" {
-  let result = @provider.RerankingResponse::new([
-    @provider.RerankingEntry::new(1, 0.8),
+  let result = @provider.RerankingModelV4Result::new([
+    @provider.RerankingModelV4Ranking::new(1, 0.8),
   ])
-  let model = MockRerankingModel::new(result)
+  let model = MockRerankingModelV4::new(result)
   let actual = @ai.rerank(
     model,
-    @provider.RerankingDocuments::objects([{ "id": 1 }, { "id": 2 }]),
+    @provider.RerankingModelV4Documents::objects([{ "id": 1 }, { "id": 2 }]),
     "query",
   )
   match actual.reranked_documents {
@@ -505,10 +505,10 @@ async test "rerank preserves object document representation" {
 
 ///|
 async test "rerank returns an empty result without invoking the model" {
-  let result = @provider.RerankingResponse::new([
-    @provider.RerankingEntry::new(0, 1.0),
+  let result = @provider.RerankingModelV4Result::new([
+    @provider.RerankingModelV4Ranking::new(0, 1.0),
   ])
-  let model = MockRerankingModel::new(result)
+  let model = MockRerankingModelV4::new(result)
   let actual = @ai.rerankText(model, [], "query")
   match actual.reranked_documents {
     @provider.TextDocuments(values) => assert_eq(values, [])
@@ -522,10 +522,10 @@ async test "rerank returns an empty result without invoking the model" {
 
 ///|
 async test "rerank rejects invalid provider indices" {
-  let result = @provider.RerankingResponse::new([
-    @provider.RerankingEntry::new(4, 1.0),
+  let result = @provider.RerankingModelV4Result::new([
+    @provider.RerankingModelV4Ranking::new(4, 1.0),
   ])
-  let model = MockRerankingModel::new(result)
+  let model = MockRerankingModelV4::new(result)
   try @ai.rerankText(model, ["one"], "query") catch {
     @provider.InvalidResponseDataError(message~, data~) => {
       assert_true(message.contains("out-of-range"))

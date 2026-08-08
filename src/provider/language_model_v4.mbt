@@ -1,246 +1,15 @@
 ///|
 
 ///|
-/// Versioned names for the provider-neutral V4 content values.
-///
-/// Generated content already has the same ordered-content semantics as the
-/// V4 result contract. It remains a named alias until the provider metadata
-/// map is moved from `Map[String, Json]` to a dedicated provider-keyed type.
-pub type LanguageModelV4Content = GeneratedContent
-
-///|
-
-///|
 
 ///|
 /// V4 spelling for response and transport metadata.
 pub type LanguageModelV4ResponseMetadata = ResponseMetadata
 
 ///|
-/// V4 spelling for provider adaptation warnings.
-pub type LanguageModelV4Warning = Warning
-
-///|
-/// Options passed to `LanguageModelV4::do_generate` and `do_stream`.
-///
-/// This is intentionally separate from the high-level `Prompt` in
-/// `ai/prompt`: callers of this contract must provide a normalized provider
-/// prompt. `ChatCallOptions` is the normalized wire contract used inside
-/// provider implementations.
-pub(all) struct LanguageModelV4CallOptions {
-  prompt : LanguageModelV4Prompt
-  tools : Array[ToolDefinition]
-  tool_choice : ToolChoice?
-  response_format : ResponseFormat
-  reasoning_effort : ReasoningEffort
-  max_output_tokens : Int?
-  temperature : Double?
-  top_p : Double?
-  top_k : Double?
-  frequency_penalty : Double?
-  presence_penalty : Double?
-  seed : Int?
-  stop_sequences : Array[String]
-  include_raw_chunks : Bool
-  headers : Map[String, String]
-  provider_options : Map[String, Json]
-  retry_policy : RetryPolicy
-  cancellation_token : CancellationToken?
-} derive(Debug)
-
-///|
-/// Construct V4 language-model call options.
-pub fn LanguageModelV4CallOptions::new(
-  prompt : LanguageModelV4Prompt,
-  tools? : Array[ToolDefinition] = [],
-  tool_choice? : ToolChoice,
-  response_format? : ResponseFormat = Text,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
-  max_output_tokens? : Int,
-  temperature? : Double,
-  top_p? : Double,
-  top_k? : Double,
-  frequency_penalty? : Double,
-  presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
-  cancellation_token? : CancellationToken,
-) -> LanguageModelV4CallOptions {
-  {
-    prompt,
-    tools,
-    tool_choice,
-    response_format,
-    reasoning_effort,
-    max_output_tokens,
-    temperature,
-    top_p,
-    top_k,
-    frequency_penalty,
-    presence_penalty,
-    seed,
-    stop_sequences,
-    include_raw_chunks,
-    headers,
-    provider_options,
-    retry_policy,
-    cancellation_token,
-  }
-}
-
-///|
-/// Return a copy of V4 call options with provider-specific values merged.
-///
-/// This is the versioned counterpart of `ChatCallOptions::with_provider_options`
-/// and is useful to provider-owned adapters that translate standardized V4
-/// controls into a namespaced wire option.
-pub fn LanguageModelV4CallOptions::with_provider_options(
-  self : LanguageModelV4CallOptions,
-  options : Map[String, Json],
-) -> LanguageModelV4CallOptions {
-  {
-    prompt: self.prompt,
-    tools: self.tools.copy(),
-    tool_choice: self.tool_choice,
-    response_format: self.response_format,
-    reasoning_effort: self.reasoning_effort,
-    max_output_tokens: self.max_output_tokens,
-    temperature: self.temperature,
-    top_p: self.top_p,
-    top_k: self.top_k,
-    frequency_penalty: self.frequency_penalty,
-    presence_penalty: self.presence_penalty,
-    seed: self.seed,
-    stop_sequences: self.stop_sequences.copy(),
-    include_raw_chunks: self.include_raw_chunks,
-    headers: copy_v4_headers(self.headers),
-    provider_options: merge_provider_metadata(self.provider_options, options),
-    retry_policy: self.retry_policy,
-    cancellation_token: self.cancellation_token,
-  }
-}
-
-///|
-/// Return a copy with the normalized reasoning setting replaced.
-pub fn LanguageModelV4CallOptions::with_reasoning_effort(
-  self : LanguageModelV4CallOptions,
-  reasoning_effort : ReasoningEffort,
-) -> LanguageModelV4CallOptions {
-  {
-    prompt: self.prompt,
-    tools: self.tools.copy(),
-    tool_choice: self.tool_choice,
-    response_format: self.response_format,
-    reasoning_effort,
-    max_output_tokens: self.max_output_tokens,
-    temperature: self.temperature,
-    top_p: self.top_p,
-    top_k: self.top_k,
-    frequency_penalty: self.frequency_penalty,
-    presence_penalty: self.presence_penalty,
-    seed: self.seed,
-    stop_sequences: self.stop_sequences.copy(),
-    include_raw_chunks: self.include_raw_chunks,
-    headers: copy_v4_headers(self.headers),
-    provider_options: merge_provider_metadata(self.provider_options, Map([])),
-    retry_policy: self.retry_policy,
-    cancellation_token: self.cancellation_token,
-  }
-}
-
-///|
-fn copy_v4_headers(headers : Map[String, String]) -> Map[String, String] {
-  let result : Map[String, String] = Map([])
-  for entry in headers.iter2() {
-    result[entry.0] = entry.1
-  }
-  result
-}
-
-///|
-/// Construct V4 call options from the normalized prompt used by wire
-/// adapters. New provider-facing code should call
-/// `LanguageModelV4CallOptions::new` with a V4 prompt directly.
-pub fn LanguageModelV4CallOptions::from_language_model_prompt(
-  prompt : LanguageModelPrompt,
-  tools? : Array[ToolDefinition] = [],
-  tool_choice? : ToolChoice,
-  response_format? : ResponseFormat = Text,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
-  max_output_tokens? : Int,
-  temperature? : Double,
-  top_p? : Double,
-  top_k? : Double,
-  frequency_penalty? : Double,
-  presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
-  cancellation_token? : CancellationToken,
-) -> LanguageModelV4CallOptions {
-  LanguageModelV4CallOptions::new(
-    LanguageModelV4Prompt::from_language_model_prompt(prompt),
-    tools~,
-    tool_choice?,
-    response_format~,
-    reasoning_effort~,
-    max_output_tokens?,
-    temperature?,
-    top_p?,
-    top_k?,
-    frequency_penalty?,
-    presence_penalty?,
-    seed?,
-    stop_sequences~,
-    include_raw_chunks~,
-    headers~,
-    provider_options~,
-    retry_policy~,
-    cancellation_token?,
-  )
-}
-
-///|
-/// Convert the versioned contract to the existing provider call contract.
-///
-/// Provider implementations use this mapping only at an explicit wire or
-/// third-party adapter boundary.
-pub fn LanguageModelV4CallOptions::to_chat_call_options(
-  self : LanguageModelV4CallOptions,
-) -> ChatCallOptions {
-  ChatCallOptions::new(
-    self.prompt.to_language_model_prompt(),
-    tools=self.tools,
-    tool_choice?=self.tool_choice,
-    response_format=self.response_format,
-    reasoning_effort=self.reasoning_effort,
-    max_output_tokens?=self.max_output_tokens,
-    temperature?=self.temperature,
-    top_p?=self.top_p,
-    top_k?=self.top_k,
-    frequency_penalty?=self.frequency_penalty,
-    presence_penalty?=self.presence_penalty,
-    seed?=self.seed,
-    stop_sequences=self.stop_sequences,
-    include_raw_chunks=self.include_raw_chunks,
-    headers=self.headers,
-    provider_options=self.provider_options,
-    retry_policy=self.retry_policy,
-    cancellation_token?=self.cancellation_token,
-  )
-}
-
-///|
 /// A generated V4 language-model result.
 pub(all) struct LanguageModelV4GenerateResult {
-  content : Array[GeneratedContent]
+  content : Array[LanguageModelV4Content]
   finish_reason : LanguageModelV4FinishReason
   usage : LanguageModelV4Usage
   provider_metadata : Map[String, Json]
@@ -255,7 +24,9 @@ pub fn LanguageModelV4GenerateResult::from_chat_response(
   response : ChatResponse,
 ) -> LanguageModelV4GenerateResult {
   {
-    content: response.content.copy(),
+    content: LanguageModelV4Content::from_generated_content_array(
+      response.content,
+    ),
     finish_reason: LanguageModelV4FinishReason::from_finish_reason(
       response.finish_reason,
     ),
@@ -279,7 +50,7 @@ pub fn LanguageModelV4GenerateResult::from_completion_response(
     content: if response.text == "" {
       []
     } else {
-      [GeneratedContent::text(response.text)]
+      [LanguageModelV4Content::text(response.text)]
     },
     finish_reason: LanguageModelV4FinishReason::from_finish_reason(
       response.finish_reason,
@@ -305,7 +76,7 @@ pub fn LanguageModelV4GenerateResult::text(
   let text = StringBuilder::new()
   for part in self.content {
     match part {
-      GeneratedTextOutput(value) => text.write_string(value.text)
+      V4TextOutput(value) => text.write_string(value.text)
       _ => ()
     }
   }
@@ -320,7 +91,7 @@ pub fn LanguageModelV4GenerateResult::reasoning(
   let reasoning = StringBuilder::new()
   for part in self.content {
     match part {
-      GeneratedReasoningOutput(value) => reasoning.write_string(value.text)
+      V4ReasoningOutput(value) => reasoning.write_string(value.text)
       _ => ()
     }
   }
@@ -333,7 +104,7 @@ pub fn LanguageModelV4GenerateResult::to_chat_response(
   self : LanguageModelV4GenerateResult,
 ) -> ChatResponse {
   ChatResponse::from_content(
-    self.content,
+    LanguageModelV4Content::to_generated_content_array(self.content),
     self.usage.to_usage(),
     self.finish_reason.to_finish_reason(),
   ).with_diagnostics(
@@ -372,7 +143,6 @@ pub fn LanguageModelV4GenerateResult::with_usage_and_finish_reason(
 /// lifecycle without forcing the older contract to grow incompatible fields.
 pub(all) enum LanguageModelV4StreamPart {
   V4StreamStart(warnings~ : Array[Warning])
-  V4Warning(Warning)
   V4TextStart(id~ : String, provider_metadata~ : Map[String, Json])
   V4TextDelta(
     id~ : String,
@@ -401,13 +171,13 @@ pub(all) enum LanguageModelV4StreamPart {
     provider_metadata~ : Map[String, Json]
   )
   V4ToolInputEnd(id~ : String, provider_metadata~ : Map[String, Json])
-  V4ToolCallReady(ToolCall)
-  V4ToolResultReady(ToolResult)
-  V4ToolApprovalRequestReady(ToolApprovalRequest)
-  V4FileReady(GeneratedFile)
-  V4ReasoningFileReady(GeneratedFile)
-  V4SourceReady(GeneratedSource)
-  V4CustomContentReady(GeneratedCustomContent)
+  V4ToolCallReady(LanguageModelV4ToolCall)
+  V4ToolResultReady(LanguageModelV4ToolResult)
+  V4ToolApprovalRequestReady(LanguageModelV4ToolApprovalRequest)
+  V4FileReady(LanguageModelV4File)
+  V4ReasoningFileReady(LanguageModelV4ReasoningFile)
+  V4SourceReady(LanguageModelV4Source)
+  V4CustomContentReady(LanguageModelV4CustomContent)
   V4ResponseMetadataReady(ResponseMetadata)
   V4Finish(
     usage~ : LanguageModelV4Usage,
@@ -415,73 +185,97 @@ pub(all) enum LanguageModelV4StreamPart {
     provider_metadata~ : Map[String, Json]
   )
   V4Raw(Json)
-  V4Error(String)
+  V4Error(StreamErrorInfo)
 } derive(Debug)
 
 ///|
 /// Convert one provider wire event to the V4 stream vocabulary.
 ///
-/// Warning is retained as a separate migration event because existing
-/// transports emit it after `StreamStart`; new native V4 implementations can
-/// emit `V4StreamStart(warnings=...)` directly.
+/// The legacy protocol emits warnings as standalone events. V4 carries them
+/// only on `V4StreamStart`, so callers must collect legacy warnings at the
+/// adapter boundary before converting the remaining events.
 pub fn LanguageModelV4StreamPart::from_stream_event(
   event : StreamEvent,
-) -> LanguageModelV4StreamPart {
+) -> LanguageModelV4StreamPart? {
   match event {
-    StreamStart => V4StreamStart(warnings=[])
-    Warning(value) => V4Warning(value)
-    TextStart(id) => V4TextStart(id~, provider_metadata=Map([]))
+    StreamStart => Some(V4StreamStart(warnings=[]))
+    Warning(_) => None
+    TextStart(id) => Some(V4TextStart(id~, provider_metadata=Map([])))
     TextDelta(id~, delta~) =>
-      V4TextDelta(id~, delta~, provider_metadata=Map([]))
-    TextEnd(id) => V4TextEnd(id~, provider_metadata=Map([]))
-    ReasoningStart(id) => V4ReasoningStart(id~, provider_metadata=Map([]))
+      Some(V4TextDelta(id~, delta~, provider_metadata=Map([])))
+    TextEnd(id) => Some(V4TextEnd(id~, provider_metadata=Map([])))
+    ReasoningStart(id) => Some(V4ReasoningStart(id~, provider_metadata=Map([])))
     ReasoningDelta(id~, delta~) =>
-      V4ReasoningDelta(id~, delta~, provider_metadata=Map([]))
-    ReasoningEnd(id) => V4ReasoningEnd(id~, provider_metadata=Map([]))
+      Some(V4ReasoningDelta(id~, delta~, provider_metadata=Map([])))
+    ReasoningEnd(id) => Some(V4ReasoningEnd(id~, provider_metadata=Map([])))
     ToolInputStart(id~, tool_name~) =>
-      V4ToolInputStart(
-        id~,
-        tool_name~,
-        provider_executed=false,
-        dynamic=false,
-        title=None,
-        provider_metadata=Map([]),
+      Some(
+        V4ToolInputStart(
+          id~,
+          tool_name~,
+          provider_executed=false,
+          dynamic=false,
+          title=None,
+          provider_metadata=Map([]),
+        ),
       )
     ToolInputDelta(id~, delta~) =>
-      V4ToolInputDelta(id~, delta~, provider_metadata=Map([]))
-    ToolInputEnd(id) => V4ToolInputEnd(id~, provider_metadata=Map([]))
-    ToolCallReady(value) => V4ToolCallReady(value)
-    ToolResultReady(value) => V4ToolResultReady(value)
-    ToolApprovalRequestReady(value) => V4ToolApprovalRequestReady(value)
-    FileReady(value) => V4FileReady(value)
-    ReasoningFileReady(value) => V4ReasoningFileReady(value)
-    SourceReady(value) => V4SourceReady(value)
-    CustomContentReady(value) => V4CustomContentReady(value)
-    ResponseMetadataReady(value) => V4ResponseMetadataReady(value)
-    Finish(usage~, reason~) =>
-      V4Finish(
-        usage=LanguageModelV4Usage::from_usage(usage),
-        reason=LanguageModelV4FinishReason::from_finish_reason(reason),
-        provider_metadata=Map([]),
+      Some(V4ToolInputDelta(id~, delta~, provider_metadata=Map([])))
+    ToolInputEnd(id) => Some(V4ToolInputEnd(id~, provider_metadata=Map([])))
+    ToolCallReady(value) =>
+      Some(V4ToolCallReady(LanguageModelV4ToolCall::from_tool_call(value)))
+    ToolResultReady(value) =>
+      Some(
+        V4ToolResultReady(LanguageModelV4ToolResult::from_tool_result(value)),
       )
-    Raw(value) => V4Raw(value)
-    StreamError(message) => V4Error(message)
+    ToolApprovalRequestReady(value) =>
+      Some(
+        V4ToolApprovalRequestReady(
+          LanguageModelV4ToolApprovalRequest::from_tool_approval_request(value),
+        ),
+      )
+    FileReady(value) =>
+      Some(V4FileReady(LanguageModelV4File::from_generated_file(value)))
+    ReasoningFileReady(value) =>
+      Some(
+        V4ReasoningFileReady(
+          LanguageModelV4ReasoningFile::from_generated_file(value),
+        ),
+      )
+    SourceReady(value) =>
+      Some(V4SourceReady(LanguageModelV4Source::from_generated_source(value)))
+    CustomContentReady(value) =>
+      Some(
+        V4CustomContentReady({
+          kind: value.kind,
+          provider_metadata: copy_provider_metadata(value.provider_metadata),
+        }),
+      )
+    ResponseMetadataReady(value) => Some(V4ResponseMetadataReady(value))
+    Finish(usage~, reason~) =>
+      Some(
+        V4Finish(
+          usage=LanguageModelV4Usage::from_usage(usage),
+          reason=LanguageModelV4FinishReason::from_finish_reason(reason),
+          provider_metadata=Map([]),
+        ),
+      )
+    Raw(value) => Some(V4Raw(value))
+    StreamError(error) => Some(V4Error(error))
   }
 }
 
 ///|
-/// Metadata returned when a V4 streaming call is started and completed.
+/// Transport diagnostics returned by a V4 streaming call.
 ///
 /// MoonBit models use an async callback rather than a JavaScript
 /// `ReadableStream`; the callback receives `LanguageModelV4StreamPart` values
-/// while this value carries the request/response diagnostics.
+/// while this value carries the request/response diagnostics. Warnings, usage,
+/// finish reason, and provider metadata belong to stream parts, matching the
+/// AI SDK provider contract.
 pub(all) struct LanguageModelV4StreamResult {
   request : RequestMetadata?
   response : ResponseMetadata?
-  usage : LanguageModelV4Usage
-  finish_reason : LanguageModelV4FinishReason
-  provider_metadata : Map[String, Json]
-  warnings : Array[LanguageModelV4Warning]
 } derive(Debug)
 
 ///|
@@ -489,19 +283,8 @@ pub(all) struct LanguageModelV4StreamResult {
 pub fn LanguageModelV4StreamResult::new(
   request : RequestMetadata?,
   response : ResponseMetadata?,
-  usage? : LanguageModelV4Usage = LanguageModelV4Usage::unknown(),
-  finish_reason? : LanguageModelV4FinishReason = LanguageModelV4FinishReason::unknown(),
-  provider_metadata? : Map[String, Json] = Map([]),
-  warnings? : Array[LanguageModelV4Warning] = [],
 ) -> LanguageModelV4StreamResult {
-  {
-    request,
-    response,
-    usage,
-    finish_reason,
-    provider_metadata: copy_provider_metadata(provider_metadata),
-    warnings: copy_warnings(warnings),
-  }
+  { request, response }
 }
 
 ///|

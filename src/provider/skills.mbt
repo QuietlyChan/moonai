@@ -1,37 +1,40 @@
 ///|
 /// One file in an uploaded provider skill.
-pub(all) struct SkillFile {
+pub(all) struct SkillsV4File {
   path : String
   data : UploadFileData
 } derive(Debug, Eq)
 
 ///|
 /// Construct one skill file relative to the skill root.
-pub fn SkillFile::new(path~ : String, data~ : UploadFileData) -> SkillFile {
+pub fn SkillsV4File::new(
+  path~ : String,
+  data~ : UploadFileData,
+) -> SkillsV4File {
   { path, data }
 }
 
 ///|
 /// Provider-level options for uploading one skill bundle.
-pub(all) struct SkillUploadOptions {
-  files : Array[SkillFile]
+pub(all) struct SkillsV4UploadSkillCallOptions {
+  files : Array[SkillsV4File]
   display_title : String?
   provider_options : Map[String, Json]
 } derive(Debug, Eq)
 
 ///|
 /// Construct one skill upload call.
-pub fn SkillUploadOptions::new(
-  files~ : Array[SkillFile],
+pub fn SkillsV4UploadSkillCallOptions::new(
+  files~ : Array[SkillsV4File],
   display_title? : String,
   provider_options? : Map[String, Json] = Map([]),
-) -> SkillUploadOptions {
+) -> SkillsV4UploadSkillCallOptions {
   { files, display_title, provider_options }
 }
 
 ///|
 /// Result returned after a provider accepts a skill bundle.
-pub(all) struct SkillUploadResult {
+pub(all) struct SkillsV4UploadSkillResult {
   provider_reference : ProviderReference
   display_title : String?
   name : String?
@@ -43,7 +46,7 @@ pub(all) struct SkillUploadResult {
 
 ///|
 /// Construct a provider skill-upload result.
-pub fn SkillUploadResult::new(
+pub fn SkillsV4UploadSkillResult::new(
   provider_reference~ : ProviderReference,
   display_title? : String,
   name? : String,
@@ -51,7 +54,7 @@ pub fn SkillUploadResult::new(
   latest_version? : String,
   provider_metadata? : Map[String, Json] = Map([]),
   warnings? : Array[Warning] = [],
-) -> SkillUploadResult {
+) -> SkillsV4UploadSkillResult {
   {
     provider_reference,
     display_title,

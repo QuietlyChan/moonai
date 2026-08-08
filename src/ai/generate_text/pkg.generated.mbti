@@ -1,0 +1,287 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/ai/generate_text"
+
+import {
+  "QuietlyChan/moonai/ai/prompt",
+  "QuietlyChan/moonai/ai/tool",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub async fn generateText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : ToolApprovalConfiguration, experimental_tool_approval_secret? : ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (PrepareStepOptions) -> PrepareStepResult?, stop_when? : Array[async (Array[GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> GenerateTextResult
+
+pub async fn generate_text(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : ToolApprovalConfiguration, experimental_tool_approval_secret? : ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (PrepareStepOptions) -> PrepareStepResult?, stop_when? : Array[async (Array[GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> GenerateTextResult
+
+pub fn hasToolCall(Array[String]) -> async (Array[GenerateTextStep]) -> Bool
+
+pub fn has_tool_call(Array[String]) -> async (Array[GenerateTextStep]) -> Bool
+
+pub fn isLoopFinished() -> async (Array[GenerateTextStep]) -> Bool
+
+pub fn isStepCount(Int) -> async (Array[GenerateTextStep]) -> Bool
+
+pub fn is_loop_finished() -> async (Array[GenerateTextStep]) -> Bool
+
+pub fn is_step_count(Int) -> async (Array[GenerateTextStep]) -> Bool
+
+pub async fn streamText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : ToolApprovalConfiguration, experimental_tool_approval_secret? : ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (PrepareStepOptions) -> PrepareStepResult?, stop_when? : Array[async (Array[GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> StreamTextResult
+
+pub async fn stream_text(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : ToolApprovalConfiguration, experimental_tool_approval_secret? : ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (PrepareStepOptions) -> PrepareStepResult?, stop_when? : Array[async (Array[GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> StreamTextResult
+
+// Errors
+pub(all) suberror InvalidToolApprovalError {
+  InvalidToolApprovalError(approval_id~ : String)
+} derive(Eq, @debug.Debug)
+
+pub suberror InvalidToolApprovalSignatureError {
+  InvalidToolApprovalSignatureError(approval_id~ : String, tool_call_id~ : String, reason~ : String)
+} derive(Eq, @debug.Debug)
+
+pub(all) suberror InvalidToolInputError {
+  InvalidToolInputError(tool_call_id~ : String, tool_name~ : String, input~ : String, message~ : String)
+} derive(Eq, @debug.Debug)
+
+pub(all) suberror NoSuchToolError {
+  NoSuchToolError(tool_name~ : String, available_tools~ : Array[String])
+} derive(Eq, @debug.Debug)
+
+pub(all) suberror ToolCallNotFoundForApprovalError {
+  ToolCallNotFoundForApprovalError(tool_call_id~ : String, approval_id~ : String)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub(all) enum GenerateTextContent {
+  GenerateTextText(@provider.LanguageModelV4Text)
+  GenerateTextReasoning(@provider.LanguageModelV4Reasoning)
+  GenerateTextCustom(@provider.LanguageModelV4CustomContent)
+  GenerateTextReasoningFile(@provider.LanguageModelV4ReasoningFile)
+  GenerateTextFile(@provider.LanguageModelV4File)
+  GenerateTextToolApprovalRequest(GenerateTextToolApprovalRequestOutput)
+  GenerateTextToolApprovalResponse(GenerateTextToolApprovalResponseOutput)
+  GenerateTextSource(@provider.LanguageModelV4Source)
+  GenerateTextToolCall(GenerateTextToolCall)
+  GenerateTextToolResult(GenerateTextToolResult)
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GenerateTextResult {
+  content : Array[GenerateTextContent]
+  tool_calls : Array[GenerateTextToolCall]
+  tool_results : Array[GenerateTextToolResult]
+  tool_approval_requests : Array[GenerateTextToolApprovalRequestOutput]
+  tool_approval_responses : Array[GenerateTextToolApprovalResponseOutput]
+  files : Array[@provider.LanguageModelV4File]
+  sources : Array[@provider.LanguageModelV4Source]
+  finish_reason : @provider.LanguageModelV4FinishReason
+  usage : @provider.LanguageModelV4Usage
+  total_usage : @provider.LanguageModelV4Usage
+  warnings : Array[@provider.Warning]
+  request : @provider.RequestMetadata?
+  response : @provider.ResponseMetadata?
+  response_messages : Array[@provider_utils.ModelMessage]
+  provider_metadata : Map[String, Json]
+  steps : Array[GenerateTextStep]
+  final_step : GenerateTextStep
+} derive(@debug.Debug)
+pub fn GenerateTextResult::provider_result(Self) -> @provider.LanguageModelV4GenerateResult
+pub fn GenerateTextResult::reasoning(Self) -> String
+pub fn GenerateTextResult::text(Self) -> String
+pub fn GenerateTextResult::to_chat_response(Self) -> @provider.ChatResponse
+
+pub(all) struct GenerateTextStep {
+  call_id : String
+  step_number : Int
+  provider : String
+  model_id : String
+  runtime_context : Json
+  tools_context : Map[String, Json]
+  content : Array[GenerateTextContent]
+  tool_calls : Array[GenerateTextToolCall]
+  tool_results : Array[GenerateTextToolResult]
+  tool_approval_requests : Array[GenerateTextToolApprovalRequestOutput]
+  tool_approval_responses : Array[GenerateTextToolApprovalResponseOutput]
+  finish_reason : @provider.LanguageModelV4FinishReason
+  usage : @provider.LanguageModelV4Usage
+  performance : GenerateTextStepPerformance
+  request : @provider.RequestMetadata?
+  response : @provider.ResponseMetadata?
+  provider_metadata : Map[String, Json]
+  warnings : Array[@provider.Warning]
+  response_messages : Array[@provider_utils.ModelMessage]
+  provider_result : @provider.LanguageModelV4GenerateResult
+} derive(@debug.Debug)
+pub fn GenerateTextStep::reasoning(Self) -> String
+pub fn GenerateTextStep::text(Self) -> String
+
+pub(all) struct GenerateTextStepPerformance {
+  step_time_ms : Int
+  response_time_ms : Int
+  tool_execution_ms : Map[String, Int]
+  effective_output_tokens_per_second : Double?
+  effective_total_tokens_per_second : Double?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GenerateTextToolApprovalRequestOutput {
+  approval_id : String
+  tool_call : GenerateTextToolCall
+  is_automatic : Bool
+  signature : String?
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GenerateTextToolApprovalResponseOutput {
+  approval_id : String
+  tool_call : GenerateTextToolCall
+  approved : Bool
+  reason : String?
+  provider_executed : Bool
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GenerateTextToolCall {
+  tool_call_id : String
+  tool_name : String
+  input : Json
+  input_text : String
+  provider_executed : Bool
+  dynamic : Bool
+  invalid : Bool
+  error : String?
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GenerateTextToolResult {
+  tool_call_id : String
+  tool_name : String
+  input : Json
+  output : Json
+  is_error : Bool
+  preliminary : Bool
+  provider_executed : Bool
+  dynamic : Bool
+  provider_metadata : Map[String, Json]
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GenericToolApprovalOptions {
+  tool_call : GenerateTextToolCall
+  tools : Map[String, @provider_utils.Tool]
+  tools_context : Map[String, Json]
+  runtime_context : Json
+  messages : Array[@provider_utils.ModelMessage]
+}
+
+pub(all) struct PrepareStepOptions {
+  steps : Array[GenerateTextStep]
+  step_number : Int
+  model : &@provider.LanguageModelV4
+  instructions : @prompt.Instructions?
+  initial_instructions : @prompt.Instructions?
+  messages : Array[@provider_utils.ModelMessage]
+  initial_messages : Array[@provider_utils.ModelMessage]
+  response_messages : Array[@provider_utils.ModelMessage]
+  runtime_context : Json
+  tools_context : Map[String, Json]
+  experimental_sandbox : @provider_utils.SandboxSession?
+}
+
+pub(all) struct PrepareStepResult {
+  model : &@provider.LanguageModelV4?
+  tool_choice : @provider.ToolChoice?
+  active_tools : Array[String]?
+  tool_order : Array[String]?
+  instructions : @prompt.Instructions?
+  messages : Array[@provider_utils.ModelMessage]?
+  runtime_context : Json?
+  tools_context : Map[String, Json]?
+  experimental_sandbox : @provider_utils.SandboxSession?
+  provider_options : Map[String, Json]?
+  max_output_tokens : Int?
+  temperature : Double?
+  top_p : Double?
+  top_k : Double?
+  frequency_penalty : Double?
+  presence_penalty : Double?
+  seed : Int?
+  stop_sequences : Array[String]?
+  reasoning_effort : @provider.ReasoningEffort?
+}
+pub fn PrepareStepResult::new(model? : &@provider.LanguageModelV4, tool_choice? : @provider.ToolChoice, active_tools? : Array[String], tool_order? : Array[String], instructions? : @prompt.Instructions, messages? : Array[@provider_utils.ModelMessage], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, provider_options? : Map[String, Json], max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], reasoning_effort? : @provider.ReasoningEffort) -> Self
+
+pub(all) struct SingleToolApprovalOptions {
+  tool_call_id : String
+  messages : Array[@provider_utils.ModelMessage]
+  tool_context : Json
+  runtime_context : Json
+}
+
+pub(all) struct StreamTextResult {
+  content : Array[GenerateTextContent]
+  tool_calls : Array[GenerateTextToolCall]
+  tool_results : Array[GenerateTextToolResult]
+  tool_approval_requests : Array[GenerateTextToolApprovalRequestOutput]
+  tool_approval_responses : Array[GenerateTextToolApprovalResponseOutput]
+  files : Array[@provider.LanguageModelV4File]
+  sources : Array[@provider.LanguageModelV4Source]
+  finish_reason : @provider.LanguageModelV4FinishReason
+  usage : @provider.LanguageModelV4Usage
+  total_usage : @provider.LanguageModelV4Usage
+  warnings : Array[@provider.Warning]
+  request : @provider.RequestMetadata?
+  response : @provider.ResponseMetadata?
+  response_messages : Array[@provider_utils.ModelMessage]
+  provider_metadata : Map[String, Json]
+  steps : Array[GenerateTextStep]
+  final_step : GenerateTextStep
+} derive(@debug.Debug)
+pub fn StreamTextResult::provider_result(Self) -> @provider.LanguageModelV4GenerateResult
+pub fn StreamTextResult::reasoning(Self) -> String
+pub fn StreamTextResult::text(Self) -> String
+pub fn StreamTextResult::to_chat_response(Self) -> @provider.ChatResponse
+
+pub(all) enum ToolApprovalConfiguration {
+  ToolApprovalGeneric(async (GenericToolApprovalOptions) -> ToolApprovalStatus)
+  ToolApprovalPerTool(Map[String, ToolApprovalRule])
+}
+pub fn ToolApprovalConfiguration::generic(async (GenericToolApprovalOptions) -> ToolApprovalStatus) -> Self
+pub fn ToolApprovalConfiguration::per_tool(Map[String, ToolApprovalRule]) -> Self
+
+pub(all) enum ToolApprovalRule {
+  ToolApprovalRuleStatus(ToolApprovalStatus)
+  ToolApprovalRuleFunction(async (Json, SingleToolApprovalOptions) -> ToolApprovalStatus)
+}
+pub fn ToolApprovalRule::status(ToolApprovalStatus) -> Self
+pub fn ToolApprovalRule::when(async (Json, SingleToolApprovalOptions) -> ToolApprovalStatus) -> Self
+
+pub(all) enum ToolApprovalSecret {
+  ToolApprovalSecretString(String)
+  ToolApprovalSecretBytes(Bytes)
+} derive(Eq, @debug.Debug)
+pub fn ToolApprovalSecret::bytes(Bytes) -> Self
+pub fn ToolApprovalSecret::string(String) -> Self
+
+pub(all) enum ToolApprovalStatus {
+  ToolApprovalNotApplicable
+  ToolApprovalApproved(reason~ : String?)
+  ToolApprovalDenied(reason~ : String?)
+  ToolApprovalUserApproval
+} derive(Eq, @debug.Debug)
+pub fn ToolApprovalStatus::approved(reason? : String) -> Self
+pub fn ToolApprovalStatus::denied(reason? : String) -> Self
+pub fn ToolApprovalStatus::not_applicable() -> Self
+pub fn ToolApprovalStatus::user_approval() -> Self
+
+// Type aliases
+pub type ActiveTools = Array[String]
+
+pub type GenericToolApprovalFunction = async (GenericToolApprovalOptions) -> ToolApprovalStatus
+
+pub type PrepareStepFunction = async (PrepareStepOptions) -> PrepareStepResult?
+
+pub type SingleToolApprovalFunction = async (Json, SingleToolApprovalOptions) -> ToolApprovalStatus
+
+pub type StopCondition = async (Array[GenerateTextStep]) -> Bool
+
+pub type ToolOrder = Array[String]
+
+// Traits
+

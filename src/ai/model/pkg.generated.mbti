@@ -21,7 +21,7 @@ pub fn model_id_of_language_model(&@provider.LanguageModelV4) -> ModelId
 
 pub fn model_id_of_realtime(&@provider.RealtimeModelV4) -> ModelId
 
-pub fn model_id_of_reranking(&@provider.RerankingModel) -> ModelId
+pub fn model_id_of_reranking(&@provider.RerankingModelV4) -> ModelId
 
 pub fn model_id_of_speech(&@provider.SpeechModelV4) -> ModelId
 
@@ -37,45 +37,45 @@ pub fn wrapChatModel(&@provider.ChatModel, ChatModelMiddleware) -> &@provider.Ch
 
 pub fn wrapChatModelChain(&@provider.ChatModel, Array[ChatModelMiddleware]) -> &@provider.ChatModel
 
-pub fn wrapEmbeddingModel(&@provider.EmbeddingModelV4, EmbeddingModelV4Middleware) -> &@provider.EmbeddingModelV4
+pub fn wrapEmbeddingModel(&@provider.EmbeddingModelV4, @provider.EmbeddingModelV4Middleware, model_id? : String, provider_id? : String) -> &@provider.EmbeddingModelV4
 
-pub fn wrapEmbeddingModelChain(&@provider.EmbeddingModelV4, Array[EmbeddingModelV4Middleware]) -> &@provider.EmbeddingModelV4
+pub fn wrapEmbeddingModelChain(&@provider.EmbeddingModelV4, Array[@provider.EmbeddingModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.EmbeddingModelV4
 
-pub fn wrapImageModel(&@provider.ImageModelV4, ImageModelV4Middleware) -> &@provider.ImageModelV4
+pub fn wrapImageModel(&@provider.ImageModelV4, @provider.ImageModelV4Middleware, model_id? : String, provider_id? : String) -> &@provider.ImageModelV4
 
-pub fn wrapImageModelChain(&@provider.ImageModelV4, Array[ImageModelV4Middleware]) -> &@provider.ImageModelV4
+pub fn wrapImageModelChain(&@provider.ImageModelV4, Array[@provider.ImageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.ImageModelV4
 
 pub fn wrapImageWireModel(&@provider.ImageWireModel, ImageWireModelMiddleware) -> &@provider.ImageWireModel
 
 pub fn wrapImageWireModelChain(&@provider.ImageWireModel, Array[ImageWireModelMiddleware]) -> &@provider.ImageWireModel
 
-pub fn wrapLanguageModel(&@provider.LanguageModelV4, LanguageModelV4Middleware) -> &@provider.LanguageModelV4
+pub fn wrapLanguageModel(&@provider.LanguageModelV4, @provider.LanguageModelV4Middleware, model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
-pub fn wrapLanguageModelChain(&@provider.LanguageModelV4, Array[LanguageModelV4Middleware]) -> &@provider.LanguageModelV4
+pub fn wrapLanguageModelChain(&@provider.LanguageModelV4, Array[@provider.LanguageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
-pub fn wrapLanguageModelV4(&@provider.LanguageModelV4, LanguageModelV4Middleware) -> &@provider.LanguageModelV4
+pub fn wrapLanguageModelV4(&@provider.LanguageModelV4, @provider.LanguageModelV4Middleware, model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
-pub fn wrapLanguageModelV4Chain(&@provider.LanguageModelV4, Array[LanguageModelV4Middleware]) -> &@provider.LanguageModelV4
+pub fn wrapLanguageModelV4Chain(&@provider.LanguageModelV4, Array[@provider.LanguageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
 pub fn wrap_chat_model(&@provider.ChatModel, ChatModelMiddleware) -> &@provider.ChatModel
 
 pub fn wrap_chat_model_chain(&@provider.ChatModel, Array[ChatModelMiddleware]) -> &@provider.ChatModel
 
-pub fn wrap_embedding_model_v4(&@provider.EmbeddingModelV4, EmbeddingModelV4Middleware) -> &@provider.EmbeddingModelV4
+pub fn wrap_embedding_model_v4(&@provider.EmbeddingModelV4, @provider.EmbeddingModelV4Middleware, model_id? : String, provider_id? : String) -> &@provider.EmbeddingModelV4
 
-pub fn wrap_embedding_model_v4_chain(&@provider.EmbeddingModelV4, Array[EmbeddingModelV4Middleware]) -> &@provider.EmbeddingModelV4
+pub fn wrap_embedding_model_v4_chain(&@provider.EmbeddingModelV4, Array[@provider.EmbeddingModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.EmbeddingModelV4
 
-pub fn wrap_image_model_v4(&@provider.ImageModelV4, ImageModelV4Middleware) -> &@provider.ImageModelV4
+pub fn wrap_image_model_v4(&@provider.ImageModelV4, @provider.ImageModelV4Middleware, model_id? : String, provider_id? : String) -> &@provider.ImageModelV4
 
-pub fn wrap_image_model_v4_chain(&@provider.ImageModelV4, Array[ImageModelV4Middleware]) -> &@provider.ImageModelV4
+pub fn wrap_image_model_v4_chain(&@provider.ImageModelV4, Array[@provider.ImageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.ImageModelV4
 
 pub fn wrap_image_wire_model(&@provider.ImageWireModel, ImageWireModelMiddleware) -> &@provider.ImageWireModel
 
 pub fn wrap_image_wire_model_chain(&@provider.ImageWireModel, Array[ImageWireModelMiddleware]) -> &@provider.ImageWireModel
 
-pub fn wrap_language_model_v4(&@provider.LanguageModelV4, LanguageModelV4Middleware) -> &@provider.LanguageModelV4
+pub fn wrap_language_model_v4(&@provider.LanguageModelV4, @provider.LanguageModelV4Middleware, model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
-pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[LanguageModelV4Middleware]) -> &@provider.LanguageModelV4
+pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[@provider.LanguageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
 // Errors
 pub suberror InvalidModelIdError {
@@ -145,54 +145,12 @@ pub(all) enum EmbeddingModelReference {
 pub fn EmbeddingModelReference::instance(&@provider.EmbeddingModelV4) -> Self
 pub fn EmbeddingModelReference::named(provider~ : String, model_id~ : String) -> Self
 
-pub(all) struct EmbeddingModelV4Middleware {
-  transform_params : (async (@provider.EmbeddingModelV4CallOptions, &@provider.EmbeddingModelV4) -> @provider.EmbeddingModelV4CallOptions)?
-  override_provider : ((&@provider.EmbeddingModelV4) -> String)?
-  override_model_id : ((&@provider.EmbeddingModelV4) -> String)?
-  override_max_embeddings_per_call : ((&@provider.EmbeddingModelV4) -> Int?)?
-  override_supports_parallel_calls : ((&@provider.EmbeddingModelV4) -> Bool)?
-  wrap_embed : (async (EmbeddingModelV4MiddlewareContext) -> @provider.EmbeddingModelV4Result)?
-}
-pub fn EmbeddingModelV4Middleware::new(transform_params? : async (@provider.EmbeddingModelV4CallOptions, &@provider.EmbeddingModelV4) -> @provider.EmbeddingModelV4CallOptions, override_provider? : (&@provider.EmbeddingModelV4) -> String, override_model_id? : (&@provider.EmbeddingModelV4) -> String, override_max_embeddings_per_call? : (&@provider.EmbeddingModelV4) -> Int?, override_supports_parallel_calls? : (&@provider.EmbeddingModelV4) -> Bool, wrap_embed? : async (EmbeddingModelV4MiddlewareContext) -> @provider.EmbeddingModelV4Result) -> Self
-pub fn EmbeddingModelV4Middleware::specification_version(Self) -> String
-pub async fn EmbeddingModelV4Middleware::transform(Self, &@provider.EmbeddingModelV4, @provider.EmbeddingModelV4CallOptions) -> @provider.EmbeddingModelV4CallOptions
-
-pub(all) struct EmbeddingModelV4MiddlewareContext {
-  params : @provider.EmbeddingModelV4CallOptions
-  model : &@provider.EmbeddingModelV4
-  do_embed : async () -> @provider.EmbeddingModelV4Result
-}
-pub async fn EmbeddingModelV4MiddlewareContext::embed(Self) -> @provider.EmbeddingModelV4Result
-
 pub(all) enum ImageModelReference {
   Instance(&@provider.ImageModelV4)
   Named(ModelId)
 }
 pub fn ImageModelReference::instance(&@provider.ImageModelV4) -> Self
 pub fn ImageModelReference::named(provider~ : String, model_id~ : String) -> Self
-
-pub(all) struct ImageModelV4Middleware {
-  transform_options : ((@provider.ImageModelV4CallOptions) -> @provider.ImageModelV4CallOptions)?
-  transform_params : (async (@provider.ImageModelV4CallOptions, &@provider.ImageModelV4) -> @provider.ImageModelV4CallOptions)?
-  provider : String?
-  model_id : String?
-  max_images_per_call : Int?
-  override_provider : ((&@provider.ImageModelV4) -> String)?
-  override_model_id : ((&@provider.ImageModelV4) -> String)?
-  override_max_images_per_call : ((&@provider.ImageModelV4) -> Int?)?
-  wrap_generate : (async (ImageModelV4MiddlewareContext) -> @provider.ImageModelV4Result)?
-}
-pub fn ImageModelV4Middleware::apply_options(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4CallOptions
-pub fn ImageModelV4Middleware::new(transform_options? : (@provider.ImageModelV4CallOptions) -> @provider.ImageModelV4CallOptions, provider? : String, model_id? : String, max_images_per_call? : Int, transform_params? : async (@provider.ImageModelV4CallOptions, &@provider.ImageModelV4) -> @provider.ImageModelV4CallOptions, override_provider? : (&@provider.ImageModelV4) -> String, override_model_id? : (&@provider.ImageModelV4) -> String, override_max_images_per_call? : (&@provider.ImageModelV4) -> Int?, wrap_generate? : async (ImageModelV4MiddlewareContext) -> @provider.ImageModelV4Result) -> Self
-pub fn ImageModelV4Middleware::specification_version(Self) -> String
-pub async fn ImageModelV4Middleware::transform(Self, &@provider.ImageModelV4, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4CallOptions
-
-pub(all) struct ImageModelV4MiddlewareContext {
-  params : @provider.ImageModelV4CallOptions
-  model : &@provider.ImageModelV4
-  do_generate : async () -> @provider.ImageModelV4Result
-}
-pub async fn ImageModelV4MiddlewareContext::generate(Self) -> @provider.ImageModelV4Result
 
 pub(all) struct ImageWireModelMiddleware {
   transform_options : ((@provider.ImageCallOptions) -> @provider.ImageCallOptions)?
@@ -216,49 +174,12 @@ pub(all) struct ImageWireModelMiddlewareContext {
 }
 pub async fn ImageWireModelMiddlewareContext::generate(Self) -> @provider.ImageResponse
 
-pub(all) struct LanguageModelV4Middleware {
-  transform_options : ((@provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4CallOptions)?
-  transform_params : (async (LanguageModelV4TransformContext) -> @provider.LanguageModelV4CallOptions)?
-  provider : String?
-  model_id : String?
-  supported_urls : Array[@provider.SupportedUrlRule]?
-  override_provider : ((&@provider.LanguageModelV4) -> String)?
-  override_model_id : ((&@provider.LanguageModelV4) -> String)?
-  override_supported_urls : ((&@provider.LanguageModelV4) -> Array[@provider.SupportedUrlRule])?
-  wrap_generate : (async (LanguageModelV4MiddlewareContext) -> @provider.LanguageModelV4GenerateResult)?
-  wrap_stream : (async (LanguageModelV4MiddlewareContext) -> @provider.LanguageModelV4StreamResult)?
-}
-pub fn LanguageModelV4Middleware::apply_options(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4CallOptions
-pub fn LanguageModelV4Middleware::new(transform_options? : (@provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4CallOptions, provider? : String, model_id? : String, supported_urls? : Array[@provider.SupportedUrlRule], transform_params? : async (LanguageModelV4TransformContext) -> @provider.LanguageModelV4CallOptions, override_provider? : (&@provider.LanguageModelV4) -> String, override_model_id? : (&@provider.LanguageModelV4) -> String, override_supported_urls? : (&@provider.LanguageModelV4) -> Array[@provider.SupportedUrlRule], wrap_generate? : async (LanguageModelV4MiddlewareContext) -> @provider.LanguageModelV4GenerateResult, wrap_stream? : async (LanguageModelV4MiddlewareContext) -> @provider.LanguageModelV4StreamResult) -> Self
-pub fn LanguageModelV4Middleware::specification_version(Self) -> String
-pub async fn LanguageModelV4Middleware::transform(Self, LanguageModelV4MiddlewareOperation, &@provider.LanguageModelV4, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4CallOptions
-
-pub(all) struct LanguageModelV4MiddlewareContext {
-  params : @provider.LanguageModelV4CallOptions
-  model : &@provider.LanguageModelV4
-  do_generate : async () -> @provider.LanguageModelV4GenerateResult
-  do_stream : async () -> @provider.LanguageModelV4StreamResult
-}
-pub async fn LanguageModelV4MiddlewareContext::generate(Self) -> @provider.LanguageModelV4GenerateResult
-pub async fn LanguageModelV4MiddlewareContext::stream(Self) -> @provider.LanguageModelV4StreamResult
-
-pub(all) enum LanguageModelV4MiddlewareOperation {
-  Generate
-  Stream
-} derive(Eq, @debug.Debug)
-
 pub(all) enum LanguageModelV4Reference {
   Instance(&@provider.LanguageModelV4)
   Named(ModelId)
 }
 pub fn LanguageModelV4Reference::instance(&@provider.LanguageModelV4) -> Self
 pub fn LanguageModelV4Reference::named(provider~ : String, model_id~ : String) -> Self
-
-pub(all) struct LanguageModelV4TransformContext {
-  operation : LanguageModelV4MiddlewareOperation
-  params : @provider.LanguageModelV4CallOptions
-  model : &@provider.LanguageModelV4
-}
 
 type MiddlewareChatModel
 pub impl @provider.ChatModel for MiddlewareChatModel
@@ -304,19 +225,19 @@ pub fn ModelRegistry::require_embedding_model(Self, ModelId) -> &@provider.Embed
 pub fn ModelRegistry::require_image_model(Self, ModelId) -> &@provider.ImageModelV4 raise NoSuchModelError
 pub fn ModelRegistry::require_language_model(Self, ModelId) -> &@provider.LanguageModelV4 raise NoSuchModelError
 pub fn ModelRegistry::require_realtime_model(Self, ModelId) -> &@provider.RealtimeModelV4 raise NoSuchModelError
-pub fn ModelRegistry::require_reranking_model(Self, ModelId) -> &@provider.RerankingModel raise NoSuchModelError
+pub fn ModelRegistry::require_reranking_model(Self, ModelId) -> &@provider.RerankingModelV4 raise NoSuchModelError
 pub fn ModelRegistry::require_speech_model(Self, ModelId) -> &@provider.SpeechModelV4 raise NoSuchModelError
 pub fn ModelRegistry::require_speech_translation_model(Self, ModelId) -> &@provider.SpeechTranslationModelV4 raise NoSuchModelError
 pub fn ModelRegistry::require_transcription_model(Self, ModelId) -> &@provider.TranscriptionModelV4 raise NoSuchModelError
 pub fn ModelRegistry::require_video_model(Self, ModelId) -> &@provider.VideoModelV4 raise NoSuchModelError
-pub fn ModelRegistry::reranking_model(Self, ModelId) -> &@provider.RerankingModel?
-pub fn ModelRegistry::reranking_model_by_key(Self, String) -> &@provider.RerankingModel?
+pub fn ModelRegistry::reranking_model(Self, ModelId) -> &@provider.RerankingModelV4?
+pub fn ModelRegistry::reranking_model_by_key(Self, String) -> &@provider.RerankingModelV4?
 pub fn ModelRegistry::resolve_completion_model(Self, CompletionModelReference) -> &@provider.CompletionModel raise NoSuchModelError
 pub fn ModelRegistry::resolve_embedding_model(Self, EmbeddingModelReference) -> &@provider.EmbeddingModelV4 raise NoSuchModelError
 pub fn ModelRegistry::resolve_image_model(Self, ImageModelReference) -> &@provider.ImageModelV4 raise NoSuchModelError
 pub fn ModelRegistry::resolve_language_model(Self, LanguageModelV4Reference) -> &@provider.LanguageModelV4 raise NoSuchModelError
 pub fn ModelRegistry::resolve_realtime_model(Self, RealtimeModelReference) -> &@provider.RealtimeModelV4 raise NoSuchModelError
-pub fn ModelRegistry::resolve_reranking_model(Self, RerankingModelReference) -> &@provider.RerankingModel raise NoSuchModelError
+pub fn ModelRegistry::resolve_reranking_model(Self, RerankingModelReference) -> &@provider.RerankingModelV4 raise NoSuchModelError
 pub fn ModelRegistry::resolve_speech_model(Self, SpeechModelReference) -> &@provider.SpeechModelV4 raise NoSuchModelError
 pub fn ModelRegistry::resolve_speech_translation_model(Self, SpeechTranslationModelReference) -> &@provider.SpeechTranslationModelV4 raise NoSuchModelError
 pub fn ModelRegistry::resolve_transcription_model(Self, TranscriptionModelReference) -> &@provider.TranscriptionModelV4 raise NoSuchModelError
@@ -334,7 +255,7 @@ pub fn ModelRegistry::with_embedding_model(Self, &@provider.EmbeddingModelV4) ->
 pub fn ModelRegistry::with_image_model(Self, &@provider.ImageModelV4) -> Self
 pub fn ModelRegistry::with_language_model(Self, &@provider.LanguageModelV4) -> Self
 pub fn ModelRegistry::with_realtime_model(Self, &@provider.RealtimeModelV4) -> Self
-pub fn ModelRegistry::with_reranking_model(Self, &@provider.RerankingModel) -> Self
+pub fn ModelRegistry::with_reranking_model(Self, &@provider.RerankingModelV4) -> Self
 pub fn ModelRegistry::with_speech_model(Self, &@provider.SpeechModelV4) -> Self
 pub fn ModelRegistry::with_speech_translation_model(Self, &@provider.SpeechTranslationModelV4) -> Self
 pub fn ModelRegistry::with_transcription_model(Self, &@provider.TranscriptionModelV4) -> Self
@@ -361,10 +282,10 @@ pub fn RealtimeModelReference::instance(&@provider.RealtimeModelV4) -> Self
 pub fn RealtimeModelReference::named(provider~ : String, model_id~ : String) -> Self
 
 pub(all) enum RerankingModelReference {
-  Instance(&@provider.RerankingModel)
+  Instance(&@provider.RerankingModelV4)
   Named(ModelId)
 }
-pub fn RerankingModelReference::instance(&@provider.RerankingModel) -> Self
+pub fn RerankingModelReference::instance(&@provider.RerankingModelV4) -> Self
 pub fn RerankingModelReference::named(provider~ : String, model_id~ : String) -> Self
 
 pub(all) enum SpeechModelReference {

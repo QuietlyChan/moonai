@@ -218,8 +218,6 @@ fn deepseek_stream_chunks() -> Array[String] {
       },
     }),
     "",
-    deepseek_sse_line("[DONE]"),
-    "",
   ]
 }
 
@@ -233,24 +231,21 @@ async test "DeepSeek drives a JSON request and preserves diagnostics" {
     ),
     DeepSeekMockStream::new([]),
   )
-  let model = DeepSeekLanguageModelV4::new(
-      deepseek_chat(
-        "deepseek-chat",
-        api_key="test-key",
-        base_url="https://deepseek.test",
-        http_transport=transport,
-        id_generator=() => "deepseek-generated-call",
-      ),
-    )
-    as &@provider.LanguageModelV4
-  let tool = @provider.ToolDefinition::new("lookup", {
+  let model = deepseek(
+    "deepseek-chat",
+    api_key="test-key",
+    base_url="https://deepseek.test",
+    http_transport=transport,
+    id_generator=() => "deepseek-generated-call",
+  )
+  let tool = @provider_utils.Tool::function({
     "type": "object",
     "properties": { "q": { "type": "string" } },
   })
   let response = @ai.generate_text(
     model,
     prompt="find moon",
-    tools=[tool],
+    tools=@provider_utils.tool_set([("lookup", tool)]),
     retry_policy=@provider.RetryPolicy::none(),
   )
   let legacy = response.to_chat_response()
@@ -264,7 +259,13 @@ async test "DeepSeek drives a JSON request and preserves diagnostics" {
   assert_eq(legacy.usage.cached_input_tokens, 1)
   assert_eq(legacy.usage.cache_write_input_tokens, 0)
   assert_eq(response.finish_reason.raw, Some("tool_calls"))
-  json_inspect(response.usage.raw.unwrap(), content={
+  assert_eq(response.usage.input_tokens.total, Some(3))
+  assert_eq(response.usage.input_tokens.no_cache, Some(2))
+  assert_eq(response.usage.input_tokens.cache_read, Some(1))
+  assert_eq(response.usage.input_tokens.cache_write, None)
+  assert_eq(response.usage.output_tokens.total, Some(5))
+  assert_eq(response.usage.output_tokens.reasoning, Some(0))
+  json_inspect(response.final_step.usage.raw.unwrap(), content={
     "prompt_tokens": 3,
     "completion_tokens": 5,
     "total_tokens": 8,
@@ -290,15 +291,12 @@ async test "DeepSeek API errors retain structured HTTP diagnostics" {
     ),
     DeepSeekMockStream::new([]),
   )
-  let model = DeepSeekLanguageModelV4::new(
-      deepseek_chat(
-        "deepseek-chat",
-        api_key="bad-key",
-        base_url="https://deepseek.test",
-        http_transport=transport,
-      ),
-    )
-    as &@provider.LanguageModelV4
+  let model = deepseek(
+    "deepseek-chat",
+    api_key="bad-key",
+    base_url="https://deepseek.test",
+    http_transport=transport,
+  )
   try
     @ai.generate_text(
       model,
@@ -315,13 +313,14 @@ async test "DeepSeek API errors retain structured HTTP diagnostics" {
       status_code~,
       response_headers~,
       response_body~,
-      is_retryable~
+      is_retryable~,
+      ..
     ) => {
       assert_eq(message, "invalid key")
       assert_eq(url, "https://deepseek.test/chat/completions")
       assert_true(request_body.contains("\"model\":\"deepseek-chat\""))
       assert_eq(request_headers["Authorization"], "Bearer bad-key")
-      assert_eq(status_code, 401)
+      assert_eq(status_code, Some(401))
       assert_eq(response_headers["x-request-id"], "ds-error-1")
       assert_true(response_body.contains("invalid key"))
       assert_eq(is_retryable, false)
@@ -340,19 +339,16 @@ async test "DeepSeek SSE keeps reasoning, text, and tool transitions ordered" {
       "x-request-id": "ds-stream-request",
     }),
   )
-  let model = DeepSeekLanguageModelV4::new(
-      deepseek_chat(
-        "deepseek-chat",
-        api_key="test-key",
-        base_url="https://deepseek.test",
-        http_transport=transport,
-      ),
-    )
-    as &@provider.LanguageModelV4
+  let model = deepseek(
+    "deepseek-chat",
+    api_key="test-key",
+    base_url="https://deepseek.test",
+    http_transport=transport,
+  )
   let events : Array[@provider.LanguageModelV4StreamPart] = []
   let text_deltas : Array[String] = []
   let reasoning_deltas : Array[String] = []
-  let tool_calls : Array[@provider.ToolCall] = []
+  let tool_calls : Array[@provider.LanguageModelV4ToolCall] = []
   let response_metadata : Array[@provider.ResponseMetadata] = []
   let response = @ai.stream_text(
     model,
@@ -373,7 +369,7 @@ async test "DeepSeek SSE keeps reasoning, text, and tool transitions ordered" {
   assert_eq(text_deltas.join(""), "answer")
   assert_eq(reasoning_deltas.join(""), "plan carefully")
   assert_eq(tool_calls.length(), 1)
-  assert_eq(tool_calls[0].arguments, "{\"q\":\"moon\"}")
+  assert_eq(tool_calls[0].input, "{\"q\":\"moon\"}")
   assert_eq(response_metadata.length(), 1)
   assert_eq(response_metadata[0].id, Some("ds-stream-1"))
   assert_eq(response_metadata[0].model_id, Some("deepseek-chat"))
@@ -383,7 +379,7 @@ async test "DeepSeek SSE keeps reasoning, text, and tool transitions ordered" {
   assert_eq(response.finish_reason.unified, @provider.V4FinishToolCalls)
   assert_eq(response.finish_reason.raw, Some("tool_calls"))
   assert_true(
-    response.usage.raw
+    response.final_step.usage.raw
     is Some({ "prompt_tokens": 4, "completion_tokens": 6, .. }),
   )
   assert_true(
@@ -395,11 +391,9 @@ async test "DeepSeek SSE keeps reasoning, text, and tool transitions ordered" {
     events.any(event => event is @provider.V4ReasoningEnd(id="reasoning-0", ..)),
   )
   assert_true(
-    events.any(event => event is @provider.V4TextStart(id="text-0", ..)),
+    events.any(event => event is @provider.V4TextStart(id="txt-0", ..)),
   )
-  assert_true(
-    events.any(event => event is @provider.V4TextEnd(id="text-0", ..)),
-  )
+  assert_true(events.any(event => event is @provider.V4TextEnd(id="txt-0", ..)))
   assert_true(events.any(event => event is @provider.V4ToolCallReady(_)))
   assert_true(
     events.any(event => {

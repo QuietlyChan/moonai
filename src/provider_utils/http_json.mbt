@@ -36,13 +36,6 @@ suberror HttpTimeoutError {
 } derive(Debug)
 
 ///|
-/// A response body that could not be decoded as JSON. Protocol errors are not
-/// retried because repeating the same request will not repair the body.
-suberror HttpDecodeError {
-  HttpDecodeError(String, String)
-} derive(Debug)
-
-///|
 fn response_metadata(
   response : HttpResponse,
   body : String,
@@ -106,6 +99,122 @@ fn is_retryable(error : Error) -> Bool {
 }
 
 ///|
+/// Parse a successful JSON response while the transport still owns the
+/// request and response diagnostics. AI SDK exposes this boundary through
+/// `createJsonResponseHandler`; the callback below is its MoonBit equivalent.
+fn parse_successful_json_response(
+  response_body : String,
+  url : String,
+  request_body : String,
+  request_headers : Map[String, String],
+  status_code : Int,
+  response_headers : Map[String, String],
+) -> Json raise {
+  parse_json(response_body) catch {
+    @provider.JSONParseError(text~, cause~) => {
+      let parse_error = @provider.JSONParseError(text~, cause~)
+      raise @provider.APICallError(
+        message="Invalid JSON response",
+        url~,
+        request_body~,
+        request_headers=copy_headers(request_headers),
+        status_code=Some(status_code),
+        response_headers=copy_headers(response_headers),
+        response_body~,
+        is_retryable=false,
+        data=None,
+        cause=Some(parse_error.message()),
+      )
+    }
+  }
+}
+
+///|
+/// Validate a parsed successful response before it leaves the transport
+/// boundary. Validation failures retain the raw parsed value as `data` and
+/// are never retried, matching AI SDK's JSON response handler semantics.
+fn validate_successful_json_response(
+  value : Json,
+  validate_response : ((Json) -> Unit raise)?,
+  response_body : String,
+  url : String,
+  request_body : String,
+  request_headers : Map[String, String],
+  status_code : Int,
+  response_headers : Map[String, String],
+) -> Unit raise {
+  guard validate_response is Some(validate) else { return }
+  try validate(value) catch {
+    error if @async.is_cancellation_error(error) || @async.is_being_cancelled() =>
+      raise error
+    error =>
+      match error {
+        @provider.CancellationError => raise error
+        @provider.APICallError(..) => raise error
+        _ =>
+          raise @provider.APICallError(
+            message="Invalid JSON response",
+            url~,
+            request_body~,
+            request_headers=copy_headers(request_headers),
+            status_code=Some(status_code),
+            response_headers=copy_headers(response_headers),
+            response_body~,
+            is_retryable=false,
+            data=Some(value),
+            cause=Some(@debug.to_string(error)),
+          )
+      }
+  } noraise {
+    _ => ()
+  }
+}
+
+///|
+/// Process a parsed successful JSON response with a provider-specific handler.
+/// Any handler failure other than cancellation or an existing `APICallError`
+/// is wrapped while the complete HTTP diagnostics are still available. This
+/// mirrors `postToApi`'s successful-response handler boundary in AI SDK.
+pub fn[T] handle_json_response(
+  response : JsonHttpResponse,
+  handler : (Json) -> T raise,
+) -> T raise {
+  handler(response.value) catch {
+    error if @async.is_cancellation_error(error) || @async.is_being_cancelled() =>
+      raise error
+    error =>
+      match error {
+        @provider.CancellationError => raise error
+        @provider.APICallError(..) => raise error
+        _ =>
+          raise @provider.APICallError(
+            message="Failed to process successful response",
+            url=response.request.url,
+            request_body=response.request.body,
+            request_headers=copy_headers(response.request.headers),
+            status_code=response.response.status_code,
+            response_headers=copy_headers(response.response.headers),
+            response_body=response.response.body.unwrap_or(
+              response.value.stringify(),
+            ),
+            is_retryable=false,
+            data=Some(response.value),
+            cause=Some(@debug.to_string(error)),
+          )
+      }
+  }
+}
+
+///|
+/// Camel-case alias matching AI SDK's response-handler naming style.
+pub fn[T] handleJsonResponse(
+  response : JsonHttpResponse,
+  handler : (Json) -> T raise,
+) -> T raise {
+  handle_json_response(response, handler)
+}
+
+///|
 async fn fetch_buffered_with_timeout(
   provider_name : String,
   request : HttpRequest,
@@ -114,9 +223,16 @@ async fn fetch_buffered_with_timeout(
 ) -> HttpResponse {
   let fetch = () => {
     transport.fetch(request) catch {
+      DownloadError(url~, message~, status_code~, status_text~) =>
+        raise DownloadError(url~, message~, status_code~, status_text~)
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
-      error => raise HttpTransportError(provider_name, @debug.to_string(error))
+      error =>
+        match error {
+          @provider.CancellationError | @provider.APICallError(..) =>
+            raise error
+          _ => raise HttpTransportError(provider_name, @debug.to_string(error))
+        }
     }
   }
   if timeout_ms <= 0 {
@@ -142,8 +258,9 @@ async fn post_data_json_once(
   request_body~ : String,
   timeout_ms : Int,
   cancellation_token : @provider.CancellationToken?,
-  error_to_message : ((Json) -> String?)?,
-  is_retryable_response : ((Int, Json?) -> Bool?)?,
+  error_to_message : ((Json) -> String? raise)?,
+  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  validate_response : ((Json) -> Unit raise)?,
   transport : &HttpTransport,
 ) -> JsonHttpResponse {
   @provider.check_cancellation(cancellation_token)
@@ -153,42 +270,53 @@ async fn post_data_json_once(
     timeout_ms,
     transport,
   )
-  let response_body = response.body_text()
+  let response_body = @utf8.decode(
+    read_response_with_size_limit(response, url~),
+  )
   guard response.is_success() else {
-    let error_json : Json? = try @json.parse(response_body) catch {
-      _ => None
-    } noraise {
-      value => Some(value)
-    }
-    let message = match (error_to_message, error_json) {
-      (Some(extract), Some(value)) => extract(value).unwrap_or(response_body)
-      _ => response_body
-    }
-    let retryable = match is_retryable_response {
-      Some(resolve) =>
-        resolve(response.status_code, error_json).unwrap_or(
-          is_retryable_status(response.status_code),
-        )
-      None => is_retryable_status(response.status_code)
-    }
+    let error_json = parse_json_if_valid(response_body)
+    let (message, retryable) = handle_failed_response(
+      url~,
+      request_body~,
+      request_headers=headers,
+      status_code=response.status_code,
+      response_headers=response.headers,
+      response_body~,
+      error_json~,
+      error_to_message,
+      is_retryable_response,
+    )
     raise @provider.APICallError(
       message~,
       url~,
       request_body~,
       request_headers=copy_headers(headers),
-      status_code=response.status_code,
+      status_code=Some(response.status_code),
       response_headers=copy_headers(response.headers),
       response_body~,
       is_retryable=retryable,
+      data=error_json,
+      cause=None,
     )
   }
-  let value = @json.parse(response_body) catch {
-    error =>
-      raise HttpDecodeError(
-        provider_name,
-        @debug.to_string(error) + "; body: " + response_body,
-      )
-  }
+  let value = parse_successful_json_response(
+    response_body,
+    url,
+    request_body,
+    headers,
+    response.status_code,
+    response.headers,
+  )
+  validate_successful_json_response(
+    value,
+    validate_response,
+    response_body,
+    url,
+    request_body,
+    headers,
+    response.status_code,
+    response.headers,
+  )
   {
     value,
     request: @provider.RequestMetadata::new(
@@ -208,8 +336,9 @@ async fn post_json_once(
   body~ : Json,
   timeout_ms : Int,
   cancellation_token : @provider.CancellationToken?,
-  error_to_message : ((Json) -> String?)?,
-  is_retryable_response : ((Int, Json?) -> Bool?)?,
+  error_to_message : ((Json) -> String? raise)?,
+  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  validate_response : ((Json) -> Unit raise)?,
   transport : &HttpTransport,
 ) -> JsonHttpResponse {
   let request_body = body.stringify()
@@ -223,6 +352,7 @@ async fn post_json_once(
     cancellation_token,
     error_to_message,
     is_retryable_response,
+    validate_response,
     transport,
   )
 }
@@ -238,8 +368,9 @@ pub async fn post_json(
   timeout_ms? : Int = 120_000,
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
-  error_to_message? : (Json) -> String?,
-  is_retryable_response? : (Int, Json?) -> Bool?,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  validate_response? : (Json) -> Unit raise,
   transport? : &HttpTransport,
 ) -> JsonHttpResponse {
   let resolved_transport = transport.unwrap_or(native_http_transport())
@@ -257,6 +388,7 @@ pub async fn post_json(
         cancellation_token,
         error_to_message,
         is_retryable_response,
+        validate_response,
         resolved_transport,
       )
     catch {
@@ -270,7 +402,13 @@ pub async fn post_json(
         delay = next_retry_delay(retry_policy, delay)
         continue
       }
-      error => raise error
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body=body.stringify(),
+          request_headers=headers,
+        )
     } noraise {
       result => return result
     }
@@ -285,8 +423,8 @@ async fn post_json_binary_once(
   body~ : Json,
   timeout_ms : Int,
   cancellation_token : @provider.CancellationToken?,
-  error_to_message : ((Json) -> String?)?,
-  is_retryable_response : ((Int, Json?) -> Bool?)?,
+  error_to_message : ((Json) -> String? raise)?,
+  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
   transport : &HttpTransport,
 ) -> BinaryHttpResponse {
   @provider.check_cancellation(cancellation_token)
@@ -297,34 +435,36 @@ async fn post_json_binary_once(
     timeout_ms,
     transport,
   )
-  let value = response.body
+  let value = if response.is_success() {
+    response.body
+  } else {
+    read_response_with_size_limit(response, url~)
+  }
   guard response.is_success() else {
     let response_body = binary_error_body(value)
-    let error_json : Json? = try @json.parse(response_body) catch {
-      _ => None
-    } noraise {
-      parsed => Some(parsed)
-    }
-    let message = match (error_to_message, error_json) {
-      (Some(extract), Some(parsed)) => extract(parsed).unwrap_or(response_body)
-      _ => response_body
-    }
-    let retryable = match is_retryable_response {
-      Some(resolve) =>
-        resolve(response.status_code, error_json).unwrap_or(
-          is_retryable_status(response.status_code),
-        )
-      None => is_retryable_status(response.status_code)
-    }
+    let error_json = parse_json_if_valid(response_body)
+    let (message, retryable) = handle_failed_response(
+      url~,
+      request_body~,
+      request_headers=headers,
+      status_code=response.status_code,
+      response_headers=response.headers,
+      response_body~,
+      error_json~,
+      error_to_message,
+      is_retryable_response,
+    )
     raise @provider.APICallError(
       message~,
       url~,
       request_body~,
       request_headers=copy_headers(headers),
-      status_code=response.status_code,
+      status_code=Some(response.status_code),
       response_headers=copy_headers(response.headers),
       response_body~,
       is_retryable=retryable,
+      data=error_json,
+      cause=None,
     )
   }
   {
@@ -351,8 +491,8 @@ pub async fn post_json_binary(
   timeout_ms? : Int = 120_000,
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
-  error_to_message? : (Json) -> String?,
-  is_retryable_response? : (Int, Json?) -> Bool?,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
   transport? : &HttpTransport,
 ) -> BinaryHttpResponse {
   let resolved_transport = transport.unwrap_or(native_http_transport())
@@ -383,7 +523,13 @@ pub async fn post_json_binary(
         delay = next_retry_delay(retry_policy, delay)
         continue
       }
-      error => raise error
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body=body.stringify(),
+          request_headers=headers,
+        )
     } noraise {
       response => return response
     }
@@ -402,8 +548,9 @@ pub async fn post_multipart(
   timeout_ms? : Int = 120_000,
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
-  error_to_message? : (Json) -> String?,
-  is_retryable_response? : (Int, Json?) -> Bool?,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  validate_response? : (Json) -> Unit raise,
   transport? : &HttpTransport,
 ) -> JsonHttpResponse {
   let resolved_transport = transport.unwrap_or(native_http_transport())
@@ -424,6 +571,7 @@ pub async fn post_multipart(
         cancellation_token,
         error_to_message,
         is_retryable_response,
+        validate_response,
         resolved_transport,
       )
     catch {
@@ -437,7 +585,13 @@ pub async fn post_multipart(
         delay = next_retry_delay(retry_policy, delay)
         continue
       }
-      error => raise error
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body=form_data.diagnostic_body,
+          request_headers~,
+        )
     } noraise {
       result => return result
     }
@@ -456,8 +610,9 @@ async fn get_json_once(
   headers~ : Map[String, String],
   timeout_ms : Int,
   cancellation_token : @provider.CancellationToken?,
-  error_to_message : ((Json) -> String?)?,
-  is_retryable_response : ((Int, Json?) -> Bool?)?,
+  error_to_message : ((Json) -> String? raise)?,
+  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  validate_response : ((Json) -> Unit raise)?,
   transport : &HttpTransport,
 ) -> JsonHttpResponse {
   @provider.check_cancellation(cancellation_token)
@@ -467,42 +622,53 @@ async fn get_json_once(
     timeout_ms,
     transport,
   )
-  let response_body = response.body_text()
-  let error_json : Json? = try @json.parse(response_body) catch {
-    _ => None
-  } noraise {
-    value => Some(value)
-  }
+  let response_body = @utf8.decode(
+    read_response_with_size_limit(response, url~),
+  )
+  let error_json = parse_json_if_valid(response_body)
   guard response.is_success() else {
-    let message = match (error_to_message, error_json) {
-      (Some(extract), Some(value)) => extract(value).unwrap_or(response_body)
-      _ => response_body
-    }
-    let retryable = match is_retryable_response {
-      Some(resolve) =>
-        resolve(response.status_code, error_json).unwrap_or(
-          is_retryable_status(response.status_code),
-        )
-      None => is_retryable_status(response.status_code)
-    }
+    let (message, retryable) = handle_failed_response(
+      url~,
+      request_body="",
+      request_headers=headers,
+      status_code=response.status_code,
+      response_headers=response.headers,
+      response_body~,
+      error_json~,
+      error_to_message,
+      is_retryable_response,
+    )
     raise @provider.APICallError(
       message~,
       url~,
       request_body="",
       request_headers=copy_headers(headers),
-      status_code=response.status_code,
+      status_code=Some(response.status_code),
       response_headers=copy_headers(response.headers),
       response_body~,
       is_retryable=retryable,
+      data=error_json,
+      cause=None,
     )
   }
-  let value = @json.parse(response_body) catch {
-    error =>
-      raise HttpDecodeError(
-        provider_name,
-        @debug.to_string(error) + "; body: " + response_body,
-      )
-  }
+  let value = parse_successful_json_response(
+    response_body,
+    url,
+    "",
+    headers,
+    response.status_code,
+    response.headers,
+  )
+  validate_successful_json_response(
+    value,
+    validate_response,
+    response_body,
+    url,
+    "",
+    headers,
+    response.status_code,
+    response.headers,
+  )
   {
     value,
     request: @provider.RequestMetadata::new(
@@ -523,8 +689,9 @@ pub async fn get_json(
   timeout_ms? : Int = 120_000,
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
-  error_to_message? : (Json) -> String?,
-  is_retryable_response? : (Int, Json?) -> Bool?,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  validate_response? : (Json) -> Unit raise,
   transport? : &HttpTransport,
 ) -> JsonHttpResponse {
   let resolved_transport = transport.unwrap_or(native_http_transport())
@@ -541,6 +708,7 @@ pub async fn get_json(
         cancellation_token,
         error_to_message,
         is_retryable_response,
+        validate_response,
         resolved_transport,
       )
     catch {
@@ -554,7 +722,13 @@ pub async fn get_json(
         delay = next_retry_delay(retry_policy, delay)
         continue
       }
-      error => raise error
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body="",
+          request_headers=headers,
+        )
     } noraise {
       result => return result
     }
@@ -587,37 +761,92 @@ async fn download_file_once(
   headers~ : Map[String, String],
   timeout_ms : Int,
   cancellation_token : @provider.CancellationToken?,
+  trusted_origin : String?,
+  max_bytes : Int64,
   transport : &HttpTransport,
+  safe_transport : &HttpTransport?,
 ) -> DownloadedFile {
-  @provider.check_cancellation(cancellation_token)
-  let response = fetch_buffered_with_timeout(
-    provider_name,
-    HttpRequest::get(url~, headers~),
-    timeout_ms,
-    transport,
-  )
-  let data = response.body
-  guard response.is_success() else {
-    let response_body = binary_error_body(data)
-    raise @provider.APICallError(
-      message=response_body,
-      url~,
-      request_body="",
-      request_headers=copy_headers(headers),
-      status_code=response.status_code,
-      response_headers=copy_headers(response.headers),
-      response_body~,
-      is_retryable=is_retryable_status(response.status_code),
+  let mut current_url = url
+  let mut request_headers = sanitize_download_headers(headers)
+  let mut redirect_count = 0
+  for ;; {
+    @provider.check_cancellation(cancellation_token)
+    let is_trusted_hop = match trusted_origin {
+      Some(origin) => download_same_origin(current_url, origin)
+      None => false
+    }
+    if !is_trusted_hop {
+      validate_download_url(current_url)
+    }
+    if current_url.length() >= 5 &&
+      current_url[:5].to_owned().to_lower() == "data:" {
+      let (data, media_type) = decode_data_url(current_url)
+      ensure_download_size(current_url, data, max_bytes, None)
+      let response_headers = { "content-type": media_type }
+      return {
+        data,
+        media_type,
+        response: @provider.ResponseMetadata::new(
+          status_code=200,
+          headers=response_headers,
+        ),
+      }
+    }
+    let hop_transport = match safe_transport {
+      Some(value) if !is_trusted_hop => value
+      _ => transport
+    }
+    let response = fetch_buffered_with_timeout(
+      provider_name,
+      HttpRequest::get(url=current_url, headers=request_headers),
+      timeout_ms,
+      hop_transport,
     )
-  }
-  let response_headers = copy_headers(response.headers)
-  {
-    data,
-    media_type: downloaded_media_type(response_headers),
-    response: @provider.ResponseMetadata::new(
-      status_code=response.status_code,
-      headers=response_headers,
-    ),
+    if is_download_redirect_status(response.status_code) &&
+      download_response_header(response.headers, "location") is Some(location) {
+      guard redirect_count < 10 else {
+        raise DownloadError(
+          url=current_url,
+          message="Too many redirects (max 10)",
+          status_code=None,
+          status_text=None,
+        )
+      }
+      let next_url = resolve_download_redirect(current_url, location)
+      request_headers = download_redirect_headers(
+        request_headers, current_url, next_url,
+      )
+      current_url = next_url
+      redirect_count = redirect_count + 1
+      continue
+    }
+    guard response.is_success() else {
+      let status_text = if response.reason == "" {
+        None
+      } else {
+        Some(response.reason)
+      }
+      raise DownloadError(
+        url=current_url,
+        message="Failed to download \{current_url}: \{response.status_code} \{response.reason}",
+        status_code=Some(response.status_code),
+        status_text~,
+      )
+    }
+    let data = read_response_with_size_limit(
+      response,
+      url=current_url,
+      max_bytes~,
+    )
+    let response_headers = copy_headers(response.headers)
+    return {
+      data,
+      media_type: downloaded_media_type(response_headers),
+      response: @provider.ResponseMetadata::new(
+        status_code=response.status_code,
+        headers=response_headers,
+      ),
+    }
   }
 }
 
@@ -631,9 +860,18 @@ pub async fn download_file(
   timeout_ms? : Int = 120_000,
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
+  trusted_origin? : String,
+  max_bytes? : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
   transport? : &HttpTransport,
 ) -> DownloadedFile {
+  guard max_bytes >= 0L else {
+    raise download_error(url, "Maximum download size must not be negative")
+  }
   let resolved_transport = transport.unwrap_or(native_http_transport())
+  let safe_transport : &HttpTransport? = match transport {
+    None => Some(safe_native_download_transport(max_bytes))
+    Some(_) => None
+  }
   let mut retry_number = 0
   let mut delay = initial_retry_delay(retry_policy)
   for ;; {
@@ -645,7 +883,10 @@ pub async fn download_file(
         headers~,
         timeout_ms,
         cancellation_token,
+        trusted_origin,
+        max_bytes,
         resolved_transport,
+        safe_transport,
       )
     catch {
       error if @async.is_cancellation_error(error) ||

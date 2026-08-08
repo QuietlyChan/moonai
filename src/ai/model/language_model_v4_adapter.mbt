@@ -71,17 +71,52 @@ pub impl @provider.LanguageModelV4 for ChatModelV4Adapter with fn do_stream(
   options,
   on_event,
 ) {
+  let started : Ref[Bool] = Ref(false)
+  let warnings : Array[@provider.Warning] = []
   let response = self.model.stream(options.to_chat_call_options(), event => {
-    on_event(@provider.LanguageModelV4StreamPart::from_stream_event(event))
+    match event {
+      @provider.StreamStart => ()
+      @provider.Warning(warning) if !started.val => warnings.push(warning)
+      @provider.Warning(_) => ()
+      @provider.Finish(..) => ()
+      other => {
+        if !started.val {
+          started.val = true
+          on_event(
+            @provider.V4StreamStart(warnings=@provider.copy_warnings(warnings)),
+          )
+        }
+        match @provider.LanguageModelV4StreamPart::from_stream_event(other) {
+          Some(part) => on_event(part)
+          None => ()
+        }
+      }
+    }
   })
+  if !started.val {
+    for warning in response.warnings {
+      if !warnings.contains(warning) {
+        warnings.push(warning)
+      }
+    }
+    started.val = true
+    on_event(
+      @provider.V4StreamStart(warnings=@provider.copy_warnings(warnings)),
+    )
+  }
+  on_event(
+    @provider.V4Finish(
+      usage=@provider.LanguageModelV4Usage::from_usage(response.usage),
+      reason=@provider.LanguageModelV4FinishReason::from_finish_reason(
+        response.finish_reason,
+      ),
+      provider_metadata=@provider.copy_provider_metadata(
+        response.provider_metadata,
+      ),
+    ),
+  )
   @provider.LanguageModelV4StreamResult::new(
     response.request,
     response.response,
-    usage=@provider.LanguageModelV4Usage::from_usage(response.usage),
-    finish_reason=@provider.LanguageModelV4FinishReason::from_finish_reason(
-      response.finish_reason,
-    ),
-    provider_metadata=response.provider_metadata,
-    warnings=response.warnings,
   )
 }

@@ -87,7 +87,7 @@ fn anthropic_document_citations(options : Map[String, Json]) -> Json? {
 }
 
 ///|
-/// Resolve the provider key used by Files API references. Provider model names
+/// Resolve the provider key used by FilesV4 API references. Provider model names
 /// carry a modality suffix (`anthropic.messages`), while uploaded references
 /// use the base provider name (`anthropic`).
 fn anthropic_reference_provider_key(provider_name : String) -> String {
@@ -201,22 +201,20 @@ fn anthropic_reasoning_signature(
 }
 
 ///|
-/// Add a provider-specific cache-control field to an Anthropic content block.
-fn with_anthropic_cache_control(
+fn with_anthropic_cache_control_value(
   content : Json,
-  options : Map[String, Json],
-  provider_name : String,
+  cache_control : Json?,
 ) -> Json {
-  match anthropic_cache_control(options, provider_name) {
+  match cache_control {
     None => content
-    Some(cache_control) =>
+    Some(value) =>
       match content {
         Object(fields) => {
           let result : Map[String, Json] = Map([])
           for entry in fields.iter2() {
             result[entry.0] = entry.1
           }
-          result["cache_control"] = anthropic_wire_json(cache_control)
+          result["cache_control"] = anthropic_wire_json(value)
           Json::object(result)
         }
         _ => content
@@ -246,24 +244,6 @@ fn with_anthropic_citations(
         _ => content
       }
     None => content
-  }
-}
-
-///|
-/// Apply a message-level cache policy only when a part did not provide one.
-/// AI SDK applies message options to the final cacheable part of a message.
-fn with_message_cache_control(
-  content : Json,
-  part_options : Map[String, Json],
-  message_options : Map[String, Json],
-  is_last_part : Bool,
-  provider_name : String,
-) -> Json {
-  if is_last_part &&
-    anthropic_cache_control(part_options, provider_name) is None {
-    with_anthropic_cache_control(content, message_options, provider_name)
-  } else {
-    content
   }
 }
 
@@ -323,269 +303,44 @@ fn append_wire_message(
 }
 
 ///|
-fn tool_input(call : @provider.ToolCall) -> Json raise {
-  if call.arguments.trim().is_empty() {
-    return Json::empty_object()
+/// Anthropic rejects trailing whitespace in a final assistant prefill. AI SDK
+/// trims only the final content part when the final wire message is an
+/// assistant message; earlier assistant turns and earlier parts stay intact.
+fn trim_final_anthropic_assistant_text(
+  messages : Array[AnthropicWireMessage],
+) -> Unit {
+  guard messages.length() > 0 else { return }
+  let message = messages[messages.length() - 1]
+  guard message.role == "assistant" && message.content.length() > 0 else {
+    return
   }
-  let input = @json.parse(call.arguments) catch {
-    error =>
-      fail(
-        "Anthropic tool call \{call.name} has invalid JSON arguments: \{error}",
-      )
-  }
-  guard input is Object(_) else {
-    fail("Anthropic tool call \{call.name} arguments must be a JSON object")
-  }
-  input
-}
-
-///|
-fn user_content_part(
-  part : @provider.LanguageModelContentPart,
-  provider_name : String,
-  beta_features : Array[String],
-) -> Json raise {
-  let provider_options = part.provider_options()
-  let scoped_options = resolve_anthropic_prompt_options(
-    provider_options, provider_name,
-  )
-  let content = match part.without_provider_options() {
-    @provider.Text(value) => text_content(value)
-    @provider.ImageUrl(url) =>
-      { "type": "image", "source": { "type": "url", "url": url } }
-    @provider.ImageData(data~, media_type~) =>
-      {
-        "type": "image",
-        "source": {
-          "type": "base64",
-          "media_type": @provider_utils.resolve_full_media_type(
-            media_type, data,
-          ),
-          "data": data,
-        },
-      }
-    @provider.FileUrl(url~, media_type~, filename~) => {
-      let top_level = @provider_utils.get_top_level_media_type(media_type)
-      if top_level == "image" {
-        { "type": "image", "source": { "type": "url", "url": url } }
-      } else if media_type == "application/pdf" || media_type == "text/plain" {
-        if media_type == "application/pdf" {
-          append_unique_beta(beta_features, "pdfs-2024-09-25")
-        }
-        anthropic_document(
-          { "type": "url", "url": url },
-          filename,
-          scoped_options,
-        )
-      } else {
-        fail("Anthropic Messages does not accept file media type \{media_type}")
-      }
-    }
-    @provider.FileData(data~, media_type~, filename~) => {
-      let top_level = @provider_utils.get_top_level_media_type(media_type)
-      let full_media_type = @provider_utils.resolve_full_media_type(
-        media_type, data,
-      )
-      if top_level == "image" {
-        {
-          "type": "image",
-          "source": {
-            "type": "base64",
-            "media_type": full_media_type,
-            "data": data,
-          },
-        }
-      } else if full_media_type == "application/pdf" {
-        append_unique_beta(beta_features, "pdfs-2024-09-25")
-        anthropic_document(
-          { "type": "base64", "media_type": "application/pdf", "data": data },
-          filename,
-          scoped_options,
-        )
-      } else if media_type == "text/plain" {
-        anthropic_document(
-          {
-            "type": "text",
-            "media_type": "text/plain",
-            "data": @provider_utils.decode_base64_text(data),
-          },
-          filename,
-          scoped_options,
-        )
-      } else {
-        fail(
-          "Anthropic Messages does not accept file media type \{full_media_type}",
-        )
-      }
-    }
-    @provider.FileReference(reference~, media_type~, filename~) => {
-      let file_id = resolve_anthropic_file_reference(reference, provider_name)
-      append_unique_beta(beta_features, "files-api-2025-04-14")
-      if anthropic_container_upload(scoped_options) {
-        { "type": "container_upload", "file_id": file_id }
-      } else {
-        let top_level = @provider_utils.get_top_level_media_type(media_type)
-        if top_level == "image" {
-          { "type": "image", "source": { "type": "file", "file_id": file_id } }
-        } else if media_type == "application/pdf" || media_type == "text/plain" {
-          if media_type == "application/pdf" {
-            append_unique_beta(beta_features, "pdfs-2024-09-25")
-          }
-          anthropic_document(
-            { "type": "file", "file_id": file_id },
-            filename,
-            scoped_options,
-          )
-        } else {
-          fail(
-            "Anthropic Messages does not accept file media type \{media_type}",
-          )
-        }
-      }
-    }
-    @provider.AudioData(..) =>
-      fail("Anthropic Messages does not accept audio content parts")
-    @provider.Reasoning(_)
-    | @provider.ReasoningFileUrl(..)
-    | @provider.ReasoningFileData(..)
-    | @provider.Custom(..)
-    | @provider.ToolCallPart(_)
-    | @provider.ToolResultPart(_)
-    | @provider.ToolApprovalRequestPart(_)
-    | @provider.ToolApprovalResponsePart(_) =>
-      fail(
-        "Anthropic Messages does not accept this content part in a user message",
-      )
-    @provider.ProviderOptions(part~, ..) =>
-      user_content_part(part, provider_name, beta_features)
-  }
-  with_anthropic_cache_control(content, provider_options, provider_name)
-}
-
-///|
-fn anthropic_tool_result_content_part(
-  part : @provider.LanguageModelToolResultContentPart,
-  provider_name : String,
-  beta_features : Array[String],
-) -> Json raise {
+  let part = message.content[message.content.length() - 1]
   match part {
-    @provider.LanguageModelToolText(text~, provider_options~) =>
-      with_anthropic_cache_control(
-        text_content(text),
-        provider_options,
-        provider_name,
-      )
-    @provider.LanguageModelToolFileUrl(
-      url~,
-      media_type~,
-      filename~,
-      provider_options~
-    ) =>
-      user_content_part(
-        @provider.LanguageModelContentPart::file_url(
-          url~,
-          media_type~,
-          filename~,
-        ).with_provider_options(provider_options),
-        provider_name,
-        beta_features,
-      )
-    @provider.LanguageModelToolFileData(
-      data~,
-      media_type~,
-      filename~,
-      provider_options~
-    ) =>
-      user_content_part(
-        @provider.LanguageModelContentPart::file_data(
-          data~,
-          media_type~,
-          filename~,
-        ).with_provider_options(provider_options),
-        provider_name,
-        beta_features,
-      )
-    @provider.LanguageModelToolFileReference(
-      reference~,
-      media_type~,
-      filename~,
-      provider_options~
-    ) =>
-      user_content_part(
-        @provider.LanguageModelContentPart::file_reference(
-          reference~,
-          media_type~,
-          filename~,
-        ).with_provider_options(provider_options),
-        provider_name,
-        beta_features,
-      )
-    @provider.LanguageModelToolCustom(..) =>
-      fail("Anthropic tool result content does not accept custom parts")
+    Object(fields) if fields.get("type") == Some(Json::string("text")) =>
+      match fields.get("text") {
+        Some(String(value)) =>
+          fields["text"] = Json::string(value.trim().to_owned())
+        _ => ()
+      }
+    _ => ()
   }
 }
 
 ///|
-fn anthropic_tool_result_output_content(
-  output : @provider.LanguageModelToolResultOutput,
-  provider_name : String,
-  beta_features : Array[String],
-) -> Array[Json] raise {
-  match output {
-    @provider.LanguageModelToolTextOutput(value~, ..)
-    | @provider.LanguageModelToolErrorText(value~, ..) => [text_content(value)]
-    @provider.LanguageModelToolJsonOutput(..)
-    | @provider.LanguageModelToolErrorJson(..)
-    | @provider.LanguageModelToolExecutionDenied(..) =>
-      [text_content(output.to_json().stringify())]
-    @provider.LanguageModelToolContent(value~, ..) =>
-      [
-        for part in value => {
-          anthropic_tool_result_content_part(part, provider_name, beta_features)
-        }
-      ]
-  }
-}
-
-///|
-fn anthropic_tool_result_to_json(
-  result : @provider.LanguageModelToolResult,
-  provider_name : String,
-  beta_features : Array[String],
-) -> Json raise {
-  Json::object(
-    Map([
-      ("type", Json::string("tool_result")),
-      ("tool_use_id", Json::string(result.tool_call_id)),
-      (
-        "content",
-        Json::array(
-          anthropic_tool_result_output_content(
-            result.output,
-            provider_name,
-            beta_features,
-          ),
-        ),
-      ),
-    ]),
-  )
-}
-
-///|
-fn tool_choice_to_json(
-  choice : @provider.ToolChoice,
+fn anthropic_v4_tool_choice_to_json(
+  choice : @provider.LanguageModelV4ToolChoice,
   disable_parallel_tool_use : Bool?,
   tool_name_mapping : @provider_utils.ToolNameMapping,
 ) -> Json {
   let fields : Map[String, Json] = match choice {
-    @provider.Auto => Map([("type", Json::string("auto"))])
-    @provider.Required => Map([("type", Json::string("any"))])
-    @provider.Named(name) =>
+    @provider.V4ToolChoiceAuto => Map([("type", Json::string("auto"))])
+    @provider.V4ToolChoiceRequired => Map([("type", Json::string("any"))])
+    @provider.V4ToolChoiceTool(name) =>
       Map([
         ("type", Json::string("tool")),
         ("name", Json::string(tool_name_mapping.to_provider_tool_name(name))),
       ])
-    @provider.NoTool => Map([("type", Json::string("auto"))])
+    @provider.V4ToolChoiceNone => Map([("type", Json::string("auto"))])
   }
   if disable_parallel_tool_use is Some(value) {
     fields["disable_parallel_tool_use"] = Json::boolean(value)
@@ -767,17 +522,45 @@ fn anthropic_container_has_skills(value : Json?) -> Bool {
 }
 
 ///|
-fn has_anthropic_skills_code_execution_tool(
-  tools : Array[@provider.ToolDefinition],
+fn has_anthropic_v4_skills_code_execution_tool(
+  tools : Array[@provider.LanguageModelV4Tool],
 ) -> Bool {
   tools.any(fn(tool) {
     match tool {
-      @provider.ProviderTool(id~, ..) =>
-        id == "anthropic.code_execution_20250825" ||
-        id == "anthropic.code_execution_20260120"
+      @provider.V4ProviderTool(value) =>
+        value.id == "anthropic.code_execution_20250825" ||
+        value.id == "anthropic.code_execution_20260120"
       _ => false
     }
   })
+}
+
+///|
+fn has_anthropic_v4_web_tool_without_code_execution(
+  tools : Array[@provider.LanguageModelV4Tool],
+) -> Bool {
+  let mut has_web_tool = false
+  let mut has_code_execution = false
+  for tool in tools {
+    match tool {
+      @provider.V4FunctionTool(value) =>
+        if value.name == "code_execution" {
+          has_code_execution = true
+        }
+      @provider.V4ProviderTool(value) => {
+        if value.id == "anthropic.web_fetch_20260209" ||
+          value.id == "anthropic.web_search_20260209" {
+          has_web_tool = true
+        }
+        if value.name == "code_execution" ||
+          value.id == "anthropic.code_execution_20250825" ||
+          value.id == "anthropic.code_execution_20260120" {
+          has_code_execution = true
+        }
+      }
+    }
+  }
+  has_web_tool && !has_code_execution
 }
 
 ///|
@@ -835,25 +618,46 @@ fn prepare_anthropic_v4_request(
   provider_name : String,
   stream : Bool,
 ) -> AnthropicPreparedRequest raise {
+  prepare_anthropic_v4_request_with_config(
+    model_id, options, provider_name, stream, true, true,
+  )
+}
+
+///|
+fn prepare_anthropic_v4_request_with_config(
+  model_id : String,
+  options : @provider.LanguageModelV4CallOptions,
+  provider_name : String,
+  stream : Bool,
+  supports_native_structured_output : Bool,
+  supports_strict_tools : Bool,
+) -> AnthropicPreparedRequest raise {
   let parsed = parse_anthropic_options(options.provider_options, provider_name)
   let provider_options = parsed.options
   let warnings = parsed.warnings.copy()
   let tool_name_mapping = create_anthropic_tool_name_mapping(options.tools)
   let capabilities = get_anthropic_model_capabilities(model_id)
+  let supports_structured_output = supports_native_structured_output &&
+    capabilities.supports_structured_output
+  let strict_tools_supported = supports_strict_tools &&
+    capabilities.supports_structured_output
+  let cache_control_validator = AnthropicCacheControlValidator::new()
   let prompt = convert_v4_prompt_to_anthropic(
     options.prompt,
     provider_name,
     provider_options.send_reasoning,
     tool_name_mapping,
+    cache_control_validator,
   )
   for warning in prompt.warnings {
     warnings.push(warning)
   }
   let mut thinking = provider_options.thinking
   let mut effort = provider_options.effort
-  if !(options.reasoning_effort is @provider.ProviderDefault) && effort is None {
+  if !(options.reasoning is @provider.V4ReasoningProviderDefault) &&
+    effort is None {
     let (mapped_thinking, mapped_effort) = map_anthropic_reasoning(
-      options.reasoning_effort,
+      options.reasoning,
       capabilities,
       warnings,
     )
@@ -868,10 +672,11 @@ fn prepare_anthropic_v4_request(
   if capabilities.rejects_thinking_disabled_above_high &&
     thinking is Some(AnthropicThinkingDisabled) &&
     (effort == Some("xhigh") || effort == Some("max")) {
+    let unsupported_effort = effort.unwrap()
     warnings.push(
       @provider.Warning::Unsupported(
         feature="providerOptions.anthropic.effort",
-        details="This model does not support xhigh or max effort when thinking is disabled; effort was lowered to high.",
+        details="effort '\{unsupported_effort}' is not supported by \{model_id} when thinking is disabled. The effort has been lowered to 'high'.",
       ),
     )
     effort = Some("high")
@@ -884,7 +689,7 @@ fn prepare_anthropic_v4_request(
     warnings.push(
       @provider.Warning::Compatibility(
         feature="extended thinking",
-        details="thinking budget is required when thinking is enabled; using 1024 tokens.",
+        details="thinking budget is required when thinking is enabled. using default budget of 1024 tokens.",
       ),
     )
     thinking_budget = Some(1024)
@@ -927,74 +732,91 @@ fn prepare_anthropic_v4_request(
       warnings.push(
         @provider.Warning::Unsupported(
           feature="temperature",
-          details="temperature exceeds Anthropic maximum of 1.0 and is clamped to 1.0.",
+          details="\{value} exceeds anthropic maximum of 1.0. clamped to 1.0",
         ),
       )
     Some(value) if value < 0.0 =>
       warnings.push(
         @provider.Warning::Unsupported(
           feature="temperature",
-          details="temperature is below Anthropic minimum of 0.0 and is clamped to 0.0.",
+          details="\{value} is below anthropic minimum of 0. clamped to 0",
         ),
       )
     _ => ()
   }
-  if capabilities.rejects_sampling_parameters || thinking_enabled {
+  if capabilities.rejects_sampling_parameters {
     if temperature is Some(_) {
       warnings.push(
         @provider.Warning::Unsupported(
           feature="temperature",
-          details=if thinking_enabled {
-            "temperature is not supported when thinking is enabled and was ignored."
-          } else {
-            "temperature is not supported by this model and was ignored."
-          },
+          details="temperature is not supported by \{model_id} and will be ignored",
         ),
       )
       temperature = None
-    }
-    if top_p is Some(_) {
-      warnings.push(
-        @provider.Warning::Unsupported(
-          feature="topP",
-          details=if thinking_enabled {
-            "topP is not supported when thinking is enabled and was ignored."
-          } else {
-            "topP is not supported by this model and was ignored."
-          },
-        ),
-      )
-      top_p = None
     }
     if top_k is Some(_) {
       warnings.push(
         @provider.Warning::Unsupported(
           feature="topK",
-          details=if thinking_enabled {
-            "topK is not supported when thinking is enabled and was ignored."
-          } else {
-            "topK is not supported by this model and was ignored."
-          },
+          details="topK is not supported by \{model_id} and will be ignored",
         ),
       )
       top_k = None
     }
-  } else if model_id.contains("claude-") &&
+    if top_p is Some(_) {
+      warnings.push(
+        @provider.Warning::Unsupported(
+          feature="topP",
+          details="topP is not supported by \{model_id} and will be ignored",
+        ),
+      )
+      top_p = None
+    }
+  }
+  if thinking_enabled {
+    if temperature is Some(_) {
+      warnings.push(
+        @provider.Warning::Unsupported(
+          feature="temperature",
+          details="temperature is not supported when thinking is enabled",
+        ),
+      )
+      temperature = None
+    }
+    if top_k is Some(_) {
+      warnings.push(
+        @provider.Warning::Unsupported(
+          feature="topK",
+          details="topK is not supported when thinking is enabled",
+        ),
+      )
+      top_k = None
+    }
+    if top_p is Some(_) {
+      warnings.push(
+        @provider.Warning::Unsupported(
+          feature="topP",
+          details="topP is not supported when thinking is enabled",
+        ),
+      )
+      top_p = None
+    }
+  } else if (capabilities.is_known_model || model_id.contains("claude-")) &&
     temperature is Some(_) &&
     top_p is Some(_) {
     warnings.push(
       @provider.Warning::Unsupported(
         feature="topP",
-        details="Anthropic models do not support topP together with temperature; topP was ignored.",
+        details="topP is not supported when temperature is set. topP is ignored.",
       ),
     )
     top_p = None
   }
-  if options.response_format is @provider.JsonResponse({ schema: None, .. }) {
+  if options.response_format is @provider.V4ResponseJson({ schema: None, .. }) {
     warnings.push(
       @provider.Warning::Unsupported(
         feature="responseFormat",
-        details="Anthropic JSON response format requires an explicit schema and is ignored.",
+        details="JSON response format requires a schema. The response format is ignored.",
       ),
     )
   }
@@ -1002,7 +824,7 @@ fn prepare_anthropic_v4_request(
     warnings.push(
       @provider.Warning::Compatibility(
         feature="maxOutputTokens",
-        details="The model '\{model_id}' is unknown; max output tokens defaulted to \{capabilities.max_output_tokens}.",
+        details="The model \"\{model_id}\" is unknown. The max output tokens have been limited to \{capabilities.max_output_tokens}. Set maxOutputTokens explicitly to override this limit.",
       ),
     )
   }
@@ -1015,31 +837,40 @@ fn prepare_anthropic_v4_request(
       warnings.push(
         @provider.Warning::Unsupported(
           feature="maxOutputTokens",
-          details="maxOutputTokens plus thinking budget exceeds this model's limit and was clamped.",
+          details="\{max_tokens} (maxOutputTokens + thinkingBudget) is greater than \{model_id} \{capabilities.max_output_tokens} max output tokens. The max output tokens have been limited to \{capabilities.max_output_tokens}.",
         ),
       )
     }
     max_tokens = capabilities.max_output_tokens
   }
   let native_structured_output = match options.response_format {
-    @provider.JsonResponse({ schema: Some(_), .. }) =>
+    @provider.V4ResponseJson({ schema: Some(_), .. }) =>
       provider_options.structured_output_mode == "outputFormat" ||
       (
         provider_options.structured_output_mode == "auto" &&
-        capabilities.supports_structured_output
+        supports_structured_output
       )
     _ => false
   }
   let json_tool = match options.response_format {
-    @provider.JsonResponse({ schema: Some(schema), .. }) if !native_structured_output =>
+    @provider.V4ResponseJson({ schema: Some(schema), .. }) if !native_structured_output =>
       Some(
-        @provider.ToolDefinition::new(
+        @provider.LanguageModelV4Tool::function(
           "json",
           schema,
           description="Respond with a JSON object.",
         ),
       )
     _ => None
+  }
+  if json_tool is Some(_) &&
+    provider_options.disable_parallel_tool_use == Some(false) {
+    warnings.push(
+      @provider.Warning::Unsupported(
+        feature="providerOptions.anthropic.disableParallelToolUse",
+        details="`disableParallelToolUse: false` is ignored when using the JSON response tool. Parallel tool use is disabled to ensure a single coherent JSON tool call.",
+      ),
+    )
   }
   // Beta features are collected by prompt conversion as well as tool and
   // request option preparation, so keep one mutable set for the whole pass.
@@ -1050,7 +881,7 @@ fn prepare_anthropic_v4_request(
   let system = prompt.system
   let messages = prompt.messages
   let tools_disabled = match options.tool_choice {
-    Some(@provider.NoTool) => true
+    Some(@provider.V4ToolChoiceNone) => true
     _ => false
   }
   let include_tools = (options.tools.length() > 0 || json_tool is Some(_)) &&
@@ -1060,15 +891,17 @@ fn prepare_anthropic_v4_request(
   if include_tools && json_tool is Some(tool) {
     requested_tools.push(tool)
   }
-  let prepared_tools = prepare_anthropic_tools(
+  let prepared_tools = prepare_anthropic_v4_tools(
     if include_tools {
       requested_tools
     } else {
       []
     },
-    capabilities.supports_structured_output,
-    capabilities.supports_structured_output,
+    supports_structured_output,
+    strict_tools_supported,
     eager_input_streaming,
+    provider_name,
+    cache_control_validator,
     warnings,
   )
   let tools = prepared_tools.tools
@@ -1080,7 +913,7 @@ fn prepare_anthropic_v4_request(
     output_config["task_budget"] = anthropic_wire_json(value)
   }
   match options.response_format {
-    @provider.JsonResponse({ schema: Some(schema), .. }) if native_structured_output =>
+    @provider.V4ResponseJson({ schema: Some(schema), .. }) if native_structured_output =>
       output_config["format"] = {
         "type": "json_schema",
         "schema": sanitize_json_schema(schema),
@@ -1168,15 +1001,15 @@ fn prepare_anthropic_v4_request(
     fields["tools"] = Json::array(tools)
     match json_tool {
       Some(_) =>
-        fields["tool_choice"] = tool_choice_to_json(
-          @provider.Required,
+        fields["tool_choice"] = anthropic_v4_tool_choice_to_json(
+          @provider.V4ToolChoiceRequired,
           Some(true),
           tool_name_mapping,
         )
       None =>
         match options.tool_choice {
           Some(choice) =>
-            fields["tool_choice"] = tool_choice_to_json(
+            fields["tool_choice"] = anthropic_v4_tool_choice_to_json(
               choice,
               provider_options.disable_parallel_tool_use,
               tool_name_mapping,
@@ -1184,8 +1017,8 @@ fn prepare_anthropic_v4_request(
           None =>
             match provider_options.disable_parallel_tool_use {
               Some(true) =>
-                fields["tool_choice"] = tool_choice_to_json(
-                  @provider.Auto,
+                fields["tool_choice"] = anthropic_v4_tool_choice_to_json(
+                  @provider.V4ToolChoiceAuto,
                   Some(true),
                   tool_name_mapping,
                 )
@@ -1198,10 +1031,7 @@ fn prepare_anthropic_v4_request(
     append_unique_beta(prepared_beta_features, feature)
   }
   if native_structured_output ||
-    (
-      capabilities.supports_structured_output &&
-      options.tools.any(tool => tool.strict())
-    ) {
+    (strict_tools_supported && options.tools.any(tool => tool.strict())) {
     append_unique_beta(prepared_beta_features, "structured-outputs-2025-11-13")
   }
   if provider_options.mcp_servers.length() > 0 {
@@ -1217,7 +1047,7 @@ fn prepare_anthropic_v4_request(
     append_unique_beta(prepared_beta_features, "code-execution-2025-08-25")
     append_unique_beta(prepared_beta_features, "skills-2025-10-02")
     append_unique_beta(prepared_beta_features, "files-api-2025-04-14")
-    if !has_anthropic_skills_code_execution_tool(options.tools) {
+    if !has_anthropic_v4_skills_code_execution_tool(options.tools) {
       warnings.push(
         @provider.Warning::Other(
           message="code execution tool is required when using skills",
@@ -1242,77 +1072,20 @@ fn prepare_anthropic_v4_request(
       )
     _ => ()
   }
+  for warning in cache_control_validator.diagnostics() {
+    warnings.push(warning)
+  }
   {
     body: Json::object(fields),
     warnings,
     beta_features: prepared_beta_features,
     tool_name_mapping,
+    mark_code_execution_dynamic: has_anthropic_v4_web_tool_without_code_execution(
+      options.tools,
+    ),
+    uses_json_response_tool: json_tool is Some(_),
+    used_custom_provider_key: parsed.used_custom_provider_key,
   }
 }
 
 ///|
-/// Temporary inward-facing migration adapter. The Anthropic request core is
-/// V4-native; remaining ChatModel callers can only move in this direction.
-fn anthropic_v4_options_from_chat(
-  options : @provider.ChatCallOptions,
-) -> @provider.LanguageModelV4CallOptions {
-  @provider.LanguageModelV4CallOptions::new(
-    @provider.LanguageModelV4Prompt::from_language_model_prompt(
-      options.messages,
-    ),
-    tools=options.tools,
-    tool_choice?=options.tool_choice,
-    response_format=options.response_format,
-    reasoning_effort=options.reasoning_effort,
-    max_output_tokens?=options.max_output_tokens,
-    temperature?=options.temperature,
-    top_p?=options.top_p,
-    top_k?=options.top_k,
-    frequency_penalty?=options.frequency_penalty,
-    presence_penalty?=options.presence_penalty,
-    seed?=options.seed,
-    stop_sequences=options.stop_sequences,
-    include_raw_chunks=options.include_raw_chunks,
-    headers=options.headers,
-    provider_options=options.provider_options,
-    retry_policy=options.retry_policy,
-    cancellation_token?=options.cancellation_token,
-  )
-}
-
-///|
-fn prepare_anthropic_request(
-  model_id : String,
-  options : @provider.ChatCallOptions,
-  provider_name : String,
-  stream : Bool,
-) -> AnthropicPreparedRequest raise {
-  prepare_anthropic_v4_request(
-    model_id,
-    anthropic_v4_options_from_chat(options),
-    provider_name,
-    stream,
-  )
-}
-
-///|
-/// Encode V4 call options as an Anthropic Messages request.
-pub fn encode_messages_v4_request(
-  model_id : String,
-  options : @provider.LanguageModelV4CallOptions,
-  provider_name? : String = "",
-  stream? : Bool = true,
-) -> Json raise {
-  prepare_anthropic_v4_request(model_id, options, provider_name, stream).body
-}
-
-///|
-/// Encode normalized call options as an Anthropic Messages request.
-pub fn encode_messages_request(
-  model_id : String,
-  options : @provider.ChatCallOptions,
-  provider_name? : String = "",
-  stream? : Bool = true,
-) -> Json raise {
-  prepare_anthropic_request(model_id, options, provider_name, stream).body
-}

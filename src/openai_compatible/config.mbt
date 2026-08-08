@@ -26,7 +26,7 @@ pub(all) struct OpenAICompatibleErrorData {
 
 ///|
 /// Decode the standard nested OpenAI-compatible error payload.
-pub fn decode_openai_compatible_error_data(
+fn decode_openai_compatible_error_data(
   json : Json,
 ) -> OpenAICompatibleErrorData? {
   match json {
@@ -55,8 +55,8 @@ pub fn decode_openai_compatible_error_data(
 /// the configured error shape. `is_retryable` can override the normal HTTP
 /// status based retry decision for a parsed error response.
 pub struct OpenAICompatibleErrorStructure {
-  priv error_to_message_callback : (Json) -> String?
-  priv is_retryable_callback : (Int, Json?) -> Bool?
+  priv error_to_message_callback : (Json) -> String? raise
+  priv is_retryable_callback : (Int, Json?) -> Bool? raise
 }
 
 ///|
@@ -66,8 +66,8 @@ pub type ProviderErrorStructure = OpenAICompatibleErrorStructure
 ///|
 /// Create a provider error structure.
 pub fn OpenAICompatibleErrorStructure::new(
-  error_to_message~ : (Json) -> String?,
-  is_retryable? : (Int, Json?) -> Bool? = default_retryable_override,
+  error_to_message~ : (Json) -> String? raise,
+  is_retryable? : (Int, Json?) -> Bool? raise = default_retryable_override,
 ) -> OpenAICompatibleErrorStructure {
   {
     error_to_message_callback: error_to_message,
@@ -76,23 +76,33 @@ pub fn OpenAICompatibleErrorStructure::new(
 }
 
 ///|
-fn default_retryable_override(_status_code : Int, _error : Json?) -> Bool? {
+fn default_retryable_override(
+  _status_code : Int,
+  _error : Json?,
+) -> Bool? raise {
+  // Adapt the pure built-in callback to the fallible transport hook contract.
+  @provider.check_cancellation(None)
   None
 }
 
 ///|
-fn default_compatible_error_message(json : Json) -> String? {
-  match json {
-    { "error": { "message": String(message), .. }, .. } => Some(message)
-    { "error": String(message), .. } => Some(message)
-    { "type": "error", "message": String(message), .. } => Some(message)
-    _ => None
+fn default_compatible_error_message(json : Json) -> String? raise {
+  // Adapt the pure built-in parser to the fallible transport hook contract.
+  @provider.check_cancellation(None)
+  match decode_openai_compatible_error_data(json) {
+    Some(data) => Some(data.error.message)
+    None =>
+      match json {
+        { "error": String(message), .. } => Some(message)
+        { "type": "error", "message": String(message), .. } => Some(message)
+        _ => None
+      }
   }
 }
 
 ///|
 /// Return the permissive OpenAI-compatible error structure used by default.
-pub fn default_openai_compatible_error_structure() -> OpenAICompatibleErrorStructure {
+fn default_openai_compatible_error_structure() -> OpenAICompatibleErrorStructure {
   OpenAICompatibleErrorStructure::new(
     error_to_message=default_compatible_error_message,
   )
@@ -102,7 +112,7 @@ pub fn default_openai_compatible_error_structure() -> OpenAICompatibleErrorStruc
 fn OpenAICompatibleErrorStructure::message(
   self : OpenAICompatibleErrorStructure,
   json : Json,
-) -> String? {
+) -> String? raise {
   (self.error_to_message_callback)(json)
 }
 
@@ -111,7 +121,7 @@ fn OpenAICompatibleErrorStructure::retryable(
   self : OpenAICompatibleErrorStructure,
   status_code : Int,
   error : Json?,
-) -> Bool? {
+) -> Bool? raise {
   (self.is_retryable_callback)(status_code, error)
 }
 
@@ -191,45 +201,60 @@ fn OpenAICompatibleMetadataExtractor::create_stream_extractor(
 }
 
 ///|
-/// Convert the standard OpenAI-compatible usage object to normalized usage.
+/// Provider-specific conversion hook for optional token accounting payloads.
+pub type OpenAICompatibleUsageConverter = (Json?) -> @provider.LanguageModelV4Usage
+
+///|
+/// Successful JSON/SSE schema boundary used before compatible response
+/// mapping. Returning a message rejects the value as a stream error or typed
+/// invalid response.
+pub type OpenAICompatibleJsonValidator = (Json) -> String?
+
+///|
+/// Convert the standard OpenAI-compatible usage object to the V4 usage shape.
 /// Providers can replace this function through `convert_usage` when their
 /// accounting semantics differ.
-pub fn convert_openai_compatible_chat_usage(json : Json) -> @provider.Usage {
-  let input_tokens = @provider_utils.json_int_field(json, "prompt_tokens")
-  let output_tokens = @provider_utils.json_int_field(json, "completion_tokens")
-  let reasoning_tokens = match json {
-    {
-      "completion_tokens_details": { "reasoning_tokens": Number(value, ..), .. },
-      ..
-    } => value.to_int()
-    _ => 0
-  }
-  let cached_input_tokens = match json {
-    { "prompt_tokens_details": { "cached_tokens": Number(value, ..), .. }, .. } =>
-      value.to_int()
-    { "prompt_cache_hit_tokens": Number(value, ..), .. } => value.to_int()
-    _ => 0
-  }
-  let cache_write_input_tokens = match json {
-    {
-      "prompt_tokens_details": { "cache_write_tokens": Number(value, ..), .. },
-      ..
-    } => value.to_int()
-    _ => 0
-  }
-  {
-    input_tokens,
-    output_tokens,
-    // A number of compatible endpoints omit total_tokens even though the
-    // component counts are present. Keep the normalized contract useful in
-    // that case, matching the provider-neutral usage converters.
-    total_tokens: @provider_utils.json_int_field(
-      json,
-      "total_tokens",
-      default=input_tokens + output_tokens,
-    ),
-    reasoning_tokens,
-    cached_input_tokens,
-    cache_write_input_tokens,
+pub fn convert_openai_compatible_chat_usage(
+  usage : Json?,
+) -> @provider.LanguageModelV4Usage {
+  match usage {
+    Some(json) if !(json is Null) => {
+      let input_tokens = @provider_utils.json_int_field(json, "prompt_tokens")
+      let output_tokens = @provider_utils.json_int_field(
+        json, "completion_tokens",
+      )
+      let reasoning_tokens = match json {
+        {
+          "completion_tokens_details": {
+            "reasoning_tokens": Number(value, ..),
+            ..
+          },
+          ..
+        } => value.to_int()
+        _ => 0
+      }
+      let cached_input_tokens = match json {
+        {
+          "prompt_tokens_details": { "cached_tokens": Number(value, ..), .. },
+          ..
+        } => value.to_int()
+        _ => 0
+      }
+      {
+        input_tokens: {
+          total: Some(input_tokens),
+          no_cache: Some(input_tokens - cached_input_tokens),
+          cache_read: Some(cached_input_tokens),
+          cache_write: None,
+        },
+        output_tokens: {
+          total: Some(output_tokens),
+          text: Some(output_tokens - reasoning_tokens),
+          reasoning: Some(reasoning_tokens),
+        },
+        raw: Some(json),
+      }
+    }
+    _ => @provider_utils.create_null_language_model_usage()
   }
 }

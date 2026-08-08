@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/open_responses/protocol"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub fn decode_open_responses_usage(Json) -> @provider.Usage
+
+pub fn map_open_responses_finish_reason(String, Bool) -> @provider.FinishReason
+
+// Errors
+
+// Types and methods
+pub struct OpenResponsesStreamDecoder {
+  // private fields
+}
+pub fn OpenResponsesStreamDecoder::feed_line(Self, String) -> @provider_utils.SseDecodeBatch[@provider.StreamEvent] raise
+pub fn OpenResponsesStreamDecoder::finish_stream(Self) -> @provider_utils.SseDecodeBatch[@provider.StreamEvent]
+pub fn OpenResponsesStreamDecoder::flush_buffered(Self) -> @provider_utils.SseDecodeBatch[@provider.StreamEvent] raise
+pub fn OpenResponsesStreamDecoder::new(include_raw_chunks? : Bool, progressive_tool_calls? : Bool, emit_failed_error? : Bool, split_reasoning_summary_parts? : Bool, provider_name? : String, id_generator? : () -> String, observe_json? : (Json) -> Unit, validate_json? : (Json) -> Unit raise, observe_events? : (Json) -> Array[@provider.StreamEvent], build_provider_metadata? : () -> Map[String, Json], build_content? : () -> Array[@provider.GeneratedContent], use_built_content? : Bool, has_extra_tool_calls? : () -> Bool, build_tool_metadata? : (String, Json) -> Map[String, Json], convert_v4_usage? : (Json?) -> @provider.LanguageModelV4Usage) -> Self
+pub fn OpenResponsesStreamDecoder::provider_metadata_snapshot(Self) -> Map[String, Json]
+pub fn OpenResponsesStreamDecoder::response(Self) -> @provider.ChatResponse
+pub fn OpenResponsesStreamDecoder::response_metadata_snapshot(Self) -> @provider.ResponseMetadata?
+pub fn OpenResponsesStreamDecoder::v4_finish_reason(Self) -> @provider.LanguageModelV4FinishReason
+pub fn OpenResponsesStreamDecoder::v4_usage(Self) -> @provider.LanguageModelV4Usage
+
+pub struct OpenResponsesV4StreamDecoder {
+  // private fields
+}
+pub fn OpenResponsesV4StreamDecoder::feed_line(Self, String) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise
+pub fn OpenResponsesV4StreamDecoder::finish_stream(Self) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart]
+pub fn OpenResponsesV4StreamDecoder::flush_buffered(Self) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise
+pub fn OpenResponsesV4StreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String, id_generator? : () -> String) -> Self
+pub fn OpenResponsesV4StreamDecoder::response_metadata_snapshot(Self) -> @provider.ResponseMetadata?
+
+type ResponsesContentRef
+
+// Type aliases
+
+// Traits
+

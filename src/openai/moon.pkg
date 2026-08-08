@@ -1,9 +1,8 @@
 import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
-  "QuietlyChan/moonai/open_responses",
+  "QuietlyChan/moonai/open_responses/protocol",
   "moonbitlang/async",
-  "moonbitlang/core/encoding/base64",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/env",
   "moonbitlang/core/json",
@@ -20,6 +19,7 @@ import {
 
 import {
   "QuietlyChan/moonai/ai",
+  "moonbitlang/core/encoding/base64",
 } for "wbtest"
 
 supported_targets = "+native"

@@ -73,14 +73,14 @@ pub fn EmbeddingModelReference::named(
 ///|
 /// A reranking model supplied directly or by identity.
 pub(all) enum RerankingModelReference {
-  Instance(&@provider.RerankingModel)
+  Instance(&@provider.RerankingModelV4)
   Named(ModelId)
 }
 
 ///|
 /// Construct a direct reranking model reference.
 pub fn RerankingModelReference::instance(
-  model : &@provider.RerankingModel,
+  model : &@provider.RerankingModelV4,
 ) -> RerankingModelReference {
   Instance(model)
 }

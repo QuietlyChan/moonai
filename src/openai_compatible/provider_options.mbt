@@ -237,28 +237,63 @@ fn resolve_compatible_options(
   reserved_fields : Array[String],
 ) -> @provider_utils.ProviderOptionsResolution {
   let options_name = compatible_provider_options_name(provider_name)
-  let generic = @provider_utils.resolve_provider_options(
-    options,
-    provider_name="openai-compatible.chat",
-    reserved_fields~,
+  let generic = resolve_compatible_namespace_pair(
+    options, "openai-compatible", reserved_fields,
   )
-  let specific = @provider_utils.resolve_provider_options(
-    options,
-    provider_name=options_name,
-    reserved_fields~,
-  )
-  if generic.namespace_key is Some(key) && specific.namespace_key == Some(key) {
-    return specific
+  if options_name == "openai-compatible" {
+    return generic
   }
-  if generic.namespace_key is Some(_) || specific.namespace_key is Some(_) {
-    return @provider_utils.merge_provider_options_resolutions(generic, specific)
+  let specific = resolve_compatible_namespace_pair(
+    options, options_name, reserved_fields,
+  )
+  @provider_utils.merge_provider_options_resolutions(generic, specific)
+}
+
+///|
+fn resolve_compatible_exact_namespace(
+  options : Map[String, Json],
+  namespace_key : String,
+  reserved_fields : Array[String],
+) -> @provider_utils.ProviderOptionsResolution {
+  let scoped : Map[String, Json] = Map([])
+  if options.get(namespace_key) is Some(value) {
+    scoped[namespace_key] = value
   }
   @provider_utils.resolve_provider_options(
-    options,
-    provider_name=options_name,
-    aliases=["openaiCompatible", "openai-compatible"],
+    scoped,
+    provider_name=namespace_key,
     reserved_fields~,
+    prefer_exact_provider_name=true,
   )
+}
+
+///|
+/// AI SDK merges a provider's raw namespace with its camel-case spelling.
+/// Fields from the camel-case object win while distinct raw fields survive.
+fn resolve_compatible_namespace_pair(
+  options : Map[String, Json],
+  raw_name : String,
+  reserved_fields : Array[String],
+) -> @provider_utils.ProviderOptionsResolution {
+  let raw = resolve_compatible_exact_namespace(
+    options, raw_name, reserved_fields,
+  )
+  let camel_name = @provider_utils.provider_options_camel_case(raw_name)
+  if camel_name == raw_name {
+    return raw
+  }
+  if options.get(raw_name) is Some(value) && !(value is Null) {
+    raw.warnings.push(
+      @provider.Warning::Deprecated(
+        setting="providerOptions key '\{raw_name}'",
+        message="Use '\{camel_name}' instead.",
+      ),
+    )
+  }
+  let camel = resolve_compatible_exact_namespace(
+    options, camel_name, reserved_fields,
+  )
+  @provider_utils.merge_provider_options_resolutions(raw, camel)
 }
 
 ///|
@@ -281,37 +316,6 @@ priv struct OpenAICompatiblePreparedChatRequest {
   body : Json
   warnings : Array[@provider.Warning]
   metadata_key : String
-}
-
-///|
-fn parse_compatible_chat_options(
-  options : @provider.ChatCallOptions,
-  provider_name : String,
-) -> ParsedOpenAICompatibleChatOptions {
-  let resolution = resolve_compatible_options(
-    options.provider_options,
-    provider_name,
-    chat_reserved_fields(),
-  )
-  let reader = @provider_utils.ProviderOptionsReader::new(resolution)
-  let user = reader.take_string("user")
-  let reasoning_effort = reader.take_string("reasoningEffort", aliases=[
-    "reasoning_effort",
-  ])
-  let text_verbosity = reader.take_string("textVerbosity", aliases=["verbosity"])
-  let strict_json_schema = reader.take_bool("strictJsonSchema", aliases=[
-    "strict_json_schema",
-  ])
-  {
-    options: {
-      user,
-      reasoning_effort,
-      text_verbosity,
-      strict_json_schema,
-      extensions: reader.remaining_values(),
-    },
-    warnings: reader.diagnostics(),
-  }
 }
 
 ///|
@@ -346,150 +350,21 @@ fn image_reserved_fields() -> Array[String] {
 /// adapters. The wire protocol has no portable fields for these options, so
 /// callers get an explicit warning when they would otherwise be discarded.
 fn compatible_image_request_warnings(
-  options : @provider.ImageCallOptions,
+  aspect_ratio : String?,
+  seed : Int?,
   resolution : @provider_utils.ProviderOptionsResolution,
 ) -> Array[@provider.Warning] {
   let warnings = resolution.warnings.copy()
-  if options.aspect_ratio is Some(_) {
+  if aspect_ratio is Some(_) {
     warnings.push(
       @provider.Warning::Unsupported(
         feature="aspectRatio",
-        details="OpenAI image generation uses size instead of aspectRatio.",
+        details="This model does not support aspect ratio. Use `size` instead.",
       ),
     )
   }
-  if options.seed is Some(_) {
-    warnings.push(
-      @provider.Warning::Unsupported(
-        feature="seed",
-        details="OpenAI image generation does not support seed.",
-      ),
-    )
+  if seed is Some(_) {
+    warnings.push(@provider.Warning::unsupported("seed"))
   }
   warnings
-}
-
-///|
-fn openai_compatible_reasoning_effort(
-  effort : @provider.ReasoningEffort,
-) -> String? {
-  match effort {
-    @provider.ProviderDefault | @provider.Disabled => None
-    @provider.Minimal => Some("minimal")
-    @provider.Low => Some("low")
-    @provider.Medium => Some("medium")
-    @provider.High => Some("high")
-    @provider.XHigh => Some("xhigh")
-  }
-}
-
-///|
-fn compatible_chat_request_warnings(
-  options : @provider.ChatCallOptions,
-  parsed : ParsedOpenAICompatibleChatOptions,
-  supports_structured_outputs : Bool,
-  supports_top_k : Bool,
-  supports_frequency_penalty : Bool,
-) -> Array[@provider.Warning] {
-  let warnings = parsed.warnings.copy()
-  if !supports_top_k && options.top_k is Some(_) {
-    warnings.push(
-      @provider.Warning::Unsupported(
-        feature="topK",
-        details="OpenAI-compatible Chat Completions does not define a portable top-k field.",
-      ),
-    )
-  }
-  if !supports_frequency_penalty && options.frequency_penalty is Some(_) {
-    warnings.push(
-      @provider.Warning::Unsupported(
-        feature="frequencyPenalty",
-        details="This OpenAI-compatible provider does not support frequencyPenalty.",
-      ),
-    )
-  }
-  for tool in options.tools {
-    match tool {
-      @provider.ProviderTool(id~, ..) =>
-        warnings.push(
-          @provider.Warning::Unsupported(
-            feature="provider-defined tool \{id}",
-            details="OpenAI-compatible Chat Completions accepts function tools only.",
-          ),
-        )
-      _ => ()
-    }
-  }
-  if options.response_format is @provider.JsonResponse({ schema: Some(_), .. }) &&
-    !supports_structured_outputs {
-    warnings.push(
-      @provider.Warning::Unsupported(
-        feature="responseFormat",
-        details="JSON Schema requires supports_structured_outputs; using json_object instead.",
-      ),
-    )
-  }
-  warnings
-}
-
-///|
-fn compatible_completion_request_warnings(
-  options : @provider.CompletionOptions,
-  resolution : @provider_utils.ProviderOptionsResolution,
-) -> Array[@provider.Warning] {
-  let warnings = resolution.warnings.copy()
-  if options.top_k is Some(_) {
-    warnings.push(
-      @provider.Warning::Unsupported(
-        feature="topK",
-        details="OpenAI-compatible Completions does not define a portable top-k field.",
-      ),
-    )
-  }
-  warnings
-}
-
-///|
-fn prepare_compatible_chat_request(
-  model_id : String,
-  options : @provider.ChatCallOptions,
-  preserve_reasoning : Bool,
-  include_usage : Bool,
-  stream : Bool,
-  provider_name : String,
-  supports_structured_outputs : Bool,
-  supports_top_k : Bool,
-  supports_frequency_penalty : Bool,
-  prompt_converter : OpenAICompatiblePromptConverter,
-) -> OpenAICompatiblePreparedChatRequest raise {
-  let parsed = parse_compatible_chat_options(options, provider_name)
-  let conversion = prompt_converter(
-    options.messages,
-    preserve_reasoning,
-    provider_name,
-  )
-  let warnings = compatible_chat_request_warnings(
-    options, parsed, supports_structured_outputs, supports_top_k, supports_frequency_penalty,
-  )
-  for warning in conversion.warnings {
-    warnings.push(warning)
-  }
-  {
-    body: encode_chat_request_with_options(
-      model_id,
-      options,
-      conversion.messages,
-      parsed.options,
-      include_usage,
-      stream,
-      supports_structured_outputs,
-      supports_top_k,
-      supports_frequency_penalty,
-    ),
-    warnings,
-    metadata_key: @provider_utils.resolve_provider_options_key(
-      compatible_provider_options_name(provider_name),
-      options.provider_options,
-    ),
-  }
 }

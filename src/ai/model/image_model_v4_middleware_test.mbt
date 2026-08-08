@@ -21,7 +21,7 @@ async fn transform_image_options(
 
 ///|
 async fn passthrough_image_v4_result(
-  context : ImageModelV4MiddlewareContext,
+  context : @provider.ImageModelV4MiddlewareContext,
 ) -> @provider.ImageModelV4Result {
   context.generate()
 }
@@ -39,12 +39,12 @@ async test "image V4 middleware overrides identity and delegates generation" {
   )
   let wrapped = wrapImageModel(
     base,
-    ImageModelV4Middleware::new(
-      provider="wrapped",
-      model_id="wrapped-image",
-      max_images_per_call=4,
+    @provider.ImageModelV4Middleware::new(
+      override_max_images_per_call=_ => Some(4),
       wrap_generate=passthrough_image_v4_result,
     ),
+    provider_id="wrapped",
+    model_id="wrapped-image",
   )
   assert_eq(wrapped.specification_version(), "v4")
   assert_eq(wrapped.provider(), "wrapped")
@@ -67,8 +67,12 @@ async test "image V4 middleware transforms options before the wire adapter" {
     ),
   )
   let wrapped = wrap_image_model_v4_chain(base, [
-    ImageModelV4Middleware::new(transform_params=transform_image_options),
-    ImageModelV4Middleware::new(wrap_generate=passthrough_image_v4_result),
+    @provider.ImageModelV4Middleware::new(
+      transform_params=transform_image_options,
+    ),
+    @provider.ImageModelV4Middleware::new(
+      wrap_generate=passthrough_image_v4_result,
+    ),
   ])
   ignore(
     wrapped.do_generate(
