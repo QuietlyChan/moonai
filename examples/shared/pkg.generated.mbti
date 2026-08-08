@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai-examples/shared"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub fn example_tools(sink? : async (Json) -> Unit) -> Map[String, @provider_utils.Tool]
+
+pub fn load_example_config() -> ExampleConfig
+
+pub fn usage_json(@provider.LanguageModelV4Usage) -> Json
+
+// Errors
+
+// Types and methods
+pub struct ExampleConfig {
+  provider : String
+  model : String
+  api_key : String
+  base_url : String?
+  demo : Bool
+}
+pub fn ExampleConfig::display_provider(Self) -> String
+pub fn ExampleConfig::is_demo(Self) -> Bool
+pub fn ExampleConfig::language_model(Self) -> &@provider.LanguageModelV4 raise
+pub fn ExampleConfig::model_id(Self) -> String
+
+// Type aliases
+pub type ToolEventSink = async (Json) -> Unit
+
+// Traits
+

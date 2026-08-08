@@ -1,159 +1,128 @@
 # moonai
 
-English | [简体中文](README.zh-CN.md)
+简体中文 | [English](README.en.md)
 
 [![CI](https://github.com/QuietlyChan/moonai/actions/workflows/ci.yml/badge.svg)](https://github.com/QuietlyChan/moonai/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![MoonBit](https://img.shields.io/badge/MoonBit-native-F5A623.svg)](https://www.moonbitlang.com/)
 
-A unified, provider-neutral AI SDK for MoonBit.
+面向 MoonBit 的统一、模型服务商无关 AI SDK。
 
-`moonai` brings the standard-layer design of
-[Vercel AI SDK 7](https://ai-sdk.dev/) to MoonBit: one model interface,
-normalized streaming events, provider adapters, tool calling, and a testable
-core that applications can build on.
+`moonai` 希望把 [Vercel AI SDK 7](https://ai-sdk.dev/) 的标准层设计带到
+MoonBit，包括统一模型接口、标准化流事件、服务商适配器、工具调用，以及可测试的
+核心层，方便应用在此基础上继续构建。
 
-This is an independent community project and is not affiliated with Vercel.
+这是一个由社区独立开发的项目，与 Vercel 没有隶属关系。
 
-> Status: early alpha. APIs may change before `1.0.0`. The current release
-> supports the native target, non-streaming and streaming text generation,
-> embeddings, legacy completions, image generation, Anthropic Messages,
-> Alibaba DashScope, DeepSeek, and MiniMax adapters.
+> 当前状态：早期 alpha。`1.0.0` 之前 API 可能发生变化。当前版本支持 native
+> 目标，支持非流式与流式文本生成、embedding、legacy completion、图片生成和
+> Anthropic Messages。
 
-## Current milestone
+## 当前阶段
 
-- Provider-neutral text, embedding, image, video, speech, transcription,
-  translation, realtime, Files, and Skills model/service contracts.
-- `generate_text`, `stream_text`, `generate_object`, `embed`, `embed_many`,
-  media generation, upload, buffered transcription, and live
-  `stream_transcribe` standard-layer APIs.
-- Shared multi-step tool execution for `generate_text` and `stream_text`,
-  including `prepare_step` model/message/settings overrides, active tool
-  filtering and ordering, stop conditions, provider-deferred results,
-  sandbox-aware dynamic descriptions, and experimental tool caller routing.
-- Reusable Open Responses generation over JSON and streaming over SSE, plus a
-  separate official OpenAI Responses model and options layer.
-- OpenAI-compatible Chat Completions generation over JSON and SSE, plus
-  embeddings, legacy completions, and image generation.
-- Anthropic Messages non-streaming generation over JSON and streaming over SSE,
-  including thinking and `tool_use` blocks.
-- Alibaba DashScope Chat Completions, native text embeddings, and asynchronous
-  video generation.
-- DeepSeek Chat Completions with reasoning controls and streaming usage.
-- MiniMax Chat Completions and asynchronous video generation with polling.
-- OpenAI buffered audio transcription and Realtime Whisper transcription over
-  the provider-neutral `AudioStream` contract.
-- Text, URL/base64 image, audio, and file input parts, with explicit protocol
-  validation when an adapter does not support a media type.
-- Normalized text, reasoning, tool-call, finish, error, usage, and optional raw
-  provider events.
-- Incremental assembly of interleaved and parallel tool-call deltas.
-- Standard sampling and reasoning controls, JSON Schema response formats,
-  namespaced provider options, and per-call HTTP headers that override
-  provider defaults.
-- Request/response diagnostics, provider metadata, typed warnings,
-  configurable retries, and cooperative cancellation.
-- Deterministic mock models for each core model interface, golden SSE fixtures,
-  and local HTTP integration tests.
+- 提供模型服务商无关的文本、embedding、图片、视频、语音、转录、翻译、realtime、
+  Files 与 Skills 模型/服务契约。
+- 提供 `generate_text`、`stream_text`、`generate_object`、`embed`、
+  `embed_many`、媒体生成、上传、缓冲转录与实时 `stream_transcribe` 标准层 API。
+- `generate_text` 与 `stream_text` 共享多步骤工具执行，支持 `prepare_step`
+  模型/消息/参数覆盖、工具筛选与排序、停止条件、provider deferred result 与
+  sandbox-aware 动态描述和 experimental tool caller 路由。
+- 通过 JSON 和 SSE 实现可复用的 Open Responses 协议层，并在其上提供独立的官方
+  OpenAI Responses 模型与 options 层。
+- 通过 JSON 和 SSE 实现 OpenAI-compatible Chat Completions，并支持
+  embedding、legacy completion 和图片生成。
+- 通过 JSON 实现 Anthropic Messages 非流式调用，并通过 SSE 实现流式调用，包括
+  thinking 和 `tool_use` 内容块。
+- 支持 OpenAI 缓冲音频转录，以及基于公共 `AudioStream` 契约的 Realtime Whisper
+  实时转录。
+- 支持文本、URL/base64 图片、音频和文件输入；适配器不支持的媒体类型会明确报错。
+- 统一文本、推理、工具调用、结束原因、错误、用量事件，并可选择透传服务商原始事件。
+- 支持交错、并行 tool call delta 的增量组装。
+- 支持标准采样与推理强度参数、JSON Schema 响应格式、带命名空间的 provider
+  options，以及可覆盖 provider 默认值的调用级 HTTP headers。
+- 支持原始请求/响应诊断、provider metadata、typed warnings、可配置重试和协作式取消。
+- 为每类核心模型提供确定性 mock、golden SSE fixture 和本地 HTTP 集成测试。
 
-## Packages
+## 包结构
 
-| Package | Purpose |
+| 包 | 用途 |
 | --- | --- |
-| `QuietlyChan/moonai/ai` | High-level generation, embedding, media, upload, and realtime workflows |
-| `QuietlyChan/moonai/ai/generate_text` | Multi-step text generation, per-step preparation, streaming, tool execution, and result aggregation |
-| `QuietlyChan/moonai/ai/tool` | Tool caller routing and per-step tool preparation |
-| `QuietlyChan/moonai/ai/prompt` | Prompt URL/file normalization and model-supported asset downloading |
-| `QuietlyChan/moonai/ai/model` | Provider-qualified model identities, references, and registry resolution |
-| `QuietlyChan/moonai/ai/registry` | Provider-qualified model lookup and provider-level Files/Skills registry |
-| `QuietlyChan/moonai/provider` | Provider-neutral model contracts, call options, responses, events, and diagnostics |
-| `QuietlyChan/moonai/provider_utils` | Reusable tool and sandbox contracts, HTTP, SSE, JSON, multipart, URL, WebSocket, retry, and streaming helpers |
-| `QuietlyChan/moonai/openai` | Official OpenAI Chat and Responses models with typed options and model capabilities |
-| `QuietlyChan/moonai/open_responses` | Reusable Open Responses protocol encoder, decoder, and transport |
-| `QuietlyChan/moonai/openai_compatible` | Reusable Chat Completions, embeddings, completions, and image adapter |
-| `QuietlyChan/moonai/anthropic` | Anthropic Messages, Files, and Skills API provider adapter |
-| `QuietlyChan/moonai/alibaba` | Alibaba DashScope Chat, embeddings, and video adapter |
-| `QuietlyChan/moonai/deepseek` | DeepSeek Chat Completions adapter |
-| `QuietlyChan/moonai/minimax` | MiniMax Chat and video adapter |
-| `QuietlyChan/moonai/testing` | Deterministic mocks for the provider-neutral model contracts |
-| `QuietlyChan/moonai/cmd/main` | Optional executable smoke test; not required by the library |
+| `QuietlyChan/moonai/ai` | 生成、embedding、媒体、上传和 realtime 等高层工作流 |
+| `QuietlyChan/moonai/ai/generate_text` | 多步骤文本生成、逐步骤准备、流式调用、工具执行与结果聚合 |
+| `QuietlyChan/moonai/ai/tool` | Tool caller 路由与逐步骤工具准备 |
+| `QuietlyChan/moonai/ai/prompt` | Prompt URL/文件规范化，以及按模型能力下载资源 |
+| `QuietlyChan/moonai/ai/model` | Provider-qualified 模型身份、直接/命名引用和 registry 解析 |
+| `QuietlyChan/moonai/ai/registry` | Provider-qualified 模型查找，以及 provider 级 Files/Skills registry |
+| `QuietlyChan/moonai/provider` | 模型无关的契约、调用参数、响应、事件和诊断类型 |
+| `QuietlyChan/moonai/provider_utils` | 可复用的工具与 sandbox 契约、HTTP、SSE、JSON、multipart、URL、WebSocket、重试和流式工具 |
+| `QuietlyChan/moonai/openai` | 带 typed options 和模型能力解析的官方 OpenAI Chat/Responses 模型 |
+| `QuietlyChan/moonai/open_responses` | 可复用的 Open Responses 编码、解码与 transport 协议层 |
+| `QuietlyChan/moonai/openai_compatible` | 可复用的 Chat Completions、embedding、completion 和图片适配器 |
+| `QuietlyChan/moonai/anthropic` | Anthropic Messages、Files 和 Skills API 服务商适配器 |
+| `QuietlyChan/moonai/alibaba` | Alibaba DashScope Chat、embedding 和视频适配器 |
+| `QuietlyChan/moonai/deepseek` | DeepSeek Chat Completions 适配器 |
+| `QuietlyChan/moonai/minimax` | MiniMax Chat 和视频适配器 |
+| `QuietlyChan/moonai/testing` | 面向模型无关契约的确定性 mock model |
+| `QuietlyChan/moonai/cmd/main` | 可选的冒烟测试程序，使用库时不需要该包 |
 
-These foundational packages correspond to AI SDK's `packages/ai`,
-`packages/provider`, `packages/provider-utils`, and the registry portions of
-`packages/ai`. Provider implementations
-depend on `provider` and `provider_utils`; applications normally combine `ai`,
-`provider`, and one concrete provider package. MoonBit enum constructors are
-not re-exportable, so values such as `V4TextDelta`, `V4FinishStop`, and `High` are used
-through the `@provider` package directly.
+这些基础包分别对应 AI SDK 的 `packages/ai`、`packages/provider`、
+`packages/provider-utils`，以及 `packages/ai` 中的 registry 部分。Provider 实现依赖
+`provider` 与 `provider_utils`；
+应用通常组合使用 `ai`、`provider` 和一个具体 provider 包。MoonBit 目前不能重导出
+enum 构造器，因此 `V4TextDelta`、`V4FinishStop`、`High` 等值应直接通过 `@provider` 使用。
 
-The `src` tree follows the same dependency boundaries while preserving the
-useful internal domains from the TypeScript SDK. `src/ai`,
-`src/ai/generate_text`, `src/ai/tool`, `src/ai/prompt`, `src/ai/model`,
-`src/ai/registry`, `src/provider`, and `src/provider_utils` are MoonBit
-packages.
-A source domain becomes a package when it has a stable dependency boundary;
-smaller helpers remain grouped by responsibility inside their owning package.
-There is intentionally no module-root compatibility package. The pre-`1.0.0`
-API is allowed to evolve, so consumers should import the named packages above
-directly. The old `src/internal` implementation package has also been removed.
+`src/ai/generate_text` 对应 AI SDK 的文本生成工作流边界，统一承载非流式与流式的
+多步骤工具循环；`src/ai/tool` 负责 tool caller 路由。`src/ai/prompt` 对应 prompt
+转换边界，负责 URL/file 资源规范化，并独立于高层生成流程。项目不会提供根模块兼容包；在
+`1.0.0` 之前 API 可以直接演进，使用者应
+直接依赖上面的具名包。旧的 `src/internal` 实现包也已经删除；只有拥有稳定依赖边界的
+领域才会成为独立 MoonBit 包，较小的工具仍按职责放在所属包内。`ai/model` 与
+`ai/registry` 也是独立包，因为模型身份和 provider 注册表有稳定的依赖边界。
 
-Source directories and abstractions are not the same boundary. The important
-domains are represented by real MoonBit abstractions: the caller-facing
-language, embedding, and image contracts are `LanguageModelV4`,
-`EmbeddingModelV4`, and `ImageModelV4`; prompt normalization is isolated in
-`ai/prompt`; and replaceable provider HTTP is the `HttpTransport` trait in
-`provider_utils`. Every provider factory accepts an
-optional `http_transport` and propagates it to buffered, streaming, multipart,
-binary, download, and polling requests. `ChatModel`, `EmbeddingWireModel`, and
-`ImageWireModel` are reserved for explicit wire and third-party adapter
-boundaries, not the high-level model API.
+源码目录与抽象边界不是一回事。重要领域都有对应的 MoonBit 抽象：面向调用方的
+语言、embedding、图片主契约分别是 `provider::LanguageModelV4`、
+`provider::EmbeddingModelV4`、`provider::ImageModelV4`；prompt 规范化独立放在
+`ai/prompt`；可替换的 provider HTTP 由 `provider_utils` 中的 `HttpTransport` trait 承载。
+所有 provider 工厂都接受可选的 `http_transport`，并将其传播到普通响应、流式响应、multipart、
+二进制、下载和轮询请求。`ChatModel`、`EmbeddingWireModel`、`ImageWireModel` 只保留在
+明确的协议 wire/第三方 adapter 边界，不是高层模型 API。
 
-`provider` defines the V4 middleware contracts for language, embedding, and
-image models, while `ai/model` owns their wrapper/chain helpers. This matches
-AI SDK's package boundary: provider and middleware libraries share contract
-types without depending on high-level workflows. `ProviderRegistry` accepts
-language and image V4 middleware and applies parameter transforms, identity
-overrides, and operation wrappers after model resolution. The current
-`ChatModel`-to-V4 adapter is reserved for explicit third-party and wire-level
-integration boundaries.
+面向调用方的 `ModelMessage` 与 `ModelContentPart` 定义在 `provider_utils`，对应 AI SDK
+的公共 prompt 类型；`ai/prompt` 会把它们转换成独立的
+`provider::LanguageModelMessage` 契约。因此 provider 编码器不会意外接收未经校验的
+高层消息。
 
-The public `ModelMessage` and `ModelContentPart` types are defined in
-`provider_utils`, matching AI SDK's shared prompt types. `ai/prompt` converts
-them into the separate `provider::LanguageModelMessage` prompt contract. A
-provider encoder therefore cannot accidentally receive an unvalidated
-high-level message.
+AI SDK 的 `packages/ai/src/model` 并不定义 provider 模型契约，它负责解析字符串模型
+标识，并把旧的 V2/V3 契约适配成 V4。Moonai 将调用契约保留在 `provider`，而由
+`ai/model` 负责 provider-qualified 的 `ModelId`、直接/命名模型引用、typed registry
+和版本适配。所有内置语言 provider 都由各自包暴露 provider-owned
+`LanguageModelV4` 实现；通用的 `@model.as_language_model_v4` 仅用于显式的第三方模型与
+wire 层集成边界，不是根模块旧 API 兼容层。
 
-AI SDK's `packages/ai/src/model` does not define the provider model contracts.
-It resolves string model identifiers and adapts older V2/V3 contracts to V4.
-Moonai keeps the call contracts in `provider`, while `ai/model` owns
-provider-qualified `ModelId`, direct/named model references, typed registries,
-and version adapters. All bundled language providers expose provider-owned
-`LanguageModelV4` implementations; the generic `as_language_model_v4` adapter
-is reserved for explicit third-party and wire-level integrations.
-The two registries have different ownership. `ai/model::ModelRegistry` stores
-already-constructed model instances by canonical identity. In contrast,
-`ai/registry::ProviderRegistry` stores provider factories, selects a model
-lazily from a `provider:model` id, and exposes provider-level Files and Skills
-capabilities. The latter mirrors AI SDK's `createProviderRegistry` layer.
+两个 registry 的职责不同：`ai/model::ModelRegistry` 按规范身份保存已经构造好的模型实例；
+`ai/registry::ProviderRegistry` 保存 provider 工厂，按 `provider:model` 延迟选择模型，并提供
+provider 级 Files 和 Skills 能力。后者对应 AI SDK 的 `createProviderRegistry` 抽象层。
 
-`ai/registry::custom_provider` mirrors AI SDK's `customProvider`: applications
-can inject their own V4 language, embedding, image, media, or audio models by
-contract.
-Unmatched models and Files/Skills capabilities are delegated to an optional
-`fallback_provider`. This lets `provider` traits, `ai/prompt`, and
-`provider_utils::HttpTransport` compose at the application boundary without a
-module-root compatibility facade.
+`ai/registry::custom_provider` 对应 AI SDK 的 `customProvider`：调用方可以按模型契约
+注入自己的 `LanguageModelV4`、embedding、媒体或语音模型；没有命中的模型和 Files/Skills
+能力会按需委托给 `fallback_provider`。这使 `provider` trait、`ai/prompt` 和
+`provider_utils::HttpTransport` 都能在应用层组合，而不需要根模块兼容门面。
 
-## Installation
+`provider` 定义 language、embedding、image 三类 V4 middleware 契约，`ai/model` 只负责
+wrapper/chain。这样 provider 和 middleware 库可以共享契约类型而不依赖高层工作流，与 AI SDK
+的包边界一致。`ProviderRegistry` 的 language/image middleware 参数会在 V4 模型解析后应用
+参数变换、identity override 以及操作包装。`ChatModel` 到 V4 的 adapter 只用于显式的第三方
+模型与 wire 层集成边界。
 
-The package has not been published to Mooncakes yet. After the first release,
-it will be installable with:
+## 安装
+
+该包尚未发布到 Mooncakes。首次发布后可通过以下命令安装：
 
 ```shell
 moon add QuietlyChan/moonai
 ```
 
-Packages that use both the core API and the OpenAI adapter declare:
+同时使用核心 API 和 OpenAI 适配器的包需要声明：
 
 ```moonbit
 import {
@@ -163,11 +132,11 @@ import {
 }
 ```
 
-Import `QuietlyChan/moonai/openai_compatible` or
-`QuietlyChan/moonai/open_responses` directly when building a third-party
-provider package on one of those wire protocols.
+如果要基于这两种协议开发第三方服务商适配器，可直接依赖
+`QuietlyChan/moonai/openai_compatible` 或
+`QuietlyChan/moonai/open_responses`。
 
-## Non-streaming text
+## 非流式文本生成
 
 ```moonbit
 ///|
@@ -179,22 +148,20 @@ let model = @openai.openai(
 ///|
 let result = @ai.generate_text(
   model,
-  prompt="Explain MoonBit in three sentences.",
-  instructions=@ai.Instructions::text("Keep the answer concise."),
+  prompt="用三句话解释 MoonBit。",
+  instructions=@ai.Instructions::text("回答要简洁。"),
 )
 ```
 
-The canonical MoonBit entry point is `generate_text`. The package also exposes
-the AI SDK spelling `generateText` while the public surface is being aligned;
-this is a naming convenience, not a promise to preserve an older Moonai API.
+MoonBit 的规范入口是 `generate_text`。当前也提供 AI SDK 风格的 `generateText` 拼写，
+这是命名对齐便利，不代表会长期保留旧版 Moonai API。
 
-`generate_text`, `stream_text`, and `generate_object` share the `ai/prompt`
-standardization boundary. `instructions` accepts only system messages and is
-placed before regular messages. The regular `messages` input rejects the
-system role by default; set `allow_system_in_messages=true` only when migrating
-an existing history that already contains system messages.
+`generate_text`、`stream_text` 和 `generate_object` 共用 `ai/prompt` 的标准化边界。
+`instructions` 只接受 system message，并会放在普通消息之前；普通 `messages` 默认不允许
+包含 system role。仅在迁移已经包含 system message 的消息历史时，才显式设置
+`allow_system_in_messages=true`。
 
-## Streaming text
+## 流式文本生成
 
 ```moonbit
 ///|
@@ -216,48 +183,40 @@ let result = @ai.stream_text(
 )
 ```
 
-MoonBit code should generally prefer `stream_text`. The `streamText` alias is
-provided for developers familiar with the TypeScript AI SDK API.
+MoonBit 代码通常应优先使用 `stream_text`。`streamText` 别名主要方便熟悉
+TypeScript AI SDK API 的开发者理解和迁移。
 
-Set `include_raw_chunks=true` to receive each parsed provider chunk as
-`StreamEvent::Raw` before its normalized events. Text, completion, embedding,
-and image calls also accept per-call `headers`; these override matching headers
-configured on the provider.
+设置 `include_raw_chunks=true` 后，每个解析完成的服务商数据块会先以
+`StreamEvent::Raw` 发出，然后再发出标准化事件。文本、completion、embedding 和
+图片调用也支持调用级 `headers`，同名 header 会覆盖 provider 的默认配置。
 
-## Multi-step tools and sandbox
+## 多步骤工具与 Sandbox
 
-`generate_text` and `stream_text` share the same high-level `Tool` execution
-layer. On every step, a tool's `description_resolver` receives its entry from
-`tools_context` and the active `experimental_sandbox`; the resulting description
-is sent to the model without replacing the executable tool. The same sandbox is
-available to tool execution and streaming input callbacks.
+`generate_text` 与 `stream_text` 共用同一套高层 `Tool` 执行层。每一步中，工具的
+`description_resolver` 都会收到对应的 `tools_context` 条目和当前
+`experimental_sandbox`；解析出的描述只用于发给模型，不会替换可执行的工具对象。
+同一个 sandbox 也会传给工具执行回调和流式输入回调。
 
-`prepare_step` can override `tools_context` and `experimental_sandbox` for one
-step. The following step starts from the outer values again, matching AI SDK's
-step-local override semantics.
+`prepare_step` 可以只为当前一步覆盖 `tools_context` 和 `experimental_sandbox`；
+下一步会重新从外层值开始，语义与 AI SDK 的 step-local override 一致。
 
-`provider_utils::SandboxSession` is the provider-neutral runtime contract. Its
-`run` callback is required, while process spawning, streamed and buffered file
-reads, and file writes are optional capabilities. Calling an unavailable
-capability raises `UnsupportedFunctionalityError`; applications remain
-responsible for supplying the concrete isolated runtime.
+`provider_utils::SandboxSession` 是 provider-neutral 的运行时契约。`run` 回调是必需
+能力，进程 spawn、流式/缓冲文件读取及文件写入都是可选能力；调用未提供的能力会抛出
+`UnsupportedFunctionalityError`。具体的隔离运行时仍由应用负责注入。
 
-## Diagnostics, retries, and cancellation
+## 诊断、重试与取消
 
-Every normalized response exposes `request`, `response`, `provider_metadata`,
-and typed `warnings`. Non-streaming response metadata includes the original
-body; streaming bodies are not buffered, so use `include_raw_chunks=true` when
-the raw SSE payloads are required.
+每种标准化响应都提供 `request`、`response`、`provider_metadata` 和 typed
+`warnings`。非流式响应会保留原始响应 body；流式响应不会缓存完整 body，如需检查
+原始 SSE 数据，应设置 `include_raw_chunks=true`。
 
-Normalized `Usage` separates reasoning, cache-read, and cache-write accounting.
-Providers report cache population through `cache_write_input_tokens`; usage
-aggregation preserves that value across batched calls.
+标准化 `Usage` 会分别记录 reasoning、cache read 和 cache write 用量。provider 通过
+`cache_write_input_tokens` 返回缓存写入 token；批量调用聚合 usage 时也会保留该值。
 
-Invalid prompt shapes and message roles raise `InvalidPromptError`; invalid
-setting values raise `InvalidArgumentError`. A successful HTTP response with
-invalid protocol data raises `InvalidResponseDataError`. Asynchronous provider
-operations such as video generation raise `ProviderTimeoutError` when polling
-exceeds its deadline, keeping that condition separate from `APICallError`.
+高层 prompt 形状或消息角色不合法时会抛出 `InvalidPromptError`，参数取值不合法时会
+抛出 `InvalidArgumentError`。provider 返回成功 HTTP 状态但响应结构不合法时使用
+`InvalidResponseDataError`；视频等异步任务超过轮询期限时使用
+`ProviderTimeoutError`，与 HTTP 层的 `APICallError` 分开处理。
 
 ```moonbit
 ///|
@@ -272,21 +231,19 @@ let retry_policy = @provider.RetryPolicy::new(
 ///|
 let result = @ai.generate_text(
   model,
-  prompt="Explain MoonBit.",
+  prompt="解释 MoonBit。",
   retry_policy~,
   cancellation_token=cancellation,
 )
 ```
 
-The default policy retries network failures, timeouts, HTTP 408/409/425/429,
-and 5xx responses up to two times with exponential backoff. SSE calls retry
-only before `StreamStart`, preventing duplicate text or tool events. Use
-`RetryPolicy::none()` to disable retries and `cancellation.cancel()` to stop a
-cooperative operation.
+默认策略会对网络错误、超时、HTTP 408/409/425/429 和 5xx 响应进行最多两次指数
+退避重试。SSE 只会在 `StreamStart` 发出前重试，避免文本或工具事件重复。可通过
+`RetryPolicy::none()` 禁用重试，通过 `cancellation.cancel()` 取消协作式操作。
 
-`@openai.openai(...)` and `OpenAIProvider::language_model(...)` use the
-Responses API by default, matching AI SDK 7. Use `@openai.openai_chat(...)` or
-`OpenAIProvider::chat(...)` when Chat Completions is required:
+`@openai.openai(...)` 和 `OpenAIProvider::language_model(...)` 默认使用
+Responses API，与 AI SDK 7 保持一致。如需 Chat Completions，可使用
+`@openai.openai_chat(...)` 或 `OpenAIProvider::chat(...)`：
 
 ```moonbit
 ///|
@@ -296,13 +253,11 @@ let chat_model = @openai.openai_chat(
 )
 ```
 
-The official provider exposes distinct `OpenAIResponsesModel` and
-`OpenAIChatModel` implementations. Each has its own typed provider options and
-model capability resolution for reasoning, role selection, and parameter
-filtering; only protocol-level decoding and transport utilities are shared.
+官方 provider 分别实现 `OpenAIResponsesModel` 和 `OpenAIChatModel`。两者拥有各自的
+typed provider options 和模型能力解析，用于推理参数、消息角色与不兼容参数过滤；
+只在协议解码和 transport 工具层复用基础实现。
 
-Organization and project routing can be configured once on the official
-provider and is inherited by every selected model:
+官方 provider 可以统一配置 organization 和 project，之后选择的所有模型都会继承：
 
 ```moonbit
 ///|
@@ -313,13 +268,12 @@ let provider = @openai.create_openai(
 )
 ```
 
-Explicit custom headers take precedence over API key, organization, and
-project headers using case-insensitive header names.
+显式传入的自定义 headers 优先于 API key、organization 和 project 生成的 headers；
+header 名称按大小写不敏感规则覆盖。
 
-Official Chat metadata includes accepted/rejected prediction token counts and
-logprobs. Official Responses metadata includes the response id, service tier,
-reasoning context, and logprobs. The same fields are accumulated for JSON and
-SSE calls under the official provider's `provider_metadata` namespace.
+官方 Chat metadata 包含 accepted/rejected prediction token 数量和 logprobs；官方
+Responses metadata 包含 response id、service tier、reasoning context 和 logprobs。
+JSON 与 SSE 调用都会在官方 provider 的 `provider_metadata` 命名空间中累计这些字段。
 
 ## Anthropic Messages
 
@@ -333,7 +287,7 @@ let model = @anthropic.anthropic(
 ///|
 let response = @ai.stream_text(
   model,
-  prompt="Explain MoonBit in three sentences.",
+  prompt="用三句话解释 MoonBit。",
   provider_options={
     "anthropic": {
       "thinking": { "type": "enabled", "budgetTokens": 4096 },
@@ -349,19 +303,16 @@ let response = @ai.stream_text(
 )
 ```
 
-Anthropic supports native `generate_text` and `stream_text` requests through a
-shared prepared-request layer. Standard `reasoning_effort` is mapped by model
-capability to adaptive thinking and effort on newer Claude models, or to an
-extended-thinking token budget on older models. Provider-specific overrides
-remain available under `provider_options.anthropic`.
+Anthropic 通过共享的 prepared-request 层同时支持原生 `generate_text` 与
+`stream_text`。标准化 `reasoning_effort` 会根据模型能力映射：较新的 Claude 模型
+使用 adaptive thinking 与 effort，旧模型使用 extended-thinking token budget。
+provider 专有覆盖仍放在 `provider_options.anthropic` 下。
 
-Messages accept text, URL/base64 images, and document file parts such as PDFs.
-Audio parts are rejected before transport because the Messages API does not
-accept them.
+Messages 支持文本、URL/base64 图片和 PDF 等 document 文件 part。由于 Messages API
+不接受音频，audio part 会在发出请求前明确报错。
 
-Provider-executed Anthropic tools use the shared `provider_utils` tool factory.
-For example, the advisor tool has typed cache settings, validated empty input
-and result schemas, deferred-result semantics, and automatic multi-turn replay:
+Anthropic 的 provider-executed tool 复用 `provider_utils` 的公共工具工厂。例如 advisor
+工具具备 typed cache 配置、空输入与结果 schema 校验、deferred result 语义和自动多轮回传：
 
 ```moonbit
 ///|
@@ -376,28 +327,25 @@ let advisor = @anthropic.advisor_20260301(
 ///|
 let result = @ai.generate_text(
   model,
-  prompt="Implement the migration and ask the advisor to review the plan.",
+  prompt="实现迁移，并让 advisor 审查计划。",
   tools=@ai.tool_set([("advisor", advisor)]),
 )
 ```
 
-The `advisor-tool-2026-03-01` beta header is selected automatically. Plain,
-redacted, and error advisor results are normalized on output and converted
-back to Anthropic's wire format when the result history is sent again.
+使用该工具时会自动选择 `advisor-tool-2026-03-01` beta header。明文、密文与错误三种
+advisor 结果都会在输出时规范化，并在后续请求携带历史记录时转换回 Anthropic wire 格式。
 
-The application-executed `bash_20241022` and `bash_20250124` tools use the
-current `SandboxSession::run` callback by default. A custom `execute` callback
-takes precedence; `disable_default_execute=true` creates a non-executable tool,
-corresponding to AI SDK's explicit `execute: null` configuration.
+应用侧执行的 `bash_20241022` 和 `bash_20250124` 默认调用当前
+`SandboxSession::run`。显式传入的 `execute` 回调优先；设置
+`disable_default_execute=true` 会创建不可执行工具，对应 AI SDK 中显式的
+`execute: null` 配置。
 
-The provider also exposes `files()` and `skills()`. Files are uploaded through
-Anthropic's Files API and returned as provider-neutral references. Skills
-uploads support multiple `files[]`, an optional display title, the required
-beta header, and a follow-up latest-version lookup for name and description
-metadata. Both capabilities use the same authentication, custom headers, and
-injectable `HttpTransport` as Messages.
+Provider 还提供 `files()` 与 `skills()`。Files API 上传后返回 provider-neutral reference；
+Skills API 支持多个 `files[]`、可选 display title、必需的 beta header，并会继续读取最新
+版本的 name 与 description metadata。两者都复用 Messages 的认证、自定义 headers 和
+可注入 `HttpTransport`。
 
-## OpenAI-compatible providers
+## OpenAI-compatible 服务商
 
 ```moonbit
 ///|
@@ -423,9 +371,8 @@ let response = @ai.stream_text(
 )
 ```
 
-Provider-wide query parameters apply to chat, completion, embedding, and image
-endpoints. Enable structured outputs only when the compatible endpoint accepts
-OpenAI's `json_schema` response format:
+provider 级 `query_params` 会应用到 chat、completion、embedding 和 image 端点。
+只有兼容端点确实接受 OpenAI `json_schema` 响应格式时，才应开启结构化输出：
 
 ```moonbit
 ///|
@@ -438,20 +385,18 @@ let provider = @openai_compatible.create_openai_compatible(
 )
 ```
 
-`transform_request_body` can be supplied to the compatible provider factory to
-apply gateway-specific changes after typed request preparation and immediately
-before the HTTP transport sends the body.
+compatible provider factory 可传入 `transform_request_body`，在 typed request
+准备完成后、HTTP transport 发送前执行网关专有的 body 调整。
 
-Compatible providers can also replace `error_structure`, `metadata_extractor`,
-and `convert_usage`. The error structure is shared by JSON/SSE transports and
-the chat, completion, embedding, and image models. Metadata and usage hooks
-customize complete and streaming chat responses; stream metadata extractors are
-created per request so concurrent calls do not share state.
+compatible provider 还可以替换 `error_structure`、`metadata_extractor` 和
+`convert_usage`。JSON/SSE transport 以及 chat、completion、embedding、image
+模型共享 error structure；metadata 和 usage hook 用于非流式与流式 chat 响应。
+每个流式请求都会创建独立的 metadata extractor，因此并发调用不会共享状态。
 
-When the flag is disabled, a JSON Schema request falls back to `json_object`
-and reports a typed warning instead of claiming schema enforcement.
+未开启该选项时，JSON Schema 请求会回退为 `json_object`，并返回 typed warning，
+不会错误地声称服务端执行了 schema 约束。
 
-## Open Responses providers
+## Open Responses 服务商
 
 ```moonbit
 ///|
@@ -465,25 +410,21 @@ let provider = @open_responses.create_open_responses(
 let model = provider.language_model("my-model")
 ```
 
-The protocol package resolves namespaced options into typed values, produces a
-prepared request with warnings, encodes the wire body, and then invokes the
-transport. Custom providers can reuse that pipeline without inheriting the
-official OpenAI model capability rules.
+该协议包先把命名空间 options 解析为 typed 值并生成带 warnings 的 prepared
+request，再编码 wire body 并交给 transport。第三方 provider 可以复用这条管线，
+而不会继承官方 OpenAI 的模型能力规则。
 
-Its encoder supports URL-backed input files and multimodal tool results through
-`Message::tool_parts`. Its decoder assembles text, refusal, reasoning, tool
-argument deltas, terminal status, usage, and provider metadata for both complete
-responses and interleaved SSE event streams.
+编码器支持 URL 文件输入，并通过 `Message::tool_parts` 支持多模态 tool result。
+解码器会为完整 JSON 响应与交错 SSE 事件统一组装 text、refusal、reasoning、tool
+argument delta、终态、usage 和 provider metadata。
 
-## Provider options and reasoning
+## Provider options 与推理强度
 
-Use `reasoning_effort` for portable reasoning control. Adapters map it to their
-wire format when possible and return a typed warning when a value is coerced or
-the protocol cannot represent it.
+跨 provider 的推理控制应优先使用标准化 `reasoning_effort`。适配器会在协议支持时
+映射到对应字段；发生值降级或协议无法表达时，会返回 typed warning。
 
-Provider-specific request fields follow the AI SDK namespace convention. The
-namespace is the camel-case form of `provider_name`; for example,
-`example-gateway` becomes `exampleGateway`:
+provider 专有请求字段采用 AI SDK 的命名空间约定。命名空间是 `provider_name` 的
+camelCase 形式，例如 `example-gateway` 对应 `exampleGateway`：
 
 ```moonbit
 ///|
@@ -497,7 +438,7 @@ let model = @openai_compatible.openai_compatible(
 ///|
 let response = @ai.generate_text(
   model,
-  prompt="Explain the tradeoff.",
+  prompt="解释其中的取舍。",
   provider_options={
     "exampleGateway": {
       "reasoningEffort": "high",
@@ -507,11 +448,10 @@ let response = @ai.generate_text(
 )
 ```
 
-Provider options must be nested under their provider namespace. Fields owned
-by the normalized request, such as `model`, `messages`, or `stream`, are
-ignored and produce a compatibility warning.
+provider options 必须放在对应的 provider 命名空间下。`model`、`messages`、
+`stream` 等由标准请求负责的字段会被忽略，并产生 compatibility warning。
 
-## Structured output and multimodal input
+## 结构化输出与多模态输入
 
 ```moonbit
 ///|
@@ -522,7 +462,7 @@ let object = @ai.generate_object(
     "properties": { "answer": { "type": "string" } },
     "required": ["answer"],
   },
-  prompt="Answer as JSON.",
+  prompt="请使用 JSON 回答。",
   name="answer",
 )
 
@@ -531,28 +471,25 @@ let response = @ai.generate_text(
   model,
   messages=[
     @ai.ModelMessage::user_parts([
-      @ai.ModelContentPart::text("Describe this image."),
+      @ai.ModelContentPart::text("描述这张图片。"),
       @ai.ModelContentPart::image_url("https://example.com/moon.png"),
     ]),
   ],
 )
 ```
 
-OpenAI-compatible Chat Completions accepts text, image, base64 audio, and
-base64 PDF parts. Image URLs are passed through, `text/*` file URLs become text,
-and PDF/audio file URLs are rejected before transport, matching AI SDK.
-Official OpenAI Chat likewise passes through image URLs and rejects other file
-URLs. Open Responses accepts image and file URLs, base64 files, and multimodal
-tool result parts, but rejects audio input explicitly. Anthropic Messages
-accepts text, image, and document parts and likewise rejects audio input.
-`generate_object` requests JSON Schema output, parses the final JSON value, and
-validates it with the shared `provider_utils` JSON Schema validator. Invalid
-JSON and schema mismatches raise typed `NoObjectGeneratedError` values.
+OpenAI-compatible Chat Completions 支持文本、图片、base64 音频和 base64 PDF。
+图片 URL 会直接透传，`text/*` 文件 URL 会转换为文本，PDF/音频文件 URL 会在
+transport 前被拒绝，与 AI SDK 一致。官方 OpenAI Chat 同样透传图片 URL，并拒绝
+其他文件 URL。Open Responses 支持图片 URL、文件 URL、base64 文件和多模态 tool
+result，并明确拒绝音频输入。Anthropic Messages 支持文本、图片和 document part，
+并同样明确拒绝音频。`generate_object` 会请求 JSON Schema 输出、解析最终 JSON，
+并通过公共 `provider_utils` 校验返回值；解析失败或 schema 不匹配时会抛出带有
+结构化原因的 `NoObjectGeneratedError`。
 
-## Embeddings, completions, and images
+## Embedding、Completion 和图片
 
-The official OpenAI provider and the OpenAI-compatible provider expose the
-same model selectors:
+官方 OpenAI provider 与 OpenAI-compatible provider 使用相同的模型选择器：
 
 ```moonbit
 ///|
@@ -567,26 +504,26 @@ let vector = @ai.embed(
 ///|
 let completion = @ai.generate_text(
   provider.completion("gpt-3.5-turbo-instruct"),
-  prompt="MoonBit is",
+  prompt="MoonBit 是",
 )
 
 ///|
 let images = @ai.generate_image(
   provider.image("gpt-image-1"),
-  "A precise MoonBit language logo",
+  "一枚精确的 MoonBit 语言标志",
   n=2,
   size="1024x1024",
 )
 ```
 
-`embed_many` and `generate_image` split requests at the model's per-call limit,
-preserve result order, validate response counts, and accumulate usage.
-Embedding models declare whether batches may run in parallel; pass
-`max_parallel_calls` to cap concurrency when the provider supports it.
-Generated payloads are tagged as `ImageData::Base64` or `ImageData::Url`.
+`embed_many` 和 `generate_image` 都会根据模型的单次请求上限自动拆分，保持结果
+顺序、校验返回数量并累加 usage。图片数据明确标记为 `ImageData::Base64` 或
+`ImageData::Url`。
 
-The initial API intentionally follows familiar AI SDK concepts without
-requiring MoonBit code to copy TypeScript naming everywhere:
+provider 的 snake_case 选择器同时提供 AI SDK 风格的 camelCase 别名，包括
+`languageModel`、`embeddingModel`、`completionModel` 和 `imageModel`。
+
+初始 API 沿用了部分开发者熟悉的 AI SDK 概念，同时保留 MoonBit 自身的命名习惯：
 
 | Vercel AI SDK | moonai |
 | --- | --- |
@@ -602,19 +539,32 @@ requiring MoonBit code to copy TypeScript naming everywhere:
 | `createOpenResponses(...)` | `@open_responses.create_open_responses(...)` |
 | `anthropic("claude-sonnet-4-20250514")` | `@anthropic.anthropic("claude-sonnet-4-20250514", api_key=...)` |
 
-## Design direction
+## 设计方向
 
-The core library will remain provider-neutral. Provider-specific wire formats,
-authentication, and options belong in adapter packages. Planned milestones
-include richer generated content such as sources and files, image editing,
-telemetry hooks, and higher-level agent orchestration.
+核心库将保持模型服务商无关。服务商特有的协议格式、认证方式和配置应放在对应的
+适配包中。后续计划包括 source 和生成文件等更丰富的输出内容、图片编辑、遥测接口和
+更高层的 Agent 编排能力。
 
-The sandbox abstraction is already part of the shared tool boundary, but a
-concrete sandbox runtime remains an application or runtime integration concern.
-Higher-level agent workflows will build on these contracts rather than being
-coupled to a provider protocol.
+Sandbox 抽象已经属于公共工具边界，但具体 sandbox runtime 仍由应用或运行时集成层
+实现。更高层 Agent 工作流会建立在这些契约之上，不会与具体服务商协议耦合。
 
-## Development
+## 示例
+
+[`examples`](examples/README.md) workspace 提供了可直接运行的 CLI 问答与工具调用、
+内嵌 NDJSON 前端的 MoonBit 原生 Web Agent，以及使用 Vercel AI SDK 标准
+`useChat` transport 的 React 客户端：
+
+```shell
+moon run examples/basic_chat -- "Explain MoonAI briefly."
+moon run examples/tool_calling -- "Calculate 42 * 8."
+moon run examples/web_agent/backend
+```
+
+Web Agent 同时提供普通 JSON、流式 NDJSON 和 AI SDK UI message stream v1 SSE
+接口。在 Windows 上运行 `examples/build_standalone.ps1`，可生成已内嵌默认前端的
+单文件可执行程序 `dist/moonai-agent.exe`。
+
+## 开发
 
 ```shell
 moon info
@@ -623,15 +573,14 @@ moon check
 moon test
 ```
 
-The optional smoke-test executable can be run with:
+可选的冒烟测试程序可以通过以下命令运行：
 
 ```shell
 OPENAI_API_KEY=... moon run src/cmd/main
 ```
 
-MoonBit-aware documentation is maintained in
-[`README.mbt.md`](README.mbt.md).
+MoonBit 工具链使用的文档位于 [`README.mbt.md`](README.mbt.md)。
 
-## License
+## 许可证
 
-Licensed under the [Apache License 2.0](LICENSE).
+项目采用 [Apache License 2.0](LICENSE)。

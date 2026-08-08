@@ -1,5 +1,11 @@
 # moonai
 
+[简体中文](README.md) | English
+
+[![CI](https://github.com/QuietlyChan/moonai/actions/workflows/ci.yml/badge.svg)](https://github.com/QuietlyChan/moonai/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![MoonBit](https://img.shields.io/badge/MoonBit-native-F5A623.svg)](https://www.moonbitlang.com/)
+
 A unified, provider-neutral AI SDK for MoonBit.
 
 `moonai` brings the standard-layer design of
@@ -149,7 +155,7 @@ moon add QuietlyChan/moonai
 
 Packages that use both the core API and the OpenAI adapter declare:
 
-```moonbit nocheck
+```moonbit
 import {
   "QuietlyChan/moonai/ai",
   "QuietlyChan/moonai/provider",
@@ -163,7 +169,7 @@ provider package on one of those wire protocols.
 
 ## Non-streaming text
 
-```moonbit nocheck
+```moonbit
 ///|
 let model = @openai.openai(
   "gpt-4.1-mini",
@@ -190,7 +196,7 @@ an existing history that already contains system messages.
 
 ## Streaming text
 
-```moonbit nocheck
+```moonbit
 ///|
 let model = @openai.openai(
   "gpt-4.1-mini",
@@ -253,7 +259,7 @@ invalid protocol data raises `InvalidResponseDataError`. Asynchronous provider
 operations such as video generation raise `ProviderTimeoutError` when polling
 exceeds its deadline, keeping that condition separate from `APICallError`.
 
-```moonbit nocheck
+```moonbit
 ///|
 let cancellation = @provider.CancellationToken::new()
 
@@ -282,7 +288,7 @@ cooperative operation.
 Responses API by default, matching AI SDK 7. Use `@openai.openai_chat(...)` or
 `OpenAIProvider::chat(...)` when Chat Completions is required:
 
-```moonbit nocheck
+```moonbit
 ///|
 let chat_model = @openai.openai_chat(
   "gpt-4.1-mini",
@@ -298,7 +304,7 @@ filtering; only protocol-level decoding and transport utilities are shared.
 Organization and project routing can be configured once on the official
 provider and is inherited by every selected model:
 
-```moonbit nocheck
+```moonbit
 ///|
 let provider = @openai.create_openai(
   api_key~,
@@ -317,7 +323,7 @@ SSE calls under the official provider's `provider_metadata` namespace.
 
 ## Anthropic Messages
 
-```moonbit nocheck
+```moonbit
 ///|
 let model = @anthropic.anthropic(
   "claude-sonnet-4-20250514",
@@ -393,7 +399,7 @@ injectable `HttpTransport` as Messages.
 
 ## OpenAI-compatible providers
 
-```moonbit nocheck
+```moonbit
 ///|
 let deepseek = @openai_compatible.openai_compatible(
   provider_name="deepseek",
@@ -421,7 +427,7 @@ Provider-wide query parameters apply to chat, completion, embedding, and image
 endpoints. Enable structured outputs only when the compatible endpoint accepts
 OpenAI's `json_schema` response format:
 
-```moonbit nocheck
+```moonbit
 ///|
 let provider = @openai_compatible.create_openai_compatible(
   provider_name="example-gateway",
@@ -447,7 +453,7 @@ and reports a typed warning instead of claiming schema enforcement.
 
 ## Open Responses providers
 
-```moonbit nocheck
+```moonbit
 ///|
 let provider = @open_responses.create_open_responses(
   provider_name="my-provider",
@@ -479,7 +485,7 @@ Provider-specific request fields follow the AI SDK namespace convention. The
 namespace is the camel-case form of `provider_name`; for example,
 `example-gateway` becomes `exampleGateway`:
 
-```moonbit nocheck
+```moonbit
 ///|
 let model = @openai_compatible.openai_compatible(
   provider_name="example-gateway",
@@ -507,7 +513,7 @@ ignored and produce a compatibility warning.
 
 ## Structured output and multimodal input
 
-```moonbit nocheck
+```moonbit
 ///|
 let object = @ai.generate_object(
   model,
@@ -545,7 +551,10 @@ JSON and schema mismatches raise typed `NoObjectGeneratedError` values.
 
 ## Embeddings, completions, and images
 
-```moonbit nocheck
+The official OpenAI provider and the OpenAI-compatible provider expose the
+same model selectors:
+
+```moonbit
 ///|
 let provider = @openai.create_openai(api_key~)
 
@@ -571,14 +580,10 @@ let images = @ai.generate_image(
 ```
 
 `embed_many` and `generate_image` split requests at the model's per-call limit,
-preserve result order, validate response counts, and accumulate usage. Embedding
-models declare whether batches may run in parallel; pass `max_parallel_calls`
-to cap concurrency when the provider supports it. Image payloads are tagged as
-`ImageData::Base64` or `ImageData::Url`.
-
-The snake-case provider selectors also have AI SDK-style camel-case aliases,
-including `languageModel`, `embeddingModel`, `completionModel`, and
-`imageModel`.
+preserve result order, validate response counts, and accumulate usage.
+Embedding models declare whether batches may run in parallel; pass
+`max_parallel_calls` to cap concurrency when the provider supports it.
+Generated payloads are tagged as `ImageData::Base64` or `ImageData::Url`.
 
 The initial API intentionally follows familiar AI SDK concepts without
 requiring MoonBit code to copy TypeScript naming everywhere:
@@ -611,10 +616,10 @@ coupled to a provider protocol.
 
 ## Examples
 
-The [`examples`](examples/README.md) workspace module contains runnable
-provider-neutral chat and tool-calling programs plus a complete MoonBit Web
-agent. All examples default to a deterministic local provider, so they work
-without an API key:
+The [`examples`](examples/README.md) workspace contains runnable CLI chat and
+tool-calling programs, a native MoonBit Web Agent with an embedded NDJSON
+frontend, and a React client using the standard Vercel AI SDK `useChat`
+transport:
 
 ```shell
 moon run examples/basic_chat -- "Explain MoonAI briefly."
@@ -622,16 +627,10 @@ moon run examples/tool_calling -- "Calculate 42 * 8."
 moon run examples/web_agent/backend
 ```
 
-The Web agent serves its embedded browser UI at <http://127.0.0.1:8080> and
-exposes buffered JSON, streaming NDJSON, and Vercel AI SDK UI message stream v1
-SSE APIs. A separate React example connects with `useChat` and
-`DefaultChatTransport`, including multi-step MoonBit tool calls. Run
-`examples/build_standalone.ps1` to produce a single native executable with its
-frontend assets compiled in.
-
-Set `MOONAI_PROVIDER` and the matching provider credentials to run the same
-examples against OpenAI, Anthropic, DeepSeek, Alibaba, MiniMax, an
-OpenAI-compatible endpoint, or an Open Responses endpoint.
+The Web Agent exposes buffered JSON, streaming NDJSON, and AI SDK UI message
+stream v1 SSE endpoints. Run `examples/build_standalone.ps1` on Windows to
+produce `dist/moonai-agent.exe` with the default frontend compiled into the
+binary.
 
 ## Development
 
@@ -648,6 +647,9 @@ The optional smoke-test executable can be run with:
 OPENAI_API_KEY=... moon run src/cmd/main
 ```
 
+MoonBit-aware documentation is maintained in
+[`README.mbt.md`](README.mbt.md).
+
 ## License
 
-Apache-2.0
+Licensed under the [Apache License 2.0](LICENSE).

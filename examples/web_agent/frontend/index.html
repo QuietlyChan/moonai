@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f4f6f3" />
+    <title>MoonAI Agent Workbench</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand" aria-label="MoonAI Agent Workbench">
+        <span class="brand-mark" aria-hidden="true">
+          <i data-lucide="braces"></i>
+        </span>
+        <span class="brand-name">MoonAI</span>
+        <span class="brand-product">Agent Workbench</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="connection" id="connectionStatus" data-state="checking">
+          <span class="connection-dot" aria-hidden="true"></span>
+          <span id="connectionLabel">Connecting</span>
+        </div>
+        <button
+          class="icon-button"
+          id="clearConversation"
+          type="button"
+          aria-label="Clear conversation"
+          title="Clear conversation"
+        >
+          <i data-lucide="trash-2"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="context-panel" aria-label="Agent context">
+        <section class="context-section">
+          <div class="section-heading">
+            <i data-lucide="server"></i>
+            <h2>Runtime</h2>
+          </div>
+          <dl class="runtime-list">
+            <div>
+              <dt>Provider</dt>
+              <dd id="providerValue">Checking</dd>
+            </div>
+            <div>
+              <dt>Model</dt>
+              <dd id="modelValue">Checking</dd>
+            </div>
+            <div>
+              <dt>Transport</dt>
+              <dd>NDJSON stream</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="context-section tools-section">
+          <div class="section-heading">
+            <i data-lucide="wrench"></i>
+            <h2>Tools</h2>
+          </div>
+          <ul class="tool-list">
+            <li>
+              <span class="tool-icon calculator"><i data-lucide="calculator"></i></span>
+              <span><strong>Calculator</strong><small>Arithmetic</small></span>
+            </li>
+            <li>
+              <span class="tool-icon weather"><i data-lucide="cloud-sun"></i></span>
+              <span><strong>Weather</strong><small>Local fixture</small></span>
+            </li>
+            <li>
+              <span class="tool-icon search"><i data-lucide="search-code"></i></span>
+              <span><strong>MoonAI search</strong><small>SDK knowledge</small></span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="context-section usage-section" aria-labelledby="usageTitle">
+          <div class="section-heading">
+            <i data-lucide="chart-no-axes-column-increasing"></i>
+            <h2 id="usageTitle">Last run</h2>
+          </div>
+          <div class="usage-grid">
+            <div><span id="inputTokens">0</span><small>Input</small></div>
+            <div><span id="outputTokens">0</span><small>Output</small></div>
+            <div><span id="totalTokens">0</span><small>Total</small></div>
+            <div><span id="stepCount">0</span><small>Steps</small></div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="chat-panel" aria-label="Conversation">
+        <div class="chat-header">
+          <div>
+            <p class="eyebrow">Conversation</p>
+            <h1>MoonAI agent</h1>
+          </div>
+          <span class="turn-status" id="turnStatus">Ready</span>
+        </div>
+
+        <div
+          class="transcript"
+          id="transcript"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions text"
+        ></div>
+
+        <form class="composer" id="composer">
+          <div class="composer-options">
+            <label for="promptPreset">Task</label>
+            <select id="promptPreset">
+              <option value="">Custom prompt</option>
+              <option value="Calculate 42 * 8 and explain the result.">Calculate 42 x 8</option>
+              <option value="What is the weather in Hangzhou today?">Check Hangzhou weather</option>
+              <option value="How does MoonAI implement multi-step tool calling?">Explore tool calling</option>
+            </select>
+            <span class="character-count" id="characterCount">0 / 8000</span>
+          </div>
+          <div class="composer-input">
+            <label class="sr-only" for="messageInput">Message MoonAI</label>
+            <textarea
+              id="messageInput"
+              name="message"
+              rows="1"
+              maxlength="8000"
+              placeholder="Message MoonAI..."
+              autocomplete="off"
+              required
+            ></textarea>
+            <button
+              class="icon-button stop-button"
+              id="stopButton"
+              type="button"
+              aria-label="Stop generation"
+              title="Stop generation"
+              hidden
+            >
+              <i data-lucide="square"></i>
+            </button>
+            <button
+              class="send-button"
+              id="sendButton"
+              type="submit"
+              aria-label="Send message"
+              disabled
+            >
+              <span>Send</span>
+              <i data-lucide="arrow-up"></i>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="activity-panel" aria-label="Tool activity">
+        <div class="activity-header">
+          <div>
+            <p class="eyebrow">Execution</p>
+            <h2>Tool activity</h2>
+          </div>
+          <span class="activity-count" id="activityCount">0</span>
+        </div>
+        <div class="activity-feed" id="activityFeed">
+          <div class="empty-activity" id="emptyActivity">
+            <i data-lucide="waypoints"></i>
+            <p>No tool activity in this turn.</p>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

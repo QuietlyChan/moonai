@@ -1,0 +1,14 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai-examples/web_agent/backend"
+
+// Values
+
+// Errors
+
+// Types and methods
+type UseChatStreamState
+
+// Type aliases
+
+// Traits
+
