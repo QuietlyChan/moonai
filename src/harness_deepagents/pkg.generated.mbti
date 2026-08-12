@@ -1,0 +1,49 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/harness_deepagents"
+
+import {
+  "QuietlyChan/moonai/harness",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createDeepAgents(settings? : DeepAgentsHarnessSettings) -> DeepAgentsHarness
+
+pub fn create_deep_agents(settings? : DeepAgentsHarnessSettings) -> DeepAgentsHarness
+
+pub let deepAgents : DeepAgentsHarness
+
+pub let deep_agents : DeepAgentsHarness
+
+pub fn resolveDeepAgentsEnv(auth? : DeepAgentsAuthOptions, environment? : Map[String, String]) -> Map[String, String]
+
+pub fn resolve_deep_agents_env(auth? : DeepAgentsAuthOptions, environment? : Map[String, String]) -> Map[String, String]
+
+// Errors
+
+// Types and methods
+pub(all) enum DeepAgentsAuthOptions {
+  DeepAgentsAnthropicAuth(api_key~ : String?, auth_token~ : String?, base_url~ : String?)
+  DeepAgentsGatewayAuth(api_key~ : String?, base_url~ : String?)
+} derive(Eq, @debug.Debug)
+
+pub struct DeepAgentsHarness {
+  settings : DeepAgentsHarnessSettings
+}
+pub impl @harness.HarnessV1 for DeepAgentsHarness
+
+pub(all) struct DeepAgentsHarnessSettings {
+  auth : DeepAgentsAuthOptions?
+  model : String?
+  port : Int?
+  startup_timeout_ms : Int
+  recursion_limit : Int?
+  transport : @harness.HarnessV1BridgeTransportConfig?
+}
+pub fn DeepAgentsHarnessSettings::new(auth? : DeepAgentsAuthOptions, model? : String, port? : Int, startup_timeout_ms? : Int, recursion_limit? : Int, transport? : @harness.HarnessV1BridgeTransportConfig) -> Self
+
+// Type aliases
+
+// Traits

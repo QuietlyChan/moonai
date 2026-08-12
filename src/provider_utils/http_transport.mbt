@@ -3,6 +3,7 @@
 pub(all) enum HttpMethod {
   HttpGet
   HttpPost
+  HttpDelete
 } derive(Debug, Eq)
 
 ///|
@@ -45,6 +46,15 @@ pub fn HttpRequest::post(
   body~ : Bytes,
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpPost, url~, headers~, body~)
+}
+
+///|
+/// Construct a DELETE request without a body.
+pub fn HttpRequest::delete(
+  url~ : String,
+  headers? : Map[String, String] = Map([]),
+) -> HttpRequest {
+  HttpRequest::new(meth=HttpDelete, url~, headers~)
 }
 
 ///|
@@ -172,6 +182,7 @@ impl HttpTransport for NativeHttpTransport with fn fetch(_self, request) {
   let (response, body) = match request.meth {
     HttpGet => @http.get(request.url, headers=request.headers)
     HttpPost => @http.post(request.url, request.body, headers=request.headers)
+    HttpDelete => native_delete(request.url, request.headers)
   }
   HttpResponse::new(
     status_code=response.code,
@@ -179,6 +190,38 @@ impl HttpTransport for NativeHttpTransport with fn fetch(_self, request) {
     headers=response.headers,
     body=body.binary(),
   )
+}
+
+///|
+async fn native_delete(
+  url : String,
+  headers : Map[String, String],
+) -> (@http.Response, &@io.Data) {
+  let scheme = if url.has_prefix("https://") {
+    "https"
+  } else if url.has_prefix("http://") {
+    "http"
+  } else {
+    fail("DELETE URL must use http or https")
+  }
+  let authority = url_authority(url).unwrap_or_else(() => {
+    fail("DELETE URL must be absolute")
+  })
+  let origin = "\{scheme}://\{authority}"
+  let suffix = url[origin.length():].to_owned()
+  let target = if suffix == "" {
+    "/"
+  } else if suffix.has_prefix("?") {
+    "/" + suffix
+  } else {
+    suffix
+  }
+  let client = @http.Client(origin)
+  defer client.close()
+  client.request(@http.Delete, target, extra_headers=headers)
+  let response = client.end_request()
+  let body = client.read_all()
+  (response, body)
 }
 
 ///|

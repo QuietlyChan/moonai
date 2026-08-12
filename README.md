@@ -15,8 +15,8 @@ MoonBit，包括统一模型接口、标准化流事件、服务商适配器、�
 这是一个由社区独立开发的项目，与 Vercel 没有隶属关系。
 
 > 当前状态：早期 alpha。`1.0.0` 之前 API 可能发生变化。当前版本支持 native
-> 目标，支持非流式与流式文本生成、embedding、legacy completion、图片生成和
-> Anthropic Messages。
+> 目标、主流文本/媒体模型服务商、MCP 客户端，以及面向 OpenCode、Pi、DeepAgents 的
+> Harness 运行时适配。
 
 ## 当前阶段
 
@@ -35,6 +35,12 @@ MoonBit，包括统一模型接口、标准化流事件、服务商适配器、�
   thinking 和 `tool_use` 内容块。
 - 支持 OpenAI 缓冲音频转录，以及基于公共 `AudioStream` 契约的 Realtime Whisper
   实时转录。
+- 支持 ByteDance ModelArk 的 Seedream 图片和 Seedance 异步视频生成，以及 Moonshot AI
+  Chat Completions、思考控制和结构化输出。
+- 支持 MCP 的 Streamable HTTP、SSE 与 stdio transport、OAuth 发现、工具、资源、prompt、
+  completion 和 MCP Apps 资源。
+- 支持 Harness V1 会话、生命周期状态、Sandbox、工具审批、诊断、WebSocket 与持久
+  stdio NDJSON bridge，并提供 OpenCode、Pi 和 DeepAgents 适配器。
 - 支持文本、URL/base64 图片、音频和文件输入；适配器不支持的媒体类型会明确报错。
 - 统一文本、推理、工具调用、结束原因、错误、用量事件，并可选择透传服务商原始事件。
 - 支持交错、并行 tool call delta 的增量组装。
@@ -62,6 +68,13 @@ MoonBit，包括统一模型接口、标准化流事件、服务商适配器、�
 | `QuietlyChan/moonai/alibaba` | Alibaba DashScope Chat、embedding 和视频适配器 |
 | `QuietlyChan/moonai/deepseek` | DeepSeek Chat Completions 适配器 |
 | `QuietlyChan/moonai/minimax` | MiniMax Chat 和视频适配器 |
+| `QuietlyChan/moonai/bytedance` | ByteDance ModelArk Seedream 图片与 Seedance 视频适配器 |
+| `QuietlyChan/moonai/moonshotai` | Moonshot AI Chat Completions、思考与结构化输出适配器 |
+| `QuietlyChan/moonai/mcp` | MCP 客户端、HTTP/SSE/stdio transport、OAuth、工具和 Apps 资源 |
+| `QuietlyChan/moonai/harness` | Harness V1 契约、Sandbox、生命周期、诊断与 WebSocket/NDJSON bridge |
+| `QuietlyChan/moonai/harness_opencode` | OpenCode Harness 适配器 |
+| `QuietlyChan/moonai/harness_pi` | Pi Harness 适配器 |
+| `QuietlyChan/moonai/harness_deepagents` | DeepAgents Harness 适配器 |
 | `QuietlyChan/moonai/testing` | 面向模型无关契约的确定性 mock model |
 | `QuietlyChan/moonai/cmd/main` | 可选的冒烟测试程序，使用库时不需要该包 |
 
@@ -113,6 +126,36 @@ wrapper/chain。这样 provider 和 middleware 库可以共享契约类型而不
 的包边界一致。`ProviderRegistry` 的 language/image middleware 参数会在 V4 模型解析后应用
 参数变换、identity override 以及操作包装。`ChatModel` 到 V4 的 adapter 只用于显式的第三方
 模型与 wire 层集成边界。
+
+### Harness、MCP 与 CLI bridge
+
+`harness` 对应 AI SDK 的 coding-agent runtime 边界。`HarnessV1` 与
+`HarnessV1Session` 表达会话创建、prompt、工具结果/审批、暂停、继续、detach、stop 和 destroy；
+`HarnessV1NetworkSandboxSession` 保持可替换的 sandbox 实现。默认 bridge 协议仍然是自定义的
+NDJSON，但同一抽象也可通过 WebSocket 或持久 stdio 子进程连接，因此可以直接包装本地 CLI。
+
+```moonbit
+///|
+let transport = @harness.HarnessV1BridgeTransportConfig::stdio(
+  @harness.HarnessV1StdioConfig::new(
+    command="your-harness-bridge",
+    args=["--stdio"],
+  ),
+)
+
+///|
+let agent = @harness_opencode.createOpenCode(
+  @harness_opencode.OpenCodeHarnessSettings::new(transport=transport),
+)
+```
+
+`harness_opencode`、`harness_pi` 与 `harness_deepagents` 复用这套会话和 bridge 契约，分别暴露
+`createOpenCode`、`createPi` 与 `createDeepAgents`。传入自定义 transport 时，应用可自行控制
+CLI 命令、参数、环境变量和工作目录；未传入时，适配器可以连接 sandbox 暴露的 WebSocket bridge。
+
+`mcp` 对应 AI SDK MCP client 的能力边界。使用 `createMCPClient` 创建客户端后，可通过
+`listTools`、`tools`、`callTool`、`listResources`、`readResource` 和 prompt/completion API 访问
+远端 MCP server；`StdioMCPTransport` 则用于把本地 MCP CLI 接到 MoonBit 应用。
 
 ## 安装
 
@@ -562,7 +605,8 @@ moon run examples/web_agent/backend
 
 Web Agent 同时提供普通 JSON、流式 NDJSON 和 AI SDK UI message stream v1 SSE
 接口。在 Windows 上运行 `examples/build_standalone.ps1`，可生成已内嵌默认前端的
-单文件可执行程序 `dist/moonai-agent.exe`。
+单文件可执行程序 `dist/moonai-agent.exe`。`examples/basic_chat` 和
+`examples/tool_calling` 也是不依赖浏览器的 MoonBit CLI 示例。
 
 ## 开发
 
@@ -579,7 +623,7 @@ moon test
 OPENAI_API_KEY=... moon run src/cmd/main
 ```
 
-MoonBit 工具链使用的文档位于 [`README.mbt.md`](README.mbt.md)。
+MoonBit 工具链和包站使用同一份中文主文档；英文版本位于 [`README.en.md`](README.en.md)。
 
 ## 许可证
 

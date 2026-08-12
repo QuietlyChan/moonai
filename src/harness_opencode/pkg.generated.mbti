@@ -1,0 +1,68 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/harness_opencode"
+
+import {
+  "QuietlyChan/moonai/harness",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createOpenCode(settings? : OpenCodeHarnessSettings) -> OpenCodeHarness
+
+pub fn create_open_code(settings? : OpenCodeHarnessSettings) -> OpenCodeHarness
+
+pub let openCode : OpenCodeHarness
+
+pub let open_code : OpenCodeHarness
+
+pub fn resolveOpenCodeEnv(auth? : OpenCodeAuthOptions, model? : String, provider? : String, environment? : Map[String, String]) -> Map[String, String]
+
+pub fn resolve_open_code_env(auth? : OpenCodeAuthOptions, model? : String, provider? : String, environment? : Map[String, String]) -> Map[String, String]
+
+pub fn resolve_open_code_provider(String?, String?) -> String
+
+pub fn splitOpenCodeModel(String?, String?) -> OpenCodeModelCoordinate
+
+pub fn split_open_code_model(String?, String?) -> OpenCodeModelCoordinate
+
+pub fn toOpenCodeGatewayBaseUrl(String) -> String
+
+pub fn to_open_code_gateway_base_url(String) -> String
+
+// Errors
+
+// Types and methods
+pub(all) enum OpenCodeAuthOptions {
+  OpenCodeGatewayAuth(api_key~ : String?, base_url~ : String?)
+  OpenCodeAnthropicAuth(api_key~ : String?, auth_token~ : String?, base_url~ : String?)
+  OpenCodeOpenAIAuth(api_key~ : String?, base_url~ : String?, organization~ : String?, project~ : String?)
+  OpenCodeCompatibleAuth(api_key~ : String?, base_url~ : String?, name~ : String?, query_params~ : Map[String, String])
+} derive(Eq, @debug.Debug)
+
+pub struct OpenCodeHarness {
+  settings : OpenCodeHarnessSettings
+}
+pub impl @harness.HarnessV1 for OpenCodeHarness
+
+pub(all) struct OpenCodeHarnessSettings {
+  auth : OpenCodeAuthOptions?
+  model : String?
+  provider : String?
+  reasoning_variant : String?
+  port : Int?
+  startup_timeout_ms : Int
+  transport : @harness.HarnessV1BridgeTransportConfig?
+}
+pub fn OpenCodeHarnessSettings::new(auth? : OpenCodeAuthOptions, model? : String, provider? : String, reasoning_variant? : String, port? : Int, startup_timeout_ms? : Int, transport? : @harness.HarnessV1BridgeTransportConfig) -> Self
+
+pub(all) struct OpenCodeModelCoordinate {
+  provider_id : String?
+  model_id : String?
+  model : String?
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

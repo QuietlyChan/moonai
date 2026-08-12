@@ -1,0 +1,8 @@
+import {
+  "QuietlyChan/moonai/harness",
+  "QuietlyChan/moonai/provider",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/env",
+}
+
+supported_targets = "+native"

@@ -1,0 +1,500 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/mcp"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/builtin",
+  "moonbitlang/core/debug",
+}
+// Values
+pub const LATEST_PROTOCOL_VERSION : String = "2025-11-25"
+
+pub const MCP_APP_EXTENSION_NAME : String = "io.modelcontextprotocol/ui"
+
+pub const MCP_APP_LEGACY_RESOURCE_URI_META_KEY : String = "ui/resourceUri"
+
+pub const MCP_APP_MIME_TYPE : String = "text/html;profile=mcp-app"
+
+pub const VERSION : String = "0.1.0"
+
+pub fn buildDiscoveryUrls(String) -> Array[String]
+
+pub fn build_discovery_urls(String) -> Array[String]
+
+pub fn check_resource_allowed(String, String) -> Bool
+
+pub async fn createMCPClient(MCPClientConfig) -> MCPClient
+
+pub async fn create_mcp_client(MCPClientConfig) -> MCPClient
+
+pub fn decodeOAuthTokens(Json) -> OAuthTokens raise MCPClientOAuthError
+
+pub fn decode_oauth_tokens(Json) -> OAuthTokens raise MCPClientOAuthError
+
+pub fn detectMCPAppResourceDrift(String, String) -> Bool
+
+pub fn detect_mcp_app_resource_drift(String, String) -> Bool
+
+pub async fn discoverAuthorizationServerMetadata(authorization_server_url~ : String, protocol_version? : String, http_transport? : &@provider_utils.HttpTransport) -> OAuthAuthorizationServerMetadata?
+
+pub async fn discover_authorization_server_metadata(authorization_server_url~ : String, protocol_version? : String, http_transport? : &@provider_utils.HttpTransport) -> OAuthAuthorizationServerMetadata?
+
+pub async fn experimental_create_mcp_client(MCPClientConfig) -> MCPClient
+
+pub fn experimental_stdio_mcp_transport(StdioConfig) -> StdioMCPTransport
+
+pub fn extractResourceMetadataUrl(String) -> String?
+
+pub fn extract_resource_metadata_url(String) -> String?
+
+pub fn fingerprintMCPAppResource(MCPAppResource) -> String
+
+pub fn fingerprint_mcp_app_resource(MCPAppResource) -> String
+
+pub fn getMCPAppResourceUri(MCPTool) -> String? raise MCPClientError
+
+pub fn getMCPAppToolMeta(Json?) -> MCPAppToolMeta? raise MCPClientError
+
+pub fn get_mcp_app_resource_from_read_result(uri~ : String, resource~ : ReadResourceResult) -> MCPAppResource raise MCPClientError
+
+pub fn get_mcp_app_resource_uri(MCPTool) -> String? raise MCPClientError
+
+pub fn get_mcp_app_resource_uris(ListToolsResult) -> Array[String] raise MCPClientError
+
+pub fn get_mcp_app_tool_meta(Json?) -> MCPAppToolMeta? raise MCPClientError
+
+pub fn isMCPAppTool(MCPTool) -> Bool
+
+pub fn is_mcp_app_tool(MCPTool) -> Bool
+
+pub fn mcpAppClientCapabilities() -> Json
+
+pub let mcp_app_client_capabilities : Json
+
+pub fn parseJSONRPCMessage(String) -> JSONRPCMessage raise MCPClientError
+
+pub fn parse_json_rpc_message(String) -> JSONRPCMessage raise MCPClientError
+
+pub fn parse_oauth_error_response(String) -> MCPClientOAuthError
+
+pub async fn readMCPAppResource(client~ : MCPClient, uri~ : String, options? : MCPRequestOptions) -> MCPAppResource
+
+pub async fn read_mcp_app_resource(client~ : MCPClient, uri~ : String, options? : MCPRequestOptions) -> MCPAppResource
+
+pub fn splitMCPAppTools(ListToolsResult) -> SplitMCPAppToolsResult raise MCPClientError
+
+pub fn split_mcp_app_tools(ListToolsResult) -> SplitMCPAppToolsResult raise MCPClientError
+
+pub fn startAuthorization(authorization_server_url~ : String, client_information~ : OAuthClientInformation, redirect_url~ : String, code_verifier~ : String, metadata? : OAuthAuthorizationServerMetadata, scope? : String, state? : String, resource? : String) -> OAuthAuthorizationStart raise MCPClientOAuthError
+
+pub fn start_authorization(authorization_server_url~ : String, client_information~ : OAuthClientInformation, redirect_url~ : String, code_verifier~ : String, metadata? : OAuthAuthorizationServerMetadata, scope? : String, state? : String, resource? : String) -> OAuthAuthorizationStart raise MCPClientOAuthError
+
+pub fn supportedProtocolVersions() -> Array[String]
+
+pub let supported_protocol_versions : Array[String]
+
+pub fn validateJSONRPCMessage(Json) -> JSONRPCMessage raise MCPClientError
+
+pub fn validate_json_rpc_message(Json) -> JSONRPCMessage raise MCPClientError
+
+// Errors
+pub(all) suberror MCPClientError {
+  MCPClientError(message~ : String, code~ : Int?, data~ : Json?, status_code~ : Int?, url~ : String?, response_body~ : String?, cause~ : String?)
+} derive(Eq, @debug.Debug)
+pub fn MCPClientError::message(Self) -> String
+pub fn MCPClientError::new(message~ : String, code? : Int, data? : Json, status_code? : Int, url? : String, response_body? : String, cause? : String) -> Self
+
+pub(all) suberror MCPClientOAuthError {
+  MCPClientOAuthError(message~ : String, cause~ : String?)
+} derive(Eq, @debug.Debug)
+
+pub(all) suberror UnauthorizedError {
+  UnauthorizedError(message~ : String)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub(all) enum AuthResult {
+  Authorized
+  Redirect
+} derive(Eq, @debug.Debug)
+
+pub(all) struct CallToolResult {
+  content : Array[Json]
+  structured_content : Json?
+  is_error : Bool
+  tool_result : Json?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct CompleteRequestParams {
+  reference : MCPCompletionReference
+  argument_name : String
+  argument_value : String
+  context_arguments : Map[String, String]
+} derive(Eq, @debug.Debug)
+pub fn CompleteRequestParams::new(reference~ : MCPCompletionReference, argument_name~ : String, argument_value~ : String, context_arguments? : Map[String, String]) -> Self
+
+pub(all) struct CompleteResult {
+  values : Array[String]
+  total : Int?
+  has_more : Bool?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct GetPromptResult {
+  description : String?
+  messages : Array[MCPPromptMessage]
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub struct HttpMCPTransport {
+  url : String
+  configured_headers : Map[String, String]
+  terminate_session_on_close : Bool
+  http_transport : &@provider_utils.HttpTransport
+  // private fields
+}
+pub fn HttpMCPTransport::new(url~ : String, headers? : Map[String, String], initial_session_id? : String, initial_protocol_version? : String, on_session_id_change? : (String?) -> Unit, on_session_expired? : (String) -> Unit, terminate_session_on_close? : Bool, http_transport? : &@provider_utils.HttpTransport) -> Self
+pub fn HttpMCPTransport::session_id(Self) -> String?
+pub impl MCPTransport for HttpMCPTransport
+
+pub(all) struct InitializeResult {
+  protocol_version : String
+  capabilities : Json
+  server_info : MCPImplementation
+  instructions : String?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct JSONRPCErrorData {
+  code : Int
+  message : String
+  data : Json?
+} derive(Eq, @debug.Debug)
+
+pub(all) enum JSONRPCId {
+  JSONRPCStringId(String)
+  JSONRPCNumberId(Int)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum JSONRPCMessage {
+  JSONRPCRequest(id~ : JSONRPCId, method_name~ : String, params~ : Json?)
+  JSONRPCNotification(method_name~ : String, params~ : Json?)
+  JSONRPCResponse(id~ : JSONRPCId, result~ : Json)
+  JSONRPCError(id~ : JSONRPCId, error~ : JSONRPCErrorData)
+} derive(Eq, @debug.Debug)
+pub fn JSONRPCMessage::error(id~ : JSONRPCId, code~ : Int, message~ : String, data? : Json) -> Self
+pub fn JSONRPCMessage::notification(method_name~ : String, params? : Json) -> Self
+pub fn JSONRPCMessage::request(id~ : JSONRPCId, method_name~ : String, params? : Json) -> Self
+pub fn JSONRPCMessage::response(id~ : JSONRPCId, result? : Json) -> Self
+pub fn JSONRPCMessage::to_json(Self) -> Json
+
+pub(all) struct ListPromptsResult {
+  prompts : Array[MCPPrompt]
+  next_cursor : String?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ListResourceTemplatesResult {
+  resource_templates : Array[MCPResourceTemplate]
+  next_cursor : String?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ListResourcesResult {
+  resources : Array[MCPResource]
+  next_cursor : String?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ListToolsResult {
+  tools : Array[MCPTool]
+  next_cursor : String?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPAppResource {
+  uri : String
+  mime_type : String
+  html : String
+  meta : MCPAppResourceMeta?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPAppResourceCSP {
+  connect_domains : Array[String]
+  resource_domains : Array[String]
+  frame_domains : Array[String]
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPAppResourceMeta {
+  prefers_border : Bool?
+  csp : MCPAppResourceCSP?
+  permissions : Json?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPAppToolMeta {
+  resource_uri : String?
+  model_visible : Bool
+  app_visible : Bool
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub struct MCPClient {
+  // private fields
+}
+pub async fn MCPClient::callTool(Self, name~ : String, arguments? : Json, options? : MCPRequestOptions) -> CallToolResult
+pub async fn MCPClient::call_tool(Self, name~ : String, arguments? : Json, options? : MCPRequestOptions) -> CallToolResult
+pub fn MCPClient::capabilities(Self) -> Json
+pub async fn MCPClient::close(Self, options? : MCPTransportCloseOptions) -> Unit
+pub async fn MCPClient::complete(Self, CompleteRequestParams, options? : MCPRequestOptions) -> CompleteResult
+pub async fn MCPClient::experimental_get_prompt(Self, name~ : String, arguments? : Json, options? : MCPRequestOptions) -> GetPromptResult
+pub async fn MCPClient::experimental_list_prompts(Self, cursor? : String, options? : MCPRequestOptions) -> ListPromptsResult
+pub fn MCPClient::initialize_result(Self) -> InitializeResult raise MCPClientError
+pub fn MCPClient::instructions(Self) -> String? raise MCPClientError
+pub async fn MCPClient::listResourceTemplates(Self, cursor? : String, options? : MCPRequestOptions) -> ListResourceTemplatesResult
+pub async fn MCPClient::listResources(Self, cursor? : String, options? : MCPRequestOptions) -> ListResourcesResult
+pub async fn MCPClient::listTools(Self, cursor? : String, options? : MCPRequestOptions) -> ListToolsResult
+pub async fn MCPClient::list_resource_templates(Self, cursor? : String, options? : MCPRequestOptions) -> ListResourceTemplatesResult
+pub async fn MCPClient::list_resources(Self, cursor? : String, options? : MCPRequestOptions) -> ListResourcesResult
+pub async fn MCPClient::list_tools(Self, cursor? : String, options? : MCPRequestOptions) -> ListToolsResult
+pub fn MCPClient::onElicitationRequest(Self, async (Json) -> Json) -> Unit
+pub fn MCPClient::on_elicitation_request(Self, async (Json) -> Json) -> Unit
+pub async fn MCPClient::readResource(Self, uri~ : String, options? : MCPRequestOptions) -> ReadResourceResult
+pub async fn MCPClient::read_resource(Self, uri~ : String, options? : MCPRequestOptions) -> ReadResourceResult
+pub fn MCPClient::server_info(Self) -> MCPImplementation raise MCPClientError
+pub async fn MCPClient::tools(Self, schemas? : Map[String, Json], options? : MCPRequestOptions) -> Map[String, @provider_utils.Tool]
+pub fn MCPClient::toolsFromDefinitions(Self, ListToolsResult, schemas? : Map[String, Json]) -> Map[String, @provider_utils.Tool]
+pub fn MCPClient::tools_from_definitions(Self, ListToolsResult, schemas? : Map[String, Json]) -> Map[String, @provider_utils.Tool]
+
+pub(all) struct MCPClientConfig {
+  transport : &MCPTransport
+  initialization_options : MCPRequestOptions?
+  max_retries : Int
+  client_name : String
+  client_version : String
+  capabilities : Json
+  initial_initialize_result : InitializeResult?
+}
+pub fn MCPClientConfig::new(transport~ : &MCPTransport, initialization_options? : MCPRequestOptions, max_retries? : Int, client_name? : String, client_version? : String, capabilities? : Json, initial_initialize_result? : InitializeResult) -> Self raise MCPClientError
+
+pub(all) enum MCPCompletionReference {
+  MCPPromptReference(name~ : String)
+  MCPResourceReference(uri~ : String)
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPImplementation {
+  name : String
+  version : String
+  title : String?
+} derive(Eq, @debug.Debug)
+pub fn MCPImplementation::new(name~ : String, version~ : String, title? : String) -> Self
+
+pub(all) struct MCPPrompt {
+  name : String
+  title : String?
+  description : String?
+  arguments : Array[MCPPromptArgument]
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPPromptArgument {
+  name : String
+  description : String?
+  required : Bool?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPPromptMessage {
+  role : String
+  content : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPRequestOptions {
+  cancellation_token : @provider.CancellationToken?
+  timeout_ms : Int?
+  max_total_timeout_ms : Int?
+} derive(@debug.Debug)
+pub fn MCPRequestOptions::new(cancellation_token? : @provider.CancellationToken, timeout_ms? : Int, max_total_timeout_ms? : Int) -> Self
+
+pub(all) struct MCPResource {
+  uri : String
+  name : String
+  title : String?
+  description : String?
+  mime_type : String?
+  size : Int?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) enum MCPResourceContents {
+  MCPTextResource(uri~ : String, name~ : String?, title~ : String?, mime_type~ : String?, text~ : String, meta~ : Json?, raw~ : Json)
+  MCPBlobResource(uri~ : String, name~ : String?, title~ : String?, mime_type~ : String?, blob~ : String, meta~ : Json?, raw~ : Json)
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPResourceTemplate {
+  uri_template : String
+  name : String
+  title : String?
+  description : String?
+  mime_type : String?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPTool {
+  name : String
+  title : String?
+  description : String?
+  input_schema : Json
+  output_schema : Json?
+  annotations : Json?
+  meta : Json?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct MCPTransportCloseOptions {
+  cancellation_token : @provider.CancellationToken?
+} derive(@debug.Debug)
+pub fn MCPTransportCloseOptions::new(cancellation_token? : @provider.CancellationToken) -> Self
+
+pub(all) struct MCPTransportSendOptions {
+  cancellation_token : @provider.CancellationToken?
+  related_request_id : JSONRPCId?
+  resumption_token : String?
+} derive(@debug.Debug)
+pub fn MCPTransportSendOptions::new(cancellation_token? : @provider.CancellationToken, related_request_id? : JSONRPCId, resumption_token? : String) -> Self
+
+pub struct MockMCPTransport {
+  responses : Array[Array[JSONRPCMessage]]
+  sent_messages : Array[JSONRPCMessage]
+  // private fields
+}
+pub fn MockMCPTransport::is_closed(Self) -> Bool
+pub fn MockMCPTransport::is_started(Self) -> Bool
+pub fn MockMCPTransport::new(responses? : Array[Array[JSONRPCMessage]]) -> Self
+pub impl MCPTransport for MockMCPTransport
+
+pub(all) struct OAuthAuthorizationServerInformation {
+  authorization_server_url : String
+  token_endpoint : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct OAuthAuthorizationServerMetadata {
+  issuer : String
+  authorization_endpoint : String
+  token_endpoint : String
+  registration_endpoint : String?
+  response_types_supported : Array[String]
+  grant_types_supported : Array[String]
+  code_challenge_methods_supported : Array[String]
+  token_endpoint_auth_methods_supported : Array[String]
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct OAuthAuthorizationStart {
+  authorization_url : String
+  code_verifier : String
+} derive(Eq, @debug.Debug)
+
+pub(all) struct OAuthClientInformation {
+  client_id : String
+  client_secret : String?
+  client_id_issued_at : Int?
+  client_secret_expires_at : Int?
+  authorization_server : String?
+  token_endpoint : String?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct OAuthClientMetadata {
+  redirect_uris : Array[String]
+  token_endpoint_auth_method : String?
+  grant_types : Array[String]
+  response_types : Array[String]
+  client_name : String?
+  scope : String?
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct OAuthProtectedResourceMetadata {
+  resource : String
+  authorization_servers : Array[String]
+  scopes_supported : Array[String]
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct OAuthTokens {
+  access_token : String
+  id_token : String?
+  token_type : String
+  expires_in : Int?
+  scope : String?
+  refresh_token : String?
+  authorization_server : String?
+  token_endpoint : String?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ReadResourceResult {
+  contents : Array[MCPResourceContents]
+  raw : Json
+} derive(Eq, @debug.Debug)
+
+pub(all) struct SplitMCPAppToolsResult {
+  model_visible : ListToolsResult
+  app_visible : ListToolsResult
+} derive(Eq, @debug.Debug)
+
+pub struct SseMCPTransport {
+  url : String
+  configured_headers : Map[String, String]
+  http_transport : &@provider_utils.HttpTransport
+  // private fields
+}
+pub fn SseMCPTransport::endpoint(Self) -> String?
+pub fn SseMCPTransport::new(url~ : String, headers? : Map[String, String], http_transport? : &@provider_utils.HttpTransport) -> Self
+pub impl MCPTransport for SseMCPTransport
+
+pub(all) struct StdioConfig {
+  command : String
+  args : Array[String]
+  env : Map[String, String]
+  inherit_env : Bool
+  cwd : String?
+}
+pub fn StdioConfig::new(command~ : String, args? : Array[String], env? : Map[String, String], inherit_env? : Bool, cwd? : String) -> Self
+
+pub struct StdioMCPTransport {
+  config : StdioConfig
+  // private fields
+}
+pub fn StdioMCPTransport::new(StdioConfig) -> Self
+pub impl MCPTransport for StdioMCPTransport
+
+// Type aliases
+pub using @builtin {type Json as MCPClientCapabilities}
+
+pub type MCPElicitationHandler = async (Json) -> Json
+
+pub using @builtin {type Json as MCPServerCapabilities}
+
+// Traits
+pub(open) trait MCPTransport {
+  async fn start(Self) -> Unit
+  async fn send(Self, JSONRPCMessage, MCPTransportSendOptions) -> Array[JSONRPCMessage]
+  async fn close(Self, MCPTransportCloseOptions) -> Unit
+  fn protocol_version(Self) -> String?
+  fn set_protocol_version(Self, String) -> Unit
+}
+
+pub(open) trait OAuthClientProvider {
+  async fn tokens(Self) -> OAuthTokens?
+  async fn save_tokens(Self, OAuthTokens) -> Unit
+  async fn redirect_to_authorization(Self, String) -> Unit
+  async fn save_code_verifier(Self, String) -> Unit
+  async fn code_verifier(Self) -> String
+  fn redirect_url(Self) -> String
+  fn client_metadata(Self) -> OAuthClientMetadata
+  async fn client_information(Self) -> OAuthClientInformation?
+  async fn save_client_information(Self, OAuthClientInformation) -> Unit
+  async fn invalidate_credentials(Self, String) -> Unit
+}

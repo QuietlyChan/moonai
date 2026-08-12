@@ -16,9 +16,8 @@ core that applications can build on.
 This is an independent community project and is not affiliated with Vercel.
 
 > Status: early alpha. APIs may change before `1.0.0`. The current release
-> supports the native target, non-streaming and streaming text generation,
-> embeddings, legacy completions, image generation, Anthropic Messages,
-> Alibaba DashScope, DeepSeek, and MiniMax adapters.
+> supports the native target, mainstream text and media providers, an MCP
+> client, and Harness runtime adapters for OpenCode, Pi, and DeepAgents.
 
 ## Current milestone
 
@@ -43,6 +42,13 @@ This is an independent community project and is not affiliated with Vercel.
 - MiniMax Chat Completions and asynchronous video generation with polling.
 - OpenAI buffered audio transcription and Realtime Whisper transcription over
   the provider-neutral `AudioStream` contract.
+- ByteDance ModelArk Seedream image and Seedance asynchronous video generation,
+  plus Moonshot AI Chat Completions with thinking controls and structured output.
+- MCP Streamable HTTP, SSE, and stdio transports, OAuth discovery, tools,
+  resources, prompts, completions, and MCP Apps resources.
+- Harness V1 sessions, lifecycle state, sandboxing, tool approvals, diagnostics,
+  WebSocket bridges, and persistent stdio NDJSON bridges with OpenCode, Pi, and
+  DeepAgents adapters.
 - Text, URL/base64 image, audio, and file input parts, with explicit protocol
   validation when an adapter does not support a media type.
 - Normalized text, reasoning, tool-call, finish, error, usage, and optional raw
@@ -75,6 +81,13 @@ This is an independent community project and is not affiliated with Vercel.
 | `QuietlyChan/moonai/alibaba` | Alibaba DashScope Chat, embeddings, and video adapter |
 | `QuietlyChan/moonai/deepseek` | DeepSeek Chat Completions adapter |
 | `QuietlyChan/moonai/minimax` | MiniMax Chat and video adapter |
+| `QuietlyChan/moonai/bytedance` | ByteDance ModelArk Seedream image and Seedance video adapter |
+| `QuietlyChan/moonai/moonshotai` | Moonshot AI Chat Completions, thinking, and structured output adapter |
+| `QuietlyChan/moonai/mcp` | MCP client, HTTP/SSE/stdio transports, OAuth, tools, and Apps resources |
+| `QuietlyChan/moonai/harness` | Harness V1 contracts, sandboxing, lifecycle, diagnostics, and WebSocket/NDJSON bridges |
+| `QuietlyChan/moonai/harness_opencode` | OpenCode Harness adapter |
+| `QuietlyChan/moonai/harness_pi` | Pi Harness adapter |
+| `QuietlyChan/moonai/harness_deepagents` | DeepAgents Harness adapter |
 | `QuietlyChan/moonai/testing` | Deterministic mocks for the provider-neutral model contracts |
 | `QuietlyChan/moonai/cmd/main` | Optional executable smoke test; not required by the library |
 
@@ -143,6 +156,41 @@ Unmatched models and Files/Skills capabilities are delegated to an optional
 `fallback_provider`. This lets `provider` traits, `ai/prompt`, and
 `provider_utils::HttpTransport` compose at the application boundary without a
 module-root compatibility facade.
+
+### Harness, MCP, and CLI bridges
+
+`harness` mirrors AI SDK's coding-agent runtime boundary. `HarnessV1` and
+`HarnessV1Session` model session creation, prompts, tool results and approvals,
+suspend, continue, detach, stop, and destroy. `HarnessV1NetworkSandboxSession`
+keeps the concrete sandbox implementation replaceable. The default bridge
+protocol remains custom NDJSON, while the same contract also supports WebSocket
+and persistent stdio child processes so local CLIs can be wrapped directly.
+
+```moonbit
+///|
+let transport = @harness.HarnessV1BridgeTransportConfig::stdio(
+  @harness.HarnessV1StdioConfig::new(
+    command="your-harness-bridge",
+    args=["--stdio"],
+  ),
+)
+
+///|
+let agent = @harness_opencode.createOpenCode(
+  @harness_opencode.OpenCodeHarnessSettings::new(transport=transport),
+)
+```
+
+`harness_opencode`, `harness_pi`, and `harness_deepagents` reuse the session
+and bridge contract and expose `createOpenCode`, `createPi`, and
+`createDeepAgents`. With a custom transport, an application controls CLI
+commands, arguments, environment, and working directory; without one, an
+adapter can connect to a sandbox-exposed WebSocket bridge.
+
+`mcp` mirrors the AI SDK MCP client boundary. Create a client with
+`createMCPClient`, then use `listTools`, `tools`, `callTool`, `listResources`,
+`readResource`, and the prompt/completion APIs against an MCP server.
+`StdioMCPTransport` connects a local MCP CLI to a MoonBit application.
 
 ## Installation
 
@@ -630,7 +678,8 @@ moon run examples/web_agent/backend
 The Web Agent exposes buffered JSON, streaming NDJSON, and AI SDK UI message
 stream v1 SSE endpoints. Run `examples/build_standalone.ps1` on Windows to
 produce `dist/moonai-agent.exe` with the default frontend compiled into the
-binary.
+binary. `examples/basic_chat` and `examples/tool_calling` are also browser-free
+MoonBit CLI examples.
 
 ## Development
 
@@ -647,8 +696,8 @@ The optional smoke-test executable can be run with:
 OPENAI_API_KEY=... moon run src/cmd/main
 ```
 
-MoonBit-aware documentation is maintained in
-[`README.mbt.md`](README.mbt.md).
+The default MoonBit package documentation is the Chinese README; the English
+translation is available at [`README.en.md`](README.en.md).
 
 ## License
 

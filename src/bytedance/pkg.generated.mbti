@@ -1,0 +1,78 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/bytedance"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn byteDanceImage(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+
+pub fn byteDanceVideo(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.VideoModelV4
+
+pub fn byte_dance_image(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+
+pub fn byte_dance_video(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.VideoModelV4
+
+pub fn createByteDance(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ByteDanceProvider
+
+pub fn create_byte_dance(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ByteDanceProvider
+
+// Errors
+
+// Types and methods
+pub struct ByteDanceImageModel {
+  // private fields
+}
+pub fn ByteDanceImageModel::new(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> Self
+pub impl @provider.ImageModelV4 for ByteDanceImageModel
+
+pub(all) struct ByteDanceImageModelOptions {
+  watermark : Bool?
+  output_format : String?
+  size : String?
+  sequential_image_generation : String?
+  max_images : Int?
+  optimize_prompt_mode : String?
+  extensions : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn ByteDanceImageModelOptions::new(watermark? : Bool, output_format? : String, size? : String, sequential_image_generation? : String, max_images? : Int, optimize_prompt_mode? : String, extensions? : Map[String, Json]) -> Self raise
+pub fn ByteDanceImageModelOptions::to_provider_options(Self) -> Map[String, Json]
+
+pub struct ByteDanceProvider {
+  // private fields
+}
+pub fn ByteDanceProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn ByteDanceProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn ByteDanceProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn ByteDanceProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub impl @provider.ProviderV4 for ByteDanceProvider
+
+pub(all) struct ByteDanceVideoModelOptions {
+  watermark : Bool?
+  generate_audio : Bool?
+  camera_fixed : Bool?
+  return_last_frame : Bool?
+  service_tier : String?
+  draft : Bool?
+  last_frame_image : String?
+  reference_images : Array[String]
+  reference_videos : Array[String]
+  reference_audio : Array[String]
+  poll_interval_ms : Int?
+  poll_timeout_ms : Int?
+  extensions : Map[String, Json]
+} derive(Eq, @debug.Debug)
+pub fn ByteDanceVideoModelOptions::new(watermark? : Bool, generate_audio? : Bool, camera_fixed? : Bool, return_last_frame? : Bool, service_tier? : String, draft? : Bool, last_frame_image? : String, reference_images? : Array[String], reference_videos? : Array[String], reference_audio? : Array[String], poll_interval_ms? : Int, poll_timeout_ms? : Int, extensions? : Map[String, Json]) -> Self raise
+pub fn ByteDanceVideoModelOptions::to_provider_options(Self) -> Map[String, Json]
+
+// Type aliases
+pub type ByteDanceImageModelId = String
+
+pub type ByteDanceVideoModelId = String
+
+// Traits

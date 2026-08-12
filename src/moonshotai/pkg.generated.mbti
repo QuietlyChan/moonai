@@ -1,0 +1,52 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/moonshotai"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn convertMoonshotAIChatUsage(Json?) -> @provider.LanguageModelV4Usage
+
+pub fn convert_moonshotai_chat_usage(Json?) -> @provider.LanguageModelV4Usage
+
+pub fn createMoonshotAI(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MoonshotAIProvider
+
+pub fn create_moonshot_ai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MoonshotAIProvider
+
+pub fn getModelStructuredOutputSupport(String) -> Bool
+
+pub fn get_model_structured_output_support(String) -> Bool
+
+pub fn moonshotai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+pub(all) struct MoonshotAILanguageModelOptions {
+  reasoning_effort : String?
+  thinking_type : String?
+  thinking_budget_tokens : Int?
+  reasoning_history : String?
+} derive(Eq, @debug.Debug)
+pub fn MoonshotAILanguageModelOptions::new(reasoning_effort? : String, thinking_type? : String, thinking_budget_tokens? : Int, reasoning_history? : String) -> Self raise
+pub fn MoonshotAILanguageModelOptions::to_provider_options(Self) -> Map[String, Json]
+
+pub struct MoonshotAIProvider {
+  // private fields
+}
+pub fn MoonshotAIProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn MoonshotAIProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn MoonshotAIProvider::chat_model(Self, String) -> &@provider.LanguageModelV4
+pub fn MoonshotAIProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn MoonshotAIProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for MoonshotAIProvider
+
+// Type aliases
+pub type MoonshotAIChatModelId = String
+
+// Traits

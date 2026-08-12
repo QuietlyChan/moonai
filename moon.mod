@@ -9,7 +9,7 @@ import {
   "cc06b/mooncry@0.13.1",
 }
 
-readme = "README.mbt.md"
+readme = "README.md"
 
 repository = "https://github.com/QuietlyChan/moonai"
 

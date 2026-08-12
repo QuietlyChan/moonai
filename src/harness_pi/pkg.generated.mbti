@@ -1,0 +1,60 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/harness_pi"
+
+import {
+  "QuietlyChan/moonai/harness",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const DEFAULT_PI_GATEWAY_MODEL_ID : String = "anthropic/claude-sonnet-4.6"
+
+pub const VERSION : String = "0.1.0"
+
+pub fn createPi(settings? : PiHarnessSettings) -> PiHarness
+
+pub fn create_pi(settings? : PiHarnessSettings) -> PiHarness
+
+pub let pi : PiHarness
+
+pub fn resolvePiEnv(options? : PiAuthOptions, environment? : Map[String, String]) -> Map[String, String]
+
+pub fn resolve_pi_env(options? : PiAuthOptions, environment? : Map[String, String]) -> Map[String, String]
+
+pub fn resolve_pi_model(String?, environment? : Map[String, String]) -> String?
+
+// Errors
+
+// Types and methods
+pub(all) enum PiAuthOptions {
+  PiGatewayAuth(api_key~ : String?, base_url~ : String?)
+  PiCustomEnv(Map[String, String])
+} derive(Eq, @debug.Debug)
+
+pub struct PiHarness {
+  settings : PiHarnessSettings
+}
+pub impl @harness.HarnessV1 for PiHarness
+
+pub(all) struct PiHarnessSettings {
+  auth : PiAuthOptions?
+  model : String?
+  thinking_level : PiThinkingLevel?
+  agent_dir : String?
+  transport : @harness.HarnessV1BridgeTransportConfig?
+}
+pub fn PiHarnessSettings::new(auth? : PiAuthOptions, model? : String, thinking_level? : PiThinkingLevel, agent_dir? : String, transport? : @harness.HarnessV1BridgeTransportConfig) -> Self
+
+pub(all) enum PiThinkingLevel {
+  PiThinkingOff
+  PiThinkingMinimal
+  PiThinkingLow
+  PiThinkingMedium
+  PiThinkingHigh
+  PiThinkingXHigh
+} derive(Eq, @debug.Debug)
+pub fn PiThinkingLevel::to_string(Self) -> String
+
+// Type aliases
+
+// Traits
