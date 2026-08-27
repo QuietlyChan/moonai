@@ -159,7 +159,7 @@ CLI 命令、参数、环境变量和工作目录；未传入时，适配器可�
 
 ## 安装
 
-该包尚未发布到 Mooncakes。首次发布后可通过以下命令安装：
+项目已发布到 Mooncakes，当前版本为 `0.1.0`，可直接安装：
 
 ```shell
 moon add QuietlyChan/moonai
@@ -178,6 +178,34 @@ import {
 如果要基于这两种协议开发第三方服务商适配器，可直接依赖
 `QuietlyChan/moonai/openai_compatible` 或
 `QuietlyChan/moonai/open_responses`。
+
+## 移植说明
+
+`moonai` 是对 [Vercel AI SDK](https://github.com/vercel/ai)（文档：
+[ai-sdk.dev](https://ai-sdk.dev/)）公开抽象和协议行为的 MoonBit 重新实现，参考目标为
+AI SDK 7。Vercel AI SDK 采用 Apache License 2.0；本项目没有复制其 TypeScript 源码，
+仅依据公开文档、公开协议和可观察的 API 语义实现，并独立维护 MoonBit 代码。
+
+本次移植范围包括：
+
+- `packages/ai` 的文本生成、流式事件、多步骤工具循环、prompt 规范化、模型引用和
+  provider registry 等稳定边界；
+- `packages/provider` 与 `packages/provider-utils` 的模型契约、消息/内容类型、SSE、
+  HTTP、重试、诊断和工具辅助协议；
+- OpenAI、Anthropic、Alibaba、DeepSeek、MiniMax、OpenAI-compatible、Open Responses
+  等 provider 适配器，以及 MCP 和 Harness 的相关协议边界；
+- 面向前端 `useChat` 的 UI message stream v1 SSE 兼容端点（见 `examples/web_agent`）。
+
+针对 MoonBit 的适配和修改包括：将 TypeScript 接口改为 MoonBit trait/enum，使用
+`Result`/异常和 native `async` 运行时，注入可替换的 `HttpTransport`，把 Node.js 的
+流和进程边界改为 MoonBit native HTTP、WebSocket、stdio 与 NDJSON bridge，并为 provider
+能力增加显式的编译期类型和协议校验。API 命名遵循 MoonBit 习惯，不承诺与 TypeScript
+AI SDK 源码或运行时二进制兼容。
+
+暂不在移植范围内的功能包括：Next.js/Svelte 等 JavaScript 框架服务端集成，React
+`useChat` hook 本身（仓库仅提供可连接的协议示例），Node.js/Edge 专有运行时、遥测与
+Vercel 平台托管能力，以及 Vercel AI SDK 中未列入本项目包结构的实验性 provider 和 UI
+组件。后续是否支持这些能力以独立的 MoonBit API 设计为准。
 
 ## 非流式文本生成
 
@@ -627,4 +655,5 @@ MoonBit 工具链和包站使用同一份中文主文档；英文版本位于 [`
 
 ## 许可证
 
-项目采用 [Apache License 2.0](LICENSE)。
+项目采用 [Apache License 2.0](LICENSE)。第三方依赖和参考项目的许可证归属见
+[THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md)。

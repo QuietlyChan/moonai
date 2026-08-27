@@ -194,8 +194,8 @@ adapter can connect to a sandbox-exposed WebSocket bridge.
 
 ## Installation
 
-The package has not been published to Mooncakes yet. After the first release,
-it will be installable with:
+The package is published on Mooncakes. The current release is `0.1.0` and can
+be installed with:
 
 ```shell
 moon add QuietlyChan/moonai
@@ -214,6 +214,42 @@ import {
 Import `QuietlyChan/moonai/openai_compatible` or
 `QuietlyChan/moonai/open_responses` directly when building a third-party
 provider package on one of those wire protocols.
+
+## Porting Notes
+
+`moonai` is an independent MoonBit reimplementation of the public abstractions
+and protocol behavior of [Vercel AI SDK](https://github.com/vercel/ai), with
+AI SDK 7 as the reference target. Vercel AI SDK is licensed under the Apache
+License 2.0. This repository does not copy its TypeScript source; it uses public
+documentation, public protocols, and observable API semantics as references and
+maintains a separate MoonBit implementation.
+
+The port covers:
+
+- Stable boundaries from `packages/ai`: text generation, streaming events,
+  multi-step tool loops, prompt normalization, model references, and provider
+  registries.
+- Model contracts and protocol helpers from `packages/provider` and
+  `packages/provider-utils`, including message/content types, SSE, HTTP,
+  retries, diagnostics, and tool helpers.
+- Provider adapters for OpenAI, Anthropic, Alibaba, DeepSeek, MiniMax,
+  OpenAI-compatible, and Open Responses, together with the MCP and Harness
+  protocol boundaries.
+- An AI SDK UI message stream v1 SSE endpoint for frontend clients (see
+  `examples/web_agent`).
+
+MoonBit-specific adaptations replace TypeScript interfaces with MoonBit traits
+and enums, use `Result`/exceptions and the native `async` runtime, inject a
+replaceable `HttpTransport`, and map Node.js stream/process boundaries to native
+HTTP, WebSocket, stdio, and NDJSON bridges. Naming follows MoonBit conventions;
+source-level or binary compatibility with the TypeScript SDK is not promised.
+
+Not currently ported are Next.js/Svelte and other JavaScript framework server
+integrations, the React `useChat` hook itself (the repository provides a
+compatible protocol example), Node.js/Edge-specific runtimes, telemetry and
+Vercel hosting features, and experimental providers or UI components outside
+the package map above. Future support will follow a dedicated MoonBit API
+design.
 
 ## Non-streaming text
 
@@ -701,4 +737,6 @@ translation is available at [`README.en.md`](README.en.md).
 
 ## License
 
-Licensed under the [Apache License 2.0](LICENSE).
+Licensed under the [Apache License 2.0](LICENSE). See
+[THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md) for third-party dependency
+and reference-project attribution.
