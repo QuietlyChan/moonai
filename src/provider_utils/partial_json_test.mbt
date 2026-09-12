@@ -9,9 +9,7 @@ test "partial json parses complete values directly" {
 test "partial json repairs a truncated string value" {
   let result = parse_partial_json("{\"a\": \"Hello wo")
   assert_eq(result.state, PartialSuccessfulRepair)
-  assert_true(
-      result.value is { "a": String("Hello wo"), .. }
-    )
+  assert_true(result.value is { "a": String("Hello wo"), .. })
 }
 
 ///|

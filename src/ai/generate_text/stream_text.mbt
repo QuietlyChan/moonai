@@ -41,6 +41,9 @@ pub async fn stream_text(
   experimental_download? : @prompt.DownloadFunction,
   smooth? : SmoothChunking,
   smooth_delay_ms? : Int = 10,
+  output? : OutputSpec,
+  on_partial_output? : async (Json) -> Unit = _ => (),
+  on_element? : async (Json) -> Unit = _ => (),
   on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit = _ => (),
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
@@ -155,14 +158,98 @@ pub async fn stream_text(
     let response_started_at = @env.now()
     let accumulator = StreamStepAccumulator::new()
     let ongoing_tool_call_names : Map[String, String] = Map([])
-    // Optional smoothing re-chunks text/reasoning deltas at natural
-    // boundaries before delivery; every other event flushes unchanged.
+    // Output API: stream partial objects / completed array elements from
+    // the accumulated text while the model is still generating.
+    let initial_output : @provider_utils.PartialJsonResult = {
+      value: Json::string(""),
+      state: @provider_utils.PartialUndefinedInput,
+    }
     let smoother = match smooth {
       Some(chunking) => Some(SmoothTextTransformer::new(chunking~))
       None => None
     }
+    let output_text_buffer = Ref("")
+    let output_tracker : Ref[(@provider_utils.PartialJsonResult, Int)] = Ref(
+      (initial_output, 0),
+    )
+    let deliver_output_delta = async fn(delta : String) -> Unit {
+      output_text_buffer.val = output_text_buffer.val + delta
+      match output {
+        Some(OutputText) => ()
+        Some(_) => {
+          let prev = output_tracker.val.0
+          let prev_elements = output_tracker.val.1
+          let current = @provider_utils.parse_partial_json(
+            output_text_buffer.val,
+          )
+          // Only deliver once the parse has started producing a value.
+          let progressed = (
+              prev.state is @provider_utils.PartialUndefinedInput &&
+              current.state
+              is (@provider_utils.PartialSuccessfulRepair
+              | @provider_utils.PartialSuccessfulParse)
+            ) ||
+            (
+              prev.state is @provider_utils.PartialSuccessfulRepair &&
+              current.state
+              is (@provider_utils.PartialSuccessfulRepair
+              | @provider_utils.PartialSuccessfulParse)
+            )
+          if progressed {
+            match output {
+              Some(OutputObject(..)) => {
+                let snapshot = current.value.stringify()
+                let prev_snapshot = prev.value.stringify()
+                if snapshot != prev_snapshot {
+                  on_partial_output(current.value) catch {
+                    _ => ()
+                  }
+                }
+              }
+              Some(OutputArray(..)) => {
+                let prev_count = OutputSpec::array_elements(prev.value).length()
+                let elements = OutputSpec::array_elements(current.value)
+                let total = elements.length()
+                let mut index = prev_count
+                while index < total {
+                  on_element(elements[index]) catch {
+                    _ => ()
+                  }
+                  index = index + 1
+                }
+              }
+              _ => ()
+            }
+            output_tracker.val = (current, output_tracker.val.1)
+          } else {
+            // Array elements that completed in this delta are delivered
+            // incrementally after the initial repair.
+            match (output, current.value) {
+              (Some(OutputArray(..)), { "elements": Array(items), .. }) => {
+                let delivered = output_tracker.val.1
+                let mut index = delivered
+                while index < items.length() {
+                  on_element(items[index]) catch {
+                    _ => ()
+                  }
+                  index = index + 1
+                }
+                output_tracker.val = (output_tracker.val.0, items.length())
+              }
+              _ => ()
+            }
+          }
+        }
+        None => ()
+      }
+    }
+
     let stream_result = prepared_step.model.do_stream(call_options, event => {
       accumulator.process(event)
+      match event {
+        @provider.V4TextDelta(delta~, ..) => deliver_output_delta(delta)
+        _ => ()
+      }
       match smoother {
         Some(transformer) =>
           for part in transformer.process(event) {
