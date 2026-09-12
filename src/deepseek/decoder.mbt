@@ -185,15 +185,18 @@ fn decode_deepseek_chat_response(
     },
   )
   let metadata = @provider.merge_provider_metadata(
-    @provider_utils.provider_metadata_from_json(json, provider_name),
-    deepseek_usage_metadata(
-      if usage_json is Null {
-        Json::empty_object()
-      } else {
-        usage_json
-      },
-      provider_name,
+    @provider.merge_provider_metadata(
+      @provider_utils.provider_metadata_from_json(json, provider_name),
+      deepseek_usage_metadata(
+        if usage_json is Null {
+          Json::empty_object()
+        } else {
+          usage_json
+        },
+        provider_name,
+      ),
     ),
+    deepseek_response_extras_metadata(choice, json, provider_name),
   )
   {
     content,
@@ -226,6 +229,9 @@ priv struct DeepSeekStreamDecoder {
   mut text_active : Bool
   mut reasoning_active : Bool
   mut finalized : Bool
+  mut system_fingerprint : String?
+  logprobs_content : Array[Json]
+  logprobs_reasoning : Array[Json]
 }
 
 ///|
@@ -249,6 +255,9 @@ fn DeepSeekStreamDecoder::new(
     text_active: false,
     reasoning_active: false,
     finalized: false,
+    system_fingerprint: None,
+    logprobs_content: [],
+    logprobs_reasoning: [],
   }
 }
 
@@ -271,6 +280,29 @@ fn DeepSeekStreamDecoder::record_metadata(
   if !self.metadata_emitted {
     self.metadata_emitted = true
     events.push(@provider.V4ResponseMetadataReady(response))
+  }
+  match json {
+    { "system_fingerprint": String(value), .. } => self.system_fingerprint = Some(value)
+    _ => ()
+  }
+  match json {
+    { "choices": [{ "logprobs": Object(lp), .. }, ..], .. } => {
+      match lp.get("content") {
+        Some(Array(items)) =>
+          for item in items {
+            self.logprobs_content.push(item)
+          }
+        _ => ()
+      }
+      match lp.get("reasoning_content") {
+        Some(Array(items)) =>
+          for item in items {
+            self.logprobs_reasoning.push(item)
+          }
+        _ => ()
+      }
+    }
+    _ => ()
   }
   self.provider_metadata = @provider.merge_provider_metadata(
     self.provider_metadata,
@@ -765,7 +797,22 @@ fn DeepSeekStreamDecoder::v4_finish_reason(
 fn DeepSeekStreamDecoder::provider_metadata_snapshot(
   self : DeepSeekStreamDecoder,
 ) -> Map[String, Json] {
-  @provider.merge_provider_metadata(
+  let extras : Map[String, Json] = Map([])
+  match self.system_fingerprint {
+    Some(value) => extras["systemFingerprint"] = Json::string(value)
+    None => ()
+  }
+  if self.logprobs_content.length() > 0 || self.logprobs_reasoning.length() > 0 {
+    let logprobs : Map[String, Json] = Map([])
+    if self.logprobs_content.length() > 0 {
+      logprobs["content"] = Json::array(self.logprobs_content.copy())
+    }
+    if self.logprobs_reasoning.length() > 0 {
+      logprobs["reasoning_content"] = Json::array(self.logprobs_reasoning.copy())
+    }
+    extras["logprobs"] = Json::object(logprobs)
+  }
+  let merged = @provider.merge_provider_metadata(
     self.provider_metadata,
     deepseek_usage_metadata(
       if self.usage_json is Null {
@@ -776,6 +823,13 @@ fn DeepSeekStreamDecoder::provider_metadata_snapshot(
       self.provider_name,
     ),
   )
+  if extras.length() > 0 {
+    @provider.merge_provider_metadata(merged, Map([
+      (deepseek_provider_base(self.provider_name), Json::object(extras)),
+    ]))
+  } else {
+    merged
+  }
 }
 
 ///|
@@ -783,4 +837,64 @@ fn DeepSeekStreamDecoder::response_metadata_snapshot(
   self : DeepSeekStreamDecoder,
 ) -> @provider.ResponseMetadata? {
   self.response_metadata
+}
+
+///|
+/// Collect response extras AI SDK exposes under the DeepSeek namespace:
+/// the system fingerprint and the aggregated log probabilities
+/// (AI SDK #19407/#19429).
+fn deepseek_response_extras_metadata(
+  choice : Json,
+  root : Json,
+  provider_name : String,
+) -> Map[String, Json] {
+  let details : Map[String, Json] = Map([])
+  match root {
+    { "system_fingerprint": value, .. } if !(value is Null) =>
+      details["systemFingerprint"] = value
+    _ => ()
+  }
+  let content : Array[Json] = []
+  let reasoning : Array[Json] = []
+  match choice {
+    {
+      "logprobs": {
+        "content": Array(items),
+        "reasoning_content": Array(reasoning_items),
+        ..
+      },
+      ..
+    } => {
+      for item in items {
+        content.push(item)
+      }
+      for item in reasoning_items {
+        reasoning.push(item)
+      }
+    }
+    { "logprobs": { "content": Array(items), .. }, .. } =>
+      for item in items {
+        content.push(item)
+      }
+    { "logprobs": { "reasoning_content": Array(items), .. }, .. } =>
+      for item in items {
+        reasoning.push(item)
+      }
+    _ => ()
+  }
+  if content.length() > 0 || reasoning.length() > 0 {
+    let logprobs : Map[String, Json] = Map([])
+    if content.length() > 0 {
+      logprobs["content"] = Json::array(content)
+    }
+    if reasoning.length() > 0 {
+      logprobs["reasoning_content"] = Json::array(reasoning)
+    }
+    details["logprobs"] = Json::object(logprobs)
+  }
+  if details.length() > 0 {
+    Map([(deepseek_provider_base(provider_name), Json::object(details))])
+  } else {
+    Map([])
+  }
 }
