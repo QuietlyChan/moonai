@@ -509,39 +509,36 @@ async fn MiniMaxVideoModel::generate_video_v4(
         timeout_ms=poll_timeout_ms,
       )
     }
-    let response = @provider_utils.get_json(
-      provider_name=self.provider_name,
+    // Protected polling: redirects are manually followed and validated per
+    // hop against the trusted API origin (AI SDK #20124).
+    let (response_value, poll_response_metadata) = self.minimax_protected_status_json(
       url=@provider_utils.append_path(
         self.base_url,
         "/v2/query/video_generation/" +
         @provider_utils.encode_path_segment(task_id),
       ),
       headers=self.request_headers_with(options.headers),
-      timeout_ms=self.idle_timeout_ms,
       retry_policy=options.retry_policy,
-      cancellation_token?,
-      error_to_message=minimax_video_error_message,
-      validate_response=validate_minimax_video_status_response,
-      transport=self.http_transport,
+      cancellation_token=options.cancellation_token,
     )
-    let status : String? = match response.value {
+    let status : String? = match response_value {
       { "task": { "status": String(value), .. }, .. } => Some(value)
       { "task": { "status": Null, .. }, .. } | { "task": { .. }, .. } => None
       _ =>
         raise @provider.InvalidResponseDataError(
           message="MiniMax video status response did not contain task",
-          data=response.value,
+          data=response_value,
         )
     }
     if status == Some("succeeded") {
-      let video_url = match response.value {
+      let video_url = match response_value {
         { "task": { "content": { "url": String(url), .. }, .. }, .. } if url !=
           "" => url
         _ =>
           raise @provider.InvalidResponseDataError(
             message="MiniMax video generation completed but no video URL was returned. Task ID: " +
               task_id,
-            data=response.value,
+            data=response_value,
           )
       }
       let resolved_videos : Array[Json] = [
@@ -559,22 +556,22 @@ async fn MiniMaxVideoModel::generate_video_v4(
             } : Json),
         ),
       ])
-      match response.value {
+      match response_value {
         { "task": { "duration": Number(value, ..), .. }, .. } =>
           provider_details["duration"] = Json::number(value)
         _ => ()
       }
-      match response.value {
+      match response_value {
         { "task": { "ratio": String(value), .. }, .. } =>
           provider_details["ratio"] = Json::string(value)
         _ => ()
       }
-      match response.value {
+      match response_value {
         { "task": { "resolution": String(value), .. }, .. } =>
           provider_details["resolution"] = Json::string(value)
         _ => ()
       }
-      match response.value {
+      match response_value {
         { "task": { "usage": Object(usage), .. }, .. } => {
           let usage_fields : Map[String, Json] = Map([])
           match usage.get("total_seconds") {
@@ -599,32 +596,39 @@ async fn MiniMaxVideoModel::generate_video_v4(
       let metadata : Map[String, Json] = Map([
         ("minimax", Json::object(provider_details)),
       ])
-      let response_metadata = @provider.merge_response_metadata(
-        Some(
-          @provider.ResponseMetadata::new(
-            model_id=self.model_id,
-            created_at=request_created_at,
-          ),
-        ),
-        response.response,
-      )
+      let merged_metadata : @provider.ResponseMetadata? = match
+        poll_response_metadata {
+        Some(poll) =>
+          Some(
+            @provider.merge_response_metadata(
+              Some(
+                @provider.ResponseMetadata::new(
+                  model_id=self.model_id,
+                  created_at=request_created_at,
+                ),
+              ),
+              poll,
+            ),
+          )
+        None => None
+      }
       return @provider.VideoModelV4Result::new(
         [@provider.VideoV4Url(url=video_url, media_type="video/mp4")],
         warnings~,
         provider_metadata=metadata,
         request=create_response.request,
-        response=response_metadata,
+        response?=merged_metadata,
       )
     }
     if status == Some("failed") ||
       status == Some("cancelled") ||
       status == Some("expired") {
-      let error_message = match response.value {
+      let error_message = match response_value {
         { "task": { "error": { "message": String(value), .. }, .. }, .. } =>
           Some(value)
         _ => None
       }
-      let error_code = match response.value {
+      let error_code = match response_value {
         { "task": { "error": { "code": String(value), .. }, .. }, .. } =>
           Some(value)
         { "task": { "error": { "code": Number(value, ..), .. }, .. }, .. } =>
@@ -651,7 +655,7 @@ async fn MiniMaxVideoModel::generate_video_v4(
           "MiniMax video generation was cancelled. Task ID: " + task_id
         _ => "MiniMax video generation request expired. Task ID: " + task_id
       }
-      raise @provider.InvalidResponseDataError(message~, data=response.value)
+      raise @provider.InvalidResponseDataError(message~, data=response_value)
     }
   }
   raise @provider.InvalidResponseDataError(

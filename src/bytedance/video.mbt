@@ -342,31 +342,27 @@ async fn ByteDanceVideoModel::generate(
   let poll_interval_ms = provider_options.poll_interval_ms.unwrap_or(3000)
   let poll_timeout_ms = provider_options.poll_timeout_ms.unwrap_or(300_000)
   let started_at = @env.now()
-  let mut final_response : @provider_utils.JsonHttpResponse? = None
+  let mut final_response : (Json, @provider.ResponseMetadata?)? = None
   while true {
-    let response = @provider_utils.get_json(
-      provider_name=self.provider_name,
+    let (response_value, response_metadata) = self.protected_status_json(
       url=@provider_utils.append_path(
         self.base_url,
         "/contents/generations/tasks/" +
         @provider_utils.encode_path_segment(task_id),
       ),
       headers~,
-      timeout_ms=self.idle_timeout_ms,
       retry_policy=options.retry_policy,
-      cancellation_token?=options.cancellation_token,
-      error_to_message=bytedance_error_message,
-      transport=self.http_transport,
+      cancellation_token=options.cancellation_token,
     )
-    let status = bytedance_task_status(response.value).to_lower()
+    let status = bytedance_task_status(response_value).to_lower()
     if status == "succeeded" {
-      final_response = Some(response)
+      final_response = Some((response_value, response_metadata))
       break
     }
     if status == "failed" || status == "canceled" {
       raise @provider.InvalidResponseDataError(
-        message=bytedance_failure_message(task_id, response.value),
-        data=response.value,
+        message=bytedance_failure_message(task_id, response_value),
+        data=response_value,
       )
     }
     if @env.now() - started_at > poll_timeout_ms.to_uint64() {
@@ -381,10 +377,10 @@ async fn ByteDanceVideoModel::generate(
       options.cancellation_token,
     )
   }
-  let response = final_response.unwrap()
-  let video_url = bytedance_video_url(response.value)
+  let response_value = final_response.unwrap()
+  let video_url = bytedance_video_url(response_value.0)
   let metadata : Map[String, Json] = Map([("taskId", Json::string(task_id))])
-  match response.value {
+  match response_value.0 {
     { "usage": value, .. } if !(value is Null) => metadata["usage"] = value
     _ => ()
   }
@@ -394,7 +390,7 @@ async fn ByteDanceVideoModel::generate(
     provider_metadata={ "bytedance": Json::object(metadata) },
     request=create_response.request,
     response=@provider.merge_response_metadata(
-      Some(response.response),
+      response_value.1,
       @provider.ResponseMetadata::new(
         model_id=self.model_id_value,
         created_at=(@env.now() / 1000UL).to_int(),
@@ -491,34 +487,30 @@ async fn ByteDanceVideoModel::video_operation_status(
     self.headers,
     call_options.headers,
   )
-  let response = @provider_utils.get_json(
-    provider_name=self.provider_name,
+  let (response, response_http) = self.protected_status_json(
     url=@provider_utils.append_path(
       self.base_url,
       "/contents/generations/tasks/" +
       @provider_utils.encode_path_segment(task_id),
     ),
     headers~,
-    timeout_ms=self.idle_timeout_ms,
     retry_policy=call_options.retry_policy,
-    cancellation_token?=call_options.cancellation_token,
-    error_to_message=bytedance_error_message,
-    transport=self.http_transport,
+    cancellation_token=call_options.cancellation_token,
   )
-  let status = bytedance_task_status(response.value).to_lower()
+  let status = bytedance_task_status(response).to_lower()
   if status == "succeeded" {
-    let video_url = bytedance_video_url(response.value)
+    let video_url = bytedance_video_url(response)
     let metadata : Map[String, Json] = Map([("taskId", Json::string(task_id))])
-    match response.value {
+    match response {
       { "usage": value, .. } if !(value is Null) => metadata["usage"] = value
       _ => ()
     }
     let result = @provider.VideoModelV4Result::new(
       [@provider.VideoV4Url(url=video_url, media_type="video/mp4")],
+      warnings=[],
       provider_metadata={ "bytedance": Json::object(metadata) },
-      request=response.request,
-      response=@provider.merge_response_metadata(
-        Some(response.response),
+      request?=None,
+      response?=Some(
         @provider.ResponseMetadata::new(
           model_id=self.model_id_value,
           created_at=(@env.now() / 1000UL).to_int(),
@@ -564,4 +556,30 @@ impl @provider.VideoModelV4 for ByteDanceVideoModel with fn do_status(
   call_options,
 ) -> @provider.VideoModelV4OperationStatusResult raise {
   self.video_operation_status(call_options)
+}
+
+///|
+/// Protected status JSON fetch: redirects are manually followed and every
+/// hop away from the trusted API origin is validated (AI SDK #20124).
+/// Returns the status JSON and the poll response metadata.
+async fn ByteDanceVideoModel::protected_status_json(
+  self : ByteDanceVideoModel,
+  url~ : String,
+  headers~ : Map[String, String],
+  retry_policy~ : @provider.RetryPolicy,
+  cancellation_token~ : @provider.CancellationToken?,
+) -> (Json, @provider.ResponseMetadata?) {
+  let response = @provider_utils.get_json_protected(
+    provider_name=self.provider_name,
+    url~,
+    headers~,
+    timeout_ms=self.idle_timeout_ms,
+    retry_policy~,
+    cancellation_token?,
+    error_to_message=bytedance_error_message,
+    trusted_origin=self.base_url,
+    transport=self.http_transport,
+  )
+  let metadata = response.response
+  (response.value, Some(metadata))
 }

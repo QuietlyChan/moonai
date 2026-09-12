@@ -89,39 +89,34 @@ async fn MiniMaxVideoModel::video_operation_status_v4(
   call_options : @provider.VideoModelV4OperationStatusCallOptions,
 ) -> @provider.VideoModelV4OperationStatusResult {
   let task_id = call_options.operation_id
-  let response = @provider_utils.get_json(
-    provider_name=self.provider_name,
-    url=@provider_utils.append_path(
-      self.base_url,
-      "/v2/query/video_generation/" +
-      @provider_utils.encode_path_segment(task_id),
-    ),
-    headers=self.request_headers_with(call_options.headers),
-    timeout_ms=self.idle_timeout_ms,
-    retry_policy=call_options.retry_policy,
-    cancellation_token?=call_options.cancellation_token,
-    error_to_message=minimax_video_error_message,
-    validate_response=validate_minimax_video_status_response,
-    transport=self.http_transport,
-  )
-  let status : String? = match response.value {
+  let response_value = self.minimax_protected_status_json(
+      url=@provider_utils.append_path(
+        self.base_url,
+        "/v2/query/video_generation/" +
+        @provider_utils.encode_path_segment(task_id),
+      ),
+      headers=self.request_headers_with(call_options.headers),
+      retry_policy=call_options.retry_policy,
+      cancellation_token=call_options.cancellation_token,
+    ).0
+  let status : String? = match response_value {
     { "task": { "status": String(value), .. }, .. } => Some(value)
     { "task": { "status": Null, .. }, .. } | { "task": { .. }, .. } => None
     _ =>
       raise @provider.InvalidResponseDataError(
         message="MiniMax video status response did not contain task",
-        data=response.value,
+        data=response_value,
       )
   }
   if status == Some("succeeded") {
-    let video_url = match response.value {
+    let video_url = match response_value {
       { "task": { "content": { "url": String(url), .. }, .. }, .. } if url != "" =>
         url
       _ =>
         raise @provider.InvalidResponseDataError(
           message="MiniMax video generation completed but no video URL was returned. Task ID: " +
             task_id,
-          data=response.value,
+          data=response_value,
         )
     }
     let provider_details : Map[String, Json] = Map([
@@ -138,15 +133,10 @@ async fn MiniMaxVideoModel::video_operation_status_v4(
     let result = @provider.VideoModelV4Result::new(
       [@provider.VideoV4Url(url=video_url, media_type="video/mp4")],
       provider_metadata=metadata,
-      request=response.request,
-      response=@provider.merge_response_metadata(
-        Some(
-          @provider.ResponseMetadata::new(
-            model_id=self.model_id,
-            created_at=(@env.now() / 1000UL).to_int(),
-          ),
-        ),
-        response.response,
+      request?=None,
+      response=@provider.ResponseMetadata::new(
+        model_id=self.model_id,
+        created_at=(@env.now() / 1000UL).to_int(),
       ),
     )
     @provider.VideoModelV4OperationStatusResult::new(
@@ -182,6 +172,36 @@ impl @provider.VideoModelV4 for MiniMaxVideoModel with fn do_start(
   options,
 ) -> @provider.VideoModelV4OperationStartResult raise {
   self.start_video_v4(options)
+}
+
+///|
+
+///|
+/// Poll one MiniMax video status URL with protected redirect handling:
+/// redirects away from the trusted API origin are validated per hop
+/// (AI SDK #20124).
+async fn MiniMaxVideoModel::minimax_protected_status_json(
+  self : MiniMaxVideoModel,
+  url~ : String,
+  headers~ : Map[String, String],
+  retry_policy~ : @provider.RetryPolicy,
+  cancellation_token~ : @provider.CancellationToken?,
+) -> (Json, @provider.ResponseMetadata?) {
+  // Protected polling: redirects are manually followed and every hop away
+  // from the trusted API origin is validated (AI SDK #20124).
+  let response = @provider_utils.get_json_protected(
+    provider_name=self.provider_name,
+    url~,
+    headers~,
+    timeout_ms=self.idle_timeout_ms,
+    retry_policy~,
+    cancellation_token?,
+    error_to_message=minimax_video_error_message,
+    validate_response=validate_minimax_video_status_response,
+    trusted_origin=self.base_url,
+    transport=self.http_transport,
+  )
+  (response.value, Some(response.response))
 }
 
 ///|

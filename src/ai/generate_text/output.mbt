@@ -58,6 +58,7 @@ pub fn OutputSpec::response_format(
   self : OutputSpec,
   strict_json_schema~ : Bool,
 ) -> @provider.ResponseFormat {
+  ignore(strict_json_schema)
   match self {
     OutputText => @provider.Text
     OutputObject(schema~, name~, description~) =>

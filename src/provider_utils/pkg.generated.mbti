@@ -129,6 +129,8 @@ pub async fn get_bytes(provider_name~ : String, url~ : String, headers~ : Map[St
 
 pub async fn get_json(provider_name~ : String, url~ : String, headers~ : Map[String, String], timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport? : &HttpTransport) -> JsonHttpResponse
 
+pub async fn get_json_protected(provider_name~ : String, url~ : String, headers~ : Map[String, String], timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, trusted_origin? : String, transport? : &HttpTransport) -> JsonHttpResponse
+
 pub fn get_top_level_media_type(String) -> String
 
 pub fn[T] handleJsonResponse(JsonHttpResponse, (Json) -> T raise) -> T raise

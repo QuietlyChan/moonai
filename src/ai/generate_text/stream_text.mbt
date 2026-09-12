@@ -178,7 +178,6 @@ pub async fn stream_text(
         Some(OutputText) => ()
         Some(_) => {
           let prev = output_tracker.val.0
-          let prev_elements = output_tracker.val.1
           let current = @provider_utils.parse_partial_json(
             output_text_buffer.val,
           )

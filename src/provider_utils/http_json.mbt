@@ -1156,3 +1156,139 @@ pub async fn delete_json(
     }
   }
 }
+
+///|
+/// Protected JSON GET for provider status polling: redirects are manually
+/// followed (max 10 hops) and every hop away from `trusted_origin` is
+/// validated with the shared download-URL policy, matching AI SDK's
+/// protected video-polling path.
+pub async fn get_json_protected(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  timeout_ms? : Int = 120_000,
+  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  cancellation_token? : @provider.CancellationToken,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  validate_response? : (Json) -> Unit raise,
+  trusted_origin? : String,
+  transport? : &HttpTransport,
+) -> JsonHttpResponse {
+  let resolved_transport = transport.unwrap_or(native_http_transport())
+  let mut current_url = url
+  let mut request_headers = headers
+  let mut hops = 0
+  for ;; {
+    @provider.check_cancellation(cancellation_token)
+    let hop_trusted = match trusted_origin {
+      Some(origin) => {
+        let current_origin = match url_authority(current_url) {
+          Some(authority) => {
+            let scheme = if current_url.has_prefix("https://") {
+              "https://"
+            } else {
+              "http://"
+            }
+            Some(scheme + authority)
+          }
+          None => None
+        }
+        current_origin == Some(origin)
+      }
+      None => false
+    }
+    if !hop_trusted {
+      validate_download_url(current_url)
+    }
+    let response = fetch_buffered_with_timeout(
+      provider_name,
+      HttpRequest::get(url=current_url, headers=request_headers),
+      timeout_ms,
+      resolved_transport,
+    )
+    if is_download_redirect_status(response.status_code) &&
+      download_response_header(response.headers, "location") is Some(location) {
+      guard hops < 10 else {
+        raise @provider.APICallError(
+          message="Too many redirects polling \{current_url}",
+          url=current_url,
+          request_body="",
+          request_headers=copy_headers(request_headers),
+          status_code=Some(response.status_code),
+          response_headers=copy_headers(response.headers),
+          response_body="",
+          is_retryable=false,
+          data=None,
+          cause=None,
+        )
+      }
+      let next_url = resolve_download_redirect(current_url, location)
+      request_headers = download_redirect_headers(
+        request_headers, current_url, next_url,
+      )
+      current_url = next_url
+      hops = hops + 1
+      continue
+    }
+    let response_body = @utf8.decode(
+      read_response_with_size_limit(response, url=current_url),
+    )
+    let error_json = parse_json_if_valid(response_body)
+    guard response.is_success() else {
+      let (message, retryable) = handle_failed_response(
+        url=current_url,
+        request_body="",
+        request_headers=copy_headers(request_headers),
+        status_code=response.status_code,
+        response_headers=response.headers,
+        response_body~,
+        error_json~,
+        error_to_message,
+        is_retryable_response,
+      )
+      raise @provider.APICallError(
+        message~,
+        url=current_url,
+        request_body="",
+        request_headers=copy_headers(request_headers),
+        status_code=Some(response.status_code),
+        response_headers=copy_headers(response.headers),
+        response_body~,
+        is_retryable=retryable,
+        data=error_json,
+        cause=None,
+      )
+    }
+    let value = parse_successful_json_response(
+      response_body,
+      current_url,
+      "",
+      request_headers,
+      response.status_code,
+      response.headers,
+    )
+    validate_successful_json_response(
+      value,
+      validate_response,
+      response_body,
+      current_url,
+      "",
+      request_headers,
+      response.status_code,
+      response.headers,
+    )
+    return {
+      value,
+      request: @provider.RequestMetadata::new(
+        url=current_url,
+        headers=copy_headers(request_headers),
+        body="",
+      ),
+      response: @provider.ResponseMetadata::new(
+        status_code=response.status_code,
+        headers=copy_headers(response.headers),
+      ),
+    }
+  }
+}
