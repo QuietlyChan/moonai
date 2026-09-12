@@ -5,7 +5,7 @@ priv struct OpenAIFactoryMockTransport {
 
 ///|
 fn OpenAIFactoryMockTransport::new() -> OpenAIFactoryMockTransport {
-  { requests: [] }
+  { requests: [], }
 }
 
 ///|

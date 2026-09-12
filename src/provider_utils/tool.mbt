@@ -48,7 +48,7 @@ pub fn ToolNeedsApprovalOptions::new(
   messages? : Array[ModelMessage] = [],
   context? : Json = Json::empty_object(),
 ) -> ToolNeedsApprovalOptions {
-  { tool_call_id, messages: messages.copy(), context }
+  { tool_call_id, messages: messages.copy(), context, }
 }
 
 ///|
@@ -165,7 +165,7 @@ pub fn ToolModelOutputOptions::new(
   input~ : Json,
   output~ : Json,
 ) -> ToolModelOutputOptions {
-  { tool_call_id, input, output }
+  { tool_call_id, input, output, }
 }
 
 ///|
@@ -263,7 +263,7 @@ pub fn ToolDescriptionOptions::new(
   context? : Json = Json::empty_object(),
   experimental_sandbox? : SandboxSession,
 ) -> ToolDescriptionOptions {
-  { context, experimental_sandbox }
+  { context, experimental_sandbox, }
 }
 
 ///|
@@ -413,7 +413,7 @@ pub fn Tool::dynamic(
     on_input_delta?,
     on_input_available?,
   )
-  { ..tool, dynamic: true }
+  { ..tool, dynamic: true, }
 }
 
 ///|
@@ -559,7 +559,7 @@ pub fn Tool::with_tool_caller(
   self : Tool,
   definition : ToolCallerDefinition,
 ) -> Tool {
-  { ..self, tool_caller: Some(definition) }
+  { ..self, tool_caller: Some(definition), }
 }
 
 ///|

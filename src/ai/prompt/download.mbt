@@ -11,7 +11,7 @@ pub fn DownloadRequest::new(
   url~ : String,
   is_url_supported_by_model~ : Bool,
 ) -> DownloadRequest {
-  { url, is_url_supported_by_model }
+  { url, is_url_supported_by_model, }
 }
 
 ///|
@@ -27,7 +27,7 @@ pub fn DownloadedAsset::new(
   data~ : Bytes,
   media_type? : String,
 ) -> DownloadedAsset {
-  { data, media_type }
+  { data, media_type, }
 }
 
 ///|
@@ -54,7 +54,7 @@ pub fn PromptModelContext::new(
   provider_name~ : String,
   supported_urls~ : Array[@provider.SupportedUrlRule],
 ) -> PromptModelContext {
-  { provider_name, supported_urls: supported_urls.copy() }
+  { provider_name, supported_urls: supported_urls.copy(), }
 }
 
 ///|
@@ -98,7 +98,7 @@ fn planned_downloads(
         for part in value {
           match part {
             @provider_utils.ModelToolResultFileUrl(url~, media_type~, ..) =>
-              planned.push({ url, media_type })
+              planned.push({ url, media_type, })
             _ => ()
           }
         }
@@ -109,11 +109,11 @@ fn planned_downloads(
     for part in message.parts {
       match part.without_provider_options() {
         @provider_utils.ModelImageUrl(url) =>
-          planned.push({ url, media_type: "image" })
+          planned.push({ url, media_type: "image", })
         @provider_utils.ModelFileUrl(url~, media_type~, ..) =>
-          planned.push({ url, media_type })
+          planned.push({ url, media_type, })
         @provider_utils.ModelReasoningFileUrl(url~, media_type~) =>
-          planned.push({ url, media_type })
+          planned.push({ url, media_type, })
         @provider_utils.ModelToolResultPart(result~) =>
           plan_tool_result(result.output)
         _ => ()
@@ -204,7 +204,7 @@ fn rewrite_downloaded_model_part(
         Some(asset) => {
           let data = @base64.encode(asset.data)
           let media_type = resolved_download_media_type(
-            { url, media_type: "image" },
+            { url, media_type: "image", },
             asset,
             data,
           )
@@ -217,7 +217,7 @@ fn rewrite_downloaded_model_part(
         Some(asset) => {
           let data = @base64.encode(asset.data)
           let resolved_media_type = resolved_download_media_type(
-            { url, media_type },
+            { url, media_type, },
             asset,
             data,
           )
@@ -236,7 +236,7 @@ fn rewrite_downloaded_model_part(
         Some(asset) => {
           let data = @base64.encode(asset.data)
           let resolved_media_type = resolved_download_media_type(
-            { url, media_type },
+            { url, media_type, },
             asset,
             data,
           )
@@ -274,7 +274,7 @@ fn rewrite_tool_result_content_part(
         Some(asset) => {
           let data = @base64.encode(asset.data)
           let resolved_media_type = resolved_download_media_type(
-            { url, media_type },
+            { url, media_type, },
             asset,
             data,
           )

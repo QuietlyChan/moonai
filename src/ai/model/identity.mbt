@@ -12,7 +12,7 @@ pub(all) struct ModelId {
 ///|
 /// Construct a model identity.
 pub fn ModelId::new(provider~ : String, model_id~ : String) -> ModelId {
-  { provider, model_id }
+  { provider, model_id, }
 }
 
 ///|

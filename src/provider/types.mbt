@@ -26,7 +26,7 @@ pub fn ProviderReference::new(
     let (provider, id) = entry
     copied[provider] = id
   }
-  { entries: copied }
+  { entries: copied, }
 }
 
 ///|
@@ -325,7 +325,7 @@ pub fn LanguageModelMessage::new(
   reasoning_content? : String,
   provider_options? : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
-  { role, content, parts, tool_calls, reasoning_content, provider_options }
+  { role, content, parts, tool_calls, reasoning_content, provider_options, }
 }
 
 ///|
@@ -588,7 +588,7 @@ pub fn ResponseFormat::json(
   name? : String,
   description? : String,
 ) -> ResponseFormat {
-  JsonResponse({ schema, name, description })
+  JsonResponse({ schema, name, description, })
 }
 
 ///|

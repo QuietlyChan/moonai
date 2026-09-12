@@ -34,7 +34,7 @@ test "official OpenAI completion normal EOF finalizes a partial response" {
   assert_true(
     terminal.events[1]
     is @provider.V4Finish(
-      reason={ unified: @provider.V4FinishOther, raw: None },
+      reason={ unified: @provider.V4FinishOther, raw: None, },
       ..
     ),
   )

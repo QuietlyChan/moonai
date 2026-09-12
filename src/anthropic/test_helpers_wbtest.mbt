@@ -105,7 +105,7 @@ fn decode_messages_response(
     ),
     decoded.usage.to_usage(),
     match decoded.finish_reason {
-      { unified: @provider.V4FinishOther, raw: None } => @provider.Unknown("")
+      { unified: @provider.V4FinishOther, raw: None, } => @provider.Unknown("")
       reason => reason.to_finish_reason()
     },
   ).with_diagnostics(None, decoded.response, decoded.provider_metadata, [])

@@ -7,7 +7,7 @@ priv struct DemoLanguageModel {
 
 ///|
 fn DemoLanguageModel::new() -> DemoLanguageModel {
-  { call_count: Ref(0), selected_tool: Ref("") }
+  { call_count: Ref(0), selected_tool: Ref(""), }
 }
 
 ///|
@@ -93,7 +93,7 @@ fn demo_usage(
 fn demo_finish_reason(
   reason : @provider.LanguageModelV4UnifiedFinishReason,
 ) -> @provider.LanguageModelV4FinishReason {
-  { unified: reason, raw: Some("demo") }
+  { unified: reason, raw: Some("demo"), }
 }
 
 ///|

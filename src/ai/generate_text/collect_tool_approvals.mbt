@@ -34,7 +34,7 @@ fn collect_tool_approvals(
 ) -> CollectedToolApprovals raise {
   guard messages.length() > 0 &&
     messages[messages.length() - 1].role is @provider_utils.ModelTool(_) else {
-    return { approved: [], denied: [] }
+    return { approved: [], denied: [], }
   }
   let calls : Map[String, GenerateTextToolCall] = Map([])
   let requests : Map[String, @provider_utils.ModelToolApprovalRequest] = Map([])
@@ -79,14 +79,14 @@ fn collect_tool_approvals(
         approval_id=request.approval_id,
       )
     }
-    let value = { request, response, tool_call }
+    let value = { request, response, tool_call, }
     if response.approved {
       approved.push(value)
     } else {
       denied.push(value)
     }
   }
-  { approved, denied }
+  { approved, denied, }
 }
 
 ///|

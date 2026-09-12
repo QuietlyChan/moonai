@@ -381,4 +381,3 @@ pub using @model {type TranscriptionModelReference}
 pub using @model {type VideoModelReference}
 
 // Traits
-

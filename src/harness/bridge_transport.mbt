@@ -53,7 +53,7 @@ pub async fn connect_harness_v1_websocket(
     request_headers["Authorization"] = "Bearer " + value
   }
   let connection = connector.connect(url, [], request_headers)
-  WebSocketHarnessV1BridgeConnection::{ connection, closed: Ref(false) }
+  WebSocketHarnessV1BridgeConnection::{ connection, closed: Ref(false), }
   as &HarnessV1BridgeConnection
 }
 
@@ -76,7 +76,7 @@ pub fn HarnessV1StdioConfig::new(
   inherit_env? : Bool = true,
   cwd? : String,
 ) -> HarnessV1StdioConfig {
-  { command, args: args.copy(), env, inherit_env, cwd }
+  { command, args: args.copy(), env, inherit_env, cwd, }
 }
 
 ///|
@@ -183,6 +183,6 @@ pub async fn connect_harness_v1_stdio(
       )
     }
   }
-  StdioHarnessV1BridgeConnection::{ writer, reader, closed: Ref(false) }
+  StdioHarnessV1BridgeConnection::{ writer, reader, closed: Ref(false), }
   as &HarnessV1BridgeConnection
 }

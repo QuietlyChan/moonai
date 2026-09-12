@@ -40,7 +40,7 @@ pub fn LanguageModelV4Usage::unknown() -> LanguageModelV4Usage {
       cache_read: None,
       cache_write: None,
     },
-    output_tokens: { total: None, text: None, reasoning: None },
+    output_tokens: { total: None, text: None, reasoning: None, },
     raw: None,
   }
 }
@@ -55,7 +55,7 @@ pub fn LanguageModelV4Usage::zero() -> LanguageModelV4Usage {
       cache_read: Some(0),
       cache_write: Some(0),
     },
-    output_tokens: { total: Some(0), text: Some(0), reasoning: Some(0) },
+    output_tokens: { total: Some(0), text: Some(0), reasoning: Some(0), },
     raw: None,
   }
 }
@@ -136,7 +136,7 @@ pub fn LanguageModelV4Usage::with_raw(
   self : LanguageModelV4Usage,
   raw : Json?,
 ) -> LanguageModelV4Usage {
-  { input_tokens: self.input_tokens, output_tokens: self.output_tokens, raw }
+  { input_tokens: self.input_tokens, output_tokens: self.output_tokens, raw, }
 }
 
 ///|

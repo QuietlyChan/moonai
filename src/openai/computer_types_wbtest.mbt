@@ -16,7 +16,7 @@ test "decode every OpenAI computer action family" {
       "keys": ["SHIFT"],
     })
     is ComputerDrag(
-      path=[{ x: 1.0, y: 2.0 }, { x: 3.0, y: 4.0 }],
+      path=[{ x: 1.0, y: 2.0, }, { x: 3.0, y: 4.0, }],
       keys=Some(["SHIFT"])
     ),
   )

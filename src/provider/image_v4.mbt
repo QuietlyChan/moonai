@@ -152,7 +152,7 @@ pub fn ImageModelV4Usage::new(
   output_tokens? : Int,
   total_tokens? : Int,
 ) -> ImageModelV4Usage {
-  { input_tokens, output_tokens, total_tokens }
+  { input_tokens, output_tokens, total_tokens, }
 }
 
 ///|

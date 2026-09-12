@@ -22,12 +22,12 @@ pub fn LanguageModelV4FinishReason::from_finish_reason(
   reason : FinishReason,
 ) -> LanguageModelV4FinishReason {
   match reason {
-    Stop => { unified: V4FinishStop, raw: None }
-    Length => { unified: V4FinishLength, raw: None }
-    ToolCalls => { unified: V4FinishToolCalls, raw: None }
-    ContentFilter => { unified: V4FinishContentFilter, raw: None }
-    Error => { unified: V4FinishError, raw: None }
-    Unknown(value) => { unified: V4FinishOther, raw: Some(value) }
+    Stop => { unified: V4FinishStop, raw: None, }
+    Length => { unified: V4FinishLength, raw: None, }
+    ToolCalls => { unified: V4FinishToolCalls, raw: None, }
+    ContentFilter => { unified: V4FinishContentFilter, raw: None, }
+    Error => { unified: V4FinishError, raw: None, }
+    Unknown(value) => { unified: V4FinishOther, raw: Some(value), }
   }
 }
 
@@ -49,7 +49,7 @@ pub fn LanguageModelV4FinishReason::to_finish_reason(
 ///|
 /// Construct an unspecified V4 finish reason for an incomplete stream.
 pub fn LanguageModelV4FinishReason::unknown() -> LanguageModelV4FinishReason {
-  { unified: V4FinishOther, raw: None }
+  { unified: V4FinishOther, raw: None, }
 }
 
 ///|
@@ -58,5 +58,5 @@ pub fn LanguageModelV4FinishReason::with_raw(
   self : LanguageModelV4FinishReason,
   raw : String?,
 ) -> LanguageModelV4FinishReason {
-  { unified: self.unified, raw }
+  { unified: self.unified, raw, }
 }

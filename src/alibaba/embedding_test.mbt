@@ -90,7 +90,7 @@ priv struct AlibabaEmbeddingSuccessTransport {
 
 ///|
 fn AlibabaEmbeddingSuccessTransport::new() -> AlibabaEmbeddingSuccessTransport {
-  { requests: [] }
+  { requests: [], }
 }
 
 ///|
@@ -142,7 +142,7 @@ async test "Alibaba V4 embedding omits absent usage and null sparse metadata" {
   let model = create_alibaba(
     api_key="test-key",
     embedding_base_url="https://mock.alibaba.test/api/v1",
-    http_transport=AlibabaEmbeddingNoUsageTransport::{  },
+    http_transport=AlibabaEmbeddingNoUsageTransport::{ },
   ).embedding("text-embedding-v4")
   let result = model.do_embed(
     @provider.EmbeddingModelV4CallOptions::new(
@@ -216,7 +216,7 @@ fn AlibabaEmbeddingResponseTransport::new(
   body : String,
   status_code? : Int = 200,
 ) -> AlibabaEmbeddingResponseTransport {
-  { status_code, body }
+  { status_code, body, }
 }
 
 ///|

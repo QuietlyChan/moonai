@@ -321,7 +321,7 @@ priv struct AlibabaVideoProtocolTransport {
 fn AlibabaVideoProtocolTransport::new(
   responses : Array[String],
 ) -> AlibabaVideoProtocolTransport {
-  { responses, next_response: 0, requests: [] }
+  { responses, next_response: 0, requests: [], }
 }
 
 ///|

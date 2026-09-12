@@ -46,7 +46,7 @@ pub fn RerankingModelV4Ranking::new(
   index : Int,
   relevance_score : Double,
 ) -> RerankingModelV4Ranking {
-  { index, relevance_score }
+  { index, relevance_score, }
 }
 
 ///|

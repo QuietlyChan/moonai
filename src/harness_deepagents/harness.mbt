@@ -19,7 +19,7 @@ pub fn DeepAgentsHarnessSettings::new(
   recursion_limit? : Int,
   transport? : @harness.HarnessV1BridgeTransportConfig,
 ) -> DeepAgentsHarnessSettings {
-  { auth, model, port, startup_timeout_ms, recursion_limit, transport }
+  { auth, model, port, startup_timeout_ms, recursion_limit, transport, }
 }
 
 ///|

@@ -32,7 +32,7 @@ pub fn TranscriptionSegment::new(
   start_second~ : Double,
   end_second~ : Double,
 ) -> TranscriptionSegment {
-  { text, start_second, end_second }
+  { text, start_second, end_second, }
 }
 
 ///|

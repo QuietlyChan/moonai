@@ -79,5 +79,5 @@ fn prepare_compatible_completion_v4_request(
     let (key, value) = entry
     fields[completion_option_wire_key(key)] = value
   }
-  { body: Json::object(fields), warnings }
+  { body: Json::object(fields), warnings, }
 }

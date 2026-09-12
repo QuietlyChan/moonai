@@ -172,7 +172,7 @@ pub fn HarnessV1ToolSpec::new(
   description? : String,
   input_schema? : Json,
 ) -> HarnessV1ToolSpec {
-  { name, description, input_schema }
+  { name, description, input_schema, }
 }
 
 ///|
@@ -253,7 +253,7 @@ pub fn HarnessV1Skill::new(
   content~ : String,
   files? : Array[HarnessV1SkillFile] = [],
 ) -> HarnessV1Skill {
-  { name, description, content, files }
+  { name, description, content, files, }
 }
 
 ///|

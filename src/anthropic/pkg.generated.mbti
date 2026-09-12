@@ -471,4 +471,3 @@ pub type AnthropicModelId = String
 pub type AnthropicRequestUrlBuilder = (String, Bool) -> String
 
 // Traits
-

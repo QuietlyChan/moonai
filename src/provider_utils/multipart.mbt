@@ -15,7 +15,7 @@ pub(all) struct MultipartField {
 ///|
 /// Construct a text form-data field.
 pub fn MultipartField::text(name~ : String, value~ : String) -> MultipartField {
-  { name, value: MultipartText(value) }
+  { name, value: MultipartText(value), }
 }
 
 ///|
@@ -26,7 +26,7 @@ pub fn MultipartField::file(
   media_type~ : String,
   data~ : Bytes,
 ) -> MultipartField {
-  { name, value: MultipartFile(filename~, media_type~, data~) }
+  { name, value: MultipartFile(filename~, media_type~, data~), }
 }
 
 ///|
@@ -65,7 +65,7 @@ pub async fn resolve_image_file(
         data: convert_base64_to_bytes(data),
       }
     @provider.ImageFileBytes(data~, media_type~, filename~) =>
-      { filename, media_type, data }
+      { filename, media_type, data, }
     @provider.ImageFileUrl(url~, filename~) => {
       let downloaded = download_file(
         provider_name~,
@@ -76,7 +76,7 @@ pub async fn resolve_image_file(
         trusted_origin?,
         transport?,
       )
-      { filename, media_type: downloaded.media_type, data: downloaded.data }
+      { filename, media_type: downloaded.media_type, data: downloaded.data, }
     }
   }
 }
@@ -102,7 +102,8 @@ pub async fn resolve_image_model_v4_file(
         media_type: resolve_full_media_type(media_type, data),
         data: convert_base64_to_bytes(data),
       }
-    @provider.ImageV4Bytes(data~, media_type~) => { filename, media_type, data }
+    @provider.ImageV4Bytes(data~, media_type~) =>
+      { filename, media_type, data, }
     @provider.ImageV4Url(url~) => {
       let downloaded = download_file(
         provider_name~,
@@ -113,7 +114,7 @@ pub async fn resolve_image_model_v4_file(
         trusted_origin?,
         transport?,
       )
-      { filename, media_type: downloaded.media_type, data: downloaded.data }
+      { filename, media_type: downloaded.media_type, data: downloaded.data, }
     }
   }
 }

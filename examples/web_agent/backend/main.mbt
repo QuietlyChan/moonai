@@ -600,7 +600,7 @@ async fn handle_use_chat(
   let tools = @shared.example_tools(sink=event => {
     write_use_chat_tool_event(conn, event)
   })
-  let stream_state : UseChatStreamState = { step_open: false }
+  let stream_state : UseChatStreamState = { step_open: false, }
   let result = @ai.stream_text(
     config.language_model(),
     messages~,

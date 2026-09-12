@@ -125,7 +125,7 @@ pub fn OpenAIFileSearchRanking::new(
   guard ranker is None || !ranker.unwrap().trim().is_empty() else {
     fail("OpenAI file-search ranker must not be empty")
   }
-  { ranker, score_threshold }
+  { ranker, score_threshold, }
 }
 
 ///|
@@ -156,7 +156,7 @@ pub fn OpenAIFileSearchOptions::new(
   guard max_num_results is None || max_num_results.unwrap() > 0 else {
     fail("OpenAI file-search max_num_results must be positive")
   }
-  { vector_store_ids, max_num_results, ranking, filters }
+  { vector_store_ids, max_num_results, ranking, filters, }
 }
 
 ///|
@@ -241,7 +241,7 @@ pub fn OpenAIWebSearchUserLocation::new(
   region? : String,
   timezone? : String,
 ) -> OpenAIWebSearchUserLocation {
-  { country, city, region, timezone }
+  { country, city, region, timezone, }
 }
 
 ///|
@@ -302,7 +302,7 @@ pub fn OpenAIWebSearchFilters::new(
       }
     }
   }
-  { allowed_domains, blocked_domains }
+  { allowed_domains, blocked_domains, }
 }
 
 ///|
@@ -347,7 +347,7 @@ pub fn OpenAIWebSearchOptions::new(
   search_context_size? : OpenAIWebSearchContextSize,
   user_location? : OpenAIWebSearchUserLocation,
 ) -> OpenAIWebSearchOptions {
-  { external_web_access, filters, search_context_size, user_location }
+  { external_web_access, filters, search_context_size, user_location, }
 }
 
 ///|
@@ -388,7 +388,7 @@ pub fn OpenAIWebSearchPreviewOptions::new(
   search_context_size? : OpenAIWebSearchContextSize,
   user_location? : OpenAIWebSearchUserLocation,
 ) -> OpenAIWebSearchPreviewOptions {
-  { search_context_size, user_location }
+  { search_context_size, user_location, }
 }
 
 ///|
@@ -535,7 +535,7 @@ pub fn OpenAIImageGenerationMask::new(
   file_id? : String,
   image_url? : String,
 ) -> OpenAIImageGenerationMask {
-  { file_id, image_url }
+  { file_id, image_url, }
 }
 
 ///|
@@ -869,7 +869,7 @@ pub fn OpenAICustomToolOptions::new(
   description? : String,
   format? : OpenAICustomToolFormat,
 ) -> OpenAICustomToolOptions {
-  { description, format }
+  { description, format, }
 }
 
 ///|
@@ -926,7 +926,7 @@ pub fn OpenAIToolSearchOptions::new(
   guard parameters is None || parameters.unwrap() is Object(_) else {
     fail("OpenAI tool-search parameters must be a JSON object")
   }
-  { execution, description, parameters }
+  { execution, description, parameters, }
 }
 
 ///|

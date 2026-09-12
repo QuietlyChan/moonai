@@ -11,7 +11,7 @@ pub fn AudioFormat::new(
   media_type~ : String,
   sample_rate? : Int,
 ) -> AudioFormat {
-  { media_type, sample_rate }
+  { media_type, sample_rate, }
 }
 
 ///|
@@ -68,7 +68,7 @@ impl AudioStream for ChunkAudioStream with fn cancel(self) {
 /// Create a finite audio stream. This is useful for buffered recordings and
 /// deterministic provider tests.
 pub fn audio_chunks(chunks : Array[AudioChunk]) -> &AudioStream {
-  ChunkAudioStream::{ chunks, index: Ref(0), cancelled: Ref(false) }
+  ChunkAudioStream::{ chunks, index: Ref(0), cancelled: Ref(false), }
 }
 
 ///|
@@ -103,5 +103,5 @@ pub fn audio_reader(
   guard max_chunk_size > 0 else {
     fail("audio stream max_chunk_size must be greater than zero")
   }
-  ReaderAudioStream::{ reader, max_chunk_size, cancelled: Ref(false) }
+  ReaderAudioStream::{ reader, max_chunk_size, cancelled: Ref(false), }
 }

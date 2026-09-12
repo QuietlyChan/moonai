@@ -20,7 +20,7 @@ pub fn LanguageModelV4ResponseFormat::json(
   name? : String,
   description? : String,
 ) -> LanguageModelV4ResponseFormat {
-  V4ResponseJson({ schema, name, description })
+  V4ResponseJson({ schema, name, description, })
 }
 
 ///|

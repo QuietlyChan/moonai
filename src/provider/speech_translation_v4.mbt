@@ -329,7 +329,7 @@ pub fn SpeechTranslationModelV4StreamResult::new(
   request? : RequestMetadata,
   response? : ResponseMetadata,
 ) -> SpeechTranslationModelV4StreamResult {
-  { request, response }
+  { request, response, }
 }
 
 ///|

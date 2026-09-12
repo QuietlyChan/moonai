@@ -118,7 +118,7 @@ pub fn LanguageModelV4Content::text(
   text : String,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
-  V4TextOutput({ text, provider_metadata })
+  V4TextOutput({ text, provider_metadata, })
 }
 
 ///|
@@ -127,7 +127,7 @@ pub fn LanguageModelV4Content::reasoning(
   text : String,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
-  V4ReasoningOutput({ text, provider_metadata })
+  V4ReasoningOutput({ text, provider_metadata, })
 }
 
 ///|
@@ -137,7 +137,7 @@ pub fn LanguageModelV4Content::file(
   data~ : LanguageModelV4GeneratedFileData,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
-  V4FileOutput({ media_type, data, provider_metadata })
+  V4FileOutput({ media_type, data, provider_metadata, })
 }
 
 ///|
@@ -147,7 +147,7 @@ pub fn LanguageModelV4Content::reasoning_file(
   data~ : LanguageModelV4GeneratedFileData,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
-  V4ReasoningFileOutput({ media_type, data, provider_metadata })
+  V4ReasoningFileOutput({ media_type, data, provider_metadata, })
 }
 
 ///|
@@ -205,7 +205,7 @@ pub fn LanguageModelV4Content::custom(
   kind~ : String,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
-  V4CustomOutput({ kind, provider_metadata })
+  V4CustomOutput({ kind, provider_metadata, })
 }
 
 ///|

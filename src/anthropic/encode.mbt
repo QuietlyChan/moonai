@@ -298,7 +298,7 @@ fn append_wire_message(
       existing.push(part)
     }
   } else {
-    messages.push({ role, content })
+    messages.push({ role, content, })
   }
 }
 

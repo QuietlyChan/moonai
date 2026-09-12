@@ -9,7 +9,7 @@ priv struct MockTranscriptionAudioStream {
 fn MockTranscriptionAudioStream::new(
   chunks : Array[@provider.AudioChunk],
 ) -> MockTranscriptionAudioStream {
-  { chunks, index: Ref(0), cancelled: Ref(false) }
+  { chunks, index: Ref(0), cancelled: Ref(false), }
 }
 
 ///|
@@ -116,7 +116,7 @@ priv struct MockTranscriptionWebSocketConnector {
 fn MockTranscriptionWebSocketConnector::new(
   connection : MockTranscriptionWebSocketConnection,
 ) -> MockTranscriptionWebSocketConnector {
-  { connection, urls: [], protocols: [], headers: [] }
+  { connection, urls: [], protocols: [], headers: [], }
 }
 
 ///|

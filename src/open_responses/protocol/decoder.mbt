@@ -817,7 +817,7 @@ fn OpenResponsesStreamDecoder::decode_data(
   data : String,
 ) -> @provider_utils.SseDecodeBatch[@provider.StreamEvent] raise {
   if data.trim() == "[DONE]" {
-    return { events: self.final_events(), consumed_event: true, done: true }
+    return { events: self.final_events(), consumed_event: true, done: true, }
   }
   let json = @json.parse(data) catch {
     error =>
@@ -853,9 +853,9 @@ fn OpenResponsesStreamDecoder::decode_data(
     for event in combined_events {
       all_events.push(event)
     }
-    { events: all_events, consumed_event: true, done }
+    { events: all_events, consumed_event: true, done, }
   } else {
-    { events: combined_events, consumed_event: true, done }
+    { events: combined_events, consumed_event: true, done, }
   }
 }
 
@@ -896,7 +896,7 @@ pub fn OpenResponsesStreamDecoder::finish_stream(
   if self.finalized {
     @provider_utils.SseDecodeBatch::empty(true)
   } else {
-    { events: self.final_events(), consumed_event: false, done: true }
+    { events: self.final_events(), consumed_event: false, done: true, }
   }
 }
 

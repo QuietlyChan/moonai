@@ -303,7 +303,7 @@ fn safe_download_target(url : String) -> SafeDownloadTarget raise DownloadError 
   } else {
     without_fragment
   }
-  { scheme, hostname, port, authority, request_target }
+  { scheme, hostname, port, authority, request_target, }
 }
 
 ///|
@@ -597,7 +597,7 @@ async fn safe_native_download_fetch_at(
   let socket = safe_download_open_socket(target, address)
   defer socket.close()
   socket.write(@utf8.encode(safe_download_request_text(request, target)))
-  let connection = SafeDownloadConnection::{ socket, buffered: b"", offset: 0 }
+  let connection = SafeDownloadConnection::{ socket, buffered: b"", offset: 0, }
   connection.read_response(request.url, max_bytes)
 }
 

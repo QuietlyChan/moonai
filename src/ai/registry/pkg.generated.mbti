@@ -65,4 +65,3 @@ pub fn ProviderRegistry::with_provider(Self, String, &@provider.ProviderV4) -> S
 // Type aliases
 
 // Traits
-

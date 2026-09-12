@@ -15,7 +15,7 @@ pub fn wrap_image_model_v4(
   model_id? : String,
   provider_id? : String,
 ) -> &@provider.ImageModelV4 {
-  MiddlewareImageModelV4::{ model, middleware, provider_id, model_id }
+  MiddlewareImageModelV4::{ model, middleware, provider_id, model_id, }
   as &@provider.ImageModelV4
 }
 

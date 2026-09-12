@@ -19,7 +19,7 @@ pub fn ProviderExecutedToolFactory::new(
   output_schema~ : Json,
   supports_deferred_results? : Bool = false,
 ) -> ProviderExecutedToolFactory {
-  { id, input_schema, output_schema, supports_deferred_results }
+  { id, input_schema, output_schema, supports_deferred_results, }
 }
 
 ///|

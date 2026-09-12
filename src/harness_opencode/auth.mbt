@@ -54,7 +54,7 @@ pub fn split_open_code_model(
   provider : String?,
 ) -> OpenCodeModelCoordinate {
   match model {
-    None => { provider_id: None, model_id: None, model: None }
+    None => { provider_id: None, model_id: None, model: None, }
     Some(value) =>
       match value.find("/") {
         Some(index) =>

@@ -16,7 +16,7 @@ priv struct MockTranslationAudioStream {
 fn MockTranslationAudioStream::new(
   chunks : Array[@provider.AudioChunk],
 ) -> MockTranslationAudioStream {
-  { chunks, index: Ref(0), cancelled: Ref(false) }
+  { chunks, index: Ref(0), cancelled: Ref(false), }
 }
 
 ///|
@@ -129,7 +129,7 @@ fn MockTranslationWebSocketConnector::new(
   connection : MockTranslationWebSocketConnection,
   failure? : String,
 ) -> MockTranslationWebSocketConnector {
-  { connection, urls: [], protocols: [], headers: [], failure }
+  { connection, urls: [], protocols: [], headers: [], failure, }
 }
 
 ///|

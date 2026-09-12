@@ -17,7 +17,7 @@ pub fn SupportedUrlRule::new(
 ) -> SupportedUrlRule raise {
   let pattern_sources = url_patterns.copy()
   let patterns = [ for pattern in pattern_sources => Regex(pattern) ]
-  { media_type, pattern_sources, patterns }
+  { media_type, pattern_sources, patterns, }
 }
 
 ///|
@@ -33,7 +33,7 @@ pub fn SupportedUrlRule::http(media_type : String) -> SupportedUrlRule {
 ///|
 /// Create a rule that accepts every URL for one media type.
 pub fn SupportedUrlRule::all(media_type : String) -> SupportedUrlRule {
-  { media_type, pattern_sources: [".*"], patterns: [re".*"] }
+  { media_type, pattern_sources: [".*"], patterns: [re".*"], }
 }
 
 ///|

@@ -28,7 +28,7 @@ fn decode_compatible_test_completion(
     text.to_string(),
     decoded.usage.to_usage(),
     match decoded.finish_reason {
-      { unified: @provider.V4FinishOther, raw: None } => @provider.Unknown("")
+      { unified: @provider.V4FinishOther, raw: None, } => @provider.Unknown("")
       reason => reason.to_finish_reason()
     },
   )
@@ -75,7 +75,7 @@ test "compatible completion keeps a missing finish reason unknown" {
     terminal.events.any(event => {
       event
       is @provider.V4Finish(
-        reason={ unified: @provider.V4FinishOther, raw: None },
+        reason={ unified: @provider.V4FinishOther, raw: None, },
         ..
       )
     }),
@@ -196,7 +196,7 @@ test "completion normal EOF finalizes with an unknown finish reason" {
     terminal.events.any(event => {
       event
       is @provider.V4Finish(
-        reason={ unified: @provider.V4FinishOther, raw: None },
+        reason={ unified: @provider.V4FinishOther, raw: None, },
         ..
       )
     }),
@@ -323,7 +323,7 @@ test "compatible completion retains structured provider errors" {
   assert_true(
     terminal.events[0]
     is @provider.V4Finish(
-      reason={ unified: @provider.V4FinishError, raw: None },
+      reason={ unified: @provider.V4FinishError, raw: None, },
       ..
     ),
   )

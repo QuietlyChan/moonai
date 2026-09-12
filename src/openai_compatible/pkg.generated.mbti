@@ -178,4 +178,3 @@ pub type OpenAICompatibleV4OptionsTransformer = (@provider.LanguageModelV4CallOp
 pub type OpenAICompatibleV4PromptConverter = (@provider.LanguageModelV4Prompt, String) -> OpenAICompatiblePromptConversion raise
 
 // Traits
-

@@ -39,4 +39,3 @@ pub(all) enum OpenResponsesReasoningSummary {
 // Type aliases
 
 // Traits
-

@@ -52,7 +52,7 @@ pub fn GeneratedImage::new(
   data : ImageData,
   revised_prompt? : String,
 ) -> GeneratedImage {
-  { data, revised_prompt }
+  { data, revised_prompt, }
 }
 
 ///|

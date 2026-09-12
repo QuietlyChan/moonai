@@ -781,7 +781,7 @@ impl @provider_utils.HttpTransport for CompatibleNetworkFailureTransport with fn
 
 ///|
 async test "OpenAI-compatible exposes network failures as API call errors" {
-  let transport = CompatibleNetworkFailureTransport::{ calls: Ref(0) }
+  let transport = CompatibleNetworkFailureTransport::{ calls: Ref(0), }
   let model = openai_compatible(
     provider_name="network-test",
     base_url="https://gateway.example/v1",

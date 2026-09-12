@@ -15,7 +15,7 @@ pub fn AnthropicWebSearchUserLocation::new(
   country? : String,
   timezone? : String,
 ) -> AnthropicWebSearchUserLocation {
-  { city, region, country, timezone }
+  { city, region, country, timezone, }
 }
 
 ///|

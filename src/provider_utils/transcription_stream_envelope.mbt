@@ -22,7 +22,7 @@ pub fn TranscriptionStreamStartFrame::new(
   provider_options? : Map[String, Json],
   include_raw_chunks? : Bool,
 ) -> TranscriptionStreamStartFrame {
-  { input_audio_format, provider_options, include_raw_chunks }
+  { input_audio_format, provider_options, include_raw_chunks, }
 }
 
 ///|

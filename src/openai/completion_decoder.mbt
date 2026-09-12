@@ -157,7 +157,7 @@ fn OpenAICompletionStreamDecoder::decode_data(
   data : String,
 ) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   if data.trim() == "[DONE]" {
-    return { events: self.final_events(), consumed_event: true, done: true }
+    return { events: self.final_events(), consumed_event: true, done: true, }
   }
   let json = @json.parse(data) catch {
     error => {
@@ -174,7 +174,7 @@ fn OpenAICompletionStreamDecoder::decode_data(
       if self.include_raw_chunks {
         events.insert(0, @provider.V4Raw(Json::string(data)))
       }
-      return { events, consumed_event: true, done: false }
+      return { events, consumed_event: true, done: false, }
     }
   }
   if !self.stream_started && openai_stream_error_object(json) is Some(error) {
@@ -204,7 +204,7 @@ fn OpenAICompletionStreamDecoder::decode_data(
     if self.include_raw_chunks {
       events.insert(0, @provider.V4Raw(json))
     }
-    return { events, consumed_event: true, done: false }
+    return { events, consumed_event: true, done: false, }
   }
   match json {
     { "choices": Array(choices), .. } if choices.any(choice => {
@@ -228,9 +228,9 @@ fn OpenAICompletionStreamDecoder::decode_data(
     for event in events {
       raw_events.push(event)
     }
-    { events: raw_events, consumed_event: true, done: false }
+    { events: raw_events, consumed_event: true, done: false, }
   } else {
-    { events, consumed_event: true, done: false }
+    { events, consumed_event: true, done: false, }
   }
 }
 
@@ -263,7 +263,7 @@ fn OpenAICompletionStreamDecoder::finish_stream(
   if self.finalized {
     @provider_utils.SseDecodeBatch::empty(true)
   } else {
-    { events: self.final_events(), consumed_event: false, done: true }
+    { events: self.final_events(), consumed_event: false, done: true, }
   }
 }
 

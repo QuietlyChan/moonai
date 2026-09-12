@@ -21,7 +21,7 @@ fn decode_openai_chat_test_response(
     ),
     decoded.usage.to_usage(),
     match decoded.finish_reason {
-      { unified: @provider.V4FinishOther, raw: None } => @provider.Unknown("")
+      { unified: @provider.V4FinishOther, raw: None, } => @provider.Unknown("")
       reason => reason.to_finish_reason()
     },
   ).with_diagnostics(None, decoded.response, decoded.provider_metadata, [])
@@ -50,7 +50,7 @@ test "official OpenAI Chat normal EOF finalizes a partial response" {
   assert_true(
     terminal.events[1]
     is @provider.V4Finish(
-      reason={ unified: @provider.V4FinishOther, raw: None },
+      reason={ unified: @provider.V4FinishOther, raw: None, },
       ..
     ),
   )
@@ -319,7 +319,7 @@ test "official OpenAI Chat flushes partial tools after stream errors" {
     terminal.events.any(event => {
       event
       is @provider.V4Finish(
-        reason={ unified: @provider.V4FinishError, raw: None },
+        reason={ unified: @provider.V4FinishError, raw: None, },
         ..
       )
     }),

@@ -12,7 +12,7 @@ pub(all) struct OpenAITranslationModelOptions {} derive(Debug, Eq)
 ///|
 /// Construct the current empty OpenAI translation options value.
 pub fn OpenAITranslationModelOptions::new() -> OpenAITranslationModelOptions {
-  OpenAITranslationModelOptions::{  }
+  OpenAITranslationModelOptions::{ }
 }
 
 ///|

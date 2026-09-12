@@ -97,5 +97,5 @@ fn parse_open_responses_provider_options(
     aliases=["reasoning_summary"],
     allowed=["concise", "detailed", "auto"],
   )
-  { options: { reasoning_summary, }, warnings: reader.diagnostics() }
+  { options: { reasoning_summary, }, warnings: reader.diagnostics(), }
 }

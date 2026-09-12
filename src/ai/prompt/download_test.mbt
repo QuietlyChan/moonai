@@ -60,7 +60,7 @@ async test "prompt conversion rewrites URLs and preserves provider options" {
   }
   let converted = convert_to_language_model_prompt(
     standardize_prompt(None, messages),
-    PromptTestModel::{  },
+    PromptTestModel::{ },
     Some(download),
     @provider.RetryPolicy::none(),
     None,
@@ -96,7 +96,7 @@ async test "prompt conversion serializes structured high-level tool input" {
   ]
   let converted = convert_to_language_model_prompt(
     standardize_prompt(None, messages),
-    PromptTestModel::{  },
+    PromptTestModel::{ },
     None,
     @provider.RetryPolicy::none(),
     None,
@@ -129,7 +129,7 @@ async test "prompt conversion accepts tool_parts as a matching structured result
   ]
   let converted = convert_to_language_model_prompt(
     standardize_prompt(None, messages),
-    PromptTestModel::{  },
+    PromptTestModel::{ },
     None,
     @provider.RetryPolicy::none(),
     None,
@@ -154,7 +154,7 @@ async test "prompt conversion rejects missing client tool results" {
     ignore(
       convert_to_language_model_prompt(
         standardize_prompt(None, messages),
-        PromptTestModel::{  },
+        PromptTestModel::{ },
         None,
         @provider.RetryPolicy::none(),
         None,
@@ -196,7 +196,7 @@ async test "prompt conversion filters client approvals and assistant approval re
   ]
   let converted = convert_to_language_model_prompt(
     standardize_prompt(None, messages),
-    PromptTestModel::{  },
+    PromptTestModel::{ },
     None,
     @provider.RetryPolicy::none(),
     None,
@@ -226,7 +226,7 @@ async test "prompt conversion maps tool results and approval responses" {
   ])
   let converted = convert_to_language_model_prompt(
     standardize_prompt(None, [message]),
-    PromptTestModel::{  },
+    PromptTestModel::{ },
     None,
     @provider.RetryPolicy::none(),
     None,
@@ -278,7 +278,7 @@ async test "prompt conversion downloads nested tool-result files" {
   }
   let converted = convert_to_language_model_prompt(
     standardize_prompt(None, [message]),
-    PromptTestModel::{  },
+    PromptTestModel::{ },
     Some(download),
     @provider.RetryPolicy::none(),
     None,

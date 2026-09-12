@@ -21,7 +21,7 @@ pub fn OpenAIComputerPoint::new(
   x~ : Double,
   y~ : Double,
 ) -> OpenAIComputerPoint {
-  { x, y }
+  { x, y, }
 }
 
 ///|
@@ -64,7 +64,7 @@ pub fn OpenAIComputerSafetyCheck::new(
   code? : String,
   message? : String,
 ) -> OpenAIComputerSafetyCheck {
-  { id, code, message }
+  { id, code, message, }
 }
 
 ///|

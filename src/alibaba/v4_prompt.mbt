@@ -284,5 +284,5 @@ fn alibaba_v4_prompt_converter(
       }
     }
   }
-  { messages: converted, warnings }
+  { messages: converted, warnings, }
 }

@@ -22,7 +22,7 @@ pub fn OpenAIFilesOptions::new(
   purpose? : String,
   expires_after? : Double,
 ) -> OpenAIFilesOptions {
-  { purpose, expires_after }
+  { purpose, expires_after, }
 }
 
 ///|
@@ -100,7 +100,7 @@ fn parse_openai_files_options(
   let expires_after = reader.take_double("expiresAfter", aliases=[
     "expires_after",
   ])
-  { options: { purpose, expires_after }, warnings: reader.diagnostics() }
+  { options: { purpose, expires_after, }, warnings: reader.diagnostics(), }
 }
 
 ///|

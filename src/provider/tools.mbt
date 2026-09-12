@@ -101,7 +101,7 @@ pub fn ToolCall::new(
   dynamic? : Bool = false,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> ToolCall {
-  { id, name, arguments, provider_executed, dynamic, provider_metadata }
+  { id, name, arguments, provider_executed, dynamic, provider_metadata, }
 }
 
 ///|
@@ -153,7 +153,7 @@ pub fn ToolApprovalRequest::new(
   tool_call_id~ : String,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> ToolApprovalRequest {
-  { approval_id, tool_call_id, provider_metadata }
+  { approval_id, tool_call_id, provider_metadata, }
 }
 
 ///|

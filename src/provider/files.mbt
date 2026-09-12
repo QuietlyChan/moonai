@@ -41,7 +41,7 @@ pub fn FilesV4UploadFileCallOptions::new(
   filename? : String,
   provider_options? : Map[String, Json] = Map([]),
 ) -> FilesV4UploadFileCallOptions {
-  { data, media_type, filename, provider_options }
+  { data, media_type, filename, provider_options, }
 }
 
 ///|

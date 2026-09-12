@@ -25,7 +25,7 @@ test "DeepSeek stream errors retain the provider payload" {
   assert_true(
     terminal.events[0]
     is @provider.V4Finish(
-      reason={ unified: @provider.V4FinishError, raw: None },
+      reason={ unified: @provider.V4FinishError, raw: None, },
       ..
     ),
   )
@@ -107,7 +107,10 @@ test "DeepSeek stream lifecycle matches AI SDK transition order" {
     terminal.events.any(event => {
       event
       is @provider.V4Finish(
-        reason={ unified: @provider.V4FinishToolCalls, raw: Some("tool_calls") },
+        reason={
+          unified: @provider.V4FinishToolCalls,
+          raw: Some("tool_calls"),
+        },
         ..
       )
     }),
@@ -160,7 +163,7 @@ test "DeepSeek does not infer a finish reason omitted by the provider" {
     terminal.events.any(event => {
       event
       is @provider.V4Finish(
-        reason={ unified: @provider.V4FinishOther, raw: None },
+        reason={ unified: @provider.V4FinishOther, raw: None, },
         ..
       )
     }),
@@ -186,7 +189,7 @@ test "DeepSeek closes a stream at EOF after a provider finish reason" {
     terminal.events.any(event => {
       event
       is @provider.V4Finish(
-        reason={ unified: @provider.V4FinishStop, raw: Some("stop") },
+        reason={ unified: @provider.V4FinishStop, raw: Some("stop"), },
         ..
       )
     }),

@@ -26,7 +26,7 @@ pub fn HttpRequest::new(
   headers? : Map[String, String] = Map([]),
   body? : Bytes = b"",
 ) -> HttpRequest {
-  { meth, url, headers: copy_headers(headers), body }
+  { meth, url, headers: copy_headers(headers), body, }
 }
 
 ///|
@@ -80,7 +80,7 @@ pub fn HttpResponse::new(
   reason? : String = "",
   headers? : Map[String, String] = Map([]),
 ) -> HttpResponse {
-  { status_code, reason, headers: copy_headers(headers), body }
+  { status_code, reason, headers: copy_headers(headers), body, }
 }
 
 ///|
@@ -174,7 +174,7 @@ pub struct NativeHttpTransport {}
 ///|
 /// Construct the built-in native HTTP transport.
 pub fn NativeHttpTransport::new() -> NativeHttpTransport {
-  NativeHttpTransport::{  }
+  NativeHttpTransport::{ }
 }
 
 ///|
@@ -233,7 +233,7 @@ impl HttpTransport for NativeHttpTransport with fn fetch_stream(_self, request) 
   try {
     client.write(request.body)
     let response = client.end_request()
-    NativeHttpStreamResponse::{ client, response } as &HttpStreamResponse
+    NativeHttpStreamResponse::{ client, response, } as &HttpStreamResponse
   } catch {
     error => {
       client.close()

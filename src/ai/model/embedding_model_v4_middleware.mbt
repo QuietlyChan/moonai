@@ -15,7 +15,7 @@ pub fn wrap_embedding_model_v4(
   model_id? : String,
   provider_id? : String,
 ) -> &@provider.EmbeddingModelV4 {
-  MiddlewareEmbeddingModelV4::{ model, middleware, provider_id, model_id }
+  MiddlewareEmbeddingModelV4::{ model, middleware, provider_id, model_id, }
   as &@provider.EmbeddingModelV4
 }
 

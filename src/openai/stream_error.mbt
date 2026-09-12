@@ -97,7 +97,7 @@ priv struct OpenAIResponsesStreamGuard {
 
 ///|
 fn OpenAIResponsesStreamGuard::new() -> OpenAIResponsesStreamGuard {
-  { accepted: false, output: false, started: false }
+  { accepted: false, output: false, started: false, }
 }
 
 ///|

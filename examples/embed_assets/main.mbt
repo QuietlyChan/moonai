@@ -33,7 +33,7 @@ async fn main {
       variable: "embedded_index_html",
       path: "examples/web_agent/frontend/index.html",
     },
-    { variable: "embedded_app_js", path: "examples/web_agent/frontend/app.js" },
+    { variable: "embedded_app_js", path: "examples/web_agent/frontend/app.js", },
     {
       variable: "embedded_styles_css",
       path: "examples/web_agent/frontend/styles.css",

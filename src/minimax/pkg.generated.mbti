@@ -57,4 +57,3 @@ pub type MiniMaxChatModelId = String
 pub type MiniMaxVideoModelId = String
 
 // Traits
-

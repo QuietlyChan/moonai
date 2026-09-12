@@ -41,7 +41,7 @@ pub fn PiHarnessSettings::new(
   agent_dir? : String,
   transport? : @harness.HarnessV1BridgeTransportConfig,
 ) -> PiHarnessSettings {
-  { auth, model, thinking_level, agent_dir, transport }
+  { auth, model, thinking_level, agent_dir, transport, }
 }
 
 ///|

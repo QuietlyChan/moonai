@@ -13,7 +13,7 @@ pub fn HarnessV1ToolResultSubmission::new(
   output~ : Json,
   is_error? : Bool = false,
 ) -> HarnessV1ToolResultSubmission {
-  { tool_call_id, output, is_error }
+  { tool_call_id, output, is_error, }
 }
 
 ///|
@@ -31,7 +31,7 @@ pub fn HarnessV1ToolApprovalSubmission::new(
   approved~ : Bool,
   reason? : String,
 ) -> HarnessV1ToolApprovalSubmission {
-  { approval_id, approved, reason }
+  { approval_id, approved, reason, }
 }
 
 ///|
@@ -195,7 +195,7 @@ pub fn HarnessV1PromptTurnOptions::new(
   instructions? : String,
   cancellation_token? : @provider.CancellationToken,
 ) -> HarnessV1PromptTurnOptions {
-  { prompt, tools: tools.copy(), instructions, cancellation_token, emit }
+  { prompt, tools: tools.copy(), instructions, cancellation_token, emit, }
 }
 
 ///|
@@ -213,7 +213,7 @@ pub fn HarnessV1ContinueTurnOptions::new(
   tools? : Array[HarnessV1ToolSpec] = [],
   cancellation_token? : @provider.CancellationToken,
 ) -> HarnessV1ContinueTurnOptions {
-  { tools: tools.copy(), cancellation_token, emit }
+  { tools: tools.copy(), cancellation_token, emit, }
 }
 
 ///|

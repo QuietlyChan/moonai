@@ -123,7 +123,7 @@ priv struct ByteDanceProtocolTransport {
 fn ByteDanceProtocolTransport::new(
   responses : Array[String],
 ) -> ByteDanceProtocolTransport {
-  { responses, next: Ref(0), requests: [] }
+  { responses, next: Ref(0), requests: [], }
 }
 
 ///|

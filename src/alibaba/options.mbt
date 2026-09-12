@@ -29,7 +29,7 @@ pub fn AlibabaLanguageModelChatOptions::new(
   if thinking_budget is Some(value) {
     guard value > 0 else { fail("Alibaba thinking_budget must be positive") }
   }
-  { enable_thinking, thinking_budget, parallel_tool_calls }
+  { enable_thinking, thinking_budget, parallel_tool_calls, }
 }
 
 ///|
@@ -77,7 +77,7 @@ pub fn AlibabaEmbeddingModelOptions::new(
       )
     }
   }
-  { text_type, dimension, output_type }
+  { text_type, dimension, output_type, }
 }
 
 ///|
@@ -136,7 +136,7 @@ pub fn AlibabaVideoMedia::new(
       "Alibaba video media_type must be reference_image, reference_video, or first_frame",
     )
   }
-  { media_type, url, reference_voice }
+  { media_type, url, reference_voice, }
 }
 
 ///|
@@ -320,7 +320,7 @@ fn parse_alibaba_video_options(
               { "reference_voice": String(voice), .. } => Some(voice)
               _ => None
             }
-            media.push({ media_type, url, reference_voice })
+            media.push({ media_type, url, reference_voice, })
           }
           _ =>
             reader.add_warning(

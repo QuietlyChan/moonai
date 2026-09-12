@@ -18,7 +18,7 @@ pub fn wrap_language_model_v4(
   model_id? : String,
   provider_id? : String,
 ) -> &@provider.LanguageModelV4 {
-  MiddlewareLanguageModelV4::{ model, middleware, provider_id, model_id }
+  MiddlewareLanguageModelV4::{ model, middleware, provider_id, model_id, }
   as &@provider.LanguageModelV4
 }
 

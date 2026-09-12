@@ -41,7 +41,12 @@ pub fn MoonshotAILanguageModelOptions::new(
       )
     }
   }
-  { reasoning_effort, thinking_type, thinking_budget_tokens, reasoning_history }
+  {
+    reasoning_effort,
+    thinking_type,
+    thinking_budget_tokens,
+    reasoning_history,
+  }
 }
 
 ///|

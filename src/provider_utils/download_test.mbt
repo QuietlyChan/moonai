@@ -118,7 +118,7 @@ async test "download follows safe relative redirects" {
       ),
     },
     requests: [],
-    stream: DownloadTestStream::{ closed: Ref(false) },
+    stream: DownloadTestStream::{ closed: Ref(false), },
   }
   let result = download_file(
     provider_name="test",
@@ -137,7 +137,7 @@ async test "download decodes Base64 and percent-encoded data URLs without transp
   let transport = DownloadTestTransport::{
     responses: Map([]),
     requests: [],
-    stream: DownloadTestStream::{ closed: Ref(false) },
+    stream: DownloadTestStream::{ closed: Ref(false), },
   }
   let base64_result = download_file(
     provider_name="test",
@@ -175,7 +175,7 @@ async test "download rejects malformed data URLs and oversized content" {
       ),
     },
     requests: [],
-    stream: DownloadTestStream::{ closed: Ref(false) },
+    stream: DownloadTestStream::{ closed: Ref(false), },
   }
   for
     url in [
@@ -210,7 +210,7 @@ async test "download rejects a redirect to a private address before requesting i
       ),
     },
     requests: [],
-    stream: DownloadTestStream::{ closed: Ref(false) },
+    stream: DownloadTestStream::{ closed: Ref(false), },
   }
   try
     download_file(
@@ -246,7 +246,7 @@ async test "download drops credentials on a cross-origin redirect" {
       ),
     },
     requests: [],
-    stream: DownloadTestStream::{ closed: Ref(false) },
+    stream: DownloadTestStream::{ closed: Ref(false), },
   }
   let _ = download_file(
     provider_name="test",

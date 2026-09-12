@@ -14,7 +14,7 @@ pub fn MockRerankingModelV4::new(
   provider_name? : String = "mock",
   model_id? : String = "mock-reranker",
 ) -> MockRerankingModelV4 {
-  { provider_name, model_id, result, captured_options: None }
+  { provider_name, model_id, result, captured_options: None, }
 }
 
 ///|

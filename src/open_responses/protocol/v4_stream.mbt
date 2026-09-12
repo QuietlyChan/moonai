@@ -48,7 +48,7 @@ fn OpenResponsesV4StreamDecoder::v4_batch(
         }
     }
   }
-  { events, consumed_event: batch.consumed_event, done: batch.done }
+  { events, consumed_event: batch.consumed_event, done: batch.done, }
 }
 
 ///|

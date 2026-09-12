@@ -21,7 +21,7 @@ test "add language model usage sums known counters across steps" {
       cache_read: Some(1),
       cache_write: None,
     },
-    output_tokens: { total: Some(4), text: Some(3), reasoning: Some(1) },
+    output_tokens: { total: Some(4), text: Some(3), reasoning: Some(1), },
     raw: Some({ "step": 1 }),
   }
   let second = @provider.LanguageModelV4Usage::{
@@ -31,7 +31,7 @@ test "add language model usage sums known counters across steps" {
       cache_read: Some(2),
       cache_write: Some(1),
     },
-    output_tokens: { total: Some(6), text: Some(4), reasoning: Some(2) },
+    output_tokens: { total: Some(6), text: Some(4), reasoning: Some(2), },
     raw: Some({ "step": 2 }),
   }
   assert_eq(add_language_model_usage(first, second), {
@@ -41,7 +41,7 @@ test "add language model usage sums known counters across steps" {
       cache_read: Some(3),
       cache_write: Some(1),
     },
-    output_tokens: { total: Some(10), text: Some(7), reasoning: Some(3) },
+    output_tokens: { total: Some(10), text: Some(7), reasoning: Some(3), },
     raw: None,
   })
   assert_eq(

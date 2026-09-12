@@ -90,7 +90,7 @@ pub async fn LanguageModelV4Middleware::transform(
   params : LanguageModelV4CallOptions,
 ) -> LanguageModelV4CallOptions {
   match self.transform_params {
-    Some(transform) => transform({ operation, params, model })
+    Some(transform) => transform({ operation, params, model, })
     None => params
   }
 }

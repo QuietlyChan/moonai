@@ -67,5 +67,5 @@ fn anthropic_web_fetch_citation_document(
     Some(String(value)) => value
     _ => url
   }
-  Some({ title, filename: None, media_type })
+  Some({ title, filename: None, media_type, })
 }

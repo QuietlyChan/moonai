@@ -5,7 +5,7 @@ priv struct AnthropicAuthenticationMockTransport {
 
 ///|
 fn AnthropicAuthenticationMockTransport::new() -> AnthropicAuthenticationMockTransport {
-  { requests: [] }
+  { requests: [], }
 }
 
 ///|

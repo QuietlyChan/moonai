@@ -37,7 +37,7 @@ pub fn VideoFrameImage::new(
   image : VideoInput,
   frame_type : VideoFrameType,
 ) -> VideoFrameImage {
-  { image, frame_type }
+  { image, frame_type, }
 }
 
 ///|
@@ -62,7 +62,7 @@ pub fn GeneratedVideo::new(
   data : GeneratedVideoData,
   media_type : String,
 ) -> GeneratedVideo {
-  { data, media_type }
+  { data, media_type, }
 }
 
 ///|

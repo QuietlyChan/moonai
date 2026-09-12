@@ -19,7 +19,7 @@ pub fn OpenAIToolNamespace::new(
   name~ : String,
   description~ : String,
 ) -> OpenAIToolNamespace {
-  { name, description }
+  { name, description, }
 }
 
 ///|
@@ -44,7 +44,7 @@ pub fn OpenAIToolOptions::new(
   output_schema? : Json,
   tool_namespace? : OpenAIToolNamespace,
 ) -> OpenAIToolOptions {
-  { allowed_callers, defer_loading, output_schema, tool_namespace }
+  { allowed_callers, defer_loading, output_schema, tool_namespace, }
 }
 
 ///|
@@ -175,7 +175,7 @@ pub fn OpenAIShellDomainSecret::new(
   name~ : String,
   value~ : String,
 ) -> OpenAIShellDomainSecret {
-  { domain, name, value }
+  { domain, name, value, }
 }
 
 ///|
@@ -247,7 +247,7 @@ pub fn OpenAILocalShellSkill::new(
   description~ : String,
   path~ : String,
 ) -> OpenAILocalShellSkill {
-  { name, description, path }
+  { name, description, path, }
 }
 
 ///|

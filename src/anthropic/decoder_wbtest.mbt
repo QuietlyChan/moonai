@@ -276,7 +276,7 @@ test "Anthropic streams pre-populated tool calls across message boundaries" {
           id: "call-2",
           name: "lookup",
           arguments: "{\"city\":\"Shanghai\"}",
-          ..,
+          ..
         }
       )
     }),
@@ -1270,7 +1270,7 @@ test "Anthropic emits complete MCP parts immediately and normalizes code deltas"
         {
           id: "code-1",
           arguments: "{\"type\": \"programmatic-tool-call\",\"code\":\"print(1)\"}",
-          ..,
+          ..
         }
       )
     }),

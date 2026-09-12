@@ -121,7 +121,7 @@ pub async fn ChatModelMiddleware::transform(
 ) -> @provider.ChatCallOptions {
   let transformed = self.apply_options(options)
   match self.transform_params {
-    Some(transform) => transform({ operation, params: transformed, model })
+    Some(transform) => transform({ operation, params: transformed, model, })
     None => transformed
   }
 }
@@ -143,7 +143,7 @@ pub fn wrap_chat_model(
   model : &@provider.ChatModel,
   middleware : ChatModelMiddleware,
 ) -> &@provider.ChatModel {
-  MiddlewareChatModel::{ model, middleware } as &@provider.ChatModel
+  MiddlewareChatModel::{ model, middleware, } as &@provider.ChatModel
 }
 
 ///|
@@ -373,7 +373,7 @@ pub fn wrap_image_wire_model(
   model : &@provider.ImageWireModel,
   middleware : ImageWireModelMiddleware,
 ) -> &@provider.ImageWireModel {
-  MiddlewareImageWireModel::{ model, middleware } as &@provider.ImageWireModel
+  MiddlewareImageWireModel::{ model, middleware, } as &@provider.ImageWireModel
 }
 
 ///|

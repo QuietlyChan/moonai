@@ -211,7 +211,7 @@ pub fn prepare_tools_for_tool_callers(
       _ => ()
     }
   }
-  { execution_tools_value: execution_tools, model_tools_value: model_tools }
+  { execution_tools_value: execution_tools, model_tools_value: model_tools, }
 }
 
 ///|

@@ -11,7 +11,7 @@ pub fn AlibabaPromptTokensDetails::new(
   cached_tokens? : Int,
   cache_creation_input_tokens? : Int,
 ) -> AlibabaPromptTokensDetails {
-  { cached_tokens, cache_creation_input_tokens }
+  { cached_tokens, cache_creation_input_tokens, }
 }
 
 ///|

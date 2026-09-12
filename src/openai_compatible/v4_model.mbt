@@ -121,7 +121,7 @@ pub fn OpenAICompatibleChatLanguageModel::new(
   model_id : OpenAICompatibleChatModelId,
   config : OpenAICompatibleChatConfig,
 ) -> OpenAICompatibleChatLanguageModel {
-  { model_id_value: model_id, config }
+  { model_id_value: model_id, config, }
 }
 
 ///|

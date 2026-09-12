@@ -387,5 +387,5 @@ fn convert_v4_prompt_to_openai_chat(
         }
     }
   }
-  { messages, warnings }
+  { messages, warnings, }
 }

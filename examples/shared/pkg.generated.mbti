@@ -32,4 +32,3 @@ pub fn ExampleConfig::model_id(Self) -> String
 pub type ToolEventSink = async (Json) -> Unit
 
 // Traits
-

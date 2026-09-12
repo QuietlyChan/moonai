@@ -70,5 +70,5 @@ pub fn convert_to_completion_prompt(
   }
   text.write_string(assistant)
   text.write_string(":\n")
-  { prompt: text.to_string(), stop_sequences: ["\n\{user}:"] }
+  { prompt: text.to_string(), stop_sequences: ["\n\{user}:"], }
 }

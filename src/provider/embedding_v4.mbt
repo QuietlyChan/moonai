@@ -41,7 +41,7 @@ pub(all) struct EmbeddingModelV4Usage {
 ///|
 /// Construct known embedding usage.
 pub fn EmbeddingModelV4Usage::new(tokens : Int) -> EmbeddingModelV4Usage {
-  { tokens: Some(tokens) }
+  { tokens: Some(tokens), }
 }
 
 ///|

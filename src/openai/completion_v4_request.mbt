@@ -84,5 +84,5 @@ fn prepare_openai_completion_v4_request(
       ],
     ),
   )
-  { body, warnings }
+  { body, warnings, }
 }

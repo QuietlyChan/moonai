@@ -60,7 +60,7 @@ pub fn GeneratedCustomContent::new(
   kind~ : String,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> GeneratedCustomContent {
-  { kind, provider_metadata }
+  { kind, provider_metadata, }
 }
 
 ///|
@@ -83,7 +83,7 @@ pub fn GeneratedContent::text(
   text : String,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> GeneratedContent {
-  GeneratedTextOutput({ text, provider_metadata })
+  GeneratedTextOutput({ text, provider_metadata, })
 }
 
 ///|
@@ -92,7 +92,7 @@ pub fn GeneratedContent::reasoning(
   text : String,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> GeneratedContent {
-  GeneratedReasoningOutput({ text, provider_metadata })
+  GeneratedReasoningOutput({ text, provider_metadata, })
 }
 
 ///|
@@ -102,7 +102,7 @@ pub fn GeneratedContent::file(
   data~ : GeneratedFileData,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> GeneratedContent {
-  GeneratedFileOutput({ media_type, data, provider_metadata })
+  GeneratedFileOutput({ media_type, data, provider_metadata, })
 }
 
 ///|
@@ -112,7 +112,7 @@ pub fn GeneratedContent::reasoning_file(
   data~ : GeneratedFileData,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> GeneratedContent {
-  GeneratedReasoningFileOutput({ media_type, data, provider_metadata })
+  GeneratedReasoningFileOutput({ media_type, data, provider_metadata, })
 }
 
 ///|
@@ -174,5 +174,5 @@ pub fn GeneratedContent::custom(
   kind~ : String,
   provider_metadata? : Map[String, Json] = Map([]),
 ) -> GeneratedContent {
-  GeneratedCustomOutput({ kind, provider_metadata })
+  GeneratedCustomOutput({ kind, provider_metadata, })
 }

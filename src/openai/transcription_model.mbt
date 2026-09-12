@@ -251,7 +251,7 @@ fn parse_openai_transcription_stream_options(
   for warning in reader.diagnostics() {
     warnings.push(warning)
   }
-  { language, delay, include_values, warnings }
+  { language, delay, include_values, warnings, }
 }
 
 ///|

@@ -56,7 +56,7 @@ pub fn OpenAICompatibleCompletionLanguageModel::new(
   model_id : OpenAICompatibleCompletionModelId,
   config : OpenAICompatibleCompletionConfig,
 ) -> OpenAICompatibleCompletionLanguageModel {
-  { model_id_value: model_id, config }
+  { model_id_value: model_id, config, }
 }
 
 ///|

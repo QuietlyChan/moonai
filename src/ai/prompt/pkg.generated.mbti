@@ -101,4 +101,3 @@ pub(all) struct StandardizedPrompt {
 pub type DownloadFunction = async (Array[DownloadRequest]) -> Array[DownloadedAsset?]
 
 // Traits
-

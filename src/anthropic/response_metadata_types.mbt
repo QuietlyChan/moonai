@@ -237,7 +237,7 @@ fn parse_anthropic_context_management(
           }
         _ => ()
       }
-      Some({ applied_edits: edits })
+      Some({ applied_edits: edits, })
     }
     _ => None
   }

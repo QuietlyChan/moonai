@@ -647,7 +647,7 @@ async test "HttpTransport injects streaming SSE requests and closes responses" {
       SseDecodeBatch::empty(true)
     } else {
       payloads.push(payload)
-      { events: [], consumed_event: true, done: false }
+      { events: [], consumed_event: true, done: false, }
     }
   }
   let result = post_json_sse_events(
@@ -712,7 +712,7 @@ async test "SSE transport runs the protocol finalizer only at normal EOF" {
       match buffer.feed_line(raw) {
         Some(payload) => {
           payloads.push(payload)
-          { events: [], consumed_event: true, done: false }
+          { events: [], consumed_event: true, done: false, }
         }
         None => SseDecodeBatch::empty(false)
       }
@@ -721,7 +721,7 @@ async test "SSE transport runs the protocol finalizer only at normal EOF" {
       match buffer.flush() {
         Some(payload) => {
           payloads.push(payload)
-          { events: [], consumed_event: true, done: false }
+          { events: [], consumed_event: true, done: false, }
         }
         None => SseDecodeBatch::empty(false)
       }
@@ -1088,7 +1088,7 @@ priv struct AlwaysFailingHttpTransport {
 
 ///|
 fn AlwaysFailingHttpTransport::new() -> AlwaysFailingHttpTransport {
-  { buffered_calls: Ref(0), stream_calls: Ref(0) }
+  { buffered_calls: Ref(0), stream_calls: Ref(0), }
 }
 
 ///|
@@ -1370,7 +1370,7 @@ async test "SSE connection failures retry then become API call errors" {
 
 ///|
 async test "SSE read failures become API call errors" {
-  let stream = ReadFailingStreamResponse::{ closed: Ref(false) }
+  let stream = ReadFailingStreamResponse::{ closed: Ref(false), }
   let transport = ReadFailingHttpTransport::{ stream, }
   try
     post_json_sse_events(
@@ -1408,7 +1408,7 @@ async test "buffered timeout has no HTTP status" {
       body=Json::empty_object(),
       timeout_ms=1,
       retry_policy=@provider.RetryPolicy::none(),
-      transport=SlowHttpTransport::{  },
+      transport=SlowHttpTransport::{ },
     )
     |> ignore
   catch {
@@ -1437,7 +1437,7 @@ async test "transport preserves an existing API call error" {
       headers=Map([]),
       body=Json::empty_object(),
       retry_policy=@provider.RetryPolicy::none(),
-      transport=ExistingApiCallErrorTransport::{  },
+      transport=ExistingApiCallErrorTransport::{ },
     )
     |> ignore
   catch {

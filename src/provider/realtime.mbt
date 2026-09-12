@@ -20,7 +20,7 @@ pub fn RealtimeAudioTranscriptionConfig::new(
   language? : String,
   prompt? : String,
 ) -> RealtimeAudioTranscriptionConfig {
-  { model, language, prompt }
+  { model, language, prompt, }
 }
 
 ///|
@@ -80,7 +80,7 @@ pub fn RealtimeToolDefinition::new(
   parameters~ : Json,
   description? : String,
 ) -> RealtimeToolDefinition {
-  { name, description, parameters }
+  { name, description, parameters, }
 }
 
 ///|
@@ -153,7 +153,7 @@ pub fn RealtimeResponseCreateOptions::new(
   instructions? : String,
   metadata? : Map[String, Json],
 ) -> RealtimeResponseCreateOptions {
-  { modalities, instructions, metadata }
+  { modalities, instructions, metadata, }
 }
 
 ///|
@@ -265,7 +265,7 @@ pub fn RealtimeClientSecretOptions::new(
   expires_after_seconds? : Int,
   session_config? : RealtimeSessionConfig,
 ) -> RealtimeClientSecretOptions {
-  { expires_after_seconds, session_config }
+  { expires_after_seconds, session_config, }
 }
 
 ///|
@@ -283,7 +283,7 @@ pub fn RealtimeClientSecretResult::new(
   url~ : String,
   expires_at? : Int,
 ) -> RealtimeClientSecretResult {
-  { token, url, expires_at }
+  { token, url, expires_at, }
 }
 
 ///|
@@ -299,7 +299,7 @@ pub fn RealtimeWebSocketConfig::new(
   url~ : String,
   protocols? : Array[String] = [],
 ) -> RealtimeWebSocketConfig {
-  { url, protocols }
+  { url, protocols, }
 }
 
 ///|
@@ -317,5 +317,5 @@ pub fn RealtimeFactoryTokenOptions::new(
   expires_after_seconds? : Int,
   session_config? : RealtimeSessionConfig,
 ) -> RealtimeFactoryTokenOptions {
-  { model, expires_after_seconds, session_config }
+  { model, expires_after_seconds, session_config, }
 }

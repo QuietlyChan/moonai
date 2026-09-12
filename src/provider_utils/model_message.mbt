@@ -552,7 +552,7 @@ pub fn ModelToolApprovalRequest::new(
   is_automatic? : Bool = false,
   signature? : String,
 ) -> ModelToolApprovalRequest {
-  { approval_id, tool_call_id, is_automatic, signature }
+  { approval_id, tool_call_id, is_automatic, signature, }
 }
 
 ///|

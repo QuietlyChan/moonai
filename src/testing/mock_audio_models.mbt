@@ -14,7 +14,7 @@ pub fn MockSpeechModel::new(
   provider_name? : String = "mock",
   model_id? : String = "mock-speech-model",
 ) -> MockSpeechModel {
-  { provider_name, model_id, result, captured_options: None }
+  { provider_name, model_id, result, captured_options: None, }
 }
 
 ///|
@@ -218,7 +218,7 @@ pub fn MockSpeechTranslationModel::new(
   provider_name? : String = "mock",
   model_id? : String = "mock-translation-model",
 ) -> MockSpeechTranslationModel {
-  { provider_name, model_id, events, result, captured_target_language: None }
+  { provider_name, model_id, events, result, captured_target_language: None, }
 }
 
 ///|

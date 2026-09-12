@@ -94,7 +94,7 @@ fn stream_finish(
 ) -> @provider.LanguageModelV4StreamPart {
   @provider.V4Finish(
     usage=stream_usage(input_tokens, output_tokens),
-    reason={ unified: reason, raw: None },
+    reason={ unified: reason, raw: None, },
     provider_metadata=Map([]),
   )
 }

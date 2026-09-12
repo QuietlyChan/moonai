@@ -12,7 +12,7 @@ priv struct AnthropicCacheControlValidator {
 
 ///|
 fn AnthropicCacheControlValidator::new() -> AnthropicCacheControlValidator {
-  { breakpoint_count: 0, warnings: [] }
+  { breakpoint_count: 0, warnings: [], }
 }
 
 ///|

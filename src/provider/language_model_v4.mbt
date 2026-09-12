@@ -284,7 +284,7 @@ pub fn LanguageModelV4StreamResult::new(
   request : RequestMetadata?,
   response : ResponseMetadata?,
 ) -> LanguageModelV4StreamResult {
-  { request, response }
+  { request, response, }
 }
 
 ///|

@@ -319,4 +319,3 @@ pub fn VideoModelReference::named(provider~ : String, model_id~ : String) -> Sel
 // Type aliases
 
 // Traits
-

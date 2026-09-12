@@ -145,7 +145,7 @@ pub fn HarnessV1SandboxCreateOptions::new(
   identity? : String,
   cancellation_token? : @provider.CancellationToken,
 ) -> HarnessV1SandboxCreateOptions {
-  { session_id, identity, cancellation_token }
+  { session_id, identity, cancellation_token, }
 }
 
 ///|

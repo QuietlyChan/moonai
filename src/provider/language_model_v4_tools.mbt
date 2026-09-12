@@ -69,7 +69,7 @@ pub fn LanguageModelV4Tool::provider(
   name~ : String,
   args? : Json = Json::empty_object(),
 ) -> LanguageModelV4Tool {
-  LanguageModelV4Tool::V4ProviderTool({ id, name, args })
+  LanguageModelV4Tool::V4ProviderTool({ id, name, args, })
 }
 
 ///|
@@ -144,7 +144,7 @@ pub fn LanguageModelV4Tool::from_tool_definition(
         provider_options,
       })
     ToolDefinition::ProviderTool(id~, name~, args~) =>
-      LanguageModelV4Tool::V4ProviderTool({ id, name, args })
+      LanguageModelV4Tool::V4ProviderTool({ id, name, args, })
   }
 }
 

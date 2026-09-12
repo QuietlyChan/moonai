@@ -13,7 +13,7 @@ pub fn MCPImplementation::new(
   version~ : String,
   title? : String,
 ) -> MCPImplementation {
-  { name, version, title }
+  { name, version, title, }
 }
 
 ///|
@@ -189,7 +189,7 @@ pub fn CompleteRequestParams::new(
   argument_value~ : String,
   context_arguments? : Map[String, String] = Map([]),
 ) -> CompleteRequestParams {
-  { reference, argument_name, argument_value, context_arguments }
+  { reference, argument_name, argument_value, context_arguments, }
 }
 
 ///|
@@ -226,7 +226,7 @@ pub fn MCPRequestOptions::new(
   timeout_ms? : Int,
   max_total_timeout_ms? : Int,
 ) -> MCPRequestOptions {
-  { cancellation_token, timeout_ms, max_total_timeout_ms }
+  { cancellation_token, timeout_ms, max_total_timeout_ms, }
 }
 
 ///|
@@ -343,7 +343,7 @@ fn decode_list_tools_result(
   for item in values {
     tools.push(decode_mcp_tool(item))
   }
-  { tools, next_cursor: optional_string(fields, "nextCursor"), raw: value }
+  { tools, next_cursor: optional_string(fields, "nextCursor"), raw: value, }
 }
 
 ///|
@@ -389,7 +389,7 @@ fn decode_list_resources_result(
   for item in values {
     resources.push(decode_resource(item))
   }
-  { resources, next_cursor: optional_string(fields, "nextCursor"), raw: value }
+  { resources, next_cursor: optional_string(fields, "nextCursor"), raw: value, }
 }
 
 ///|
@@ -461,7 +461,7 @@ fn decode_read_resource_result(
   for item in values {
     contents.push(decode_resource_contents(item))
   }
-  { contents, raw: value }
+  { contents, raw: value, }
 }
 
 ///|
@@ -502,7 +502,7 @@ fn decode_list_prompts_result(
   for item in values {
     prompts.push(decode_prompt(item))
   }
-  { prompts, next_cursor: optional_string(fields, "nextCursor"), raw: value }
+  { prompts, next_cursor: optional_string(fields, "nextCursor"), raw: value, }
 }
 
 ///|
@@ -524,7 +524,7 @@ fn decode_get_prompt_result(
       content,
     })
   }
-  { description: optional_string(fields, "description"), messages, raw: value }
+  { description: optional_string(fields, "description"), messages, raw: value, }
 }
 
 ///|

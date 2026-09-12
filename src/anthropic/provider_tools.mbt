@@ -7,7 +7,7 @@ pub struct AnthropicTools {}
 ///|
 /// Return the shared Anthropic tool-factory namespace.
 pub fn anthropic_tools() -> AnthropicTools {
-  AnthropicTools::{  }
+  AnthropicTools::{ }
 }
 
 ///|

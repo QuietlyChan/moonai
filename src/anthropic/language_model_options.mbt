@@ -58,7 +58,7 @@ pub fn AnthropicFilePartProviderOptions::new(
   title? : String,
   context? : String,
 ) -> AnthropicFilePartProviderOptions {
-  { container_upload, citations, title, context }
+  { container_upload, citations, title, context, }
 }
 
 ///|
@@ -128,7 +128,7 @@ pub(all) struct AnthropicSystemMessageProviderOptions {
 pub fn AnthropicSystemMessageProviderOptions::new(
   tool_changes? : Array[AnthropicToolChange] = [],
 ) -> AnthropicSystemMessageProviderOptions {
-  { tool_changes: tool_changes.copy() }
+  { tool_changes: tool_changes.copy(), }
 }
 
 ///|
@@ -328,7 +328,7 @@ pub fn AnthropicMcpToolConfiguration::new(
   enabled? : Bool,
   allowed_tools? : Array[String],
 ) -> AnthropicMcpToolConfiguration {
-  { enabled, allowed_tools: allowed_tools.map(fn(values) { values.copy() }) }
+  { enabled, allowed_tools: allowed_tools.map(fn(values) { values.copy() }), }
 }
 
 ///|
@@ -366,7 +366,7 @@ pub fn AnthropicMcpServer::new(
   authorization_token? : String,
   tool_configuration? : AnthropicMcpToolConfiguration,
 ) -> AnthropicMcpServer {
-  { name, url, authorization_token, tool_configuration }
+  { name, url, authorization_token, tool_configuration, }
 }
 
 ///|
@@ -462,7 +462,7 @@ pub fn AnthropicContainer::new(
   id? : String,
   skills? : Array[AnthropicContainerSkill] = [],
 ) -> AnthropicContainer {
-  { id, skills: skills.copy() }
+  { id, skills: skills.copy(), }
 }
 
 ///|
@@ -528,7 +528,7 @@ pub fn AnthropicTaskBudget::new(
       fail("Anthropic task budget remaining must be non-negative")
     }
   }
-  { total, remaining }
+  { total, remaining, }
 }
 
 ///|
@@ -907,7 +907,7 @@ pub(all) struct AnthropicContextManagement {
 pub fn AnthropicContextManagement::new(
   edits~ : Array[AnthropicContextManagementEdit],
 ) -> AnthropicContextManagement {
-  { edits: edits.copy() }
+  { edits: edits.copy(), }
 }
 
 ///|

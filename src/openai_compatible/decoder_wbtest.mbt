@@ -38,7 +38,7 @@ fn decode_compatible_test_response(
     ),
     decoded.usage.to_usage(),
     match decoded.finish_reason {
-      { unified: @provider.V4FinishOther, raw: None } => @provider.Unknown("")
+      { unified: @provider.V4FinishOther, raw: None, } => @provider.Unknown("")
       reason => reason.to_finish_reason()
     },
   ).with_diagnostics(None, decoded.response, decoded.provider_metadata, [])
@@ -72,7 +72,7 @@ test "stream usage converters receive omitted usage as None" {
             cache_read: None,
             cache_write: None,
           },
-          output_tokens: { total: Some(1), text: Some(1), reasoning: None },
+          output_tokens: { total: Some(1), text: Some(1), reasoning: None, },
           raw: None,
         }
       Some(raw) => @provider.LanguageModelV4Usage::unknown().with_raw(Some(raw))
@@ -156,7 +156,7 @@ test "normal EOF finalizes compatible streams without a finish reason" {
     terminal.events.any(event => {
       event
       is @provider.V4Finish(
-        reason={ unified: @provider.V4FinishOther, raw: None },
+        reason={ unified: @provider.V4FinishOther, raw: None, },
         ..
       )
     }),

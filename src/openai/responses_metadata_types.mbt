@@ -15,7 +15,7 @@ pub fn OpenAIResponsesMetadata::new(
   service_tier? : String,
   reasoning_context? : String,
 ) -> OpenAIResponsesMetadata {
-  { response_id, logprobs, service_tier, reasoning_context }
+  { response_id, logprobs, service_tier, reasoning_context, }
 }
 
 ///|
@@ -79,7 +79,7 @@ pub fn OpenaiResponsesReasoningProviderMetadata::new(
   item_id~ : String,
   reasoning_encrypted_content? : String,
 ) -> OpenaiResponsesReasoningProviderMetadata {
-  { openai: { item_id, reasoning_encrypted_content } }
+  { openai: { item_id, reasoning_encrypted_content, }, }
 }
 
 ///|
@@ -116,7 +116,7 @@ pub fn OpenaiResponsesCompactionProviderMetadata::new(
   item_id~ : String,
   encrypted_content? : String,
 ) -> OpenaiResponsesCompactionProviderMetadata {
-  { openai: { item_id, encrypted_content } }
+  { openai: { item_id, encrypted_content, }, }
 }
 
 ///|
@@ -173,7 +173,7 @@ pub fn OpenaiResponsesTextProviderMetadata::new(
   phase? : OpenAIResponsesTextPhase,
   annotations? : Array[Json],
 ) -> OpenaiResponsesTextProviderMetadata {
-  { openai: { item_id, phase, annotations } }
+  { openai: { item_id, phase, annotations, }, }
 }
 
 ///|

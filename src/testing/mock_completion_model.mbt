@@ -16,7 +16,7 @@ pub fn MockCompletionModel::new(
   provider_name? : String = "mock",
   model_id? : String = "mock-completion-model",
 ) -> MockCompletionModel {
-  { provider_name, model_id, events, result, captured_prompt: "" }
+  { provider_name, model_id, events, result, captured_prompt: "", }
 }
 
 ///|

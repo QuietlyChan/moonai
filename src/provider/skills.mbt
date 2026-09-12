@@ -11,7 +11,7 @@ pub fn SkillsV4File::new(
   path~ : String,
   data~ : UploadFileData,
 ) -> SkillsV4File {
-  { path, data }
+  { path, data, }
 }
 
 ///|
@@ -29,7 +29,7 @@ pub fn SkillsV4UploadSkillCallOptions::new(
   display_title? : String,
   provider_options? : Map[String, Json] = Map([]),
 ) -> SkillsV4UploadSkillCallOptions {
-  { files, display_title, provider_options }
+  { files, display_title, provider_options, }
 }
 
 ///|

@@ -8,7 +8,7 @@ pub struct OpenAITools {}
 ///|
 /// Return the shared OpenAI tool-factory namespace.
 fn openai_tools() -> OpenAITools {
-  OpenAITools::{  }
+  OpenAITools::{ }
 }
 
 ///|

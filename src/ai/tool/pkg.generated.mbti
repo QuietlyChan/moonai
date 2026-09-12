@@ -38,4 +38,3 @@ pub type ResolvedToolCallers = Map[String, Array[ToolCallerReference]]
 pub type ToolCallerConfiguration = Map[String, Array[ToolCallerReference]]
 
 // Traits
-

@@ -14,7 +14,7 @@ pub fn ProviderDefinedToolFactory::new(
   input_schema~ : Json,
   output_schema? : Json,
 ) -> ProviderDefinedToolFactory {
-  { id, input_schema, output_schema }
+  { id, input_schema, output_schema, }
 }
 
 ///|

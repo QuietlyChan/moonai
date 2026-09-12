@@ -5,7 +5,7 @@ priv struct MiniMaxReasoningMockTransport {
 
 ///|
 fn MiniMaxReasoningMockTransport::new() -> MiniMaxReasoningMockTransport {
-  { requests: [] }
+  { requests: [], }
 }
 
 ///|

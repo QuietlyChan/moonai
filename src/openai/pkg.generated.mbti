@@ -764,4 +764,3 @@ pub fn OpenaiResponsesTextProviderMetadata::to_provider_metadata(Self, provider_
 pub type OpenAITranslationModelId = String
 
 // Traits
-

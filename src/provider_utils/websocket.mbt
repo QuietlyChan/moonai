@@ -137,7 +137,7 @@ pub struct NativeWebSocketConnector {}
 ///|
 /// Construct the built-in native WebSocket connector.
 pub fn NativeWebSocketConnector::new() -> NativeWebSocketConnector {
-  NativeWebSocketConnector::{  }
+  NativeWebSocketConnector::{ }
 }
 
 ///|

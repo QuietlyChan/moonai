@@ -15,7 +15,7 @@ pub fn SandboxProcessOptions::new(
   env? : Map[String, String] = Map([]),
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxProcessOptions {
-  { command, working_directory, env: copy_headers(env), cancellation_token }
+  { command, working_directory, env: copy_headers(env), cancellation_token, }
 }
 
 ///|
@@ -31,7 +31,7 @@ pub fn SandboxReadFileOptions::new(
   path~ : String,
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxReadFileOptions {
-  { path, cancellation_token }
+  { path, cancellation_token, }
 }
 
 ///|
@@ -56,7 +56,7 @@ pub fn SandboxReadTextFileOptions::new(
   end_line? : Int,
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxReadTextFileOptions {
-  { path, encoding, start_line, end_line, cancellation_token }
+  { path, encoding, start_line, end_line, cancellation_token, }
 }
 
 ///|
@@ -75,7 +75,7 @@ pub fn SandboxByteStream::new(
   read_next~ : async () -> Bytes?,
   cancel? : () -> Unit = () => (),
 ) -> SandboxByteStream {
-  { read_next_callback: read_next, cancel_callback: cancel }
+  { read_next_callback: read_next, cancel_callback: cancel, }
 }
 
 ///|
@@ -105,7 +105,7 @@ pub fn SandboxWriteFileOptions::new(
   content~ : SandboxByteStream,
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxWriteFileOptions {
-  { path, content, cancellation_token }
+  { path, content, cancellation_token, }
 }
 
 ///|
@@ -123,7 +123,7 @@ pub fn SandboxWriteBinaryFileOptions::new(
   content~ : Bytes,
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxWriteBinaryFileOptions {
-  { path, content, cancellation_token }
+  { path, content, cancellation_token, }
 }
 
 ///|
@@ -143,7 +143,7 @@ pub fn SandboxWriteTextFileOptions::new(
   encoding? : String,
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxWriteTextFileOptions {
-  { path, content, encoding, cancellation_token }
+  { path, content, encoding, cancellation_token, }
 }
 
 ///|
@@ -161,7 +161,7 @@ pub fn SandboxProcessResult::new(
   stdout? : String = "",
   stderr? : String = "",
 ) -> SandboxProcessResult {
-  { exit_code, stdout, stderr }
+  { exit_code, stdout, stderr, }
 }
 
 ///|

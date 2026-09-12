@@ -12,5 +12,5 @@ pub(all) struct StreamErrorInfo {
 ///|
 /// Construct a stream error with optional structured data.
 pub fn StreamErrorInfo::new(message : String, data? : Json) -> StreamErrorInfo {
-  { message, data }
+  { message, data, }
 }

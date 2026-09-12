@@ -72,7 +72,7 @@ pub fn VideoModelV4FrameImage::new(
   image : VideoModelV4File,
   frame_type : VideoModelV4FrameType,
 ) -> VideoModelV4FrameImage {
-  { image, frame_type }
+  { image, frame_type, }
 }
 
 ///|
@@ -80,7 +80,7 @@ pub fn VideoModelV4FrameImage::new(
 pub fn VideoModelV4FrameImage::first(
   image : VideoModelV4File,
 ) -> VideoModelV4FrameImage {
-  { image, frame_type: VideoV4FirstFrame }
+  { image, frame_type: VideoV4FirstFrame, }
 }
 
 ///|
@@ -88,7 +88,7 @@ pub fn VideoModelV4FrameImage::first(
 pub fn VideoModelV4FrameImage::last(
   image : VideoModelV4File,
 ) -> VideoModelV4FrameImage {
-  { image, frame_type: VideoV4LastFrame }
+  { image, frame_type: VideoV4LastFrame, }
 }
 
 ///|
@@ -283,7 +283,7 @@ pub fn VideoModelV4FrameImage::from_video_frame_image(
     FirstFrame => VideoV4FirstFrame
     LastFrame => VideoV4LastFrame
   }
-  { image: VideoModelV4File::from_video_input(frame.image), frame_type }
+  { image: VideoModelV4File::from_video_input(frame.image), frame_type, }
 }
 
 ///|

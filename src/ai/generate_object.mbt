@@ -137,7 +137,7 @@ pub async fn generate_object(
   } noraise {
     _ => ()
   }
-  { object, response }
+  { object, response, }
 }
 
 ///|

@@ -31,7 +31,7 @@ pub fn DeepSeekLanguageModelChatOptions::new(
       fail("DeepSeek reasoning_effort must be low, medium, high, xhigh, or max")
     }
   }
-  { thinking_type, reasoning_effort, strict_json_schema }
+  { thinking_type, reasoning_effort, strict_json_schema, }
 }
 
 ///|
@@ -97,5 +97,5 @@ fn parse_deepseek_options(
     .take_bool("strictJsonSchema", aliases=["strict_json_schema"])
     .unwrap_or(true),
   }
-  { options, warnings: reader.diagnostics() }
+  { options, warnings: reader.diagnostics(), }
 }

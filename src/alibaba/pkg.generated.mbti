@@ -108,4 +108,3 @@ pub type AlibabaEmbeddingModelId = String
 pub type AlibabaVideoModelId = String
 
 // Traits
-

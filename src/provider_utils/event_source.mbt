@@ -14,7 +14,7 @@ pub(all) struct SseDecodeBatch[E] {
 ///|
 /// Return a generic batch that did not consume a complete SSE event.
 pub fn[E] SseDecodeBatch::empty(done : Bool) -> SseDecodeBatch[E] {
-  { events: [], consumed_event: false, done }
+  { events: [], consumed_event: false, done, }
 }
 
 ///|
@@ -50,7 +50,7 @@ pub fn SseStreamStartPolicy::new(
   guard accepted_grace_ms >= 0 else {
     fail("SSE accepted grace period must not be negative")
   }
-  { is_accepted, is_output, accepted_grace_ms, on_started, on_retry }
+  { is_accepted, is_output, accepted_grace_ms, on_started, on_retry, }
 }
 
 ///|
@@ -84,7 +84,7 @@ pub struct EventSourceBuffer {
 ///|
 /// Create an empty SSE payload buffer.
 pub fn EventSourceBuffer::new() -> EventSourceBuffer {
-  { data_lines: [] }
+  { data_lines: [], }
 }
 
 ///|

@@ -74,7 +74,7 @@ fn openai_gpt_version(model_id : String) -> OpenAIGptVersion? {
   } else {
     None
   }
-  Some({ major, minor, variant })
+  Some({ major, minor, variant, })
 }
 
 ///|

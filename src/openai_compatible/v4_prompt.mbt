@@ -378,5 +378,5 @@ pub fn default_openai_compatible_v4_prompt_converter(
         }
     }
   }
-  { messages, warnings: [] }
+  { messages, warnings: [], }
 }

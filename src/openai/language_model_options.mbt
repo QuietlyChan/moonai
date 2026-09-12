@@ -79,7 +79,7 @@ pub fn OpenAIPromptCacheOptions::new(
   mode? : OpenAIPromptCacheMode,
   ttl? : OpenAIPromptCacheTtl,
 ) -> OpenAIPromptCacheOptions {
-  { mode, ttl }
+  { mode, ttl, }
 }
 
 ///|
@@ -274,7 +274,7 @@ pub fn OpenAIAllowedTools::new(
   guard tool_names.length() > 0 else {
     fail("OpenAI allowed_tools requires at least one tool name")
   }
-  { tool_names: tool_names.copy(), mode }
+  { tool_names: tool_names.copy(), mode, }
 }
 
 ///|
@@ -718,7 +718,7 @@ pub fn OpenAILanguageModelCompletionOptions::new(
   user? : String,
   logprobs? : OpenAILogprobs,
 ) -> OpenAILanguageModelCompletionOptions {
-  { echo, logit_bias, suffix, user, logprobs }
+  { echo, logit_bias, suffix, user, logprobs, }
 }
 
 ///|
@@ -775,7 +775,7 @@ pub fn OpenAIEmbeddingModelOptions::new(
   if dimensions is Some(value) && value < 1 {
     fail("OpenAI embedding dimensions must be greater than or equal to 1")
   }
-  { dimensions, user }
+  { dimensions, user, }
 }
 
 ///|
@@ -975,7 +975,7 @@ pub fn OpenAIImageModelOptions::new(
   user? : String,
 ) -> OpenAIImageModelOptions raise {
   validate_openai_image_compression(output_compression)
-  { quality, background, output_format, output_compression, user }
+  { quality, background, output_format, output_compression, user, }
 }
 
 ///|
@@ -1118,7 +1118,7 @@ pub fn OpenAISpeechModelOptions::new(
   if speed is Some(value) && (value < 0.25 || value > 4.0) {
     fail("OpenAI speech speed must be between 0.25 and 4.0")
   }
-  { instructions, speed }
+  { instructions, speed, }
 }
 
 ///|
@@ -1195,7 +1195,7 @@ pub fn OpenAITranscriptionStreamingOptions::new(
   delay? : OpenAITranscriptionStreamingDelay,
   include_values? : Array[String],
 ) -> OpenAITranscriptionStreamingOptions {
-  { delay, include_values }
+  { delay, include_values, }
 }
 
 ///|

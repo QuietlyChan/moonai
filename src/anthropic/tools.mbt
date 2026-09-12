@@ -473,7 +473,7 @@ fn prepare_anthropic_v4_tools(
         }
     }
   }
-  { tools: prepared, beta_features }
+  { tools: prepared, beta_features, }
 }
 
 ///|

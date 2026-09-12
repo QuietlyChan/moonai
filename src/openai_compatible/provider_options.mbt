@@ -35,7 +35,7 @@ pub fn OpenAICompatibleLanguageModelChatOptions::new(
   text_verbosity? : String,
   strict_json_schema? : Bool,
 ) -> OpenAICompatibleLanguageModelChatOptions {
-  { user, reasoning_effort, text_verbosity, strict_json_schema }
+  { user, reasoning_effort, text_verbosity, strict_json_schema, }
 }
 
 ///|
@@ -82,7 +82,7 @@ pub fn OpenAICompatibleLanguageModelCompletionOptions::new(
   suffix? : String,
   user? : String,
 ) -> OpenAICompatibleLanguageModelCompletionOptions {
-  { echo, logit_bias, suffix, user }
+  { echo, logit_bias, suffix, user, }
 }
 
 ///|
@@ -135,7 +135,7 @@ pub fn OpenAICompatibleEmbeddingModelOptions::new(
   dimensions? : Int,
   user? : String,
 ) -> OpenAICompatibleEmbeddingModelOptions {
-  { dimensions, user }
+  { dimensions, user, }
 }
 
 ///|
@@ -187,7 +187,7 @@ pub fn OpenAICompatibleImageModelOptions::new(
     (output_compression.unwrap() >= 0 && output_compression.unwrap() <= 100) else {
     fail("OpenAI-compatible image output_compression must be between 0 and 100")
   }
-  { size, quality, output_format, output_compression, background, extensions }
+  { size, quality, output_format, output_compression, background, extensions, }
 }
 
 ///|

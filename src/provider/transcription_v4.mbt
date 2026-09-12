@@ -366,7 +366,7 @@ pub fn TranscriptionModelV4StreamResult::new(
   request? : RequestMetadata,
   response? : ResponseMetadata,
 ) -> TranscriptionModelV4StreamResult {
-  { request, response }
+  { request, response, }
 }
 
 ///|

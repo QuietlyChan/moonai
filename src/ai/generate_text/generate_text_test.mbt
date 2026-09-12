@@ -78,7 +78,7 @@ fn generation_result(
 ) -> @provider.LanguageModelV4GenerateResult {
   {
     content,
-    finish_reason: { unified: finish_reason, raw: None },
+    finish_reason: { unified: finish_reason, raw: None, },
     usage: @provider.LanguageModelV4Usage::from_usage(
       @provider.Usage::new(input_tokens~, output_tokens~),
     ),

@@ -432,14 +432,14 @@ fn MiniMaxVideoProtocolTransport::new(
       @provider_utils.HttpResponse::text(status_code=200, body~)
     }
   ]
-  { responses: http_responses, next_response: 0, requests: [] }
+  { responses: http_responses, next_response: 0, requests: [], }
 }
 
 ///|
 fn MiniMaxVideoProtocolTransport::from_http_responses(
   responses : Array[@provider_utils.HttpResponse],
 ) -> MiniMaxVideoProtocolTransport {
-  { responses, next_response: 0, requests: [] }
+  { responses, next_response: 0, requests: [], }
 }
 
 ///|
