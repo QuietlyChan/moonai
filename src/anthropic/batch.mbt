@@ -348,7 +348,7 @@ fn anthropic_batch_result_to_item(
         modality=@provider.BatchModalityText,
         error=@provider.BatchV4Error::new(
           message="batch request errored",
-          error_type?=Some("errored"),
+          error_type="errored",
         ),
         provider_metadata=Map([]),
       )

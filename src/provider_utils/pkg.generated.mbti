@@ -227,6 +227,8 @@ pub fn parse_json(String) -> Json raise @provider.JSONParseError
 
 pub fn[T] parse_json_with(String, (Json) -> T raise, context? : @provider.TypeValidationContext) -> T raise
 
+pub fn parse_partial_json(String) -> PartialJsonResult
+
 pub fn parse_transcription_stream_client_frame(String) -> TranscriptionStreamClientFrame
 
 pub fn parse_transcription_stream_part(String) -> @provider.TranscriptionModelV4StreamPart?
@@ -580,6 +582,18 @@ pub(all) enum ParseJsonResult[T] {
   ParseJsonFailure(error~ : @provider.JSONParseError, raw_value~ : Json?)
   ParseJsonValidationFailure(error~ : @provider.TypeValidationError, raw_value~ : Json)
 }
+
+pub(all) enum PartialJsonParseState {
+  PartialUndefinedInput
+  PartialSuccessfulParse
+  PartialSuccessfulRepair
+  PartialFailedParse
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PartialJsonResult {
+  value : Json
+  state : PartialJsonParseState
+} derive(Eq, @debug.Debug)
 
 pub struct ProviderDefinedToolFactory {
   // private fields
