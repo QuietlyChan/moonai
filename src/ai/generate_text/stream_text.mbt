@@ -39,6 +39,8 @@ pub async fn stream_text(
   tools_context? : Map[String, Json] = Map([]),
   experimental_sandbox? : @provider_utils.SandboxSession,
   experimental_download? : @prompt.DownloadFunction,
+  smooth? : SmoothChunking,
+  smooth_delay_ms? : Int = 10,
   on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit = _ => (),
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
@@ -153,12 +155,32 @@ pub async fn stream_text(
     let response_started_at = @env.now()
     let accumulator = StreamStepAccumulator::new()
     let ongoing_tool_call_names : Map[String, String] = Map([])
+    // Optional smoothing re-chunks text/reasoning deltas at natural
+    // boundaries before delivery; every other event flushes unchanged.
+    let smoother = match smooth {
+      Some(chunking) => Some(SmoothTextTransformer::new(chunking~))
+      None => None
+    }
     let stream_result = prepared_step.model.do_stream(call_options, event => {
       accumulator.process(event)
-      // User callbacks are isolated: a throwing callback must not break
-      // stream consumption or mask a subsequent provider error.
-      on_event(event) catch {
-        _ => ()
+      match smoother {
+        Some(transformer) =>
+          for part in transformer.process(event) {
+            on_event(part) catch {
+              _ => ()
+            }
+            if smooth_delay_ms > 0 {
+              @provider_utils.sleep_with_cancellation(
+                smooth_delay_ms, cancellation_token,
+              )
+            }
+          }
+        None =>
+          // User callbacks are isolated: a throwing callback must not break
+          // stream consumption or mask a subsequent provider error.
+          on_event(event) catch {
+            _ => ()
+          }
       }
       invoke_tool_callbacks_from_stream_part(
         event,
@@ -172,6 +194,21 @@ pub async fn stream_text(
         _ => ()
       }
     })
+    // Flush any buffered text once the provider stream ends.
+    match smoother {
+      Some(transformer) =>
+        for part in transformer.flush() {
+          on_event(part) catch {
+            _ => ()
+          }
+          if smooth_delay_ms > 0 {
+            @provider_utils.sleep_with_cancellation(
+              smooth_delay_ms, cancellation_token,
+            )
+          }
+        }
+      None => ()
+    }
     @provider.check_cancellation(cancellation_token)
     let response_time_ms = (@env.now() - response_started_at).to_int()
     let provider_result = accumulator.provider_result(stream_result)
@@ -315,6 +352,8 @@ pub async fn streamText(
   tools_context? : Map[String, Json] = Map([]),
   experimental_sandbox? : @provider_utils.SandboxSession,
   experimental_download? : @prompt.DownloadFunction,
+  smooth? : SmoothChunking,
+  smooth_delay_ms? : Int = 10,
   on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit = _ => (),
   retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
@@ -351,6 +390,8 @@ pub async fn streamText(
     tools_context~,
     experimental_sandbox?,
     experimental_download?,
+    smooth?,
+    smooth_delay_ms~,
     on_event~,
     retry_policy~,
     cancellation_token?,

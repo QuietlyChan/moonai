@@ -71,6 +71,7 @@ pub(all) enum LanguageModelV4ReasoningEffort {
   V4ReasoningMedium
   V4ReasoningHigh
   V4ReasoningXHigh
+  V4ReasoningMax
 } derive(Debug, Eq)
 
 ///|
@@ -86,6 +87,7 @@ pub fn LanguageModelV4ReasoningEffort::from_reasoning_effort(
     Medium => V4ReasoningMedium
     High => V4ReasoningHigh
     XHigh => V4ReasoningXHigh
+    Max => V4ReasoningMax
   }
 }
 
@@ -102,6 +104,7 @@ pub fn LanguageModelV4ReasoningEffort::to_reasoning_effort(
     V4ReasoningMedium => Medium
     V4ReasoningHigh => High
     V4ReasoningXHigh => XHigh
+    V4ReasoningMax => Max
   }
 }
 

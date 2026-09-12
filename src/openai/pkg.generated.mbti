@@ -212,6 +212,8 @@ pub(all) enum OpenAIImageGenerationQuality {
   ImageQualityLow
   ImageQualityMedium
   ImageQualityHigh
+  ImageQualityXHigh
+  ImageQualityMax
 } derive(Eq, @debug.Debug)
 
 pub(all) enum OpenAIImageGenerationSize {
@@ -276,6 +278,8 @@ pub(all) enum OpenAIImageQuality {
   OpenAIImageQualityLow
   OpenAIImageQualityMedium
   OpenAIImageQualityHigh
+  OpenAIImageQualityXHigh
+  OpenAIImageQualityMax
   OpenAIImageQualityAuto
 } derive(Eq, @debug.Debug)
 
@@ -529,6 +533,8 @@ pub(all) enum OpenAIServiceTier {
   OpenAIServiceTierAuto
   OpenAIServiceTierFlex
   OpenAIServiceTierPriority
+  OpenAIServiceTierFast
+  OpenAIServiceTierUltrafast
   OpenAIServiceTierDefault
 } derive(Eq, @debug.Debug)
 

@@ -11,6 +11,8 @@ pub fn asLanguageModelV4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
 pub fn as_language_model_v4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
+pub fn default_settings_middleware(@provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4Middleware
+
 pub fn model_id_of_completion(&@provider.CompletionModel) -> ModelId
 
 pub fn model_id_of_embedding(&@provider.EmbeddingModelV4) -> ModelId

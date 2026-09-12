@@ -119,6 +119,13 @@ pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn suppo
 }
 
 ///|
+pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn max_input_bytes_per_call(
+  self : MiddlewareEmbeddingModelV4,
+) -> Int64? {
+  self.model.max_input_bytes_per_call()
+}
+
+///|
 pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn do_embed(
   self,
   options,

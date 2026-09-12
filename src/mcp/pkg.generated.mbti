@@ -9,7 +9,9 @@ import {
 }
 
 // Values
-pub const LATEST_PROTOCOL_VERSION : String = "2025-11-25"
+pub const LATEST_LEGACY_PROTOCOL_VERSION : String = "2025-11-25"
+
+pub const LATEST_PROTOCOL_VERSION : String = "2026-07-28"
 
 pub const MCP_APP_EXTENSION_NAME : String = "io.modelcontextprotocol/ui"
 

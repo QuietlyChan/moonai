@@ -300,6 +300,13 @@ impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn supports_paral
 }
 
 ///|
+impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn max_input_bytes_per_call(
+  _self : AlibabaEmbeddingModel,
+) -> Int64? {
+  None
+}
+
+///|
 impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn do_embed(
   self,
   options,

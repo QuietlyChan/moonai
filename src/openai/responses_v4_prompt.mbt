@@ -512,20 +512,68 @@ fn openai_responses_v4_tool_result_content_part(
 }
 
 ///|
+
+///|
+/// Output-level provider options of a scalar tool-result output.
+fn openai_responses_tool_result_output_options(
+  output : @provider.LanguageModelV4ToolResultOutput,
+) -> Map[String, Json] {
+  match output {
+    @provider.V4ToolResultTextOutput(provider_options~, ..) => provider_options
+    @provider.V4ToolResultJsonOutput(provider_options~, ..) => provider_options
+    @provider.V4ToolResultExecutionDenied(provider_options~, ..) =>
+      provider_options
+    @provider.V4ToolResultErrorText(provider_options~, ..) => provider_options
+    @provider.V4ToolResultErrorJson(provider_options~, ..) => provider_options
+    @provider.V4ToolResultContentOutput(..) => Map([])
+  }
+}
+
+///|
 fn openai_responses_v4_tool_result_output(
   output : @provider.LanguageModelV4ToolResultOutput,
   pass_through_unsupported_files : Bool,
   provider_name : String,
   warnings : Array[@provider.Warning],
+  result_provider_options : Map[String, Json],
 ) -> Json raise {
+  // Scalar results resolve output-level breakpoints with a tool-result-level
+  // fallback and emit input_text arrays so explicit cache breakpoints are not
+  // silently discarded (AI SDK #19927).
+  let output_options = openai_responses_tool_result_output_options(output)
+  let breakpoint = match
+    openai_responses_prompt_option(
+      output_options, provider_name, "promptCacheBreakpoint",
+    ) {
+    Some(mark) => Some(mark)
+    None =>
+      openai_responses_prompt_option(
+        result_provider_options, provider_name, "promptCacheBreakpoint",
+      )
+  }
+  let convert_scalar = fn(value : String) -> Json {
+    match breakpoint {
+      Some(mark) =>
+        Json::array([
+          Json::object(
+            Map([
+              ("type", Json::string("input_text")),
+              ("text", Json::string(value)),
+              ("prompt_cache_breakpoint", mark),
+            ]),
+          ),
+        ])
+      None => Json::string(value)
+    }
+  }
   match output {
     @provider.V4ToolResultTextOutput(value~, ..)
-    | @provider.V4ToolResultErrorText(value~, ..) => Json::string(value)
+    | @provider.V4ToolResultErrorText(value~, ..) => convert_scalar(value)
     @provider.V4ToolResultJsonOutput(value~, ..)
     | @provider.V4ToolResultErrorJson(value~, ..) =>
-      Json::string(value.stringify())
+      convert_scalar(value.stringify())
     @provider.V4ToolResultExecutionDenied(reason~, ..) =>
-      Json::string(reason.unwrap_or("Tool call execution denied."))
+      convert_scalar(reason.unwrap_or("Tool call execution denied."))
     @provider.V4ToolResultContentOutput(value~, ..) => {
       let converted : Array[Json] = []
       for index, part in value {
@@ -707,6 +755,7 @@ fn openai_responses_v4_tool_result_to_wire(
         pass_through_unsupported_files,
         provider_name,
         warnings,
+        result.provider_options,
       ),
     ),
   ])
@@ -738,6 +787,7 @@ fn openai_responses_v4_custom_tool_output_wire(
       pass_through_unsupported_files,
       provider_name,
       warnings,
+      result.provider_options,
     ),
   }
 }

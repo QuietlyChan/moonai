@@ -77,6 +77,13 @@ pub impl @provider.EmbeddingWireModel for MockEmbeddingModel with fn supports_pa
 }
 
 ///|
+pub impl @provider.EmbeddingModelV4 for MockEmbeddingModel with fn max_input_bytes_per_call(
+  _self : MockEmbeddingModel,
+) -> Int64? {
+  None
+}
+
+///|
 pub impl @provider.EmbeddingWireModel for MockEmbeddingModel with fn embed(
   self,
   values,

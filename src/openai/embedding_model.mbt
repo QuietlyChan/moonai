@@ -222,6 +222,14 @@ impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn supports_parall
 }
 
 ///|
+impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn max_input_bytes_per_call(
+  _self : OpenAIEmbeddingModel,
+) -> Int64? {
+  // Conservative aggregate UTF-8 budget configured by AI SDK for OpenAI.
+  Some(300_000L)
+}
+
+///|
 impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn do_embed(
   self,
   options,

@@ -1,5 +1,6 @@
 import {
   "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
 }
 
 import {

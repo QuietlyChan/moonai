@@ -607,6 +607,7 @@ pub(all) enum ReasoningEffort {
   Medium
   High
   XHigh
+  Max
 } derive(Debug, Eq)
 
 ///|

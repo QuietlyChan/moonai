@@ -83,6 +83,7 @@ fn reasoning_key(reasoning : @provider.ReasoningEffort) -> String {
     @provider.Medium => "medium"
     @provider.High => "high"
     @provider.XHigh => "xhigh"
+    @provider.Max => "max"
   }
 }
 

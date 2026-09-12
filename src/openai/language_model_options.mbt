@@ -104,6 +104,8 @@ pub(all) enum OpenAIServiceTier {
   OpenAIServiceTierAuto
   OpenAIServiceTierFlex
   OpenAIServiceTierPriority
+  OpenAIServiceTierFast
+  OpenAIServiceTierUltrafast
   OpenAIServiceTierDefault
 } derive(Debug, Eq)
 
@@ -113,6 +115,10 @@ fn OpenAIServiceTier::wire_name(self : OpenAIServiceTier) -> String {
     OpenAIServiceTierAuto => "auto"
     OpenAIServiceTierFlex => "flex"
     OpenAIServiceTierPriority => "priority"
+    // 'fast' is OpenAI's newer name for the 'priority' tier.
+    OpenAIServiceTierFast => "fast"
+    // 'ultrafast' is access-controlled and limited to gpt-5.6-sol.
+    OpenAIServiceTierUltrafast => "ultrafast"
     OpenAIServiceTierDefault => "default"
   }
 }
@@ -807,6 +813,8 @@ pub(all) enum OpenAIImageQuality {
   OpenAIImageQualityLow
   OpenAIImageQualityMedium
   OpenAIImageQualityHigh
+  OpenAIImageQualityXHigh
+  OpenAIImageQualityMax
   OpenAIImageQualityAuto
 } derive(Debug, Eq)
 
@@ -818,6 +826,9 @@ fn OpenAIImageQuality::wire_name(self : OpenAIImageQuality) -> String {
     OpenAIImageQualityLow => "low"
     OpenAIImageQualityMedium => "medium"
     OpenAIImageQualityHigh => "high"
+    // 'xhigh' and 'max' are GPT Image 2.5 quality tiers.
+    OpenAIImageQualityXHigh => "xhigh"
+    OpenAIImageQualityMax => "max"
     OpenAIImageQualityAuto => "auto"
   }
 }

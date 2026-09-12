@@ -115,6 +115,9 @@ pub(open) trait EmbeddingModelV4 {
   fn provider(Self) -> String
   fn model_id(Self) -> String
   fn max_embeddings_per_call(Self) -> Int?
+  /// Experimental UTF-8 input-byte budget for one embedding call, mirroring
+  /// AI SDK's `maxInputBytesPerCall` capability. `None` means no byte limit.
+  fn max_input_bytes_per_call(Self) -> Int64?
   fn supports_parallel_calls(Self) -> Bool
   async fn do_embed(Self, EmbeddingModelV4CallOptions) -> EmbeddingModelV4Result
 }

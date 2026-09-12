@@ -40,6 +40,7 @@ fn openai_compatible_v4_reasoning_effort(
     @provider.V4ReasoningMedium => Some("medium")
     @provider.V4ReasoningHigh => Some("high")
     @provider.V4ReasoningXHigh => Some("xhigh")
+    @provider.V4ReasoningMax => Some("max")
   }
 }
 

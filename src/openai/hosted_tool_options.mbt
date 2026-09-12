@@ -487,6 +487,8 @@ pub(all) enum OpenAIImageGenerationQuality {
   ImageQualityLow
   ImageQualityMedium
   ImageQualityHigh
+  ImageQualityXHigh
+  ImageQualityMax
 } derive(Debug, Eq)
 
 ///|
@@ -498,6 +500,9 @@ fn OpenAIImageGenerationQuality::wire_name(
     ImageQualityLow => "low"
     ImageQualityMedium => "medium"
     ImageQualityHigh => "high"
+    // 'xhigh' and 'max' are GPT Image 2.5 quality tiers.
+    ImageQualityXHigh => "xhigh"
+    ImageQualityMax => "max"
   }
 }
 

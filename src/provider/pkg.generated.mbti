@@ -865,6 +865,7 @@ pub(all) enum LanguageModelV4ReasoningEffort {
   V4ReasoningMedium
   V4ReasoningHigh
   V4ReasoningXHigh
+  V4ReasoningMax
 } derive(Eq, @debug.Debug)
 pub fn LanguageModelV4ReasoningEffort::from_reasoning_effort(ReasoningEffort) -> Self
 pub fn LanguageModelV4ReasoningEffort::to_reasoning_effort(Self) -> ReasoningEffort
@@ -1216,6 +1217,7 @@ pub(all) enum ReasoningEffort {
   Medium
   High
   XHigh
+  Max
 } derive(Eq, @debug.Debug)
 
 pub(all) struct RequestMetadata {
@@ -1886,6 +1888,7 @@ pub(open) trait EmbeddingModelV4 {
   fn provider(Self) -> String
   fn model_id(Self) -> String
   fn max_embeddings_per_call(Self) -> Int?
+  fn max_input_bytes_per_call(Self) -> Int64?
   fn supports_parallel_calls(Self) -> Bool
   async fn do_embed(Self, EmbeddingModelV4CallOptions) -> EmbeddingModelV4Result
 }

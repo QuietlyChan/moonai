@@ -191,6 +191,13 @@ pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel with fn s
 }
 
 ///|
+pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel with fn max_input_bytes_per_call(
+  _self : OpenAICompatibleEmbeddingModel,
+) -> Int64? {
+  None
+}
+
+///|
 pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel with fn do_embed(
   self,
   options,

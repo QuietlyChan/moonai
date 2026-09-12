@@ -92,9 +92,13 @@ fn minimax_non_image_frame_media_type(
 ///|
 fn minimax_resolution(value : String) -> String? {
   match value.to_upper() {
+    "480P" => Some("480P")
+    "768P" => Some("768P")
     "2K" => Some("2K")
     _ =>
       match value {
+        "480x832" | "832x480" => Some("480P")
+        "768x1344" | "1344x768" => Some("768P")
         "2048x2048"
         | "2560x1080"
         | "2560x1440"

@@ -105,6 +105,10 @@ pub async fn embed_many(
   guard max_embeddings_per_call > 0 else {
     fail("embedding model max_embeddings_per_call must be greater than zero")
   }
+  let max_input_bytes_per_call = model.max_input_bytes_per_call()
+  let batches = split_embedding_batches(
+    values, max_embeddings_per_call, max_input_bytes_per_call,
+  )
   let parallel_limit = match max_parallel_calls {
     Some(value) => {
       guard value > 0 else {
@@ -126,22 +130,14 @@ pub async fn embed_many(
   let mut provider_metadata : Map[String, Json] = Map([])
   let warnings : Array[Warning] = []
   let mut offset = 0
-  while offset < values.length() {
+  while offset < batches.length() {
     let tasks : Array[async () -> (Int, @provider.EmbeddingModelV4Result)] = []
     let mut next_offset = offset
-    while next_offset < values.length() && tasks.length() < batch_parallel_limit {
+    while next_offset < batches.length() &&
+          tasks.length() < batch_parallel_limit {
       check_cancellation(cancellation_token)
-      let remaining = values.length() - next_offset
-      let batch_size = if remaining < max_embeddings_per_call {
-        remaining
-      } else {
-        max_embeddings_per_call
-      }
-      let batch : Array[String] = []
-      for index in next_offset..<(next_offset + batch_size) {
-        batch.push(values[index])
-      }
-      let expected_size = batch_size
+      let batch = batches[next_offset]
+      let expected_size = batch.length()
       tasks.push(() => {
         (
           expected_size,
@@ -158,7 +154,7 @@ pub async fn embed_many(
           ),
         )
       })
-      next_offset = next_offset + batch_size
+      next_offset = next_offset + 1
     }
     let responses = @async.all(tasks)
     for result in responses {
@@ -224,4 +220,44 @@ pub async fn embedMany(
     cancellation_token?,
     max_parallel_calls?,
   )
+}
+
+///|
+/// Split embedding inputs into batches honoring both the per-call count
+/// limit and the optional UTF-8 input-byte budget, in a single pass.
+///
+/// A single input larger than the byte budget becomes its own batch, matching
+/// AI SDK behavior: the request is still attempted once so the provider can
+/// reject it with its own diagnostics.
+fn split_embedding_batches(
+  values : Array[String],
+  max_embeddings_per_call : Int,
+  max_input_bytes_per_call : Int64?,
+) -> Array[Array[String]] raise {
+  if max_input_bytes_per_call is Some(limit) {
+    guard limit > 0 else {
+      fail("embedding model max_input_bytes_per_call must be greater than zero")
+    }
+  }
+  let batches : Array[Array[String]] = []
+  let mut current : Array[String] = []
+  let mut current_bytes = 0L
+  let byte_limit = max_input_bytes_per_call.unwrap_or(-1L)
+  for value in values {
+    let input_bytes = @utf8.encode(value).length().to_int64()
+    let byte_overflow = byte_limit >= 0 &&
+      current_bytes + input_bytes > byte_limit
+    if current.length() > 0 &&
+      (current.length() >= max_embeddings_per_call || byte_overflow) {
+      batches.push(current)
+      current = []
+      current_bytes = 0L
+    }
+    current.push(value)
+    current_bytes = current_bytes + input_bytes
+  }
+  if current.length() > 0 {
+    batches.push(current)
+  }
+  batches
 }
