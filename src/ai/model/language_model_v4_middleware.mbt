@@ -156,6 +156,7 @@ pub impl @provider.LanguageModelV4 for MiddlewareLanguageModelV4 with fn do_gene
     model: self.model,
     do_generate,
     do_stream,
+    emit: async fn(_ : @provider.LanguageModelV4StreamPart) {},
   }
   match self.middleware.wrap_generate {
     Some(wrap) => wrap(context)
@@ -185,6 +186,7 @@ pub impl @provider.LanguageModelV4 for MiddlewareLanguageModelV4 with fn do_stre
     model: self.model,
     do_generate,
     do_stream,
+    emit: on_event,
   }
   match self.middleware.wrap_stream {
     Some(wrap) => wrap(context)

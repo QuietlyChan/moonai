@@ -20,6 +20,10 @@ pub(all) struct LanguageModelV4MiddlewareContext {
   model : &LanguageModelV4
   do_generate : async () -> LanguageModelV4GenerateResult
   do_stream : async () -> LanguageModelV4StreamResult
+  /// Stream event channel (the counterpart of the upstream controller
+  /// enqueue). Middleware can emit additional or rewritten events, which
+  /// are delivered to the caller's `on_event` handler.
+  emit : async (LanguageModelV4StreamPart) -> Unit
 }
 
 ///|
