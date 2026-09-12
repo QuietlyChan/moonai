@@ -18,7 +18,7 @@ pub fn convert_to_completion_prompt(
   user? : String = "user",
   assistant? : String = "assistant",
 ) -> CompletionPrompt raise {
-  let text = StringBuilder::new()
+  let text = StringBuilder()
   let mut start = 0
   if prompt.messages.length() > 0 {
     match prompt.messages[0] {

@@ -211,7 +211,6 @@ test "oauth endpoints on private networks are rejected with loopback exception" 
     )
   catch {
     MCPClientOAuthError(..) => ()
-    error => fail("unexpected error")
   } noraise {
     _ => fail("expected a private endpoint rejection")
   }
@@ -232,7 +231,6 @@ test "oauth endpoints on private networks are rejected with loopback exception" 
     )
   catch {
     MCPClientOAuthError(..) => ()
-    error => fail("unexpected error")
   } noraise {
     _ => fail("expected an untrusted loopback rejection")
   }

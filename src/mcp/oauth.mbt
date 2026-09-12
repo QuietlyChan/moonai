@@ -441,7 +441,7 @@ fn oauth_hex(value : Int) -> Char {
 
 ///|
 fn oauth_encode(value : String) -> String {
-  let output = StringBuilder::new()
+  let output = StringBuilder()
   for byte in @utf8.encode(value) {
     if oauth_unreserved(byte) {
       output.write_char(byte.to_char())

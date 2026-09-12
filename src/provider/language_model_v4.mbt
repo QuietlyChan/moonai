@@ -73,7 +73,7 @@ pub fn LanguageModelV4GenerateResult::from_completion_response(
 pub fn LanguageModelV4GenerateResult::text(
   self : LanguageModelV4GenerateResult,
 ) -> String {
-  let text = StringBuilder::new()
+  let text = StringBuilder()
   for part in self.content {
     match part {
       V4TextOutput(value) => text.write_string(value.text)
@@ -88,7 +88,7 @@ pub fn LanguageModelV4GenerateResult::text(
 pub fn LanguageModelV4GenerateResult::reasoning(
   self : LanguageModelV4GenerateResult,
 ) -> String {
-  let reasoning = StringBuilder::new()
+  let reasoning = StringBuilder()
   for part in self.content {
     match part {
       V4ReasoningOutput(value) => reasoning.write_string(value.text)

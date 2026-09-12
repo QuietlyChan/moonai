@@ -17,7 +17,7 @@ fn decode_compatible_test_completion(
     json,
     default_openai_compatible_error_structure(),
   )
-  let text = StringBuilder::new()
+  let text = StringBuilder()
   for part in decoded.content {
     match part {
       @provider.V4TextOutput(value) => text.write_string(value.text)

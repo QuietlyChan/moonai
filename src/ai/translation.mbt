@@ -24,8 +24,8 @@ pub async fn stream_speech_translation(
   let final_duration : Ref[Double?] = Ref(None)
   let final_usage : Ref[@provider.SpeechTranslationModelV4Usage?] = Ref(None)
   let response_metadata : Ref[ResponseMetadata?] = Ref(None)
-  let source_text = StringBuilder::new()
-  let output_text = StringBuilder::new()
+  let source_text = StringBuilder()
+  let output_text = StringBuilder()
   let stream_result = model.do_stream(
     @provider.SpeechTranslationModelV4StreamOptions::new(
       audio~,

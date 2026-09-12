@@ -214,7 +214,7 @@ fn alibaba_v4_prompt_converter(
           cache_breakpoints,
           warnings,
         )
-        let text_builder = StringBuilder::new()
+        let text_builder = StringBuilder()
         let tool_calls : Array[Json] = []
         for part in content {
           match part {

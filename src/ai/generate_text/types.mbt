@@ -104,7 +104,7 @@ pub(all) struct GenerateTextStep {
 
 ///|
 fn content_text(content : Array[GenerateTextContent]) -> String {
-  let output = StringBuilder::new()
+  let output = StringBuilder()
   for part in content {
     match part {
       GenerateTextText(value) => output.write_string(value.text)
@@ -116,7 +116,7 @@ fn content_text(content : Array[GenerateTextContent]) -> String {
 
 ///|
 fn content_reasoning(content : Array[GenerateTextContent]) -> String {
-  let output = StringBuilder::new()
+  let output = StringBuilder()
   for part in content {
     match part {
       GenerateTextReasoning(value) => output.write_string(value.text)

@@ -63,7 +63,7 @@ fn hex_digit(value : Int) -> Char {
 ///|
 /// Percent-encode one UTF-8 query-string component according to RFC 3986.
 fn encode_query_component(value : String) -> String {
-  let result = StringBuilder::new(size_hint=value.length())
+  let result = StringBuilder(size_hint=value.length())
   let bytes = @utf8.encode(value)
   for index = 0; index < bytes.length(); index = index + 1 {
     let byte = bytes[index]

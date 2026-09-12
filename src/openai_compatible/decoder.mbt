@@ -71,8 +71,8 @@ fn OpenAICompatibleStreamDecoder::new(
     close_text_before_reasoning,
     close_text_before_tool_calls,
     validate_stream_chunk,
-    text: StringBuilder::new(),
-    reasoning: StringBuilder::new(),
+    text: StringBuilder(),
+    reasoning: StringBuilder(),
     tools: @provider_utils.StreamingToolCallTracker::new(
       id_generator=resolved_id_generator,
     ),
@@ -223,7 +223,7 @@ fn OpenAICompatibleStreamDecoder::ensure_pending_tool(
   }
   while self.pending_tool_ids.length() <= index {
     self.pending_tool_ids.push(None)
-    self.pending_tool_arguments.push(StringBuilder::new())
+    self.pending_tool_arguments.push(StringBuilder())
     self.pending_tool_metadata.push(Map([]))
     self.pending_tool_data.push(data)
     self.pending_tool_received.push(false)

@@ -37,7 +37,7 @@ test "strict schema normalization rejects non-string propertyNames" {
     )
   catch {
     @provider.UnsupportedFunctionalityError(..) => ()
-    error => fail("unexpected error")
+    _ => fail("unexpected error")
   } noraise {
     _ => fail("expected unsupported functionality error")
   }

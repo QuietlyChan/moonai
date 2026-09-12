@@ -77,8 +77,8 @@ pub fn OpenResponsesStreamDecoder::new(
     progressive_tool_calls,
     emit_failed_error,
     split_reasoning_summary_parts,
-    text: StringBuilder::new(),
-    reasoning: StringBuilder::new(),
+    text: StringBuilder(),
+    reasoning: StringBuilder(),
     text_parts: [],
     reasoning_parts: [],
     content_order: [],
@@ -253,7 +253,7 @@ fn OpenResponsesStreamDecoder::start_text(
     None => {
       self.text_ids.push(id)
       self.text_stopped.push(false)
-      self.text_parts.push(StringBuilder::new())
+      self.text_parts.push(StringBuilder())
       self.content_order.push(ResponsesText(self.text_ids.length() - 1))
       events.push(@provider.TextStart(id))
       self.text_ids.length() - 1
@@ -285,7 +285,7 @@ fn OpenResponsesStreamDecoder::start_reasoning(
     None => {
       self.reasoning_ids.push(id)
       self.reasoning_stopped.push(false)
-      self.reasoning_parts.push(StringBuilder::new())
+      self.reasoning_parts.push(StringBuilder())
       self.content_order.push(
         ResponsesReasoning(self.reasoning_ids.length() - 1),
       )

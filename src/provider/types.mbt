@@ -793,8 +793,8 @@ pub fn ChatResponse::from_content(
   usage : Usage,
   finish_reason : FinishReason,
 ) -> ChatResponse {
-  let text = StringBuilder::new()
-  let reasoning = StringBuilder::new()
+  let text = StringBuilder()
+  let reasoning = StringBuilder()
   let tool_calls : Array[ToolCall] = []
   for part in content {
     match part {

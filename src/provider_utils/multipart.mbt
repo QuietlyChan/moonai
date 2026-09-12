@@ -228,7 +228,7 @@ pub fn encode_multipart_form_data(
     resolved_boundary = resolved_boundary + "x"
   }
   let body = @buffer.Buffer()
-  let diagnostic = StringBuilder::new()
+  let diagnostic = StringBuilder()
   for field in fields {
     validate_multipart_token(field.name, "field name")
     write_multipart_string(body, "--\{resolved_boundary}\r\n")

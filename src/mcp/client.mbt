@@ -239,17 +239,15 @@ pub async fn create_mcp_client(config : MCPClientConfig) -> MCPClient {
     initialize_result_value: Ref(None),
     elicitation_handler: Ref(None),
   }
+  // Close the transport on any initialization failure; on success the
+  // client keeps ownership.
+  errdefer (config.transport.close(MCPTransportCloseOptions::new()) catch {
+    _ => ()
+  })
   run_mcp_with_options(config.initialization_options, () => {
     config.transport.start()
-  }) catch {
-    error => {
-      config.transport.close(MCPTransportCloseOptions::new()) catch {
-        _ => ()
-      }
-      raise error
-    }
-  }
-  let initialized = try {
+  })
+  {
     let result = match config.initial_initialize_result {
       Some(value) => value
       None => {
@@ -278,16 +276,7 @@ pub async fn create_mcp_client(config : MCPClientConfig) -> MCPClient {
     if config.initial_initialize_result is None {
       client.notification("notifications/initialized")
     }
-    true
-  } catch {
-    error => {
-      config.transport.close(MCPTransportCloseOptions::new()) catch {
-        _ => ()
-      }
-      raise error
-    }
   }
-  ignore(initialized)
   client
 }
 

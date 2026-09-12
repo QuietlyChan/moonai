@@ -230,16 +230,11 @@ impl HttpTransport for NativeHttpTransport with fn fetch_stream(_self, request) 
     fail("native streaming transport currently supports POST requests only")
   }
   let client = @http.post_stream(request.url, headers=request.headers)
-  try {
-    client.write(request.body)
-    let response = client.end_request()
-    NativeHttpStreamResponse::{ client, response, } as &HttpStreamResponse
-  } catch {
-    error => {
-      client.close()
-      raise error
-    }
-  }
+  // The response wrapper takes ownership on success; close only on failure.
+  errdefer client.close()
+  client.write(request.body)
+  let response = client.end_request()
+  NativeHttpStreamResponse::{ client, response, } as &HttpStreamResponse
 }
 
 ///|

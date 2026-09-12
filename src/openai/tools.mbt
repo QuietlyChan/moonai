@@ -438,7 +438,7 @@ fn OpenAIShellEnvironment::to_args_json(self : OpenAIShellEnvironment) -> Json {
 
 ///|
 fn openai_tool_key_to_snake(value : String) -> String {
-  let output = StringBuilder::new(size_hint=value.length() + 4)
+  let output = StringBuilder(size_hint=value.length() + 4)
   for character in value {
     if character.is_ascii_uppercase() {
       output.write_char('_')

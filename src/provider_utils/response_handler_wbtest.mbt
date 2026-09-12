@@ -36,7 +36,7 @@ test "failed response handler falls back to a status message for empty bodies" {
     error_json=Some({ "error": { "message": "slow down" } }),
     Some(fn(value) {
       match value {
-        { "error": { "message": String(message), .. } } => Some(message)
+        { "error": { "message": String(message), .. }, .. } => Some(message)
         _ => None
       }
     }),

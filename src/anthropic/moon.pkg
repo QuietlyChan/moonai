@@ -1,7 +1,6 @@
 import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
-  "moonbitlang/core/env",
   "moonbitlang/core/json",
 }
 
@@ -11,11 +10,13 @@ import {
   "moonbitlang/async/http",
   "moonbitlang/async/io",
   "moonbitlang/async/socket",
+  "moonbitlang/core/env",
 } for "test"
 
 import {
   "moonbitlang/async",
   "moonbitlang/async/fs",
+  "moonbitlang/core/env",
 } for "wbtest"
 
 supported_targets = "+native"

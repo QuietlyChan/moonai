@@ -400,7 +400,7 @@ fn safe_download_request_text(
       "Safe download transport only supports GET",
     )
   }
-  let output = StringBuilder::new()
+  let output = StringBuilder()
   output.write_string("GET \{target.request_target} HTTP/1.1\r\n")
   output.write_string("Host: \{target.authority}\r\n")
   for entry in sanitize_download_headers(request.headers).iter2() {
@@ -573,14 +573,11 @@ async fn safe_download_open_socket(
 ) -> SafeDownloadSocket {
   let tcp = @socket.Tcp::connect(address)
   if target.scheme == "https" {
-    try @tls.Tls::client(tcp, host=target.hostname) catch {
-      error => {
-        tcp.close()
-        raise error
-      }
-    } noraise {
-      tls => SafeDownloadTls(tcp, tls)
+    let tls = {
+      errdefer tcp.close()
+      @tls.Tls::client(tcp, host=target.hostname)
     }
+    SafeDownloadTls(tcp, tls)
   } else {
     SafeDownloadPlain(tcp)
   }

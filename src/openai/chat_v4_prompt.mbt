@@ -315,7 +315,7 @@ fn openai_v4_chat_user_message(
 fn openai_v4_chat_assistant_message(
   content : Array[@provider.LanguageModelV4PromptPart],
 ) -> Json {
-  let text_builder = StringBuilder::new()
+  let text_builder = StringBuilder()
   let text_parts : Array[Json] = []
   let tool_calls : Array[Json] = []
   let mut has_breakpoint = false

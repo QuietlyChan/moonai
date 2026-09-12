@@ -361,7 +361,7 @@ fn normalized_temperature(value : Double) -> Double {
 
 ///|
 fn camel_to_snake(value : String) -> String {
-  let result = StringBuilder::new(size_hint=value.length() + 4)
+  let result = StringBuilder(size_hint=value.length() + 4)
   for character in value {
     if character.is_ascii_uppercase() {
       result.write_char('_')

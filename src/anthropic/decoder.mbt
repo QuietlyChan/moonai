@@ -56,7 +56,6 @@ priv struct AnthropicStreamDecoder {
   mut finalized : Bool
   mut message_open : Bool
   mut active_message_id : String?
-  mut invalid_message_sequence : Bool
 }
 
 ///|
@@ -75,8 +74,8 @@ fn AnthropicStreamDecoder::new_with_metadata_policy(
   {
     sse: @provider_utils.EventSourceBuffer::new(),
     include_raw_chunks,
-    text: StringBuilder::new(),
-    reasoning: StringBuilder::new(),
+    text: StringBuilder(),
+    reasoning: StringBuilder(),
     input_tokens: 0,
     output_tokens: 0,
     cache_creation_input_tokens: 0,
@@ -128,7 +127,6 @@ fn AnthropicStreamDecoder::new_with_metadata_policy(
     finalized: false,
     message_open: false,
     active_message_id: None,
-    invalid_message_sequence: false,
   }
 }
 
@@ -480,7 +478,6 @@ fn AnthropicStreamDecoder::begin_message(self : AnthropicStreamDecoder) -> Unit 
   self.message_had_tool_call = false
   self.message_open = false
   self.active_message_id = None
-  self.invalid_message_sequence = false
 }
 
 ///|
@@ -502,7 +499,7 @@ fn AnthropicStreamDecoder::ensure_block(
     self.block_signatures.push("")
     self.block_redacted_data.push("")
     self.block_citations.push([])
-    self.block_data.push(StringBuilder::new())
+    self.block_data.push(StringBuilder())
     self.block_started.push(false)
     self.block_stopped.push(false)
     self.block_ready.push(false)
@@ -747,7 +744,7 @@ fn anthropic_tool_provider_metadata(
 
 ///|
 fn anthropic_snake_to_camel(value : String) -> String {
-  let result = StringBuilder::new(size_hint=value.length())
+  let result = StringBuilder(size_hint=value.length())
   let mut capitalize = false
   for character in value {
     if character == '_' {
@@ -1324,7 +1321,6 @@ fn AnthropicStreamDecoder::apply_json(
         if incoming_message_id is Some(id) && self.active_message_id == Some(id) {
           return (events, false)
         }
-        self.invalid_message_sequence = true
         raise @provider.InvalidResponseDataError(
           message="Received message_start while message \{self.active_message_id.unwrap_or("")} is still open.",
           data=json,

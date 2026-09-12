@@ -129,8 +129,8 @@ fn deepseek_v4_assistant_message(
   include_reasoning : Bool,
   require_reasoning_field : Bool,
 ) -> Json {
-  let text = StringBuilder::new()
-  let reasoning = StringBuilder::new()
+  let text = StringBuilder()
+  let reasoning = StringBuilder()
   let mut has_reasoning = false
   let tool_calls : Array[Json] = []
   for part in content {
@@ -200,7 +200,7 @@ fn convert_v4_prompt_to_deepseek(
       @provider.V4SystemMessage(content~, ..) =>
         messages.push({ "role": "system", "content": content })
       @provider.V4UserMessage(content~, ..) => {
-        let text = StringBuilder::new()
+        let text = StringBuilder()
         for part in content {
           match part {
             @provider.V4PromptText(text=value, ..) => text.write_string(value)

@@ -26,7 +26,7 @@ pub fn isCustomReasoning(reasoning : @provider.ReasoningEffort) -> Bool {
 pub fn assistant_reasoning_content(
   message : @provider.LanguageModelMessage,
 ) -> String? {
-  let reasoning = StringBuilder::new()
+  let reasoning = StringBuilder()
   let mut has_reasoning_part = false
   for part in message.parts {
     match part.without_provider_options() {

@@ -52,7 +52,7 @@ pub async fn stream_transcribe(
   let final_language : Ref[String?] = Ref(None)
   let final_duration : Ref[Double?] = Ref(None)
   let response_metadata : Ref[ResponseMetadata?] = Ref(None)
-  let transcript = StringBuilder::new()
+  let transcript = StringBuilder()
   let stream_result = model.do_stream(
     @provider.TranscriptionModelV4StreamOptions::new(
       audio~,

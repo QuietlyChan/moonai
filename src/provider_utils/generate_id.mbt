@@ -46,7 +46,7 @@ pub fn create_id_generator(
   }
   let random = @random.Rand::new()
   let generator : IdGenerator = () => {
-    let result = StringBuilder::new(size_hint=size)
+    let result = StringBuilder(size_hint=size)
     for _ in 0..<size {
       result.write_object(
         alphabet_chars[random.int(limit=alphabet_chars.length())],
@@ -91,7 +91,7 @@ fn make_default_id_generator() -> IdGenerator {
   let alphabet_chars = DEFAULT_ID_ALPHABET.to_array()
   let random = @random.Rand::new()
   () => {
-    let result = StringBuilder::new(size_hint=16)
+    let result = StringBuilder(size_hint=16)
     for _ in 0..<16 {
       result.write_object(
         alphabet_chars[random.int(limit=alphabet_chars.length())],

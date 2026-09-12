@@ -65,7 +65,7 @@ fn provider_options_base_name(provider_name : String) -> String {
 ///|
 /// Convert provider identifiers such as `openai-compatible` to camel case.
 pub fn provider_options_camel_case(value : String) -> String {
-  let result = StringBuilder::new(size_hint=value.length())
+  let result = StringBuilder(size_hint=value.length())
   let mut capitalize_next = false
   for character in value {
     if character == '-' || character == '_' || character == '.' {

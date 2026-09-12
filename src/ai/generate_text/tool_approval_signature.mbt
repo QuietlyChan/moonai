@@ -55,7 +55,7 @@ fn compare_canonical_json_keys(left : String, right : String) -> Int {
 ///|
 fn javascript_json_number_value(number : Double, repr : String?) -> Double {
   guard repr is Some(repr) else { return number }
-  let decimal_repr = StringBuilder::new()
+  let decimal_repr = StringBuilder()
   let mut has_decimal_point = false
   let mut inserted_decimal_point = false
   for character in repr {
@@ -92,7 +92,7 @@ fn canonical_json(value : Json) -> String {
     Object(fields) => {
       let keys = [ for entry in fields.iter2() => entry.0 ]
       keys.sort_by(compare_canonical_json_keys)
-      let result = StringBuilder::new()
+      let result = StringBuilder()
       result.write_char('{')
       for index, key in keys {
         if index > 0 {
@@ -109,7 +109,7 @@ fn canonical_json(value : Json) -> String {
       result.to_string()
     }
     Array(values) => {
-      let result = StringBuilder::new()
+      let result = StringBuilder()
       result.write_char('[')
       for index, item in values {
         if index > 0 {
@@ -134,7 +134,7 @@ fn canonical_json(value : Json) -> String {
 
 ///|
 fn to_base64url(value : Bytes) -> String {
-  let result = StringBuilder::new()
+  let result = StringBuilder()
   for character in @base64.encode(value, padding=false) {
     match character {
       '+' => result.write_char('-')
@@ -147,7 +147,7 @@ fn to_base64url(value : Bytes) -> String {
 
 ///|
 fn from_base64url(value : String) -> Bytes raise {
-  let result = StringBuilder::new()
+  let result = StringBuilder()
   for character in value {
     match character {
       '-' => result.write_char('+')

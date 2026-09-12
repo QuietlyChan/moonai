@@ -288,8 +288,8 @@ fn compatible_v4_assistant_message(
   content : Array[@provider.LanguageModelV4PromptPart],
   provider_options : Map[String, Json],
 ) -> Json {
-  let text_builder = StringBuilder::new()
-  let reasoning_builder = StringBuilder::new()
+  let text_builder = StringBuilder()
+  let reasoning_builder = StringBuilder()
   let tool_calls : Array[Json] = []
   for part in content {
     match part {

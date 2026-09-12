@@ -757,7 +757,7 @@ async test "OpenAI Responses retries before acceptance without leaking decoder s
       idle_timeout_ms=2_000,
     )
     let events : Array[@provider.LanguageModelV4StreamPart] = []
-    let text = StringBuilder::new()
+    let text = StringBuilder()
     let result = @ai.stream_text(
       provider.responses("responses-model"),
       prompt="hello",
@@ -830,7 +830,7 @@ async test "OpenAI Responses continues normally after acceptance" {
       idle_timeout_ms=2_000,
     )
     let events : Array[@provider.LanguageModelV4StreamPart] = []
-    let text = StringBuilder::new()
+    let text = StringBuilder()
     let started_before_output = Ref(false)
     let result = @ai.stream_text(
       provider.responses("responses-model"),
@@ -1043,7 +1043,7 @@ async test "official OpenAI completion model owns streaming decoding" {
       top_k=5.0,
       on_event=event => events.push(event),
     )
-    let text = StringBuilder::new()
+    let text = StringBuilder()
     for event in events {
       match event {
         @provider.V4TextDelta(delta~, ..) => text.write_string(delta)

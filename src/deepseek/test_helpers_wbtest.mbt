@@ -43,9 +43,7 @@ fn prepare_deepseek_request(
     supports_thinking,
     supports_structured_outputs,
     supports_structured_outputs,
-  ) catch {
-    error => raise error
-  }
+  )
 }
 
 ///|

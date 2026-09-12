@@ -63,7 +63,7 @@ fn StreamStepAccumulator::ensure_text(
   match self.text.get(id) {
     Some(value) => value
     None => {
-      let value = StringBuilder::new()
+      let value = StringBuilder()
       self.text[id] = value
       self.order.push(StreamTextOrder(id))
       value
@@ -81,7 +81,7 @@ fn StreamStepAccumulator::ensure_reasoning(
   match self.reasoning.get(id) {
     Some(value) => value
     None => {
-      let value = StringBuilder::new()
+      let value = StringBuilder()
       self.reasoning[id] = value
       self.order.push(StreamReasoningOrder(id))
       value

@@ -312,7 +312,7 @@ fn OpenAIChatStreamDecoder::new(
     include_raw_chunks,
     provider_name,
     generate_id: id_generator,
-    text: StringBuilder::new(),
+    text: StringBuilder(),
     tools: @provider_utils.StreamingToolCallTracker::new(
       id_generator~,
       type_validation=@provider_utils.ValidateToolCallTypeIfPresent,

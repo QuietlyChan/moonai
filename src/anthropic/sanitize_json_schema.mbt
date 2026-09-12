@@ -23,7 +23,7 @@ fn anthropic_constraint_keys() -> Array[String] {
 
 ///|
 fn anthropic_constraint_name(value : String) -> String {
-  let output = StringBuilder::new(size_hint=value.length() + 4)
+  let output = StringBuilder(size_hint=value.length() + 4)
   for character in value {
     if character.is_ascii_uppercase() {
       output.write_char(' ')

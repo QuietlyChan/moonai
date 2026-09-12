@@ -26,7 +26,7 @@ fn OpenAICompatibleCompletionStreamDecoder::new(
   {
     sse: @provider_utils.EventSourceBuffer::new(),
     include_raw_chunks,
-    text: StringBuilder::new(),
+    text: StringBuilder(),
     raw_usage: None,
     finish_reason: @provider.Unknown(""),
     finish_reason_raw: None,

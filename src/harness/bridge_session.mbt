@@ -132,7 +132,7 @@ pub impl HarnessV1Session for HarnessV1BridgeSession with fn do_prompt_turn(
   }
   self.bridge_state.send(
     HarnessBridgeStart(
-      prompt=options.prompt.to_text() catch { error => raise error },
+      prompt=options.prompt.to_text(),
       tools=options.tools,
       model=self.model_id_value,
       permission_mode=self.permission_mode_value,

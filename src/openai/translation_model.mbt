@@ -275,8 +275,8 @@ async fn OpenAITranslationModel::stream_translation_v4(
   defer connection.close()
   on_event(@provider.SpeechTranslationV4StreamStart(warnings~))
   connection.send_text(session_update.stringify())
-  let source_text = StringBuilder::new()
-  let output_text = StringBuilder::new()
+  let source_text = StringBuilder()
+  let output_text = StringBuilder()
   @async.with_task_group() <| group => {
     let sender = group.spawn(no_wait=true) <| () => {
       send_openai_translation_audio(
