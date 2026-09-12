@@ -510,12 +510,7 @@ async fn ByteDanceVideoModel::video_operation_status(
       warnings=[],
       provider_metadata={ "bytedance": Json::object(metadata) },
       request?=None,
-      response?=Some(
-        @provider.ResponseMetadata::new(
-          model_id=self.model_id_value,
-          created_at=(@env.now() / 1000UL).to_int(),
-        ),
-      ),
+      response?=response_http,
     )
     @provider.VideoModelV4OperationStatusResult::new(
       operation_id=task_id,

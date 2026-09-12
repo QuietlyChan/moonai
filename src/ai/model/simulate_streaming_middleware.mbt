@@ -42,8 +42,8 @@ pub fn simulate_streaming_middleware() -> @provider.LanguageModelV4Middleware {
         ),
       )
       @provider.LanguageModelV4StreamResult::new(
-        request=result.request,
-        response=result.response,
+        result.request,
+        result.response,
       )
     },
   )

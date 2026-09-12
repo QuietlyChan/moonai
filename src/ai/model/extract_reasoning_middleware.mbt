@@ -27,18 +27,18 @@ pub fn extract_reasoning_middleware(
             ExtractMergeIntoText,
             @provider.V4ReasoningStart(id~, provider_metadata~),
           ) =>
-            context.emit(@provider.V4TextStart(id~, provider_metadata~))
+            (context.emit)(@provider.V4TextStart(id~, provider_metadata~))
           (
             ExtractMergeIntoText,
             @provider.V4ReasoningDelta(id~, delta~, provider_metadata~),
           ) =>
-            context.emit(@provider.V4TextDelta(id~, delta~, provider_metadata~))
+            (context.emit)(@provider.V4TextDelta(id~, delta~, provider_metadata~))
           (
             ExtractMergeIntoText,
             @provider.V4ReasoningEnd(id~, provider_metadata~),
           ) =>
-            context.emit(@provider.V4TextEnd(id~, provider_metadata~))
-          (_, part) => context.emit(part)
+            (context.emit)(@provider.V4TextEnd(id~, provider_metadata~))
+          (_, part) => (context.emit)(part)
         }
       }
       context.model.do_stream(context.params, converted_emit)
