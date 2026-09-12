@@ -377,17 +377,18 @@ pub async fn discover_authorization_server_metadata(
     @provider_utils.native_http_transport(),
   )
   for url in build_discovery_urls(authorization_server_url) {
-    let response = transport.fetch(
-      @provider_utils.HttpRequest::get(url~, headers={
-        "MCP-Protocol-Version": protocol_version,
-      }),
+    // Discovery responses are fetched through the protected channel so a
+    // compromised server cannot redirect metadata discovery to internal
+    // addresses (AI SDK #20578).
+    let response = @provider_utils.get_json_protected(
+      provider_name="mcp",
+      url~,
+      headers={ "MCP-Protocol-Version": protocol_version },
+      transport~,
     ) catch {
       _ => continue
     }
-    if !response.is_success() {
-      continue
-    }
-    let value = @json.parse(response.body_text()) catch { _ => continue }
+    let value = response.value
     let metadata = decode_oauth_metadata(value) catch { _ => continue }
     let expected = if url.contains(authorization_server_url) {
       authorization_server_url
