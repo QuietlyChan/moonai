@@ -81,9 +81,11 @@ pub async fn generate_video(&@provider.VideoModelV4, String, n? : Int, aspect_ra
 
 pub async fn getFileMetadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
 
+pub async fn getVideoStatus(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
 
 pub async fn get_file_metadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
 
+pub async fn get_video_status(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
 
 pub fn hasToolCall(Array[String]) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
@@ -111,7 +113,9 @@ pub async fn rerankText(&@provider.RerankingModelV4, Array[String], String, top_
 
 pub async fn rerank_text(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
 
+pub async fn startVideo(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
 
+pub async fn start_video(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
 
 pub async fn streamSpeechTranslation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
 

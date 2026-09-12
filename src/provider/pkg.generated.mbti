@@ -1784,6 +1784,39 @@ pub(all) enum VideoModelV4FrameType {
   VideoV4LastFrame
 } derive(Eq, @debug.Debug)
 
+pub(all) struct VideoModelV4OperationStartResult {
+  operation_id : String
+  state : VideoModelV4OperationState
+  provider_metadata : Map[String, Json]
+  warnings : Array[Warning]
+} derive(@debug.Debug)
+pub fn VideoModelV4OperationStartResult::new(operation_id~ : String, state? : VideoModelV4OperationState, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
+
+pub(all) enum VideoModelV4OperationState {
+  OperationSubmitted
+  OperationRunning
+  OperationSucceeded
+  OperationFailed
+} derive(Eq, @debug.Debug)
+
+pub(all) struct VideoModelV4OperationStatusCallOptions {
+  operation_id : String
+  provider_options : Map[String, Json]
+  headers : Map[String, String]
+  retry_policy : RetryPolicy
+  cancellation_token : CancellationToken?
+} derive(@debug.Debug)
+pub fn VideoModelV4OperationStatusCallOptions::new(operation_id~ : String, provider_options? : Map[String, Json], headers? : Map[String, String], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
+
+pub(all) struct VideoModelV4OperationStatusResult {
+  operation_id : String
+  state : VideoModelV4OperationState
+  result : VideoModelV4Result?
+  provider_metadata : Map[String, Json]
+  warnings : Array[Warning]
+} derive(@debug.Debug)
+pub fn VideoModelV4OperationStatusResult::new(operation_id~ : String, state~ : VideoModelV4OperationState, result? : VideoModelV4Result, provider_metadata? : Map[String, Json], warnings? : Array[Warning]) -> Self
+
 pub(all) struct VideoModelV4Result {
   videos : Array[VideoModelV4VideoData]
   warnings : Array[Warning]
@@ -1995,6 +2028,8 @@ pub(open) trait VideoModelV4 {
   fn model_id(Self) -> String
   fn max_videos_per_call(Self) -> Int?
   async fn do_generate(Self, VideoModelV4CallOptions) -> VideoModelV4Result
+  async fn do_start(Self, VideoModelV4CallOptions) -> VideoModelV4OperationStartResult
+  async fn do_status(Self, VideoModelV4OperationStatusCallOptions) -> VideoModelV4OperationStatusResult
 }
 
 pub(open) trait VideoWireModel {

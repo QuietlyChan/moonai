@@ -434,3 +434,125 @@ impl @provider.VideoModelV4 for ByteDanceVideoModel with fn do_generate(
 ) {
   self.generate(options)
 }
+
+///|
+async fn ByteDanceVideoModel::start_video(
+  self : ByteDanceVideoModel,
+  options : @provider.VideoModelV4CallOptions,
+) -> @provider.VideoModelV4OperationStartResult {
+  let (provider_options, option_warnings) = parse_bytedance_video_options(
+    options.provider_options,
+  )
+  let warnings = option_warnings
+  let body = self.create_body(options, provider_options, warnings)
+  let headers = bytedance_headers(self.api_key, self.headers, options.headers)
+  let create_response = @provider_utils.post_json(
+    provider_name=self.provider_name,
+    url=@provider_utils.append_path(
+      self.base_url,
+      "/contents/generations/tasks",
+    ),
+    headers~,
+    body~,
+    timeout_ms=self.idle_timeout_ms,
+    retry_policy=options.retry_policy,
+    cancellation_token?=options.cancellation_token,
+    error_to_message=bytedance_error_message,
+    transport=self.http_transport,
+  )
+  let task_id = bytedance_task_id(create_response.value)
+  @provider.VideoModelV4OperationStartResult::new(
+    operation_id=task_id,
+    state=@provider.OperationSubmitted,
+    provider_metadata=Map([
+      ("bytedance", Json::object(Map([("taskId", Json::string(task_id))]))),
+    ]),
+    warnings~,
+  )
+}
+
+///|
+async fn ByteDanceVideoModel::video_operation_status(
+  self : ByteDanceVideoModel,
+  call_options : @provider.VideoModelV4OperationStatusCallOptions,
+) -> @provider.VideoModelV4OperationStatusResult {
+  let task_id = call_options.operation_id
+  let headers = bytedance_headers(
+    self.api_key,
+    self.headers,
+    call_options.headers,
+  )
+  let response = @provider_utils.get_json(
+    provider_name=self.provider_name,
+    url=@provider_utils.append_path(
+      self.base_url,
+      "/contents/generations/tasks/" +
+      @provider_utils.encode_path_segment(task_id),
+    ),
+    headers~,
+    timeout_ms=self.idle_timeout_ms,
+    retry_policy=call_options.retry_policy,
+    cancellation_token?=call_options.cancellation_token,
+    error_to_message=bytedance_error_message,
+    transport=self.http_transport,
+  )
+  let status = bytedance_task_status(response.value).to_lower()
+  if status == "succeeded" {
+    let video_url = bytedance_video_url(response.value)
+    let metadata : Map[String, Json] = Map([("taskId", Json::string(task_id))])
+    match response.value {
+      { "usage": value, .. } if !(value is Null) => metadata["usage"] = value
+      _ => ()
+    }
+    let result = @provider.VideoModelV4Result::new(
+      [@provider.VideoV4Url(url=video_url, media_type="video/mp4")],
+      provider_metadata={ "bytedance": Json::object(metadata) },
+      request=response.request,
+      response=@provider.merge_response_metadata(
+        Some(response.response),
+        @provider.ResponseMetadata::new(
+          model_id=self.model_id_value,
+          created_at=(@env.now() / 1000UL).to_int(),
+        ),
+      ),
+    )
+    @provider.VideoModelV4OperationStatusResult::new(
+      operation_id=task_id,
+      state=@provider.OperationSucceeded,
+      result~,
+      provider_metadata={ "bytedance": Json::object(metadata) },
+    )
+  } else if status == "failed" || status == "canceled" {
+    @provider.VideoModelV4OperationStatusResult::new(
+      operation_id=task_id,
+      state=@provider.OperationFailed,
+      provider_metadata=Map([
+        ("bytedance", Json::object(Map([("taskId", Json::string(task_id))]))),
+      ]),
+    )
+  } else {
+    @provider.VideoModelV4OperationStatusResult::new(
+      operation_id=task_id,
+      state=@provider.OperationRunning,
+      provider_metadata=Map([
+        ("bytedance", Json::object(Map([("taskId", Json::string(task_id))]))),
+      ]),
+    )
+  }
+}
+
+///|
+impl @provider.VideoModelV4 for ByteDanceVideoModel with fn do_start(
+  self,
+  options,
+) -> @provider.VideoModelV4OperationStartResult raise {
+  self.start_video(options)
+}
+
+///|
+impl @provider.VideoModelV4 for ByteDanceVideoModel with fn do_status(
+  self,
+  call_options,
+) -> @provider.VideoModelV4OperationStatusResult raise {
+  self.video_operation_status(call_options)
+}

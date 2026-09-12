@@ -1363,3 +1363,89 @@ async test "MiniMax video preserves string and numeric task error codes" {
     _ => fail("expected a MiniMax numeric error code")
   }
 }
+
+///|
+async test "MiniMax video do_start submits an operation without polling" {
+  let transport = MiniMaxVideoProtocolTransport::new([
+    "{\"task_id\":\"task-1\"}",
+  ])
+  let model = minimax_video(
+    "MiniMax-H3",
+    api_key="test-key",
+    base_url="https://mock.minimax.test",
+    http_transport=transport,
+  )
+  let started = @provider.VideoModelV4::do_start(
+    model,
+    @provider.VideoModelV4CallOptions::new(
+      prompt="a soaring crane",
+      retry_policy=@provider.RetryPolicy::none(),
+    ),
+  )
+  assert_eq(started.operation_id, "task-1")
+  assert_true(started.state is @provider.OperationSubmitted)
+  assert_eq(transport.requests.length(), 1)
+  assert_true(transport.requests[0].url.contains("/v2/video_generation"))
+}
+
+///|
+async test "MiniMax video do_status maps provider states once" {
+  let transport = MiniMaxVideoProtocolTransport::new([
+    "{\"task\":{\"status\":\"succeeded\",\"content\":{\"url\":\"https://example.com/video.mp4\"}}}",
+  ])
+  let model = minimax_video(
+    "MiniMax-H3",
+    api_key="test-key",
+    base_url="https://mock.minimax.test",
+    http_transport=transport,
+  )
+  let status = @provider.VideoModelV4::do_status(
+    model,
+    @provider.VideoModelV4OperationStatusCallOptions::new(
+      operation_id="task-1",
+      retry_policy=@provider.RetryPolicy::none(),
+    ),
+  )
+  assert_eq(status.operation_id, "task-1")
+  assert_true(status.state is @provider.OperationSucceeded)
+  let result = status.result.unwrap()
+  assert_eq(result.videos.length(), 1)
+  assert_true(
+    result.videos[0]
+    is @provider.VideoV4Url(url="https://example.com/video.mp4", ..),
+  )
+  assert_eq(transport.requests.length(), 1)
+  assert_true(
+    transport.requests[0].url.contains("/v2/query/video_generation/task-1"),
+  )
+}
+
+///|
+async test "MiniMax video do_status reports running and failed states" {
+  let transport = MiniMaxVideoProtocolTransport::new([
+    "{\"task\":{\"status\":\"running\"}}", "{\"task\":{\"status\":\"failed\",\"error\":{\"message\":\"boom\"}}}",
+  ])
+  let model = minimax_video(
+    "MiniMax-H3",
+    api_key="test-key",
+    base_url="https://mock.minimax.test",
+    http_transport=transport,
+  )
+  let running = @provider.VideoModelV4::do_status(
+    model,
+    @provider.VideoModelV4OperationStatusCallOptions::new(
+      operation_id="task-1",
+      retry_policy=@provider.RetryPolicy::none(),
+    ),
+  )
+  assert_true(running.state is @provider.OperationRunning)
+  assert_true(running.result is None)
+  let failed = @provider.VideoModelV4::do_status(
+    model,
+    @provider.VideoModelV4OperationStatusCallOptions::new(
+      operation_id="task-1",
+      retry_policy=@provider.RetryPolicy::none(),
+    ),
+  )
+  assert_true(failed.state is @provider.OperationFailed)
+}

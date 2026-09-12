@@ -363,4 +363,95 @@ pub(open) trait VideoModelV4 {
   fn model_id(Self) -> String
   fn max_videos_per_call(Self) -> Int?
   async fn do_generate(Self, VideoModelV4CallOptions) -> VideoModelV4Result
+  async fn do_start(Self, VideoModelV4CallOptions) -> VideoModelV4OperationStartResult
+  async fn do_status(Self, VideoModelV4OperationStatusCallOptions) -> VideoModelV4OperationStatusResult
+}
+
+///|
+/// Unified state of a provider-side asynchronous video operation.
+pub(all) enum VideoModelV4OperationState {
+  OperationSubmitted
+  OperationRunning
+  OperationSucceeded
+  OperationFailed
+} derive(Debug, Eq)
+
+///|
+/// Call options for polling one asynchronous video operation.
+pub(all) struct VideoModelV4OperationStatusCallOptions {
+  operation_id : String
+  provider_options : Map[String, Json]
+  headers : Map[String, String]
+  retry_policy : RetryPolicy
+  cancellation_token : CancellationToken?
+} derive(Debug)
+
+///|
+/// Construct one operation-status call.
+pub fn VideoModelV4OperationStatusCallOptions::new(
+  operation_id~ : String,
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  cancellation_token? : CancellationToken,
+) -> VideoModelV4OperationStatusCallOptions {
+  { operation_id, provider_options, headers, retry_policy, cancellation_token, }
+}
+
+///|
+/// Result of submitting an asynchronous video generation operation.
+///
+/// `operation_id` is the provider task identifier; pass it to `do_status`
+/// to poll the operation, or keep it to let an external webhook receiver
+/// observe completion out of band.
+pub(all) struct VideoModelV4OperationStartResult {
+  operation_id : String
+  state : VideoModelV4OperationState
+  provider_metadata : Map[String, Json]
+  warnings : Array[Warning]
+} derive(Debug)
+
+///|
+/// Construct one operation-start result.
+pub fn VideoModelV4OperationStartResult::new(
+  operation_id~ : String,
+  state? : VideoModelV4OperationState = OperationSubmitted,
+  provider_metadata? : Map[String, Json] = Map([]),
+  warnings? : Array[Warning] = [],
+) -> VideoModelV4OperationStartResult {
+  {
+    operation_id,
+    state,
+    provider_metadata: copy_provider_metadata(provider_metadata),
+    warnings: copy_warnings(warnings),
+  }
+}
+
+///|
+/// Result of polling one asynchronous video operation. The generated video
+/// is present only once the state reaches `OperationSucceeded`.
+pub(all) struct VideoModelV4OperationStatusResult {
+  operation_id : String
+  state : VideoModelV4OperationState
+  result : VideoModelV4Result?
+  provider_metadata : Map[String, Json]
+  warnings : Array[Warning]
+} derive(Debug)
+
+///|
+/// Construct one operation-status result.
+pub fn VideoModelV4OperationStatusResult::new(
+  operation_id~ : String,
+  state~ : VideoModelV4OperationState,
+  result? : VideoModelV4Result,
+  provider_metadata? : Map[String, Json] = Map([]),
+  warnings? : Array[Warning] = [],
+) -> VideoModelV4OperationStatusResult {
+  {
+    operation_id,
+    state,
+    result,
+    provider_metadata: copy_provider_metadata(provider_metadata),
+    warnings: copy_warnings(warnings),
+  }
 }

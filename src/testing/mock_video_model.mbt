@@ -127,3 +127,30 @@ pub impl @provider.VideoModelV4 for MockVideoModel with fn do_generate(
     response?=self.result.response,
   )
 }
+
+///|
+pub impl @provider.VideoModelV4 for MockVideoModel with fn do_start(
+  _self,
+  options,
+) -> @provider.VideoModelV4OperationStartResult raise {
+  ignore(options)
+  @provider.VideoModelV4OperationStartResult::new(
+    operation_id="mock-video-operation",
+    state=@provider.OperationSubmitted,
+  )
+}
+
+///|
+pub impl @provider.VideoModelV4 for MockVideoModel with fn do_status(
+  _self,
+  call_options,
+) -> @provider.VideoModelV4OperationStatusResult raise {
+  // The mock resolves immediately with a deterministic empty result.
+  let videos : Array[@provider.VideoModelV4VideoData] = []
+  let result = @provider.VideoModelV4Result::new(videos)
+  @provider.VideoModelV4OperationStatusResult::new(
+    operation_id=call_options.operation_id,
+    state=@provider.OperationSucceeded,
+    result~,
+  )
+}
