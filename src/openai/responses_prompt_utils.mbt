@@ -397,40 +397,107 @@ fn openai_responses_computer_output_wire(
 }
 
 ///|
+/// Build the resolution table for Responses `allowed_tools` entries.
+///
+/// Function tools resolve to their function form; provider-defined tools
+/// resolve to their native wire form so built-in tools are no longer
+/// mis-serialized as functions (AI SDK #18998). Aliases through the tool-name
+/// mapping are registered with ambiguity detection.
+fn openai_allowed_tools_resolutions(
+  tools : Array[@provider.LanguageModelV4Tool],
+  tool_name_mapping : @provider_utils.ToolNameMapping,
+) -> (Map[String, Json], Map[String, Json]) {
+  let resolutions : Map[String, Json] = Map([])
+  let aliases : Map[String, Json] = Map([])
+  for tool in tools {
+    match tool {
+      @provider.LanguageModelV4Tool::V4FunctionTool(function) => {
+        let wire : Json = {
+          "type": "function",
+          "name": tool_name_mapping.to_provider_tool_name(function.name),
+        }
+        resolutions[function.name] = wire
+      }
+      @provider.LanguageModelV4Tool::V4ProviderTool(provider) => {
+        let wire_type = provider.id
+          .strip_prefix("openai.")
+          .unwrap_or(provider.id)
+          .to_owned()
+        let wire : Json = { "type": Json::string(wire_type) }
+        resolutions[provider.name] = wire
+        if wire_type != provider.name && !aliases.contains(wire_type) {
+          aliases[wire_type] = wire
+        }
+      }
+    }
+  }
+  (resolutions, aliases)
+}
+
+///|
 fn openai_allowed_tools_choice(
   value : Json,
   tool_name_mapping : @provider_utils.ToolNameMapping,
+  tools : Array[@provider.LanguageModelV4Tool],
+  warnings : Array[@provider.Warning],
 ) -> Json? {
+  let (resolutions, aliases) = openai_allowed_tools_resolutions(
+    tools, tool_name_mapping,
+  )
+  // Resolve one allowed entry: a registered tool name wins, then a provider
+  // tool name alias; unknown names fall back to the function mapping.
+  fn resolve_entry(name : String) -> Json? {
+    match resolutions.get(name) {
+      Some(entry) => Some(entry)
+      None =>
+        match aliases.get(name) {
+          Some(entry) => Some(entry)
+          None => {
+            warnings.push(
+              @provider.Warning::Unsupported(
+                feature="allowedTools entry \"" + name + "\"",
+                details="The name does not match any tool declared for this request; the entry was dropped.",
+              ),
+            )
+            None
+          }
+        }
+    }
+  }
   match value {
     { "toolNames": Array(tool_names), "mode": String(mode), .. } => {
-      let tools : Array[Json] = []
+      let tools_out : Array[Json] = []
       for name in tool_names {
-        if name is String(value) {
-          tools.push({
-            "type": "function",
-            "name": tool_name_mapping.to_provider_tool_name(value),
-          })
+        if name is String(name_value) {
+          match resolve_entry(name_value) {
+            Some(entry) => tools_out.push(entry)
+            None => ()
+          }
         }
       }
-      if tools.length() > 0 && (mode == "auto" || mode == "required") {
-        Some(({ "type": "allowed_tools", "mode": mode, "tools": tools } : Json))
+      if tools_out.length() > 0 && (mode == "auto" || mode == "required") {
+        Some(
+          ({ "type": "allowed_tools", "mode": mode, "tools": tools_out } : Json),
+        )
       } else {
         None
       }
     }
     { "toolNames": Array(tool_names), .. } => {
-      let tools : Array[Json] = []
+      let tools_out : Array[Json] = []
       for name in tool_names {
-        if name is String(value) {
-          tools.push({
-            "type": "function",
-            "name": tool_name_mapping.to_provider_tool_name(value),
-          })
+        if name is String(name_value) {
+          match resolve_entry(name_value) {
+            Some(entry) => tools_out.push(entry)
+            None => ()
+          }
         }
       }
-      if tools.length() > 0 {
+      if tools_out.length() > 0 {
         Some(
-          ({ "type": "allowed_tools", "mode": "auto", "tools": tools } : Json),
+          (
+            { "type": "allowed_tools", "mode": "auto", "tools": tools_out } :
+            Json),
         )
       } else {
         None

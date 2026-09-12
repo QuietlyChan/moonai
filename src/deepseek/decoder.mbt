@@ -282,7 +282,8 @@ fn DeepSeekStreamDecoder::record_metadata(
     events.push(@provider.V4ResponseMetadataReady(response))
   }
   match json {
-    { "system_fingerprint": String(value), .. } => self.system_fingerprint = Some(value)
+    { "system_fingerprint": String(value), .. } =>
+      self.system_fingerprint = Some(value)
     _ => ()
   }
   match json {
@@ -808,7 +809,9 @@ fn DeepSeekStreamDecoder::provider_metadata_snapshot(
       logprobs["content"] = Json::array(self.logprobs_content.copy())
     }
     if self.logprobs_reasoning.length() > 0 {
-      logprobs["reasoning_content"] = Json::array(self.logprobs_reasoning.copy())
+      logprobs["reasoning_content"] = Json::array(
+        self.logprobs_reasoning.copy(),
+      )
     }
     extras["logprobs"] = Json::object(logprobs)
   }
@@ -824,9 +827,10 @@ fn DeepSeekStreamDecoder::provider_metadata_snapshot(
     ),
   )
   if extras.length() > 0 {
-    @provider.merge_provider_metadata(merged, Map([
-      (deepseek_provider_base(self.provider_name), Json::object(extras)),
-    ]))
+    @provider.merge_provider_metadata(
+      merged,
+      Map([(deepseek_provider_base(self.provider_name), Json::object(extras))]),
+    )
   } else {
     merged
   }

@@ -48,10 +48,12 @@ fn resolve_openai_v4_responses_tool_choice(
   choice : @provider.LanguageModelV4ToolChoice?,
   tools : Array[@provider.LanguageModelV4Tool],
   tool_name_mapping : @provider_utils.ToolNameMapping,
+  warnings : Array[@provider.Warning],
 ) -> Json? {
   match allowed_tools {
     Some(value) =>
-      match openai_allowed_tools_choice(value, tool_name_mapping) {
+      match
+        openai_allowed_tools_choice(value, tool_name_mapping, tools, warnings) {
         Some(resolved) => Some(resolved)
         None =>
           match choice {
@@ -385,6 +387,7 @@ fn prepare_openai_v4_responses_request(
         options.tool_choice,
         options.tools,
         tool_name_mapping,
+        warnings,
       )
       is Some(choice) {
       fields["tool_choice"] = choice

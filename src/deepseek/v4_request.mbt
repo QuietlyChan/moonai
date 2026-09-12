@@ -236,7 +236,8 @@ fn prepare_deepseek_v4_request(
   }
   // Request log probabilities when explicitly enabled or a top-logprobs
   // count is given (AI SDK #19407).
-  if parsed.options.logprobs == Some(true) || parsed.options.top_logprobs is Some(_) {
+  if parsed.options.logprobs == Some(true) ||
+    parsed.options.top_logprobs is Some(_) {
     fields["logprobs"] = Json::boolean(true)
   }
   match parsed.options.top_logprobs {

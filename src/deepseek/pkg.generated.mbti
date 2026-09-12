@@ -36,8 +36,10 @@ pub(all) struct DeepSeekLanguageModelChatOptions {
   thinking_type : String?
   reasoning_effort : String?
   strict_json_schema : Bool
+  logprobs : Bool?
+  top_logprobs : Int?
 } derive(Eq, @debug.Debug)
-pub fn DeepSeekLanguageModelChatOptions::new(thinking_type? : String, reasoning_effort? : String, strict_json_schema? : Bool) -> Self raise
+pub fn DeepSeekLanguageModelChatOptions::new(thinking_type? : String, reasoning_effort? : String, strict_json_schema? : Bool, logprobs? : Bool, top_logprobs? : Int) -> Self raise
 pub fn DeepSeekLanguageModelChatOptions::to_provider_options(Self) -> Map[String, Json]
 
 pub struct DeepSeekProvider {
