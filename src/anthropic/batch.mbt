@@ -92,10 +92,7 @@ fn anthropic_batch_state(processing_status : String) -> @provider.BatchV4State {
 }
 
 ///|
-fn anthropic_batch_status(
-  json : Json,
-  provider_name~ : String,
-) -> @provider.BatchV4Status {
+fn anthropic_batch_status(json : Json) -> @provider.BatchV4Status {
   let processing_status = @provider_utils.json_string_field(
     json, "processing_status",
   ).unwrap_or("")
@@ -283,7 +280,7 @@ impl @provider.BatchV4 for AnthropicBatch with fn do_start_batch(
   )
   @provider.BatchV4StartResult::new(
     batch_id=@provider_utils.json_string_field(batch, "id").unwrap_or(""),
-    status=anthropic_batch_status(batch, provider_name=self.provider_name),
+    status=anthropic_batch_status(batch),
     warnings=batch_warnings,
   )
 }
@@ -300,7 +297,7 @@ impl @provider.BatchV4 for AnthropicBatch with fn do_get_batch_status(
     body=Json::empty_object(),
     options,
   )
-  anthropic_batch_status(batch, provider_name=self.provider_name)
+  anthropic_batch_status(batch)
 }
 
 ///|
@@ -477,7 +474,7 @@ impl @provider.BatchV4 for AnthropicBatch with fn do_list_batches(
       for item in items {
         batches.push({
           batch_id: @provider_utils.json_string_field(item, "id").unwrap_or(""),
-          status: anthropic_batch_status(item, provider_name=self.provider_name),
+          status: anthropic_batch_status(item),
         })
       }
       let mut last : String? = None
@@ -493,7 +490,7 @@ impl @provider.BatchV4 for AnthropicBatch with fn do_list_batches(
       for item in items {
         batches.push({
           batch_id: @provider_utils.json_string_field(item, "id").unwrap_or(""),
-          status: anthropic_batch_status(item, provider_name=self.provider_name),
+          status: anthropic_batch_status(item),
         })
       }
     _ => ()

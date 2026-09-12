@@ -128,6 +128,7 @@ fn deepseek_v4_assistant_message(
   content : Array[@provider.LanguageModelV4PromptPart],
   include_reasoning : Bool,
   require_reasoning_field : Bool,
+  prefix~ : Bool,
 ) -> Json {
   let text = StringBuilder()
   let reasoning = StringBuilder()
@@ -154,10 +155,47 @@ fn deepseek_v4_assistant_message(
   } else if require_reasoning_field {
     fields["reasoning_content"] = Json::string("")
   }
+  if prefix {
+    // Assistant prefix continuation (beta): the model continues from this
+    // message instead of starting a new one.
+    fields["prefix"] = Json::boolean(true)
+  }
   if tool_calls.length() > 0 {
     fields["tool_calls"] = Json::array(tool_calls)
   }
   Json::object(fields)
+}
+
+///|
+/// Read a string option from a message's DeepSeek provider options.
+fn deepseek_message_provider_string(
+  options : Map[String, Json],
+  field~ : String,
+) -> String? {
+  match options.get("deepseek") {
+    Some(Object(values)) =>
+      match values.get(field) {
+        Some(String(value)) => Some(value)
+        _ => None
+      }
+    _ => None
+  }
+}
+
+///|
+fn deepseek_message_provider_bool(
+  options : Map[String, Json],
+  field~ : String,
+) -> Bool? {
+  match options.get("deepseek") {
+    Some(Object(values)) =>
+      match values.get(field) {
+        Some(True) => Some(true)
+        Some(False) => Some(false)
+        _ => None
+      }
+    _ => None
+  }
 }
 
 ///|
@@ -197,9 +235,19 @@ fn convert_v4_prompt_to_deepseek(
   let is_v4 = is_deepseek_v4_model(model_id)
   for index, message in prompt.messages {
     match message {
-      @provider.V4SystemMessage(content~, ..) =>
-        messages.push({ "role": "system", "content": content })
-      @provider.V4UserMessage(content~, ..) => {
+      @provider.V4SystemMessage(content~, provider_options~) => {
+        let fields : Map[String, Json] = Map([
+          ("role", Json::string("system")),
+          ("content", Json::string(content)),
+        ])
+        // Message-level name (AI SDK #19399).
+        match deepseek_message_provider_string(provider_options, field="name") {
+          Some(name) => fields["name"] = Json::string(name)
+          None => ()
+        }
+        messages.push(Json::object(fields))
+      }
+      @provider.V4UserMessage(content~, provider_options~) => {
         let text = StringBuilder()
         for part in content {
           match part {
@@ -213,16 +261,38 @@ fn convert_v4_prompt_to_deepseek(
               )
           }
         }
-        messages.push({ "role": "user", "content": text.to_string() })
+        let fields : Map[String, Json] = Map([
+          ("role", Json::string("user")),
+          ("content", Json::string(text.to_string())),
+        ])
+        match deepseek_message_provider_string(provider_options, field="name") {
+          Some(name) => fields["name"] = Json::string(name)
+          None => ()
+        }
+        messages.push(Json::object(fields))
       }
-      @provider.V4AssistantMessage(content~, ..) =>
+      @provider.V4AssistantMessage(content~, provider_options~) => {
+        let prefix = deepseek_message_provider_bool(
+          provider_options,
+          field="prefix",
+        )
+        if prefix == Some(true) && index != prompt.messages.length() - 1 {
+          warnings.push(
+            @provider.Warning::Unsupported(
+              feature="assistant prefix completion",
+              details="DeepSeek assistant prefix completion requires the prefixed assistant message to be the final message; the prefix flag was ignored.",
+            ),
+          )
+        }
         messages.push(
           deepseek_v4_assistant_message(
             content,
             is_v4 || index > last_user_index,
             is_v4,
+            prefix=prefix == Some(true) && index == prompt.messages.length() - 1,
           ),
         )
+      }
       @provider.V4ToolMessage(content~, ..) =>
         for part in content {
           match part {

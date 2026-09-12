@@ -10,6 +10,7 @@ pub(all) struct DeepSeekLanguageModelChatOptions {
   strict_json_schema : Bool
   logprobs : Bool?
   top_logprobs : Int?
+  user_id : String?
 } derive(Debug, Eq)
 
 ///|
@@ -20,6 +21,7 @@ pub fn DeepSeekLanguageModelChatOptions::new(
   strict_json_schema? : Bool = true,
   logprobs? : Bool,
   top_logprobs? : Int,
+  user_id? : String,
 ) -> DeepSeekLanguageModelChatOptions raise {
   if top_logprobs is Some(value) {
     guard value > 0 else {
@@ -46,6 +48,7 @@ pub fn DeepSeekLanguageModelChatOptions::new(
     strict_json_schema,
     logprobs,
     top_logprobs,
+    user_id,
   }
 }
 
@@ -119,6 +122,7 @@ fn parse_deepseek_options(
     .unwrap_or(true),
     logprobs: reader.take_bool("logprobs"),
     top_logprobs: reader.take_int("topLogprobs", aliases=["top_logprobs"]),
+    user_id: reader.take_string("userId", aliases=["user_id"]),
   }
   { options, warnings: reader.diagnostics(), }
 }

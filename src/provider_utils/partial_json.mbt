@@ -148,9 +148,9 @@ fn repair_partial_prefix(bytes : Bytes, end : Int) -> String? {
       token == b"null"
     let last_byte = bytes[end - 1]
     let token_text = @utf8.decode_lossy(token)
-    let literal_prefix = "true".starts_with(token_text) ||
-      "false".starts_with(token_text) ||
-      "null".starts_with(token_text)
+    let literal_prefix = "true".has_prefix(token_text) ||
+      "false".has_prefix(token_text) ||
+      "null".has_prefix(token_text)
     let is_number_incomplete = is_complete_number &&
       (
         last_byte == 46 ||
@@ -164,9 +164,9 @@ fn repair_partial_prefix(bytes : Bytes, end : Int) -> String? {
     } else if literal_prefix {
       // Replace the partial literal with its complete form.
       cut = state.token_start
-      let completion = if "true".starts_with(token_text) {
+      let completion = if "true".has_prefix(token_text) {
         "true"
-      } else if "false".starts_with(token_text) {
+      } else if "false".has_prefix(token_text) {
         "false"
       } else {
         "null"
