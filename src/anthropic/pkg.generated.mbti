@@ -327,6 +327,7 @@ pub fn AnthropicMetadata::new(user_id? : String) -> Self
 pub struct AnthropicProvider {
   // private fields
 }
+pub fn AnthropicProvider::batch(Self) -> &@provider.BatchV4
 pub fn AnthropicProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn AnthropicProvider::files(Self) -> AnthropicFiles raise
 pub fn AnthropicProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
