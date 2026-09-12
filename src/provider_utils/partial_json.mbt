@@ -143,7 +143,9 @@ fn repair_partial_prefix(bytes : Bytes, end : Int) -> String? {
     let token = bytes[state.token_start:end]
     let first = token[0]
     let is_complete_number = (first >= 48 && first <= 57) || first == 45
-    let is_full_literal = token == "true" || token == "false" || token == "null"
+    let is_full_literal = token == b"true" ||
+      token == b"false" ||
+      token == b"null"
     let last_byte = bytes[end - 1]
     let token_text = @utf8.decode_lossy(token)
     let literal_prefix = "true".starts_with(token_text) ||

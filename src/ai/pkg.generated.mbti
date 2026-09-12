@@ -137,6 +137,8 @@ pub async fn start_batch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4
 
 pub async fn start_video(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
 
+pub async fn streamObject(&@provider.LanguageModelV4, Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_partial? : async (Json) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> StreamObjectResponse
+
 pub async fn streamSpeechTranslation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
 
 pub async fn streamText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], smooth? : @generate_text.SmoothChunking, smooth_delay_ms? : Int, on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.StreamTextResult
@@ -144,6 +146,8 @@ pub async fn streamText(&@provider.LanguageModelV4, prompt? : String, messages? 
 pub async fn streamTranscribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
 
 pub async fn stream_completion(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], on_event? : async (@provider.StreamEvent) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
+
+pub async fn stream_object(&@provider.LanguageModelV4, Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_partial? : async (Json) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> StreamObjectResponse
 
 pub async fn stream_speech_translation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
 
@@ -208,6 +212,10 @@ pub suberror ObjectValidationError {
   ObjectValidationError(path~ : String, message~ : String)
 } derive(Eq, @debug.Debug)
 
+pub suberror StreamObjectFailedError {
+  StreamObjectFailedError(message~ : String, text~ : String?)
+} derive(Eq, @debug.Debug)
+
 // Types and methods
 pub(all) enum ObjectGenerationFailure {
   EmptyResponse
@@ -238,6 +246,18 @@ pub(all) enum RerankingDocument {
   TextDocument(String)
   ObjectDocument(Json)
 } derive(Eq, @debug.Debug)
+
+pub(all) enum StreamObjectPart {
+  PartialObject(object~ : Json)
+  FinalObject(object~ : Json)
+} derive(Eq, @debug.Debug)
+
+pub(all) struct StreamObjectResponse {
+  object : Json
+  text : String
+  provider_result : @provider.LanguageModelV4GenerateResult
+  warnings : Array[@provider.Warning]
+} derive(@debug.Debug)
 
 // Type aliases
 pub type ActiveTools = Array[String]
