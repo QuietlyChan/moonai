@@ -340,6 +340,20 @@ pub fn OpenAIProvider::imageModel(
 }
 
 ///|
+/// Select the official OpenAI Batches API.
+pub fn OpenAIProvider::batch(self : OpenAIProvider) -> &@provider.BatchV4 {
+  let batch = openai_batch(
+    provider_name=self.provider_name,
+    base_url=self.base_url,
+    api_key=self.api_key,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  batch as &@provider.BatchV4
+}
+
+///|
 /// Select the official OpenAI Files API.
 pub fn OpenAIProvider::files(self : OpenAIProvider) -> &@provider.FilesV4 {
   let files = openai_files(

@@ -419,6 +419,7 @@ pub(all) enum OpenAIPromptCacheTtl {
 pub struct OpenAIProvider {
   // private fields
 }
+pub fn OpenAIProvider::batch(Self) -> &@provider.BatchV4
 pub fn OpenAIProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::chat_model(Self, String) -> &@provider.LanguageModelV4

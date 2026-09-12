@@ -17,6 +17,10 @@ pub fn asLanguageModelV4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
 pub fn as_language_model_v4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
+pub async fn cancelBatch(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4CancelResult
+
+pub async fn cancel_batch(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4CancelResult
+
 pub async fn complete(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
 
 pub fn createProviderRegistry(Map[String, &@provider.ProviderV4], separator? : String, language_model_middleware? : @provider.LanguageModelV4Middleware, image_model_middleware? : @provider.ImageModelV4Middleware) -> @registry.ProviderRegistry raise @provider.InvalidArgumentError
@@ -79,9 +83,17 @@ pub async fn generate_text(&@provider.LanguageModelV4, prompt? : String, message
 
 pub async fn generate_video(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4Result
 
+pub async fn getBatchResults(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> Array[@provider.BatchV4ItemResult]
+
+pub async fn getBatchStatus(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4Status
+
 pub async fn getFileMetadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
 
 pub async fn getVideoStatus(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
+
+pub async fn get_batch_results(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> Array[@provider.BatchV4ItemResult]
+
+pub async fn get_batch_status(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4Status
 
 pub async fn get_file_metadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
 
@@ -103,6 +115,10 @@ pub fn is_loop_finished() -> async (Array[@generate_text.GenerateTextStep]) -> B
 
 pub fn is_step_count(Int) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
+pub async fn listBatches(&@provider.BatchV4, limit? : Int, cursor? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4ListResult
+
+pub async fn list_batches(&@provider.BatchV4, limit? : Int, cursor? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4ListResult
+
 pub fn model_id_of_language_model(&@provider.LanguageModelV4) -> @model.ModelId
 
 pub fn parse_model_id(String) -> @model.ModelId raise @model.InvalidModelIdError
@@ -113,7 +129,11 @@ pub async fn rerankText(&@provider.RerankingModelV4, Array[String], String, top_
 
 pub async fn rerank_text(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
 
+pub async fn startBatch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4Request], webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4StartResult
+
 pub async fn startVideo(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
+
+pub async fn start_batch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4Request], webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4StartResult
 
 pub async fn start_video(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
 

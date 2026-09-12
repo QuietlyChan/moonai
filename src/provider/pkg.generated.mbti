@@ -118,6 +118,155 @@ pub(all) struct AudioFormat {
 } derive(Eq, @debug.Debug)
 pub fn AudioFormat::new(media_type~ : String, sample_rate? : Int) -> Self
 
+pub(all) struct BatchV4CallOptions {
+  provider_options : Map[String, Json]
+  headers : Map[String, String]
+  cancellation_token : CancellationToken?
+} derive(@debug.Debug)
+pub fn BatchV4CallOptions::new(provider_options? : Map[String, Json], headers? : Map[String, String], cancellation_token? : CancellationToken) -> Self
+
+pub(all) struct BatchV4CancelResult {
+  provider_metadata : Map[String, Json]
+} derive(@debug.Debug)
+pub fn BatchV4CancelResult::new(provider_metadata? : Map[String, Json]) -> Self
+
+pub(all) struct BatchV4Error {
+  message : String
+  error_type : String?
+  code : String?
+  status_code : Int?
+} derive(Eq, @debug.Debug)
+pub fn BatchV4Error::new(message~ : String, error_type? : String, code? : String, status_code? : Int) -> Self
+
+pub(all) struct BatchV4ImageRequest {
+  request_id : String
+  model_id : String
+  prompt : String
+  n : Int?
+  size : String?
+  aspect_ratio : String?
+  seed : Int?
+  files : Array[ImageModelV4File]
+  mask : ImageModelV4File?
+  provider_options : Map[String, Json]
+} derive(@debug.Debug)
+
+pub(all) enum BatchV4ItemPayload {
+  BatchTextResult(LanguageModelV4GenerateResult)
+  BatchImageResult(ImageModelV4Result)
+} derive(@debug.Debug)
+
+pub(all) enum BatchV4ItemResult {
+  BatchItemSucceeded(id~ : String, modality~ : BatchV4Modality, result~ : BatchV4ItemPayload, provider_metadata~ : Map[String, Json])
+  BatchItemFailed(id~ : String, modality~ : BatchV4Modality, error~ : BatchV4Error, provider_metadata~ : Map[String, Json])
+  BatchItemTerminated(id~ : String, modality~ : BatchV4Modality, state~ : BatchV4TerminatedState, error~ : BatchV4Error?, provider_metadata~ : Map[String, Json])
+} derive(@debug.Debug)
+pub fn BatchV4ItemResult::id(Self) -> String
+
+pub(all) struct BatchV4ListItem {
+  batch_id : String
+  status : BatchV4Status
+} derive(@debug.Debug)
+
+pub(all) struct BatchV4ListOptions {
+  limit : Int?
+  cursor : String?
+  call_options : BatchV4CallOptions
+} derive(@debug.Debug)
+pub fn BatchV4ListOptions::new(limit? : Int, cursor? : String, call_options? : BatchV4CallOptions) -> Self
+
+pub(all) struct BatchV4ListResult {
+  batches : Array[BatchV4ListItem]
+  next_cursor : String?
+  provider_metadata : Map[String, Json]
+} derive(@debug.Debug)
+pub fn BatchV4ListResult::new(batches~ : Array[BatchV4ListItem], next_cursor? : String, provider_metadata? : Map[String, Json]) -> Self
+
+pub(all) enum BatchV4Modality {
+  BatchModalityText
+  BatchModalityImage
+} derive(Eq, @debug.Debug)
+
+pub(all) struct BatchV4OperationOptions {
+  batch_id : String
+  call_options : BatchV4CallOptions
+} derive(@debug.Debug)
+pub fn BatchV4OperationOptions::new(batch_id~ : String, call_options? : BatchV4CallOptions) -> Self
+
+pub(all) enum BatchV4Request {
+  BatchTextRequest(BatchV4TextRequest)
+  BatchImageRequest(BatchV4ImageRequest)
+} derive(@debug.Debug)
+pub fn BatchV4Request::request_id(Self) -> String
+
+pub(all) struct BatchV4RequestCounts {
+  total : Int
+  pending : Int
+  completed : Int
+  failed : Int
+} derive(Eq, @debug.Debug)
+pub fn BatchV4RequestCounts::new(total~ : Int, pending~ : Int, completed~ : Int, failed~ : Int) -> Self raise
+
+pub(all) struct BatchV4RequestWarning {
+  request_id : String?
+  warning : Warning
+} derive(@debug.Debug)
+
+pub(all) struct BatchV4StartOptions {
+  requests : Array[BatchV4Request]
+  webhook_url : String?
+  call_options : BatchV4CallOptions
+} derive(@debug.Debug)
+pub fn BatchV4StartOptions::new(requests~ : Array[BatchV4Request], webhook_url? : String, call_options? : BatchV4CallOptions) -> Self
+
+pub(all) struct BatchV4StartResult {
+  batch_id : String
+  status : BatchV4Status
+  warnings : Array[BatchV4RequestWarning]
+} derive(@debug.Debug)
+pub fn BatchV4StartResult::new(batch_id~ : String, status~ : BatchV4Status, warnings? : Array[BatchV4RequestWarning]) -> Self
+
+pub(all) enum BatchV4State {
+  BatchPending
+  BatchCompleted
+  BatchFailed
+} derive(Eq, @debug.Debug)
+
+pub(all) struct BatchV4Status {
+  state : BatchV4State
+  raw_status : String?
+  request_counts : BatchV4RequestCounts?
+  error : BatchV4Error?
+  created_at : String?
+  expires_at : String?
+  provider_metadata : Map[String, Json]
+} derive(@debug.Debug)
+pub fn BatchV4Status::new(state~ : BatchV4State, raw_status? : String, request_counts? : BatchV4RequestCounts, error? : BatchV4Error, created_at? : String, expires_at? : String, provider_metadata? : Map[String, Json]) -> Self
+
+pub(all) enum BatchV4TerminatedState {
+  BatchCancelled
+  BatchExpired
+} derive(Eq, @debug.Debug)
+
+pub(all) struct BatchV4TextRequest {
+  request_id : String
+  model_id : String
+  prompt : String
+  max_output_tokens : Int?
+  temperature : Double?
+  top_p : Double?
+  top_k : Double?
+  presence_penalty : Double?
+  frequency_penalty : Double?
+  seed : Int?
+  stop_sequences : Array[String]
+  reasoning : LanguageModelV4ReasoningEffort
+  response_format : LanguageModelV4ResponseFormat
+  tools : Array[LanguageModelV4Tool]
+  tool_choice : LanguageModelV4ToolChoice?
+  provider_options : Map[String, Json]
+} derive(@debug.Debug)
+
 pub struct CancellationToken {
   // private fields
 } derive(@debug.Debug)
@@ -1860,12 +2009,25 @@ pub fn Warning::compatibility(String) -> Self
 pub fn Warning::unsupported(String) -> Self
 
 // Type aliases
+pub type BatchV4ModelId = String
+
 pub type LanguageModelPrompt = Array[LanguageModelMessage]
 
 // Traits
 pub(open) trait AudioStream {
   async fn read_next(Self) -> AudioChunk?
   fn cancel(Self) -> Unit
+}
+
+pub(open) trait BatchV4 {
+  fn specification_version(Self) -> String
+  fn provider(Self) -> String
+  fn supported_urls(Self) -> Array[SupportedUrlRule]
+  async fn do_start_batch(Self, BatchV4StartOptions) -> BatchV4StartResult
+  async fn do_get_batch_status(Self, BatchV4OperationOptions) -> BatchV4Status
+  async fn do_get_batch_results(Self, BatchV4OperationOptions) -> Array[BatchV4ItemResult]
+  async fn do_cancel_batch(Self, BatchV4OperationOptions) -> BatchV4CancelResult
+  async fn do_list_batches(Self, BatchV4ListOptions) -> BatchV4ListResult
 }
 
 pub(open) trait ChatModel {
