@@ -43,6 +43,15 @@ async fn MiniMaxVideoModel::start_video_v4(
   let (body, _image_count, _reference_video_urls) = self.create_v4_body(
     options, provider_options, warnings,
   )
+  // Forward the caller-owned callback endpoint; MiniMax expects the
+  // receiver to echo its challenge handshake within three seconds.
+  let body = match (body, options.webhook_url) {
+    (Object(fields), Some(url)) => {
+      fields["callback_url"] = Json::string(url)
+      Json::object(fields)
+    }
+    _ => body
+  }
   let create_response = @provider_utils.post_json(
     provider_name=self.provider_name,
     url=@provider_utils.append_path(self.base_url, "/v2/video_generation"),

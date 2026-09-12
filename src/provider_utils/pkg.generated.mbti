@@ -25,6 +25,8 @@ pub fn assistantReasoningContent(@provider.LanguageModelMessage) -> String?
 
 pub fn assistant_reasoning_content(@provider.LanguageModelMessage) -> String?
 
+pub async fn collect_upload_file_data(@provider.UploadFileData) -> Bytes
+
 pub fn combineHeaders(Array[Map[String, String]]) -> Map[String, String]
 
 pub fn combine_headers(Array[Map[String, String]]) -> Map[String, String]

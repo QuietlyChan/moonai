@@ -1449,3 +1449,32 @@ async test "MiniMax video do_status reports running and failed states" {
   )
   assert_true(failed.state is @provider.OperationFailed)
 }
+
+///|
+async test "MiniMax video do_start forwards webhook callback url" {
+  let transport = MiniMaxVideoProtocolTransport::new([
+    "{\"task_id\":\"task-9\"}",
+  ])
+  let model = minimax_video(
+    "MiniMax-H3",
+    api_key="test-key",
+    base_url="https://mock.minimax.test",
+    http_transport=transport,
+  )
+  let started = @provider.VideoModelV4::do_start(
+    model,
+    @provider.VideoModelV4CallOptions::new(
+      prompt="a soaring crane",
+      webhook_url="https://receiver.example/minimax-hook",
+      retry_policy=@provider.RetryPolicy::none(),
+    ),
+  )
+  assert_eq(started.operation_id, "task-9")
+  assert_eq(transport.requests.length(), 1)
+  let request_body = transport.requests[0].body_text()
+  assert_true(
+    request_body.contains(
+      "\"callback_url\":\"https://receiver.example/minimax-hook\"",
+    ),
+  )
+}

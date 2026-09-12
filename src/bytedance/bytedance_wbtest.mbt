@@ -220,3 +220,32 @@ test "ByteDance public provider exposes image and video V4 models" {
     "bytedance.video",
   )
 }
+
+///|
+async test "ByteDance video do_start forwards webhook callback url" {
+  let transport = ByteDanceProtocolTransport::new([
+    "{\"id\":\"cgt-1\",\"status\":\"queued\"}",
+  ])
+  let model = ByteDanceVideoModel::new(
+    "seedance-1-5-pro-251215",
+    api_key="test-key",
+    base_url="https://ark.ap-southeast.bytepluses.com/api/v3",
+    headers=Map([]),
+    idle_timeout_ms=120_000,
+    http_transport=transport,
+  )
+  let started = @provider.VideoModelV4::do_start(
+    model,
+    @provider.VideoModelV4CallOptions::new(
+      prompt="Orbit",
+      webhook_url="https://receiver.example/video-hook",
+      retry_policy=@provider.RetryPolicy::none(),
+    ),
+  )
+  assert_eq(started.operation_id, "cgt-1")
+  assert_true(started.state is @provider.OperationSubmitted)
+  assert_eq(transport.requests.length(), 1)
+  let request_body = transport.requests[0].body_text()
+  assert_true(request_body.contains("callback_url"))
+  assert_true(request_body.contains("receiver.example/video-hook"))
+}

@@ -445,6 +445,15 @@ async fn ByteDanceVideoModel::start_video(
   )
   let warnings = option_warnings
   let body = self.create_body(options, provider_options, warnings)
+  // Forward the caller-owned callback endpoint that receives the
+  // completion notification.
+  let body = match (body, options.webhook_url) {
+    (Object(fields), Some(url)) => {
+      fields["callback_url"] = Json::string(url)
+      Json::object(fields)
+    }
+    _ => body
+  }
   let headers = bytedance_headers(self.api_key, self.headers, options.headers)
   let create_response = @provider_utils.post_json(
     provider_name=self.provider_name,

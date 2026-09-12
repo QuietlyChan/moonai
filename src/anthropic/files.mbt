@@ -153,6 +153,18 @@ fn decode_anthropic_file_upload(
     { "mime_type": String(value), .. } => Some(value)
     _ => Some(options.media_type)
   }
+  let byte_size = match json {
+    { "size_bytes": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  let created_at = match json {
+    { "created_at": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  let expires_at = match json {
+    { "expires_at": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
   @provider.FilesV4UploadFileResult::new(
     provider_reference=@provider.ProviderReference::single(
       provider="anthropic",
@@ -160,6 +172,9 @@ fn decode_anthropic_file_upload(
     ),
     media_type?,
     filename?,
+    byte_size?,
+    created_at?,
+    expires_at?,
     provider_metadata=anthropic_file_metadata(json),
   )
 }
@@ -174,7 +189,7 @@ async fn AnthropicFiles::upload(
       name="file",
       filename=options.filename.unwrap_or("blob"),
       media_type=options.media_type,
-      data=@provider_utils.convert_inline_file_data_to_bytes(options.data),
+      data=@provider_utils.collect_upload_file_data(options.data),
     ),
   ]
   let form_data = @provider_utils.encode_multipart_form_data(fields)

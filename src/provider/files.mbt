@@ -1,10 +1,30 @@
 ///|
+/// Pull-based byte source for streaming uploads.
+///
+/// Providers currently drain the stream into memory before encoding the
+/// request, so callers gain chunked sourcing rather than O(1) memory; the
+/// `size_hint_bytes` declaration is reserved for transports that can stream
+/// the request body incrementally.
+pub(open) trait UploadByteStream {
+  /// Read the next chunk; `None` ends the stream.
+  async fn read_chunk(Self) -> Bytes?
+  /// Total payload size in bytes when declared up front; `None` otherwise.
+  fn size_hint_bytes(Self) -> Int64?
+}
+
+///|
+impl Debug for &UploadByteStream with fn to_repr(_self) {
+  Repr::Repr("UploadByteStream(<stream>)")
+}
+
+///|
 /// Inline data accepted by a provider file-upload interface.
 pub(all) enum UploadFileData {
   UploadFileBytes(Bytes)
   UploadFileBase64(String)
   UploadFileText(String)
-} derive(Debug, Eq)
+  UploadFileStream(&UploadByteStream)
+} derive(Debug)
 
 ///|
 /// Construct raw-byte upload data.
@@ -25,6 +45,12 @@ pub fn UploadFileData::text(text : String) -> UploadFileData {
 }
 
 ///|
+/// Construct streaming upload data from a chunked byte source.
+pub fn UploadFileData::stream(stream : &UploadByteStream) -> UploadFileData {
+  UploadFileStream(stream)
+}
+
+///|
 /// Provider-level options for uploading one file.
 pub(all) struct FilesV4UploadFileCallOptions {
   data : UploadFileData
@@ -32,7 +58,7 @@ pub(all) struct FilesV4UploadFileCallOptions {
   filename : String?
   provider_options : Map[String, Json]
   headers : Map[String, String]
-} derive(Debug, Eq)
+} derive(Debug)
 
 ///|
 /// Construct one provider-level file upload call.

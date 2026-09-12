@@ -105,6 +105,7 @@ pub(all) struct VideoModelV4CallOptions {
   frame_images : Array[VideoModelV4FrameImage]?
   input_references : Array[VideoModelV4File]?
   generate_audio : Bool?
+  webhook_url : String?
   provider_options : Map[String, Json]
   headers : Map[String, String]
   retry_policy : RetryPolicy
@@ -113,6 +114,10 @@ pub(all) struct VideoModelV4CallOptions {
 
 ///|
 /// Construct V4 video generation options.
+///
+/// `webhook_url` is forwarded by providers whose asynchronous start API
+/// accepts a caller-owned callback endpoint; the provider notifies that
+/// endpoint when generation completes.
 pub fn VideoModelV4CallOptions::new(
   prompt? : String,
   n? : Int = 1,
@@ -125,6 +130,7 @@ pub fn VideoModelV4CallOptions::new(
   frame_images? : Array[VideoModelV4FrameImage],
   input_references? : Array[VideoModelV4File],
   generate_audio? : Bool,
+  webhook_url? : String,
   provider_options? : Map[String, Json] = Map([]),
   headers? : Map[String, String] = Map([]),
   retry_policy? : RetryPolicy = RetryPolicy::standard(),
@@ -142,6 +148,7 @@ pub fn VideoModelV4CallOptions::new(
     frame_images,
     input_references,
     generate_audio,
+    webhook_url,
     provider_options,
     headers,
     retry_policy,

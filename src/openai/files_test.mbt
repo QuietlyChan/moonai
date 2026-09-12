@@ -218,3 +218,77 @@ async test "official OpenAI Files deletes a file and reports state" {
     assert_eq(deleted.file_id, "file-abc123")
   }
 }
+
+///|
+priv struct TwoChunkStream {
+  chunks : Array[Bytes]
+  mut index : Int
+}
+
+///|
+fn TwoChunkStream::new(chunks : Array[Bytes]) -> TwoChunkStream {
+  { chunks, index: 0, }
+}
+
+///|
+impl @provider.UploadByteStream for TwoChunkStream with fn read_chunk(self) -> Bytes? {
+  if self.index < self.chunks.length() {
+    let chunk = self.chunks[self.index]
+    self.index = self.index + 1
+    Some(chunk)
+  } else {
+    None
+  }
+}
+
+///|
+impl @provider.UploadByteStream for TwoChunkStream with fn size_hint_bytes(self) -> Int64? {
+  let mut total = 0L
+  for chunk in self.chunks {
+    total = total + chunk.length().to_int64()
+  }
+  Some(total)
+}
+
+///|
+async test "official OpenAI Files drains a streaming upload into one file" {
+  @async.with_task_group() <| group => {
+    let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (request, body, connection) => {
+          assert_eq(request.path, "/v1/files")
+          let request_body = body.read_all().text()
+          assert_true(request_body.contains("first-chunk-payload"))
+          assert_true(request_body.contains("second-chunk-payload"))
+          assert_true(
+            request_body.contains("name=\"purpose\"\r\n\r\nassistants"),
+          )
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "application/json",
+          })
+          connection.write(
+            "{\"id\":\"file-stream-1\",\"object\":\"file\",\"bytes\":38,\"created_at\":1700000000,\"filename\":\"streamed.txt\",\"purpose\":\"assistants\",\"status\":\"processed\"}",
+          )
+        },
+        max_connections=1,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let result = @ai.upload_file(
+      provider.files(),
+      data=@provider.UploadFileData::stream(
+        TwoChunkStream::new([b"first-chunk-payload", b"second-chunk-payload"]),
+      ),
+      media_type="text/plain",
+      filename="streamed.txt",
+    )
+    assert_eq(result.provider_reference.get("openai"), Some("file-stream-1"))
+    assert_eq(result.byte_size, Some(38))
+    assert_eq(result.created_at, Some(1700000000))
+  }
+}

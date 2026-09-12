@@ -104,18 +104,18 @@ fn parse_openai_files_options(
 }
 
 ///|
-fn OpenAIFiles::form_data(
+async fn OpenAIFiles::form_data(
   _self : OpenAIFiles,
   call_options : @provider.FilesV4UploadFileCallOptions,
   parsed : ParsedOpenAIFilesOptions,
-) -> @provider_utils.MultipartFormData raise {
+) -> @provider_utils.MultipartFormData {
   let filename = call_options.filename.unwrap_or("blob")
   let fields : Array[@provider_utils.MultipartField] = [
     @provider_utils.MultipartField::file(
       name="file",
       filename~,
       media_type=call_options.media_type,
-      data=@provider_utils.convert_inline_file_data_to_bytes(call_options.data),
+      data=@provider_utils.collect_upload_file_data(call_options.data),
     ),
     @provider_utils.MultipartField::text(
       name="purpose",
@@ -196,6 +196,18 @@ fn decode_openai_file_upload(
     { "filename": String(value), .. } => Some(value)
     _ => call_options.filename
   }
+  let byte_size = match json {
+    { "bytes": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  let created_at = match json {
+    { "created_at": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  let expires_at = match json {
+    { "expires_at": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
   @provider.FilesV4UploadFileResult::new(
     provider_reference=@provider.ProviderReference::single(
       provider="openai",
@@ -203,6 +215,9 @@ fn decode_openai_file_upload(
     ),
     media_type=call_options.media_type,
     filename?,
+    byte_size?,
+    created_at?,
+    expires_at?,
     provider_metadata=openai_files_provider_metadata(json),
     warnings=parsed.warnings,
   )
@@ -214,11 +229,12 @@ async fn OpenAIFiles::upload(
   call_options : @provider.FilesV4UploadFileCallOptions,
 ) -> @provider.FilesV4UploadFileResult {
   let parsed = parse_openai_files_options(call_options, self.provider_name)
+  let form_data = self.form_data(call_options, parsed)
   let response = @provider_utils.post_multipart(
     provider_name=self.provider_name,
     url=self.url(),
     headers=self.request_headers(),
-    form_data=self.form_data(call_options, parsed),
+    form_data~,
     timeout_ms=self.idle_timeout_ms,
     error_to_message=openai_error_message,
     transport=self.http_transport,

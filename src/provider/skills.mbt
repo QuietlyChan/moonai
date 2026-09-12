@@ -3,7 +3,7 @@
 pub(all) struct SkillsV4File {
   path : String
   data : UploadFileData
-} derive(Debug, Eq)
+} derive(Debug)
 
 ///|
 /// Construct one skill file relative to the skill root.
@@ -20,7 +20,7 @@ pub(all) struct SkillsV4UploadSkillCallOptions {
   files : Array[SkillsV4File]
   display_title : String?
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+} derive(Debug)
 
 ///|
 /// Construct one skill upload call.

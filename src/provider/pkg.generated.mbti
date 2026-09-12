@@ -334,7 +334,7 @@ pub(all) struct FilesV4UploadFileCallOptions {
   filename : String?
   provider_options : Map[String, Json]
   headers : Map[String, String]
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 pub fn FilesV4UploadFileCallOptions::new(data~ : UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json], headers? : Map[String, String]) -> Self
 
 pub(all) struct FilesV4UploadFileResult {
@@ -1292,14 +1292,14 @@ pub fn RetryPolicy::standard() -> Self
 pub(all) struct SkillsV4File {
   path : String
   data : UploadFileData
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 pub fn SkillsV4File::new(path~ : String, data~ : UploadFileData) -> Self
 
 pub(all) struct SkillsV4UploadSkillCallOptions {
   files : Array[SkillsV4File]
   display_title : String?
   provider_options : Map[String, Json]
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 pub fn SkillsV4UploadSkillCallOptions::new(files~ : Array[SkillsV4File], display_title? : String, provider_options? : Map[String, Json]) -> Self
 
 pub(all) struct SkillsV4UploadSkillResult {
@@ -1683,9 +1683,11 @@ pub(all) enum UploadFileData {
   UploadFileBytes(Bytes)
   UploadFileBase64(String)
   UploadFileText(String)
-} derive(Eq, @debug.Debug)
+  UploadFileStream(&UploadByteStream)
+} derive(@debug.Debug)
 pub fn UploadFileData::base64(String) -> Self
 pub fn UploadFileData::bytes(Bytes) -> Self
+pub fn UploadFileData::stream(&UploadByteStream) -> Self
 pub fn UploadFileData::text(String) -> Self
 
 pub(all) struct Usage {
@@ -1749,13 +1751,14 @@ pub(all) struct VideoModelV4CallOptions {
   frame_images : Array[VideoModelV4FrameImage]?
   input_references : Array[VideoModelV4File]?
   generate_audio : Bool?
+  webhook_url : String?
   provider_options : Map[String, Json]
   headers : Map[String, String]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
 } derive(@debug.Debug)
 pub fn VideoModelV4CallOptions::from_video_call_options(VideoCallOptions) -> Self
-pub fn VideoModelV4CallOptions::new(prompt? : String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : VideoModelV4File, frame_images? : Array[VideoModelV4FrameImage], input_references? : Array[VideoModelV4File], generate_audio? : Bool, provider_options? : Map[String, Json], headers? : Map[String, String], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
+pub fn VideoModelV4CallOptions::new(prompt? : String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : VideoModelV4File, frame_images? : Array[VideoModelV4FrameImage], input_references? : Array[VideoModelV4File], generate_audio? : Bool, webhook_url? : String, provider_options? : Map[String, Json], headers? : Map[String, String], retry_policy? : RetryPolicy, cancellation_token? : CancellationToken) -> Self
 pub fn VideoModelV4CallOptions::to_video_call_options(Self) -> VideoCallOptions
 
 pub(all) enum VideoModelV4File {
@@ -2020,6 +2023,11 @@ pub(open) trait TranscriptionWireModel {
   fn model_id(Self) -> String
   async fn generate(Self, TranscriptionCallOptions) -> TranscriptionResponse
   async fn stream(Self, TranscriptionStreamOptions, async (TranscriptionStreamEvent) -> Unit) -> TranscriptionResponse
+}
+
+pub(open) trait UploadByteStream {
+  async fn read_chunk(Self) -> Bytes?
+  fn size_hint_bytes(Self) -> Int64?
 }
 
 pub(open) trait VideoModelV4 {
