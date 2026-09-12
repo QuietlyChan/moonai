@@ -46,7 +46,7 @@ test "streaming tool call tracker accumulates interleaved calls until flush" {
         id: "call_weather",
         name: "get_weather",
         arguments: "{\"city\":\"Hangzhou\"}",
-        ..,
+        ..
       }
     ),
   )
@@ -101,7 +101,7 @@ test "streaming tool call tracker emits V4 lifecycle parts directly" {
         tool_call_id: "call-1",
         tool_name: "lookup",
         input: "{\"city\":\"Hangzhou\"}",
-        ..,
+        ..
       }
     ),
   )
@@ -212,6 +212,7 @@ test "streaming tool call tracker ignores late deltas and repeated flushes" {
   let tracker = StreamingToolCallTracker::new()
   let _ = tracker.process_delta(
     StreamingToolCallDelta::new(
+      index=0,
       id="call-1",
       function_name="lookup",
       arguments_delta="{}",
@@ -224,8 +225,78 @@ test "streaming tool call tracker ignores late deltas and repeated flushes" {
     .length(),
     0,
   )
+  assert_eq(
+    tracker
+    .process_delta(StreamingToolCallDelta::new(arguments_delta="late"))
+    .length(),
+    0,
+  )
   assert_eq(tracker.flush().length(), 0)
   assert_eq(tracker.calls()[0].arguments, "{}")
+}
+
+///|
+test "streaming tool call tracker continues latest call when index omitted" {
+  let tracker = StreamingToolCallTracker::new()
+  let _ = tracker.process_delta(
+    StreamingToolCallDelta::new(
+      id="call-1",
+      function_name="lookup",
+      arguments_delta="{'va",
+    ),
+  )
+  let _ = tracker.process_delta(
+    StreamingToolCallDelta::new(arguments_delta="l\":1}"),
+  )
+  let terminal = tracker.flush()
+  assert_true(terminal[1] is @provider.ToolCallReady(_))
+  assert_eq(tracker.calls()[0].arguments, "{'val\":1}")
+}
+
+///|
+test "streaming tool call tracker falls back to index when continuation ids are empty" {
+  let tracker = StreamingToolCallTracker::new()
+  let _ = tracker.process_delta(
+    StreamingToolCallDelta::new(
+      index=0,
+      id="call-1",
+      function_name="lookup",
+      arguments_delta="{'va",
+    ),
+  )
+  let _ = tracker.process_delta(
+    StreamingToolCallDelta::new(index=0, id="", arguments_delta="l\":1}"),
+  )
+  let _ = tracker.flush()
+  assert_eq(tracker.calls().length(), 1)
+  assert_eq(tracker.calls()[0].id, "call-1")
+  assert_eq(tracker.calls()[0].arguments, "{'val\":1}")
+}
+
+///|
+test "streaming tool call tracker generates an id for empty first ids" {
+  let tracker = StreamingToolCallTracker::new(id_generator=fn() { "generated" })
+  let events = tracker.process_delta(
+    StreamingToolCallDelta::new(index=0, id="", function_name="lookup"),
+  )
+  assert_eq(events.length(), 1)
+  assert_true(events[0] is @provider.ToolInputStart(id="generated", ..))
+  let _ = tracker.flush()
+  assert_eq(tracker.calls()[0].id, "generated")
+}
+
+///|
+test "streaming tool call tracker rejects unknown indexed deltas without id" {
+  let tracker = StreamingToolCallTracker::new()
+  let _ = tracker.process_delta(
+    StreamingToolCallDelta::new(id="call-1", function_name="lookup"),
+  )
+  try tracker.process_delta(StreamingToolCallDelta::new(index=7)) catch {
+    @provider.InvalidResponseDataError(..) => ()
+    error => fail("unexpected error: \{error}")
+  } noraise {
+    _ => fail("expected an invalid id error")
+  }
 }
 
 ///|
@@ -251,7 +322,7 @@ test "streaming tool call tracker carries first-delta provider metadata" {
     is @provider.ToolCallReady(
       {
         provider_metadata: { "google": { "thoughtSignature": "sig-1", .. }, .. },
-        ..,
+        ..
       }
     ),
   )
@@ -284,7 +355,7 @@ test "streaming tool call tracker extracts and builds provider metadata" {
     is @provider.ToolCallReady(
       {
         provider_metadata: { "google": { "thoughtSignature": "sig-1", .. }, .. },
-        ..,
+        ..
       }
     ),
   )

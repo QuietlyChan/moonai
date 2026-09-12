@@ -6,6 +6,7 @@ import {
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
 }
+
 // Values
 pub const HARNESS_V1_SPECIFICATION_VERSION : String = "harness-v1"
 
@@ -102,9 +103,9 @@ pub(all) enum HarnessV1BridgeCommand {
   HarnessBridgeToolApproval(approval_id~ : String, approved~ : Bool, reason~ : String?)
   HarnessBridgeUserMessage(String)
   HarnessBridgeAbort
-  HarnessBridgeShutdown
+  HarnessBridgeDestroy
   HarnessBridgeResume(last_seen_event_id~ : Int)
-  HarnessBridgeDetach
+  HarnessBridgeStop
   HarnessBridgeSuspend
 } derive(Eq, @debug.Debug)
 pub fn HarnessV1BridgeCommand::to_json(Self) -> Json
@@ -112,7 +113,7 @@ pub fn HarnessV1BridgeCommand::to_json(Self) -> Json
 pub(all) enum HarnessV1BridgeOutboundFrame {
   HarnessBridgeStreamPart(seq~ : Int?, part~ : HarnessV1StreamPart)
   HarnessBridgeHello(state~ : String?, last_seq~ : Int?)
-  HarnessBridgeDetached(data~ : Json)
+  HarnessBridgeStopped(data~ : Json)
   HarnessBridgeThread(thread_id~ : String)
   HarnessBridgeSandboxLog(seq~ : Int?, source~ : String, stream~ : String, line~ : String)
   HarnessBridgeDebugEvent(seq~ : Int?, level~ : HarnessV1DebugLevel, subsystem~ : String, message~ : String, attrs~ : Json?, error~ : Json?)
@@ -131,12 +132,12 @@ pub struct HarnessV1BridgeState {
 }
 pub fn HarnessV1BridgeState::close(Self) -> Unit
 pub async fn HarnessV1BridgeState::consume(Self, (HarnessV1StreamPart) -> Unit) -> Unit raise HarnessError
-pub fn HarnessV1BridgeState::detach_data(Self) -> Json?
 pub fn HarnessV1BridgeState::last_seen_event_id(Self) -> Int
 pub fn HarnessV1BridgeState::lifecycle_state(Self) -> String?
 pub fn HarnessV1BridgeState::new(&HarnessV1BridgeConnection, last_seen_event_id? : Int, diagnostic_reporter? : (HarnessV1Diagnostic) -> Unit, session_id? : String) -> Self
 pub fn HarnessV1BridgeState::remote_last_seq(Self) -> Int
 pub async fn HarnessV1BridgeState::send(Self, HarnessV1BridgeCommand) -> Unit raise HarnessError
+pub fn HarnessV1BridgeState::stop_data(Self) -> Json?
 pub fn HarnessV1BridgeState::thread_id(Self) -> String?
 
 pub(all) enum HarnessV1BridgeTransportConfig {
@@ -382,6 +383,9 @@ pub(all) enum HarnessV1StreamPart {
   HarnessReasoningStart(id~ : String, harness_metadata~ : Map[String, Json])
   HarnessReasoningDelta(id~ : String, delta~ : String, harness_metadata~ : Map[String, Json])
   HarnessReasoningEnd(id~ : String, harness_metadata~ : Map[String, Json])
+  HarnessToolInputStart(id~ : String, tool_name~ : String, provider_executed~ : Bool?, dynamic~ : Bool?, title~ : String?, provider_metadata~ : Map[String, Json])
+  HarnessToolInputDelta(id~ : String, delta~ : String, provider_metadata~ : Map[String, Json])
+  HarnessToolInputEnd(id~ : String, provider_metadata~ : Map[String, Json])
   HarnessToolCall(call~ : @provider.LanguageModelV4ToolCall, native_name~ : String?)
   HarnessToolApprovalRequest(@provider.LanguageModelV4ToolApprovalRequest)
   HarnessToolResult(@provider.LanguageModelV4ToolResult)

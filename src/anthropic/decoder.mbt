@@ -54,6 +54,9 @@ priv struct AnthropicStreamDecoder {
   mut saw_message_stop : Bool
   mut message_had_tool_call : Bool
   mut finalized : Bool
+  mut message_open : Bool
+  mut active_message_id : String?
+  mut invalid_message_sequence : Bool
 }
 
 ///|
@@ -123,6 +126,9 @@ fn AnthropicStreamDecoder::new_with_metadata_policy(
     saw_message_stop: false,
     message_had_tool_call: false,
     finalized: false,
+    message_open: false,
+    active_message_id: None,
+    invalid_message_sequence: false,
   }
 }
 
@@ -472,6 +478,9 @@ fn AnthropicStreamDecoder::begin_message(self : AnthropicStreamDecoder) -> Unit 
   self.message_finalized = false
   self.saw_message_stop = false
   self.message_had_tool_call = false
+  self.message_open = false
+  self.active_message_id = None
+  self.invalid_message_sequence = false
 }
 
 ///|
@@ -1304,6 +1313,25 @@ fn AnthropicStreamDecoder::apply_json(
   }
   match event_type {
     "message_start" => {
+      // Message lifecycle tracking: ignore same-id duplicate starts and
+      // reject a different message while one is still open so spliced
+      // generations cannot be merged into one transcript.
+      let incoming_message_id = match json {
+        { "message": { "id": String(value), .. }, .. } => Some(value)
+        _ => None
+      }
+      if self.message_open {
+        if incoming_message_id is Some(id) && self.active_message_id == Some(id) {
+          return (events, false)
+        }
+        self.invalid_message_sequence = true
+        raise @provider.InvalidResponseDataError(
+          message="Received message_start while message \{self.active_message_id.unwrap_or("")} is still open.",
+          data=json,
+        )
+      }
+      self.message_open = true
+      self.active_message_id = incoming_message_id
       let metadata = match json {
         { "message": message, .. } =>
           @provider_utils.create_language_model_response_metadata(
@@ -1665,6 +1693,8 @@ fn AnthropicStreamDecoder::apply_json(
       (events, false)
     }
     "message_stop" => {
+      self.message_open = false
+      self.active_message_id = None
       let events = self.final_events()
       self.saw_message_stop = true
       (events, false)
@@ -1799,7 +1829,7 @@ fn AnthropicStreamDecoder::invalid_stream_chunk(
   events.push(
     @provider.StreamError(@provider.StreamErrorInfo::new(message, data~)),
   )
-  { events, consumed_event: true, done: false }
+  { events, consumed_event: true, done: false, }
 }
 
 ///|
@@ -1810,7 +1840,7 @@ fn AnthropicStreamDecoder::decode_data(
   if data.trim() == "[DONE]" {
     let events = self.final_events()
     self.finalized = true
-    return { events, consumed_event: true, done: true }
+    return { events, consumed_event: true, done: true, }
   }
   let json = @json.parse(data) catch {
     error =>
@@ -1832,9 +1862,9 @@ fn AnthropicStreamDecoder::decode_data(
     for event in events {
       all_events.push(event)
     }
-    { events: all_events, consumed_event: true, done }
+    { events: all_events, consumed_event: true, done, }
   } else {
-    { events, consumed_event: true, done }
+    { events, consumed_event: true, done, }
   }
 }
 
@@ -1861,7 +1891,7 @@ fn AnthropicStreamDecoder::flush_buffered(
       let batch = self.decode_data(data)
       if !batch.done && self.saw_message_stop {
         self.finalized = true
-        { ..batch, done: true }
+        { ..batch, done: true, }
       } else {
         batch
       }
@@ -2085,7 +2115,7 @@ fn anthropic_v4_finish_reason_from_raw(
       @provider.V4FinishLength
     _ => @provider.V4FinishOther
   }
-  { unified, raw }
+  { unified, raw, }
 }
 
 ///|

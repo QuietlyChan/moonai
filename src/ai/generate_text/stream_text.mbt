@@ -155,7 +155,11 @@ pub async fn stream_text(
     let ongoing_tool_call_names : Map[String, String] = Map([])
     let stream_result = prepared_step.model.do_stream(call_options, event => {
       accumulator.process(event)
-      on_event(event)
+      // User callbacks are isolated: a throwing callback must not break
+      // stream consumption or mask a subsequent provider error.
+      on_event(event) catch {
+        _ => ()
+      }
       invoke_tool_callbacks_from_stream_part(
         event,
         execution_tools,
@@ -164,12 +168,22 @@ pub async fn stream_text(
         cancellation_token,
         prepared_step.runtime_context,
         prepared_step.experimental_sandbox,
-      )
+      ) catch {
+        _ => ()
+      }
     })
     @provider.check_cancellation(cancellation_token)
     let response_time_ms = (@env.now() - response_started_at).to_int()
     let provider_result = accumulator.provider_result(stream_result)
     let tool_calls = parse_tool_calls(provider_result.content, execution_tools)
+    enforce_tool_choice(
+      tool_choice=prepared_step.tool_choice,
+      tool_calls~,
+      finish_reason=provider_result.finish_reason,
+      provider=prepared_step.model.provider(),
+      model_id=prepared_step.model.model_id(),
+      content=provider_result.content,
+    )
     let provider_content = normalize_provider_content(
       provider_result.content,
       tool_calls,
@@ -183,15 +197,19 @@ pub async fn stream_text(
       prepared_step.tools_context,
       prepared_step.runtime_context,
     )
-    let executed = execute_client_tool_calls(
-      tool_calls,
-      execution_tools,
-      approvals.blocked_tool_call_ids,
-      prepared_step.messages,
-      prepared_step.tools_context,
-      cancellation_token,
-      prepared_step.experimental_sandbox,
-    )
+    let executed = if tool_execution_allowed(provider_result.finish_reason) {
+      execute_client_tool_calls(
+        tool_calls,
+        execution_tools,
+        approvals.blocked_tool_call_ids,
+        prepared_step.messages,
+        prepared_step.tools_context,
+        cancellation_token,
+        prepared_step.experimental_sandbox,
+      )
+    } else {
+      no_executed_client_tools()
+    }
     @provider.check_cancellation(cancellation_token)
     let content = append_client_tool_results(
       append_tool_approvals(provider_content, approvals),
@@ -217,6 +235,7 @@ pub async fn stream_text(
       tool_approval_requests: tool_approval_requests_from_content(content),
       tool_approval_responses: tool_approval_responses_from_content(content),
       finish_reason: provider_result.finish_reason,
+      stream_error: accumulator.stream_error.val,
       usage: provider_result.usage,
       performance: step_performance(
         provider_result.usage,

@@ -3,7 +3,8 @@ fn openai_v4_responses_text_config(
   response_format : @provider.LanguageModelV4ResponseFormat,
   strict_json_schema : Bool,
   verbosity : String?,
-) -> Json? {
+  warnings : Array[@provider.Warning],
+) -> Json? raise {
   let fields : Map[String, Json] = Map([])
   match response_format {
     @provider.V4ResponseText => ()
@@ -14,7 +15,14 @@ fn openai_v4_responses_text_config(
           let format : Map[String, Json] = Map([
             ("type", Json::string("json_schema")),
             ("name", Json::string(config.name.unwrap_or("response"))),
-            ("schema", schema),
+            (
+              "schema",
+              if strict_json_schema {
+                openai_normalize_strict_schema(schema, warnings)
+              } else {
+                schema
+              },
+            ),
             ("strict", Json::boolean(strict_json_schema)),
           ])
           if config.description is Some(value) {
@@ -303,6 +311,7 @@ fn prepare_openai_v4_responses_request(
           options.response_format,
           provider_options.strict_json_schema,
           provider_options.text_verbosity,
+          warnings,
         )
         is Some(value) {
         [("text", value)]

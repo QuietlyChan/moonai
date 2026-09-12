@@ -125,3 +125,38 @@ fn parse_tool_calls(
   }
   calls
 }
+
+///|
+/// Enforce an explicit `required`/named tool choice after a step completes.
+/// Providers that silently ignore the choice produce a typed error instead
+/// of an uncontrolled plain-text answer.
+fn enforce_tool_choice(
+  tool_choice~ : @provider.ToolChoice,
+  tool_calls~ : Array[GenerateTextToolCall],
+  finish_reason~ : @provider.LanguageModelV4FinishReason,
+  provider~ : String,
+  model_id~ : String,
+  content~ : Array[@provider.LanguageModelV4Content],
+) -> Unit raise {
+  let satisfied = match tool_choice {
+    @provider.Required => tool_calls.length() > 0
+    @provider.Named(name) =>
+      tool_calls.iter().any(call => call.tool_name == name)
+    @provider.Auto | @provider.NoTool => true
+  }
+  guard !satisfied else { return }
+  let message = match tool_choice {
+    @provider.Named(name) =>
+      "Model response did not contain a call to the required tool '\{name}'."
+    _ =>
+      "Model response did not contain a tool call even though tool choice was required."
+  }
+  raise @provider.ToolChoiceViolationError(
+    message~,
+    tool_choice~,
+    finish_reason~,
+    provider~,
+    model_id~,
+    content=content.copy(),
+  )
+}

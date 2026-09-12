@@ -116,7 +116,7 @@ fn OpenAICompatibleStreamDecoder::invalid_stream_chunk(
   if self.include_raw_chunks {
     events.insert(0, @provider.V4Raw(data))
   }
-  { events, consumed_event: true, done: false }
+  { events, consumed_event: true, done: false, }
 }
 
 ///|
@@ -370,7 +370,8 @@ fn OpenAICompatibleStreamDecoder::apply_json(
           ),
         )
       }
-      if delta is { "tool_calls": Array(calls), .. } {
+      // Empty tool-call arrays must not close an active reasoning block.
+      if delta is { "tool_calls": Array(calls), .. } && calls.length() > 0 {
         self.close_reasoning(events)
         if self.close_text_before_tool_calls {
           self.close_text(events)
@@ -445,7 +446,7 @@ fn OpenAICompatibleStreamDecoder::decode_data(
   data : String,
 ) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   if data.trim() == "[DONE]" {
-    return { events: self.final_events(), consumed_event: true, done: true }
+    return { events: self.final_events(), consumed_event: true, done: true, }
   }
   let json = @json.parse(data) catch {
     error =>
@@ -472,7 +473,7 @@ fn OpenAICompatibleStreamDecoder::decode_data(
     if self.include_raw_chunks {
       events.insert(0, @provider.V4Raw(json))
     }
-    return { events, consumed_event: true, done: false }
+    return { events, consumed_event: true, done: false, }
   }
   if (self.validate_stream_chunk)(json) is Some(message) {
     return self.invalid_stream_chunk(message, json)
@@ -493,9 +494,9 @@ fn OpenAICompatibleStreamDecoder::decode_data(
     for event in events {
       all_events.push(event)
     }
-    { events: all_events, consumed_event: true, done: false }
+    { events: all_events, consumed_event: true, done: false, }
   } else {
-    { events, consumed_event: true, done: false }
+    { events, consumed_event: true, done: false, }
   }
 }
 
@@ -530,7 +531,7 @@ fn OpenAICompatibleStreamDecoder::finish_stream(
   if self.finalized {
     @provider_utils.SseDecodeBatch::empty(true)
   } else {
-    { events: self.final_events(), consumed_event: false, done: true }
+    { events: self.final_events(), consumed_event: false, done: true, }
   }
 }
 

@@ -348,7 +348,8 @@ async fn ByteDanceVideoModel::generate(
       provider_name=self.provider_name,
       url=@provider_utils.append_path(
         self.base_url,
-        "/contents/generations/tasks/" + task_id,
+        "/contents/generations/tasks/" +
+        @provider_utils.encode_path_segment(task_id),
       ),
       headers~,
       timeout_ms=self.idle_timeout_ms,

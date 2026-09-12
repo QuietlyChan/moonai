@@ -26,7 +26,18 @@ test "JSON-RPC validation distinguishes requests, notifications, and errors" {
       "id": "call-1",
       "error": { "code": -32602, "message": "bad params" },
     })
-    is JSONRPCError(id=JSONRPCStringId("call-1"), error={ code: -32602, .. }),
+    is JSONRPCError(
+      id=Some(JSONRPCStringId("call-1")),
+      error={ code: -32602, .. }
+    ),
+  )
+  // Error frames without an id are valid server-level failures.
+  assert_true(
+    validate_json_rpc_message({
+      "jsonrpc": "2.0",
+      "error": { "code": -32603, "message": "server failure" },
+    })
+    is JSONRPCError(id=None, error={ code: -32603, .. }),
   )
 }
 
@@ -96,7 +107,7 @@ priv struct MCPHttpFixtureTransport {
 fn MCPHttpFixtureTransport::new(
   responses : Array[@provider_utils.HttpResponse],
 ) -> MCPHttpFixtureTransport {
-  { requests: [], responses, next: Ref(0) }
+  { requests: [], responses, next: Ref(0), }
 }
 
 ///|
@@ -187,4 +198,42 @@ test "MCP Apps metadata splits visibility and fingerprints deterministically" {
   let second = fingerprint_mcp_app_resource(resource)
   assert_eq(first, second)
   assert_false(detect_mcp_app_resource_drift(first, second))
+}
+
+///|
+test "oauth endpoints on private networks are rejected with loopback exception" {
+  // A metadata-supplied endpoint on a private address is rejected.
+  try
+    assert_safe_oauth_endpoint(
+      url="https://169.254.169.254/latest/token",
+      trusted_origin=None,
+      context="OAuth token endpoint",
+    )
+  catch {
+    MCPClientOAuthError(..) => ()
+    error => fail("unexpected error")
+  } noraise {
+    _ => fail("expected a private endpoint rejection")
+  }
+  // A loopback endpoint is allowed only for a loopback authorization server.
+  assert_true(trusted_oauth_loopback_origin("http://localhost:8080") is Some(_))
+  assert_true(trusted_oauth_loopback_origin("https://auth.example.com") is None)
+  assert_safe_oauth_endpoint(
+    url="http://localhost:8080/token",
+    trusted_origin=trusted_oauth_loopback_origin("http://localhost:8080"),
+    context="OAuth token endpoint",
+  )
+  // A loopback endpoint from a non-loopback server stays rejected.
+  try
+    assert_safe_oauth_endpoint(
+      url="http://127.0.0.1:9000/token",
+      trusted_origin=trusted_oauth_loopback_origin("https://auth.example.com"),
+      context="OAuth token endpoint",
+    )
+  catch {
+    MCPClientOAuthError(..) => ()
+    error => fail("unexpected error")
+  } noraise {
+    _ => fail("expected an untrusted loopback rejection")
+  }
 }

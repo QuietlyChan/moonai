@@ -20,6 +20,7 @@ priv struct StreamStepAccumulator {
   finish_reason : Ref[@provider.LanguageModelV4FinishReason]
   provider_metadata : Ref[Map[String, Json]]
   response : Ref[@provider.ResponseMetadata?]
+  stream_error : Ref[@provider.StreamErrorInfo?]
 }
 
 ///|
@@ -35,6 +36,7 @@ fn StreamStepAccumulator::new() -> StreamStepAccumulator {
     finish_reason: Ref(@provider.LanguageModelV4FinishReason::unknown()),
     provider_metadata: Ref(Map([])),
     response: Ref(None),
+    stream_error: Ref(None),
   }
 }
 
@@ -146,8 +148,13 @@ fn StreamStepAccumulator::process(
     @provider.V4ToolInputStart(..)
     | @provider.V4ToolInputDelta(..)
     | @provider.V4ToolInputEnd(..)
-    | @provider.V4Raw(_)
-    | @provider.V4Error(_) => ()
+    | @provider.V4Raw(_) => ()
+    // A mid-stream provider error must fail the step instead of being
+    // treated as a normal completion (upstream marks the step 'error').
+    @provider.V4Error(info) => {
+      self.stream_error.val = Some(info)
+      self.finish_reason.val = { unified: @provider.V4FinishError, raw: None, }
+    }
   }
 }
 

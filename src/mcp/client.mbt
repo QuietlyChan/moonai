@@ -97,7 +97,15 @@ fn response_for_id(
     match message {
       JSONRPCResponse(id=response_id, result~) if response_id == id =>
         return result
-      JSONRPCError(id=response_id, error~) if response_id == id =>
+      JSONRPCError(id=Some(response_id), error~) if response_id == id =>
+        raise MCPClientError::new(
+          message=error.message,
+          code=error.code,
+          data?=error.data,
+        )
+      // An id-less error cannot be correlated with any request; surface it
+      // as a server-level failure instead of dropping the message.
+      JSONRPCError(id=None, error~) =>
         raise MCPClientError::new(
           message=error.message,
           code=error.code,

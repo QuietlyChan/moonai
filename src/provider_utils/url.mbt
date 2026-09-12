@@ -26,6 +26,21 @@ pub fn append_path(url : String, path : String) -> String {
 }
 
 ///|
+/// Percent-encode one URL path segment. Standalone dot segments are
+/// double-encoded so URL normalization cannot turn provider-owned
+/// identifiers into path traversal.
+pub fn encode_path_segment(value : String) -> String {
+  let encoded = encode_query_component(value)
+  if encoded == "." {
+    "%252E"
+  } else if encoded == ".." {
+    "%252E%252E"
+  } else {
+    encoded
+  }
+}
+
+///|
 fn is_query_unreserved(value : Byte) -> Bool {
   (value >= b'a' && value <= b'z') ||
   (value >= b'A' && value <= b'Z') ||

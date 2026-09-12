@@ -38,6 +38,7 @@ impl @provider.LanguageModelV4 for DeepSeekChatLanguageModel with fn do_generate
     false,
     self.supports_thinking,
     self.supports_structured_outputs,
+    self.base_url.has_suffix("/beta"),
   )
   let response = @provider_utils.post_json(
     provider_name=self.provider_name,
@@ -84,6 +85,7 @@ impl @provider.LanguageModelV4 for DeepSeekChatLanguageModel with fn do_stream(
     true,
     self.supports_thinking,
     self.supports_structured_outputs,
+    self.base_url.has_suffix("/beta"),
   )
   let decoder = DeepSeekStreamDecoder::new(
     include_raw_chunks=options.include_raw_chunks,

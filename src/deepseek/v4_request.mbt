@@ -60,6 +60,16 @@ fn deepseek_v4_reasoning_effort(
 }
 
 ///|
+/// DeepSeek publishes V4 models under versioned ids and unversioned
+/// aliases (`deepseek-flash`, `deepseek-pro`); only the legacy
+/// `deepseek-chat` / `deepseek-reasoner` ids predate V4.
+fn is_deepseek_v4_model(model_id : String) -> Bool {
+  model_id.contains("deepseek-v4") ||
+  model_id.has_prefix("deepseek-flash") ||
+  model_id.has_prefix("deepseek-pro")
+}
+
+///|
 fn prepare_deepseek_v4_request(
   model_id : String,
   options : @provider.LanguageModelV4CallOptions,
@@ -67,7 +77,8 @@ fn prepare_deepseek_v4_request(
   stream : Bool,
   supports_thinking : Bool,
   supports_structured_outputs : Bool,
-) -> PreparedDeepSeekRequest {
+  supports_strict_tool_calls : Bool,
+) -> PreparedDeepSeekRequest raise {
   let parsed = parse_deepseek_options(options.provider_options, provider_name)
   let warnings = parsed.warnings.copy()
   let prompt = convert_v4_prompt_to_deepseek(
@@ -113,6 +124,32 @@ fn prepare_deepseek_v4_request(
       }
     }
   }
+  let has_strict_tool = options.tools
+    .iter()
+    .any(fn(tool) {
+      match tool {
+        @provider.V4FunctionTool(value) => value.strict == Some(true)
+        _ => false
+      }
+    })
+  guard !(has_strict_tool && !supports_strict_tool_calls) else {
+    raise @provider.UnsupportedFunctionalityError(
+      functionality="DeepSeek strict tool calls",
+    )
+  }
+  guard !(has_strict_tool &&
+    options.tools
+    .iter()
+    .any(fn(tool) {
+      match tool {
+        @provider.V4FunctionTool(value) => value.strict != Some(true)
+        _ => false
+      }
+    })) else {
+    raise @provider.UnsupportedFunctionalityError(
+      functionality="mixed DeepSeek strict and non-strict tool calls",
+    )
+  }
   let thinking_type = if !supports_thinking {
     None
   } else {
@@ -141,17 +178,54 @@ fn prepare_deepseek_v4_request(
   if options.max_output_tokens is Some(value) {
     fields["max_tokens"] = Json::number(value.to_double())
   }
+  // DeepSeek thinking mode (default on V4 models) ignores sampling
+  // controls; deprecated penalties are omitted with a warning.
+  let is_thinking_enabled = supports_thinking &&
+    thinking_type != Some("disabled") &&
+    (
+      thinking_type is Some(_) ||
+      model_id == "deepseek-reasoner" ||
+      is_deepseek_v4_model(model_id)
+    )
   if options.temperature is Some(value) {
-    fields["temperature"] = Json::number(value)
+    if is_thinking_enabled {
+      warnings.push(
+        @provider.Warning::Unsupported(
+          feature="temperature",
+          details="temperature has no effect when DeepSeek thinking is enabled. Set providerOptions.deepseek.thinking_type to 'disabled' to use temperature.",
+        ),
+      )
+    } else {
+      fields["temperature"] = Json::number(value)
+    }
   }
   if options.top_p is Some(value) {
-    fields["top_p"] = Json::number(value)
+    if is_thinking_enabled {
+      warnings.push(
+        @provider.Warning::Unsupported(
+          feature="topP",
+          details="topP has no effect when DeepSeek thinking is enabled. Set providerOptions.deepseek.thinking_type to 'disabled' to use topP.",
+        ),
+      )
+    } else {
+      fields["top_p"] = Json::number(value)
+    }
   }
-  if options.frequency_penalty is Some(value) {
-    fields["frequency_penalty"] = Json::number(value)
+  if options.frequency_penalty is Some(_) {
+    warnings.push(
+      @provider.Warning::Deprecated(
+        setting="frequencyPenalty",
+        message="frequencyPenalty is deprecated by DeepSeek and has been omitted. Remove frequencyPenalty from the request.",
+      ),
+    )
   }
-  if options.presence_penalty is Some(value) {
-    fields["presence_penalty"] = Json::number(value)
+  if options.presence_penalty is Some(_) {
+    warnings.push(
+      @provider.Warning::Deprecated(
+        setting="presencePenalty",
+        message="presencePenalty is deprecated by DeepSeek and has been omitted. Remove presencePenalty from the request.",
+      ),
+    )
   }
   if options.stop_sequences.length() > 0 {
     fields["stop"] = Json::array(
@@ -193,5 +267,5 @@ fn prepare_deepseek_v4_request(
   if thinking_type != Some("disabled") && reasoning_effort is Some(value) {
     fields["reasoning_effort"] = Json::string(value)
   }
-  { body: Json::object(fields), warnings }
+  { body: Json::object(fields), warnings, }
 }

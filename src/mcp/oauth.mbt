@@ -216,6 +216,80 @@ fn decode_oauth_metadata(
 }
 
 ///|
+fn oauth_hostname(url : String) -> String? {
+  match @provider_utils.url_authority(url) {
+    Some(authority) => {
+      let host = if authority.has_prefix("[") {
+        match authority.find("]") {
+          Some(index) => authority[:index + 1].to_owned()
+          None => authority
+        }
+      } else {
+        match authority.find(":") {
+          Some(index) => authority[:index].to_owned()
+          None => authority
+        }
+      }
+      Some(host)
+    }
+    None => None
+  }
+}
+
+///|
+fn is_oauth_loopback_host(hostname : String) -> Bool {
+  let mut normalized = hostname.to_lower()
+  while normalized.has_suffix(".") {
+    normalized = normalized.strip_suffix(".").unwrap_or(normalized).to_owned()
+  }
+  normalized == "localhost" ||
+  normalized.has_suffix(".localhost") ||
+  normalized == "127.0.0.1" ||
+  normalized == "[::1]"
+}
+
+///|
+/// Return the origin of the authorization server when it is itself a
+/// loopback address; loopback endpoints are only trusted when they match
+/// the server the application actually configured.
+fn trusted_oauth_loopback_origin(authorization_server_url : String) -> String? {
+  match
+    (
+      oauth_origin(authorization_server_url),
+      oauth_hostname(authorization_server_url),
+    ) {
+    (Some(origin), Some(host)) if is_oauth_loopback_host(host) => Some(origin)
+    _ => None
+  }
+}
+
+///|
+/// Reject OAuth endpoints on private or loopback networks unless they match
+/// a trusted loopback origin. Provider-supplied metadata must never direct
+/// credentials at an untrusted internal address.
+fn assert_safe_oauth_endpoint(
+  url~ : String,
+  trusted_origin~ : String?,
+  context~ : String,
+) -> Unit raise MCPClientOAuthError {
+  let allow_loopback = match (trusted_origin, oauth_origin(url)) {
+    (Some(origin), Some(endpoint_origin)) =>
+      origin == endpoint_origin &&
+      oauth_hostname(url) is Some(host) &&
+      is_oauth_loopback_host(host)
+    _ => false
+  }
+  guard !allow_loopback else { return }
+  @provider_utils.validate_download_url(url) catch {
+    _ =>
+      raise MCPClientOAuthError(
+        message="\{context} URL is not allowed: \{url}",
+        cause=None,
+      )
+  }
+}
+
+///|
 fn oauth_origin(url : String) -> String? {
   let authority = @provider_utils.url_authority(url)
   authority.map(value => {
@@ -429,6 +503,11 @@ pub fn start_authorization(
       oauth_origin(authorization_server_url).unwrap_or(authorization_server_url) +
       "/authorize"
   }
+  assert_safe_oauth_endpoint(
+    url=endpoint,
+    trusted_origin=trusted_oauth_loopback_origin(authorization_server_url),
+    context="OAuth authorization endpoint",
+  )
   let digest = @mooncry.sha256(@utf8.encode(code_verifier))
   let challenge = @base64.encode(digest, padding=false)
     .replace(old="+", new="-")
@@ -454,7 +533,7 @@ pub fn start_authorization(
       ("resource", value.strip_suffix("/").unwrap_or(value).to_owned()),
     )
   }
-  { authorization_url: append_oauth_query(endpoint, entries), code_verifier }
+  { authorization_url: append_oauth_query(endpoint, entries), code_verifier, }
 }
 
 ///|

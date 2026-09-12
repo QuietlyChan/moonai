@@ -382,7 +382,13 @@ fn anthropic_v4_tool_call_content(
       Object(fields) =>
         match fields.get("type") {
           Some(String(kind)) if kind == "bash_code_execution" ||
-            kind == "text_editor_code_execution" => (kind, input)
+            kind == "text_editor_code_execution" => {
+            // Strip the synthetic discriminator so replayed input matches
+            // Anthropic's original shape and prompt caching still hits.
+            let stripped = @provider.copy_provider_metadata(fields)
+            stripped.remove("type")
+            (kind, Json::object(stripped))
+          }
           Some(String("programmatic-tool-call")) => {
             let stripped = @provider.copy_provider_metadata(fields)
             stripped.remove("type")
@@ -991,5 +997,5 @@ fn convert_v4_prompt_to_anthropic(
       move_anthropic_tool_use_blocks_to_end(message.content)
     }
   }
-  { system, messages, beta_features, warnings }
+  { system, messages, beta_features, warnings, }
 }

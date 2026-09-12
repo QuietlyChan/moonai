@@ -26,7 +26,7 @@ pub fn CallbackHarnessV1BridgeConnection::new(
   receive~ : async () -> String?,
   close? : () -> Unit = () => (),
 ) -> CallbackHarnessV1BridgeConnection {
-  { send_callback: send, receive_callback: receive, close_callback: close }
+  { send_callback: send, receive_callback: receive, close_callback: close, }
 }
 
 ///|
@@ -74,9 +74,9 @@ pub(all) enum HarnessV1BridgeCommand {
   )
   HarnessBridgeUserMessage(String)
   HarnessBridgeAbort
-  HarnessBridgeShutdown
+  HarnessBridgeDestroy
   HarnessBridgeResume(last_seen_event_id~ : Int)
-  HarnessBridgeDetach
+  HarnessBridgeStop
   HarnessBridgeSuspend
 } derive(Debug, Eq)
 
@@ -162,10 +162,10 @@ pub fn HarnessV1BridgeCommand::to_json(self : HarnessV1BridgeCommand) -> Json {
     HarnessBridgeUserMessage(text) =>
       ({ "type": "user-message", "text": text } : Json)
     HarnessBridgeAbort => ({ "type": "abort" } : Json)
-    HarnessBridgeShutdown => ({ "type": "shutdown" } : Json)
+    HarnessBridgeDestroy => ({ "type": "destroy" } : Json)
     HarnessBridgeResume(last_seen_event_id~) =>
       ({ "type": "resume", "lastSeenEventId": last_seen_event_id } : Json)
-    HarnessBridgeDetach => ({ "type": "detach" } : Json)
+    HarnessBridgeStop => ({ "type": "stop" } : Json)
     HarnessBridgeSuspend => ({ "type": "suspend" } : Json)
   }
 }
@@ -184,7 +184,7 @@ pub async fn send_harness_v1_bridge_command(
 pub(all) enum HarnessV1BridgeOutboundFrame {
   HarnessBridgeStreamPart(seq~ : Int?, part~ : HarnessV1StreamPart)
   HarnessBridgeHello(state~ : String?, last_seq~ : Int?)
-  HarnessBridgeDetached(data~ : Json)
+  HarnessBridgeStopped(data~ : Json)
   HarnessBridgeThread(thread_id~ : String)
   HarnessBridgeSandboxLog(
     seq~ : Int?,
@@ -210,7 +210,7 @@ pub struct HarnessV1BridgeState {
   priv last_seen_event_id : Ref[Int]
   priv bridge_last_seq : Ref[Int]
   priv thread_id_value : Ref[String?]
-  priv detach_data_value : Ref[Json?]
+  priv stop_data_value : Ref[Json?]
   priv lifecycle_state_value : Ref[String?]
   priv diagnostic_reporter : HarnessV1DiagnosticReporter?
   priv session_id_value : String?
@@ -230,7 +230,7 @@ pub fn HarnessV1BridgeState::new(
     last_seen_event_id: Ref(last_seen_event_id),
     bridge_last_seq: Ref(last_seen_event_id),
     thread_id_value: Ref(None),
-    detach_data_value: Ref(None),
+    stop_data_value: Ref(None),
     lifecycle_state_value: Ref(None),
     diagnostic_reporter,
     session_id_value: session_id,
@@ -262,8 +262,8 @@ pub fn HarnessV1BridgeState::thread_id(self : HarnessV1BridgeState) -> String? {
 
 ///|
 /// Return the most recent detach payload received from the bridge.
-pub fn HarnessV1BridgeState::detach_data(self : HarnessV1BridgeState) -> Json? {
-  self.detach_data_value.val
+pub fn HarnessV1BridgeState::stop_data(self : HarnessV1BridgeState) -> Json? {
+  self.stop_data_value.val
 }
 
 ///|
@@ -344,8 +344,8 @@ pub fn decode_harness_v1_bridge_outbound_frame(
         state=json_optional_string(fields, "state"),
         last_seq=json_optional_int(fields, "lastSeq"),
       )
-    "bridge-detach" =>
-      HarnessBridgeDetached(
+    "bridge-stop" =>
+      HarnessBridgeStopped(
         data=fields.get("data").unwrap_or(Json::empty_object()),
       )
     "bridge-thread" =>
@@ -434,6 +434,32 @@ pub fn decode_harness_v1_bridge_json(
         id=json_required_string(fields, "id"),
         harness_metadata=decode_harness_metadata(fields.get("harnessMetadata")),
       )
+    "tool-input-start" =>
+      HarnessToolInputStart(
+        id=json_required_string(fields, "id"),
+        tool_name=json_required_string(fields, "toolName"),
+        provider_executed=json_optional_bool_or_none(fields, "providerExecuted"),
+        dynamic=json_optional_bool_or_none(fields, "dynamic"),
+        title=json_optional_string(fields, "title"),
+        provider_metadata=decode_harness_metadata(
+          fields.get("providerMetadata"),
+        ),
+      )
+    "tool-input-delta" =>
+      HarnessToolInputDelta(
+        id=json_required_string(fields, "id"),
+        delta=json_required_string(fields, "delta"),
+        provider_metadata=decode_harness_metadata(
+          fields.get("providerMetadata"),
+        ),
+      )
+    "tool-input-end" =>
+      HarnessToolInputEnd(
+        id=json_required_string(fields, "id"),
+        provider_metadata=decode_harness_metadata(
+          fields.get("providerMetadata"),
+        ),
+      )
     "tool-call" =>
       HarnessToolCall(
         call=decode_harness_tool_call(fields),
@@ -504,6 +530,18 @@ fn json_required_string(
 fn json_optional_string(fields : Map[String, Json], name : String) -> String? {
   match fields.get(name) {
     Some(String(value)) => Some(value)
+    _ => None
+  }
+}
+
+///|
+fn json_optional_bool_or_none(
+  fields : Map[String, Json],
+  name : String,
+) -> Bool? {
+  match fields.get(name) {
+    Some(True) => Some(true)
+    Some(False) => Some(false)
     _ => None
   }
 }
@@ -632,7 +670,7 @@ fn decode_harness_finish_reason(
     "other" => @provider.V4FinishOther
     other => raise harness_error("Unknown harness finish reason: " + other)
   }
-  { unified, raw: json_optional_string(fields, "raw") }
+  { unified, raw: json_optional_string(fields, "raw"), }
 }
 
 ///|
@@ -703,8 +741,8 @@ pub async fn HarnessV1BridgeState::consume(
               self.bridge_last_seq.val = value
             }
           }
-          HarnessBridgeDetached(data~) => {
-            self.detach_data_value.val = Some(data)
+          HarnessBridgeStopped(data~) => {
+            self.stop_data_value.val = Some(data)
             return
           }
           HarnessBridgeThread(thread_id~) =>

@@ -15,7 +15,7 @@ pub fn OpenAICompatibleErrorDetail::new(
   param? : Json,
   code? : Json,
 ) -> OpenAICompatibleErrorDetail {
-  { message, error_type, param, code }
+  { message, error_type, param, code, }
 }
 
 ///|
@@ -249,12 +249,24 @@ pub fn convert_openai_compatible_chat_usage(
         },
         output_tokens: {
           total: Some(output_tokens),
-          text: Some(output_tokens - reasoning_tokens),
+          text: Some(non_negative_text_tokens(output_tokens, reasoning_tokens)),
           reasoning: Some(reasoning_tokens),
         },
         raw: Some(json),
       }
     }
     _ => @provider_utils.create_null_language_model_usage()
+  }
+}
+
+///|
+/// Some providers report reasoning tokens that exceed the completion total;
+/// clamp the derived text count at zero to keep usage aggregates valid.
+fn non_negative_text_tokens(output_tokens : Int, reasoning_tokens : Int) -> Int {
+  let text = output_tokens - reasoning_tokens
+  if text < 0 {
+    0
+  } else {
+    text
   }
 }

@@ -7,6 +7,7 @@ import {
   "moonbitlang/core/builtin",
   "moonbitlang/core/debug",
 }
+
 // Values
 pub const LATEST_PROTOCOL_VERSION : String = "2025-11-25"
 
@@ -182,7 +183,7 @@ pub(all) enum JSONRPCMessage {
   JSONRPCRequest(id~ : JSONRPCId, method_name~ : String, params~ : Json?)
   JSONRPCNotification(method_name~ : String, params~ : Json?)
   JSONRPCResponse(id~ : JSONRPCId, result~ : Json)
-  JSONRPCError(id~ : JSONRPCId, error~ : JSONRPCErrorData)
+  JSONRPCError(id~ : JSONRPCId?, error~ : JSONRPCErrorData)
 } derive(Eq, @debug.Debug)
 pub fn JSONRPCMessage::error(id~ : JSONRPCId, code~ : Int, message~ : String, data? : Json) -> Self
 pub fn JSONRPCMessage::notification(method_name~ : String, params? : Json) -> Self

@@ -16,7 +16,7 @@ pub fn RequestMetadata::new(
   headers~ : Map[String, String],
   body~ : String,
 ) -> RequestMetadata {
-  { url, headers, body }
+  { url, headers, body, }
 }
 
 ///|
@@ -58,7 +58,7 @@ pub fn ResponseMetadata::new(
   headers? : Map[String, String] = Map([]),
   body? : String,
 ) -> ResponseMetadata {
-  { id, model_id, created_at, status_code, headers, body }
+  { id, model_id, created_at, status_code, headers, body, }
 }
 
 ///|
@@ -151,7 +151,7 @@ pub fn TypeValidationContext::new(
   entity_name? : String,
   entity_id? : String,
 ) -> TypeValidationContext {
-  { field, entity_name, entity_id }
+  { field, entity_name, entity_id, }
 }
 
 ///|
@@ -327,6 +327,20 @@ pub(all) suberror InvalidResponseDataError {
 } derive(Debug)
 
 ///|
+/// Raised when a model response does not satisfy an enforced tool choice
+/// (`required` or a named tool) because the provider ignored the setting.
+pub(all) suberror ToolChoiceViolationError {
+  ToolChoiceViolationError(
+    message~ : String,
+    tool_choice~ : ToolChoice,
+    finish_reason~ : LanguageModelV4FinishReason,
+    provider~ : String,
+    model_id~ : String,
+    content~ : Array[LanguageModelV4Content]
+  )
+} derive(Debug)
+
+///|
 /// Raised when a provider-side asynchronous operation exceeds its polling
 /// deadline after the HTTP transport itself remained healthy.
 ///
@@ -421,7 +435,7 @@ pub fn RetryPolicy::new(
   }
   guard max_delay_ms >= 0 else { fail("retry max_delay_ms must be >= 0") }
   guard backoff_factor >= 1.0 else { fail("retry backoff_factor must be >= 1") }
-  { max_retries, initial_delay_ms, max_delay_ms, backoff_factor }
+  { max_retries, initial_delay_ms, max_delay_ms, backoff_factor, }
 }
 
 ///|
@@ -438,7 +452,7 @@ pub fn RetryPolicy::standard() -> RetryPolicy {
 ///|
 /// Disable retries.
 pub fn RetryPolicy::none() -> RetryPolicy {
-  { max_retries: 0, initial_delay_ms: 0, max_delay_ms: 0, backoff_factor: 1.0 }
+  { max_retries: 0, initial_delay_ms: 0, max_delay_ms: 0, backoff_factor: 1.0, }
 }
 
 ///|
@@ -465,7 +479,7 @@ pub suberror CancellationError derive(Debug)
 ///|
 /// Create a fresh cancellation token.
 pub fn CancellationToken::new() -> CancellationToken {
-  { cancelled: Ref(false) }
+  { cancelled: Ref(false), }
 }
 
 ///|

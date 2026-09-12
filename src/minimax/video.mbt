@@ -509,7 +509,8 @@ async fn MiniMaxVideoModel::generate_video_v4(
       provider_name=self.provider_name,
       url=@provider_utils.append_path(
         self.base_url,
-        "/v2/query/video_generation/" + task_id,
+        "/v2/query/video_generation/" +
+        @provider_utils.encode_path_segment(task_id),
       ),
       headers=self.request_headers_with(options.headers),
       timeout_ms=self.idle_timeout_ms,

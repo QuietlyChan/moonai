@@ -52,7 +52,7 @@ fn openai_responses_v4_usage(
         },
         output_tokens: {
           total: Some(output_tokens),
-          text: Some(output_tokens - reasoning_tokens),
+          text: Some(non_negative_text_tokens(output_tokens, reasoning_tokens)),
           reasoning: Some(reasoning_tokens),
         },
         raw: Some(json),
@@ -1231,7 +1231,7 @@ fn openai_responses_v4_finish_reason(
         @provider.V4FinishOther
       }
   }
-  { unified, raw }
+  { unified, raw, }
 }
 
 ///|

@@ -14,7 +14,10 @@ fn openai_v4_reasoning_effort(
 }
 
 ///|
-fn openai_v4_chat_tool(tool : @provider.LanguageModelV4Tool) -> Json? {
+fn openai_v4_chat_tool(
+  tool : @provider.LanguageModelV4Tool,
+  warnings : Array[@provider.Warning],
+) -> Json? raise {
   match tool {
     @provider.V4FunctionTool(value) =>
       Some(
@@ -30,7 +33,17 @@ fn openai_v4_chat_tool(tool : @provider.LanguageModelV4Tool) -> Json? {
                     ..if value.description is Some(description) {
                       [("description", Json::string(description))]
                     },
-                    ("parameters", value.input_schema),
+                    (
+                      "parameters",
+                      if value.strict is Some(true) {
+                        openai_normalize_strict_schema(
+                          value.input_schema,
+                          warnings,
+                        )
+                      } else {
+                        value.input_schema
+                      },
+                    ),
                     ..if value.strict is Some(strict) {
                       [("strict", Json::boolean(strict))]
                     },
@@ -62,7 +75,8 @@ fn openai_v4_chat_tool_choice(
 fn openai_v4_chat_response_format(
   format : @provider.LanguageModelV4ResponseFormat,
   strict_json_schema : Bool,
-) -> Json? {
+  warnings : Array[@provider.Warning],
+) -> Json? raise {
   match format {
     @provider.V4ResponseText => None
     @provider.V4ResponseJson(config) =>
@@ -71,7 +85,14 @@ fn openai_v4_chat_response_format(
         Some(schema) => {
           let json_schema : Map[String, Json] = Map([
             ("name", Json::string(config.name.unwrap_or("response"))),
-            ("schema", schema),
+            (
+              "schema",
+              if strict_json_schema {
+                openai_normalize_strict_schema(schema, warnings)
+              } else {
+                schema
+              },
+            ),
             ("strict", Json::boolean(strict_json_schema)),
           ])
           if config.description is Some(value) {
@@ -132,7 +153,7 @@ fn prepare_openai_v4_chat_request(
   }
   let tools : Array[Json] = []
   for tool in options.tools {
-    match openai_v4_chat_tool(tool) {
+    match openai_v4_chat_tool(tool, warnings) {
       Some(value) => tools.push(value)
       None =>
         warnings.push(
@@ -311,6 +332,7 @@ fn prepare_openai_v4_chat_request(
       ..if openai_v4_chat_response_format(
           options.response_format,
           provider_options.strict_json_schema,
+          warnings,
         )
         is Some(value) {
         [("response_format", value)]
@@ -353,5 +375,5 @@ fn prepare_openai_v4_chat_request(
       fields["tool_choice"] = openai_v4_chat_tool_choice(choice)
     }
   }
-  { body: Json::object(fields), warnings }
+  { body: Json::object(fields), warnings, }
 }

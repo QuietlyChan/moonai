@@ -13,7 +13,7 @@ pub fn MCPTransportSendOptions::new(
   related_request_id? : JSONRPCId,
   resumption_token? : String,
 ) -> MCPTransportSendOptions {
-  { cancellation_token, related_request_id, resumption_token }
+  { cancellation_token, related_request_id, resumption_token, }
 }
 
 ///|
@@ -610,7 +610,7 @@ pub fn StdioConfig::new(
   inherit_env? : Bool = true,
   cwd? : String,
 ) -> StdioConfig {
-  { command, args, env, inherit_env, cwd }
+  { command, args, env, inherit_env, cwd, }
 }
 
 ///|
@@ -731,8 +731,11 @@ pub impl MCPTransport for StdioMCPTransport with fn send(self, message, options)
     let done = match (message, decoded) {
       (JSONRPCRequest(id=request_id, ..), JSONRPCResponse(id=response_id, ..)) =>
         request_id == response_id
-      (JSONRPCRequest(id=request_id, ..), JSONRPCError(id=response_id, ..)) =>
-        request_id == response_id
+      (JSONRPCRequest(id=request_id, ..), JSONRPCError(id=Some(response_id), ..)
+      ) => request_id == response_id
+      // An id-less error is a server-level failure; stop waiting for a
+      // correlated response so the caller can surface it.
+      (JSONRPCRequest(..), JSONRPCError(id=None, ..)) => true
       (JSONRPCNotification(..), _) => true
       _ => false
     }

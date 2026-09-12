@@ -105,6 +105,8 @@ pub fn dynamic_tool(Json, description? : String, description_resolver? : (ToolDe
 
 pub fn encode_multipart_form_data(Array[MultipartField], boundary? : String) -> MultipartFormData raise
 
+pub fn encode_path_segment(String) -> String
+
 pub fn experimentalGetToolCaller(Tool) -> ToolCallerDefinition?
 
 pub fn experimentalToolCaller(Tool, ToolCallerDefinition) -> Tool
@@ -831,6 +833,7 @@ pub fn ToolModelOutputOptions::new(tool_call_id~ : String, input~ : Json, output
 pub struct ToolNameMapping {
   // private fields
 }
+pub fn ToolNameMapping::declares_provider_tool(Self, String) -> Bool
 pub fn ToolNameMapping::identity() -> Self
 pub fn ToolNameMapping::toCustomToolName(Self, String) -> String
 pub fn ToolNameMapping::toProviderToolName(Self, String) -> String
@@ -949,4 +952,3 @@ pub(open) trait WebSocketConnection {
 pub(open) trait WebSocketConnector {
   async fn connect(Self, String, Array[String], Map[String, String]) -> &WebSocketConnection
 }
-

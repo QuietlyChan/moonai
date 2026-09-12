@@ -86,6 +86,20 @@ pub(all) enum HarnessV1StreamPart {
     harness_metadata~ : HarnessV1Metadata
   )
   HarnessReasoningEnd(id~ : String, harness_metadata~ : HarnessV1Metadata)
+  HarnessToolInputStart(
+    id~ : String,
+    tool_name~ : String,
+    provider_executed~ : Bool?,
+    dynamic~ : Bool?,
+    title~ : String?,
+    provider_metadata~ : HarnessV1Metadata
+  )
+  HarnessToolInputDelta(
+    id~ : String,
+    delta~ : String,
+    provider_metadata~ : HarnessV1Metadata
+  )
+  HarnessToolInputEnd(id~ : String, provider_metadata~ : HarnessV1Metadata)
   HarnessToolCall(
     call~ : @provider.LanguageModelV4ToolCall,
     native_name~ : String?
@@ -169,6 +183,28 @@ pub fn HarnessV1StreamPart::to_provider_stream_part(
       )
     HarnessReasoningEnd(id~, harness_metadata~) =>
       Some(@provider.V4ReasoningEnd(id~, provider_metadata=harness_metadata))
+    HarnessToolInputStart(
+      id~,
+      tool_name~,
+      provider_executed~,
+      dynamic~,
+      title~,
+      provider_metadata~
+    ) =>
+      Some(
+        @provider.V4ToolInputStart(
+          id~,
+          tool_name~,
+          provider_executed=provider_executed.unwrap_or(false),
+          dynamic=dynamic.unwrap_or(false),
+          title~,
+          provider_metadata~,
+        ),
+      )
+    HarnessToolInputDelta(id~, delta~, provider_metadata~) =>
+      Some(@provider.V4ToolInputDelta(id~, delta~, provider_metadata~))
+    HarnessToolInputEnd(id~, provider_metadata~) =>
+      Some(@provider.V4ToolInputEnd(id~, provider_metadata~))
     HarnessToolCall(call~, ..) => Some(@provider.V4ToolCallReady(call))
     HarnessToolApprovalRequest(request) =>
       Some(@provider.V4ToolApprovalRequestReady(request))

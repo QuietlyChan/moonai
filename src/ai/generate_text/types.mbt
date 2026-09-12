@@ -91,6 +91,7 @@ pub(all) struct GenerateTextStep {
   tool_approval_requests : Array[GenerateTextToolApprovalRequestOutput]
   tool_approval_responses : Array[GenerateTextToolApprovalResponseOutput]
   finish_reason : @provider.LanguageModelV4FinishReason
+  stream_error : @provider.StreamErrorInfo?
   usage : @provider.LanguageModelV4Usage
   performance : GenerateTextStepPerformance
   request : @provider.RequestMetadata?

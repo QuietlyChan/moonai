@@ -103,18 +103,29 @@ pub type StreamingToolCallMetadataBuilder = (Map[String, Json]) -> Map[
 ]
 
 ///|
+priv struct TrackedStreamingToolCall {
+  id : String
+  name : String
+  arguments : StringBuilder
+  metadata : Map[String, Json]
+  mut has_finished : Bool
+  mut final_call : @provider.ToolCall?
+}
+
+///|
 /// Tracks interleaved streaming tool calls and owns their stream lifecycle.
+///
+/// Lookup prefers a non-empty id, falls back to the explicit index, and
+/// finally to the most recently seen call; this keeps providers that omit
+/// indexes (or rotate ids) from splitting one call into many.
 ///
 /// A complete-looking JSON prefix is never finalized early. All unfinished
 /// calls emit `ToolInputEnd` followed by `ToolCallReady` only from `flush`.
 pub struct StreamingToolCallTracker {
-  priv ids : Array[String?]
-  priv names : Array[String]
-  priv arguments : Array[StringBuilder]
-  priv provider_metadata : Array[Map[String, Json]]
-  priv final_calls : Array[@provider.ToolCall?]
-  priv received : Array[Bool]
-  priv finished : Array[Bool]
+  priv calls : Array[TrackedStreamingToolCall]
+  priv calls_by_id : Map[String, TrackedStreamingToolCall]
+  priv calls_by_index : Map[Int, TrackedStreamingToolCall]
+  priv mut latest_call : TrackedStreamingToolCall?
   priv generate_id : IdGenerator
   priv type_validation : StreamingToolCallTypeValidation
   priv extract_metadata : StreamingToolCallMetadataExtractor
@@ -150,33 +161,14 @@ pub fn StreamingToolCallTracker::new(
     identity_streaming_tool_call_metadata,
   )
   {
-    ids: [],
-    names: [],
-    arguments: [],
-    provider_metadata: [],
-    final_calls: [],
-    received: [],
-    finished: [],
+    calls: [],
+    calls_by_id: {},
+    calls_by_index: {},
+    latest_call: None,
     generate_id: id_generator.unwrap_or(generate_id),
     type_validation,
     extract_metadata: resolved_extract_metadata,
     build_tool_call_provider_metadata: resolved_metadata_builder,
-  }
-}
-
-///|
-fn StreamingToolCallTracker::ensure(
-  self : StreamingToolCallTracker,
-  index : Int,
-) -> Unit {
-  while self.received.length() <= index {
-    self.ids.push(None)
-    self.names.push("")
-    self.arguments.push(StringBuilder::new())
-    self.provider_metadata.push(Map([]))
-    self.final_calls.push(None)
-    self.received.push(false)
-    self.finished.push(false)
   }
 }
 
@@ -205,11 +197,11 @@ fn StreamingToolCallTracker::validate_type(
 ///|
 fn StreamingToolCallTracker::process_new(
   self : StreamingToolCallTracker,
-  index : Int,
   delta : StreamingToolCallDelta,
-) -> Array[StreamingToolCallLifecycleEvent] raise {
+  events : Array[StreamingToolCallLifecycleEvent],
+) -> TrackedStreamingToolCall raise {
   self.validate_type(delta)
-  let id = match delta.id {
+  let raw_id = match delta.id {
     Some(value) => value
     None =>
       raise @provider.InvalidResponseDataError(
@@ -225,36 +217,45 @@ fn StreamingToolCallTracker::process_new(
         data=delta.data,
       )
   }
+  // An empty id is treated as absent: generate a stable one so tool calls
+  // are never emitted with blank identifiers.
+  let id = if raw_id == "" { (self.generate_id)() } else { raw_id }
   let arguments = delta.arguments_delta.unwrap_or("")
-  self.ids[index] = Some(id)
-  self.names[index] = name
-  self.arguments[index].write_string(arguments)
-  self.provider_metadata[index] = (self.extract_metadata)(delta)
-  self.received[index] = true
-  let events : Array[StreamingToolCallLifecycleEvent] = [
-    StreamingToolInputStart(id~, tool_name=name),
-  ]
+  let call : TrackedStreamingToolCall = {
+    id,
+    name,
+    arguments: StringBuilder(),
+    metadata: (self.extract_metadata)(delta),
+    has_finished: false,
+    final_call: None,
+  }
+  call.arguments.write_string(arguments)
+  self.calls.push(call)
+  if id != "" {
+    self.calls_by_id[id] = call
+  }
+  events.push(StreamingToolInputStart(id~, tool_name=name))
   if arguments != "" {
     events.push(StreamingToolInputDelta(id~, delta=arguments))
   }
-  events
+  call
 }
 
 ///|
-fn StreamingToolCallTracker::process_existing(
-  self : StreamingToolCallTracker,
-  index : Int,
+fn TrackedStreamingToolCall::append_delta(
+  self : TrackedStreamingToolCall,
   delta : StreamingToolCallDelta,
-) -> Array[StreamingToolCallLifecycleEvent] {
-  if self.finished[index] {
-    return []
+  events : Array[StreamingToolCallLifecycleEvent],
+) -> Unit {
+  if self.has_finished {
+    return
   }
   match delta.arguments_delta {
     Some(arguments) => {
-      self.arguments[index].write_string(arguments)
-      [StreamingToolInputDelta(id=self.ids[index].unwrap(), delta=arguments)]
+      self.arguments.write_string(arguments)
+      events.push(StreamingToolInputDelta(id=self.id, delta=arguments))
     }
-    None => []
+    None => ()
   }
 }
 
@@ -263,19 +264,33 @@ fn StreamingToolCallTracker::process_delta_events(
   self : StreamingToolCallTracker,
   delta : StreamingToolCallDelta,
 ) -> Array[StreamingToolCallLifecycleEvent] raise {
-  let index = delta.index.unwrap_or(self.received.length())
-  guard index >= 0 else {
-    raise @provider.InvalidResponseDataError(
-      message="Tool call index must be non-negative.",
-      data=delta.data,
-    )
+  let events : Array[StreamingToolCallLifecycleEvent] = []
+  let existing = match delta.id {
+    Some(value) if value != "" => self.calls_by_id.get(value)
+    _ =>
+      match delta.index {
+        Some(index) => self.calls_by_index.get(index)
+        None => self.latest_call
+      }
   }
-  self.ensure(index)
-  if self.received[index] {
-    self.process_existing(index, delta)
-  } else {
-    self.process_new(index, delta)
+  let call = match existing {
+    Some(call) => {
+      call.append_delta(delta, events)
+      call
+    }
+    None => self.process_new(delta, events)
   }
+  if delta.index is Some(index) {
+    guard index >= 0 else {
+      raise @provider.InvalidResponseDataError(
+        message="Tool call index must be non-negative.",
+        data=delta.data,
+      )
+    }
+    self.calls_by_index[index] = call
+  }
+  self.latest_call = Some(call)
+  events
 }
 
 ///|
@@ -297,44 +312,30 @@ pub fn StreamingToolCallTracker::process_delta_v4(
 }
 
 ///|
-fn StreamingToolCallTracker::resolved_id(
-  self : StreamingToolCallTracker,
-  index : Int,
-) -> String {
-  match self.ids[index] {
-    Some(value) => value
-    None => (self.generate_id)()
-  }
-}
-
-///|
-fn StreamingToolCallTracker::raw_call_at(
-  self : StreamingToolCallTracker,
-  index : Int,
+fn TrackedStreamingToolCall::to_raw_call(
+  self : TrackedStreamingToolCall,
 ) -> @provider.ToolCall {
   @provider.ToolCall::new(
-    id=self.resolved_id(index),
-    name=self.names[index],
-    arguments=self.arguments[index].to_string(),
-    provider_metadata=self.provider_metadata[index],
+    id=self.id,
+    name=self.name,
+    arguments=self.arguments.to_string(),
+    provider_metadata=self.metadata,
   )
 }
 
 ///|
-fn StreamingToolCallTracker::finish_call_at(
+fn StreamingToolCallTracker::finish_call(
   self : StreamingToolCallTracker,
-  index : Int,
+  call : TrackedStreamingToolCall,
 ) -> @provider.ToolCall {
-  let call = @provider.ToolCall::new(
-    id=self.resolved_id(index),
-    name=self.names[index],
-    arguments=self.arguments[index].to_string(),
-    provider_metadata=(self.build_tool_call_provider_metadata)(
-      self.provider_metadata[index],
-    ),
+  let finished = @provider.ToolCall::new(
+    id=call.id,
+    name=call.name,
+    arguments=call.arguments.to_string(),
+    provider_metadata=(self.build_tool_call_provider_metadata)(call.metadata),
   )
-  self.final_calls[index] = Some(call)
-  call
+  call.final_call = Some(finished)
+  finished
 }
 
 ///|
@@ -342,12 +343,12 @@ fn StreamingToolCallTracker::flush_events(
   self : StreamingToolCallTracker,
 ) -> Array[StreamingToolCallLifecycleEvent] {
   let events : Array[StreamingToolCallLifecycleEvent] = []
-  for index in 0..<self.received.length() {
-    if self.received[index] && !self.finished[index] {
-      let call = self.finish_call_at(index)
-      events.push(StreamingToolInputEnd(call.id))
-      events.push(StreamingToolCallReady(call))
-      self.finished[index] = true
+  for call in self.calls {
+    if !call.has_finished {
+      let finished = self.finish_call(call)
+      events.push(StreamingToolInputEnd(finished.id))
+      events.push(StreamingToolCallReady(finished))
+      call.has_finished = true
     }
   }
   events
@@ -378,12 +379,10 @@ pub fn StreamingToolCallTracker::calls(
   self : StreamingToolCallTracker,
 ) -> Array[@provider.ToolCall] {
   let calls : Array[@provider.ToolCall] = []
-  for index in 0..<self.received.length() {
-    if self.received[index] {
-      match self.final_calls[index] {
-        Some(call) => calls.push(call)
-        None => calls.push(self.raw_call_at(index))
-      }
+  for call in self.calls {
+    match call.final_call {
+      Some(finished) => calls.push(finished)
+      None => calls.push(call.to_raw_call())
     }
   }
   calls

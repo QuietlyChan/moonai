@@ -121,10 +121,28 @@ pub fn MCPClient::toolsFromDefinitions(
 
 ///|
 /// Fetch and convert MCP tools into a MoonAI `ToolSet`.
+///
+/// Paginated tool lists are followed to the last page so tools from every
+/// page are returned, matching AI SDK client behavior.
 pub async fn MCPClient::tools(
   self : MCPClient,
   schemas? : Map[String, Json],
   options? : MCPRequestOptions,
 ) -> @provider_utils.ToolSet {
-  self.tools_from_definitions(self.list_tools(options?), schemas?)
+  let mut definitions = self.list_tools(options?)
+  let all_tools = Array::from_iter(definitions.tools.iter())
+  while definitions.next_cursor is Some(cursor) {
+    definitions = self.list_tools(cursor~, options?)
+    for tool in definitions.tools {
+      all_tools.push(tool)
+    }
+  }
+  self.tools_from_definitions(
+    {
+      tools: all_tools,
+      next_cursor: definitions.next_cursor,
+      raw: definitions.raw,
+    },
+    schemas?,
+  )
 }

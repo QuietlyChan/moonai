@@ -782,7 +782,8 @@ fn append_openai_responses_v4_assistant_tool_result(
     "item_id",
     provider_name,
   ).unwrap_or(result.tool_call_id)
-  if resolved_name == "tool_search" {
+  if resolved_name == "tool_search" &&
+    tool_name_mapping.declares_provider_tool("tool_search") {
     if store {
       input.push({ "type": "item_reference", "id": item_id })
     } else {
@@ -902,7 +903,8 @@ fn append_openai_responses_v4_assistant_tool_call(
   if has_conversation && item_id is Some(_) {
     return
   }
-  if resolved_tool_name == "tool_search" {
+  if resolved_tool_name == "tool_search" &&
+    tool_name_mapping.declares_provider_tool("tool_search") {
     if store && item_id is Some(id) {
       input.push({ "type": "item_reference", "id": id })
     } else {
@@ -1021,7 +1023,8 @@ fn append_openai_responses_v4_tool_result(
     "item_id",
     provider_name,
   ).unwrap_or(result.tool_call_id)
-  if resolved_name == "tool_search" {
+  if resolved_name == "tool_search" &&
+    tool_name_mapping.declares_provider_tool("tool_search") {
     input.push(
       openai_responses_v4_tool_search_output_wire(result, None, "client"),
     )

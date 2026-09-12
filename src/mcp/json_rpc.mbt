@@ -19,7 +19,7 @@ pub(all) enum JSONRPCMessage {
   JSONRPCRequest(id~ : JSONRPCId, method_name~ : String, params~ : Json?)
   JSONRPCNotification(method_name~ : String, params~ : Json?)
   JSONRPCResponse(id~ : JSONRPCId, result~ : Json)
-  JSONRPCError(id~ : JSONRPCId, error~ : JSONRPCErrorData)
+  JSONRPCError(id~ : JSONRPCId?, error~ : JSONRPCErrorData)
 } derive(Debug, Eq)
 
 ///|
@@ -58,7 +58,7 @@ pub fn JSONRPCMessage::error(
   message~ : String,
   data? : Json,
 ) -> JSONRPCMessage {
-  JSONRPCError(id~, error={ code, message, data })
+  JSONRPCError(id=Some(id), error={ code, message, data, })
 }
 
 ///|
@@ -123,12 +123,12 @@ pub fn JSONRPCMessage::to_json(self : JSONRPCMessage) -> Json {
       if error.data is Some(value) {
         error_fields["data"] = value
       }
-      (
-        {
-          "jsonrpc": "2.0",
-          "id": json_rpc_id_to_json(id),
-          "error": Json::object(error_fields),
-        } : Json)
+      let frame : Map[String, Json] = Map([("jsonrpc", "2.0")])
+      if id is Some(value) {
+        frame["id"] = json_rpc_id_to_json(value)
+      }
+      frame["error"] = Json::object(error_fields)
+      Json::object(frame)
     }
   }
 }
@@ -161,12 +161,14 @@ pub fn validate_json_rpc_message(
     }
     (Some(id), None, Some(result), None) =>
       JSONRPCResponse(id=decode_json_rpc_id(id), result~)
-    (Some(id), None, None, Some(Object(error_fields))) => {
+    // JSON-RPC error frames may omit the id (MCP 2025-11-25 and later allow
+    // server-level errors that cannot be correlated with a request).
+    (id, None, None, Some(Object(error_fields))) => {
       guard error_fields.get("code") is Some(Number(code, ..)) &&
         error_fields.get("message") is Some(String(message)) else {
         raise mcp_error("JSON-RPC error must contain integer code and message")
       }
-      JSONRPCError(id=decode_json_rpc_id(id), error={
+      JSONRPCError(id=id.map(decode_json_rpc_id), error={
         code: code.to_int(),
         message,
         data: error_fields.get("data"),

@@ -304,6 +304,14 @@ pub async fn generate_text(
     @provider.check_cancellation(cancellation_token)
     let response_time_ms = (@env.now() - response_started_at).to_int()
     let tool_calls = parse_tool_calls(provider_result.content, execution_tools)
+    enforce_tool_choice(
+      tool_choice=prepared_step.tool_choice,
+      tool_calls~,
+      finish_reason=provider_result.finish_reason,
+      provider=prepared_step.model.provider(),
+      model_id=prepared_step.model.model_id(),
+      content=provider_result.content,
+    )
     invoke_tool_input_callbacks(
       tool_calls,
       execution_tools,
@@ -325,15 +333,19 @@ pub async fn generate_text(
       prepared_step.tools_context,
       prepared_step.runtime_context,
     )
-    let executed = execute_client_tool_calls(
-      tool_calls,
-      execution_tools,
-      approvals.blocked_tool_call_ids,
-      prepared_step.messages,
-      prepared_step.tools_context,
-      cancellation_token,
-      prepared_step.experimental_sandbox,
-    )
+    let executed = if tool_execution_allowed(provider_result.finish_reason) {
+      execute_client_tool_calls(
+        tool_calls,
+        execution_tools,
+        approvals.blocked_tool_call_ids,
+        prepared_step.messages,
+        prepared_step.tools_context,
+        cancellation_token,
+        prepared_step.experimental_sandbox,
+      )
+    } else {
+      no_executed_client_tools()
+    }
     @provider.check_cancellation(cancellation_token)
     let content = append_client_tool_results(
       append_tool_approvals(provider_content, approvals),
@@ -359,6 +371,7 @@ pub async fn generate_text(
       tool_approval_requests: tool_approval_requests_from_content(content),
       tool_approval_responses: tool_approval_responses_from_content(content),
       finish_reason: provider_result.finish_reason,
+      stream_error: None,
       usage: provider_result.usage,
       performance: step_performance(
         provider_result.usage,

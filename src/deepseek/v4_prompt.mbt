@@ -194,7 +194,7 @@ fn convert_v4_prompt_to_deepseek(
       last_user_index = index
     }
   }
-  let is_v4 = model_id.contains("deepseek-v4")
+  let is_v4 = is_deepseek_v4_model(model_id)
   for index, message in prompt.messages {
     match message {
       @provider.V4SystemMessage(content~, ..) =>
@@ -244,5 +244,5 @@ fn convert_v4_prompt_to_deepseek(
         }
     }
   }
-  { messages, warnings }
+  { messages, warnings, }
 }

@@ -80,9 +80,13 @@ fn get_anthropic_model_capabilities(
     anthropic_capabilities(64000, true, false, false, false, false, true)
   } else if model_id.contains("claude-opus-4-1") {
     anthropic_capabilities(32000, true, false, false, false, false, true)
-  } else if model_id.contains("claude-sonnet-4-") {
+  } else if model_id.contains("claude-sonnet-4-") ||
+    model_id.contains("claude-sonnet-4@") {
+    // Vertex exposes dated ids such as claude-sonnet-4@20250514; they belong
+    // to the known Sonnet 4 envelope rather than the future-model default.
     anthropic_capabilities(64000, false, false, false, false, false, true)
-  } else if model_id.contains("claude-opus-4-") {
+  } else if model_id.contains("claude-opus-4-") ||
+    model_id.contains("claude-opus-4@") {
     anthropic_capabilities(32000, false, false, false, false, false, true)
   } else if model_id.contains("claude-3-haiku") {
     anthropic_capabilities(4096, false, false, false, false, false, true)

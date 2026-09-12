@@ -72,7 +72,7 @@ fn decode_openai_compatible_tool_call(
       )
   }
   let id = match json {
-    { "id": String(value), .. } => value
+    { "id": String(value), .. } if value != "" => value
     _ => {
       let generated = id_generator()
       if generated == "" {
@@ -105,7 +105,7 @@ fn openai_compatible_v4_finish_reason(
     Some("function_call") | Some("tool_calls") => @provider.V4FinishToolCalls
     _ => @provider.V4FinishOther
   }
-  { unified, raw }
+  { unified, raw, }
 }
 
 ///|

@@ -148,3 +148,70 @@ test "prompt text conversion rejects assistant messages" {
     _ => fail("expected assistant prompt to be rejected")
   }
 }
+
+///|
+test "bridge protocol uses destroy and stop command names" {
+  json_inspect(HarnessBridgeDestroy.to_json(), content={ "type": "destroy" })
+  json_inspect(HarnessBridgeStop.to_json(), content={ "type": "stop" })
+  assert_eq(
+    decode_harness_v1_bridge_outbound_frame(
+      ({ "type": "bridge-stop", "data": { "resume": true } } : Json).stringify(),
+    ),
+    HarnessBridgeStopped(data={ "resume": true }),
+  )
+}
+
+///|
+test "bridge outbound decoder maps tool input streaming frames" {
+  assert_eq(
+    decode_harness_v1_bridge_outbound_frame(
+      (
+        {
+          "type": "tool-input-start",
+          "seq": 1,
+          "id": "tool-1",
+          "toolName": "weather",
+          "providerExecuted": true,
+        } : Json).stringify(),
+    ),
+    HarnessBridgeStreamPart(
+      seq=Some(1),
+      part=HarnessToolInputStart(
+        id="tool-1",
+        tool_name="weather",
+        provider_executed=Some(true),
+        dynamic=None,
+        title=None,
+        provider_metadata=Map([]),
+      ),
+    ),
+  )
+  assert_eq(
+    decode_harness_v1_bridge_outbound_frame(
+      (
+        {
+          "type": "tool-input-delta",
+          "seq": 2,
+          "id": "tool-1",
+          "delta": "{\"city\":",
+        } : Json).stringify(),
+    ),
+    HarnessBridgeStreamPart(
+      seq=Some(2),
+      part=HarnessToolInputDelta(
+        id="tool-1",
+        delta="{\"city\":",
+        provider_metadata=Map([]),
+      ),
+    ),
+  )
+  assert_eq(
+    decode_harness_v1_bridge_outbound_frame(
+      ({ "type": "tool-input-end", "seq": 3, "id": "tool-1" } : Json).stringify(),
+    ),
+    HarnessBridgeStreamPart(
+      seq=Some(3),
+      part=HarnessToolInputEnd(id="tool-1", provider_metadata=Map([])),
+    ),
+  )
+}

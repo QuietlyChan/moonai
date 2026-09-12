@@ -66,7 +66,9 @@ test "Moonshot AI usage prefers native cache accounting" {
 ///|
 test "Moonshot AI model capabilities and public selectors" {
   assert_true(get_model_structured_output_support("kimi-k2.5"))
-  assert_true(!get_model_structured_output_support("moonshot-v1-8k"))
+  // Official moonshot-v1 models support native structured output.
+  assert_true(get_model_structured_output_support("moonshot-v1-8k"))
+  assert_true(!get_model_structured_output_support("unknown-model"))
   let provider = createMoonshotAI(api_key="test-key")
   let generic = provider as &@provider.ProviderV4
   assert_eq(generic.specification_version(), "v4")

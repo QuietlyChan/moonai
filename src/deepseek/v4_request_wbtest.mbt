@@ -80,6 +80,7 @@ test "DeepSeek V4 request preserves structured provider inputs" {
     true,
     true,
     true,
+    true,
   )
   json_inspect(prepared.body, content={
     "model": "deepseek-reasoner",
@@ -304,6 +305,7 @@ test "DeepSeek retains an empty tool list when only provider tools were declared
     "deepseek.chat",
     false,
     true,
+    false,
     false,
   )
   json_inspect(prepared.body, content={

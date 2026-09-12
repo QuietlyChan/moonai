@@ -17,10 +17,14 @@ fn handle_failed_response(
   is_retryable_response : ((Int, Json?) -> Bool? raise)?,
 ) -> (String, Bool) raise {
   try {
-    let message = match (error_to_message, error_json) {
+    // Some providers return an empty error body; fall back to a status-derived
+    // message so the surfaced error is never blank.
+    let status_fallback = "HTTP \{status_code} error response"
+    let extracted = match (error_to_message, error_json) {
       (Some(extract), Some(value)) => extract(value).unwrap_or(response_body)
       _ => response_body
     }
+    let message = if extracted.is_empty() { status_fallback } else { extracted }
     let retryable = match is_retryable_response {
       Some(resolve) =>
         resolve(status_code, error_json).unwrap_or(

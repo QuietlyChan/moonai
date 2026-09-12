@@ -34,7 +34,7 @@ fn prepare_deepseek_request(
   stream : Bool,
   supports_thinking : Bool,
   supports_structured_outputs : Bool,
-) -> PreparedDeepSeekRequest {
+) -> PreparedDeepSeekRequest raise {
   prepare_deepseek_v4_request(
     model_id,
     deepseek_test_v4_options_from_chat(options),
@@ -42,7 +42,10 @@ fn prepare_deepseek_request(
     stream,
     supports_thinking,
     supports_structured_outputs,
-  )
+    supports_structured_outputs,
+  ) catch {
+    error => raise error
+  }
 }
 
 ///|
@@ -53,7 +56,7 @@ fn encode_deepseek_chat_request(
   provider_name? : String = "deepseek.chat",
   supports_thinking? : Bool = true,
   supports_structured_outputs? : Bool = false,
-) -> Json {
+) -> Json raise {
   prepare_deepseek_request(
     model_id, options, provider_name, stream, supports_thinking, supports_structured_outputs,
   ).body

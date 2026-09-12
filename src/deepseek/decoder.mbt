@@ -125,7 +125,13 @@ fn decode_deepseek_chat_response(
           } =>
             content.push(
               @provider.LanguageModelV4Content::tool_call({
-                tool_call_id: id,
+                // An empty id is treated as absent and replaced with a
+                // generated one so downstream tool results stay resolvable.
+                tool_call_id: if id == "" {
+                  generate_id()
+                } else {
+                  id
+                },
                 tool_name: name,
                 input: arguments,
                 provider_executed: false,
@@ -400,7 +406,8 @@ fn DeepSeekStreamDecoder::apply_json(
         _ => ()
       }
       match delta {
-        { "tool_calls": Array(values), .. } => {
+        // Empty tool-call arrays must not close an active reasoning block.
+        { "tool_calls": Array(values), .. } if values.length() > 0 => {
           self.close_reasoning(events)
           for index, value in values {
             self.apply_tool_delta(value, index, events)
@@ -593,7 +600,7 @@ fn DeepSeekStreamDecoder::invalid_stream_chunk(
   if self.include_raw_chunks {
     events.insert(0, @provider.V4Raw(data))
   }
-  { events, consumed_event: true, done: false }
+  { events, consumed_event: true, done: false, }
 }
 
 ///|
@@ -626,7 +633,7 @@ fn DeepSeekStreamDecoder::decode_data(
   data : String,
 ) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   if data.trim() == "[DONE]" {
-    return { events: self.finish_events(), consumed_event: true, done: true }
+    return { events: self.finish_events(), consumed_event: true, done: true, }
   }
   let json = @json.parse(data) catch {
     error => {
@@ -643,7 +650,7 @@ fn DeepSeekStreamDecoder::decode_data(
       if self.include_raw_chunks {
         events.insert(0, @provider.V4Raw(Json::string(data)))
       }
-      return { events, consumed_event: true, done: false }
+      return { events, consumed_event: true, done: false, }
     }
   }
   if deepseek_error_message(json) is Some(message) {
@@ -661,7 +668,7 @@ fn DeepSeekStreamDecoder::decode_data(
     if self.include_raw_chunks {
       events.insert(0, @provider.V4Raw(json))
     }
-    return { events, consumed_event: true, done: false }
+    return { events, consumed_event: true, done: false, }
   }
   if deepseek_stream_chunk_validation_error(json) is Some(message) {
     return self.invalid_stream_chunk(message, json)
@@ -670,7 +677,7 @@ fn DeepSeekStreamDecoder::decode_data(
   if self.include_raw_chunks {
     events.insert(0, @provider.V4Raw(json))
   }
-  { events, consumed_event: true, done: false }
+  { events, consumed_event: true, done: false, }
 }
 
 ///|
@@ -704,7 +711,7 @@ fn DeepSeekStreamDecoder::finish_stream(
   if self.finalized {
     @provider_utils.SseDecodeBatch::empty(true)
   } else {
-    { events: self.finish_events(), consumed_event: false, done: true }
+    { events: self.finish_events(), consumed_event: false, done: true, }
   }
 }
 

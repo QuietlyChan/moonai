@@ -90,6 +90,10 @@ pub(all) suberror TooManyEmbeddingValuesForCallError {
   TooManyEmbeddingValuesForCallError(provider~ : String, model_id~ : String, max_embeddings_per_call~ : Int, values~ : Array[String])
 } derive(Eq, @debug.Debug)
 
+pub(all) suberror ToolChoiceViolationError {
+  ToolChoiceViolationError(message~ : String, tool_choice~ : ToolChoice, finish_reason~ : LanguageModelV4FinishReason, provider~ : String, model_id~ : String, content~ : Array[LanguageModelV4Content])
+} derive(@debug.Debug)
+
 pub(all) suberror TypeValidationError {
   TypeValidationError(value~ : Json, cause~ : String, context~ : TypeValidationContext?)
 } derive(@debug.Debug)
@@ -1941,4 +1945,3 @@ pub(open) trait VideoWireModel {
   fn max_videos_per_call(Self) -> Int
   async fn generate(Self, VideoCallOptions) -> VideoResponse
 }
-

@@ -38,27 +38,43 @@ pub async fn generate_image(
     } else {
       max_images_per_call
     }
-    let response = model.do_generate(
-      @provider.ImageModelV4CallOptions::new(
-        prompt~,
-        n=batch_size,
-        size?,
-        aspect_ratio?,
-        seed?,
-        files~,
-        mask?,
-        headers~,
-        provider_options~,
-        retry_policy~,
-        cancellation_token?,
-      ),
-    )
-    let response = response.to_image_response()
-    guard response.images.length() == batch_size else {
-      fail(
-        "image provider returned \{response.images.length()} images for a batch of \{batch_size}",
-      )
+    // Transient empty results are retried within the retry scope so a
+    // single blank response does not fail the whole generation.
+    let mut retry_number = 0
+    let mut delay = @provider_utils.initial_retry_delay(retry_policy)
+    let mut completed : ImageResponse? = None
+    while completed is None {
+      check_cancellation(cancellation_token)
+      let response = model
+        .do_generate(
+          @provider.ImageModelV4CallOptions::new(
+            prompt~,
+            n=batch_size,
+            size?,
+            aspect_ratio?,
+            seed?,
+            files~,
+            mask?,
+            headers~,
+            provider_options~,
+            retry_policy~,
+            cancellation_token?,
+          ),
+        )
+        .to_image_response()
+      if response.images.length() == batch_size {
+        completed = Some(response)
+      } else if retry_policy.can_retry(retry_number) {
+        @provider_utils.sleep_with_cancellation(delay, cancellation_token)
+        delay = @provider_utils.next_retry_delay(retry_policy, delay)
+        retry_number = retry_number + 1
+      } else {
+        fail(
+          "image provider returned \{response.images.length()} images for a batch of \{batch_size} after \{retry_number + 1} attempts",
+        )
+      }
     }
+    let response = completed.unwrap()
     for image in response.images {
       images.push(image)
     }

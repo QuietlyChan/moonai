@@ -169,7 +169,7 @@ pub impl HarnessV1Session for HarnessV1BridgeSession with fn do_continue_turn(
 async fn HarnessV1BridgeSession::send_detach_and_wait(
   self : HarnessV1BridgeSession,
 ) -> Unit {
-  self.bridge_state.send(HarnessBridgeDetach)
+  self.bridge_state.send(HarnessBridgeStop)
   self.bridge_state.consume(_ => ())
 }
 
@@ -186,7 +186,7 @@ fn HarnessV1BridgeSession::lifecycle_data(
   if self.bridge_state.thread_id() is Some(thread_id) {
     fields["threadId"] = Json::string(thread_id)
   }
-  if self.bridge_state.detach_data() is Some(data) {
+  if self.bridge_state.stop_data() is Some(data) {
     fields["bridgeData"] = data
   }
   Json::object(fields)
@@ -226,7 +226,7 @@ pub impl HarnessV1Session for HarnessV1BridgeSession with fn do_detach(self) {
 pub impl HarnessV1Session for HarnessV1BridgeSession with fn do_stop(self) {
   if !self.stopped.val {
     self.stopped.val = true
-    self.bridge_state.send(HarnessBridgeShutdown) catch {
+    self.bridge_state.send(HarnessBridgeDestroy) catch {
       _ => ()
     }
     self.bridge_state.close()
@@ -241,7 +241,7 @@ pub impl HarnessV1Session for HarnessV1BridgeSession with fn do_stop(self) {
 pub impl HarnessV1Session for HarnessV1BridgeSession with fn do_destroy(self) {
   if !self.stopped.val {
     self.stopped.val = true
-    self.bridge_state.send(HarnessBridgeShutdown) catch {
+    self.bridge_state.send(HarnessBridgeDestroy) catch {
       _ => ()
     }
     self.bridge_state.close()

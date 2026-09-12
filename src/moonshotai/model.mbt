@@ -11,8 +11,26 @@ pub struct MoonshotAIProvider {
 
 ///|
 /// Return whether a Moonshot model supports native JSON Schema output.
+///
+/// Official `moonshot-v1-*` models support structured output alongside the
+/// Kimi K series.
 pub fn get_model_structured_output_support(model_id : String) -> Bool {
-  model_id.has_prefix("kimi-k")
+  model_id.has_prefix("kimi-k") ||
+  model_id == "moonshot-v1-8k" ||
+  model_id == "moonshot-v1-32k" ||
+  model_id == "moonshot-v1-128k" ||
+  model_id == "moonshot-v1-auto" ||
+  model_id == "moonshot-v1-8k-vision-preview" ||
+  model_id == "moonshot-v1-32k-vision-preview" ||
+  model_id == "moonshot-v1-128k-vision-preview"
+}
+
+///|
+/// The K2.6/K2.7 models reject a required tool choice.
+fn moonshotai_rejects_required_tool_choice(model_id : String) -> Bool {
+  model_id == "kimi-k2.6" ||
+  model_id == "kimi-k2.7-code" ||
+  model_id == "kimi-k2.7-code-highspeed"
 }
 
 ///|
@@ -76,6 +94,21 @@ fn strip_moonshot_schema_keyword(body : Map[String, Json]) -> Unit {
 fn moonshotai_transform_request_body(json : Json) -> Json {
   guard json is Object(source) else { return json }
   let body = copy_json_object(source)
+  // Moonshot AI expects the OpenAI-compatible completion-token field name.
+  match body.get("max_tokens") {
+    Some(value) => {
+      body["max_completion_tokens"] = value
+      body.remove("max_tokens")
+    }
+    None => ()
+  }
+  // The K2.6/K2.7 models reject a required tool choice; omit the setting.
+  match (body.get("model"), body.get("tool_choice")) {
+    (Some(String(model_id)), Some(String("required"))) if moonshotai_rejects_required_tool_choice(
+        model_id,
+      ) => body.remove("tool_choice")
+    _ => ()
+  }
   match body.get("thinking") {
     Some(Object(value)) => {
       let thinking = copy_json_object(value)

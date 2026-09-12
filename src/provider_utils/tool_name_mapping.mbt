@@ -12,7 +12,19 @@ pub struct ToolNameMapping {
 ///|
 /// Construct an identity tool-name mapping.
 pub fn ToolNameMapping::identity() -> ToolNameMapping {
-  { custom_to_provider: Map([]), provider_to_custom: Map([]) }
+  { custom_to_provider: Map([]), provider_to_custom: Map([]), }
+}
+
+///|
+/// Return whether a provider-defined tool was actually declared under the
+/// given provider protocol name. Replay paths use this to avoid confusing a
+/// plain function that happens to share a native tool's name with the real
+/// provider-defined tool.
+pub fn ToolNameMapping::declares_provider_tool(
+  self : ToolNameMapping,
+  provider_tool_name : String,
+) -> Bool {
+  self.provider_to_custom.contains(provider_tool_name)
 }
 
 ///|

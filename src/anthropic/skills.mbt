@@ -73,9 +73,11 @@ fn AnthropicSkills::version_url(
   skill_id : String,
   version : String,
 ) -> String {
+  // Provider-supplied identifiers are path-encoded so values such as ".."
+  // cannot escape the skills endpoint.
   @provider_utils.append_path(
     self.base_url,
-    "/skills/\{skill_id}/versions/\{version}",
+    "/skills/\{@provider_utils.encode_path_segment(skill_id)}/versions/\{@provider_utils.encode_path_segment(version)}",
   )
 }
 

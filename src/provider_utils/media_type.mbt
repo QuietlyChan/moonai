@@ -72,7 +72,11 @@ fn id3_tag_length(bytes : BytesView) -> Int? {
 
 ///|
 fn detect_image_media_type(bytes : BytesView) -> String? {
-  if bytes_match(bytes, [0x47, 0x49, 0x46]) {
+  // GIF requires the full GIF87a/GIF89a signature and BMP requires zeroed
+  // reserved header fields; shorter prefixes misclassify plain text that
+  // merely starts with "GIF" or "BM".
+  if bytes_match(bytes, [0x47, 0x49, 0x46, 0x38, 0x37, 0x61]) ||
+    bytes_match(bytes, [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]) {
     Some("image/gif")
   } else if bytes_match(bytes, [0x89, 0x50, 0x4e, 0x47]) {
     Some("image/png")
@@ -82,7 +86,9 @@ fn detect_image_media_type(bytes : BytesView) -> String? {
       0x52, 0x49, 0x46, 0x46, -1, -1, -1, -1, 0x57, 0x45, 0x42, 0x50,
     ]) {
     Some("image/webp")
-  } else if bytes_match(bytes, [0x42, 0x4d]) {
+  } else if bytes_match(bytes, [
+      0x42, 0x4d, -1, -1, -1, -1, 0x00, 0x00, 0x00, 0x00,
+    ]) {
     Some("image/bmp")
   } else if bytes_match(bytes, [0x49, 0x49, 0x2a, 0x00]) ||
     bytes_match(bytes, [0x4d, 0x4d, 0x00, 0x2a]) {

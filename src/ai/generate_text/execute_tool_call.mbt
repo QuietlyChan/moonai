@@ -88,6 +88,22 @@ async fn execute_tool_call(
 }
 
 ///|
+/// Automatic client tool execution is only safe after a clean stop or an
+/// explicit tool-calls finish; truncated, failed, filtered, or unknown
+/// terminations must not run side-effecting tools.
+fn tool_execution_allowed(
+  finish_reason : @provider.LanguageModelV4FinishReason,
+) -> Bool {
+  finish_reason.unified
+  is (@provider.V4FinishStop | @provider.V4FinishToolCalls)
+}
+
+///|
+fn no_executed_client_tools() -> ExecutedClientTools {
+  { results: [], completed_count: 0, execution_ms: Map([]), }
+}
+
+///|
 async fn execute_client_tool_calls(
   calls : Array[GenerateTextToolCall],
   tools : @provider_utils.ToolSet,
@@ -137,5 +153,5 @@ async fn execute_client_tool_calls(
     execution_ms[outcome.result.tool_call_id] = outcome.execution_ms
     results.push(outcome.result)
   }
-  { results, completed_count: results.length(), execution_ms }
+  { results, completed_count: results.length(), execution_ms, }
 }

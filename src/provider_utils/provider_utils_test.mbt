@@ -378,6 +378,18 @@ test "media type detection skips bounded ID3v2 tags and accepts base64url" {
 }
 
 ///|
+test "media type detection requires full GIF signatures and BMP headers" {
+  assert_eq(detect_media_type("R0lGODlh"), Some("image/gif"))
+  assert_eq(detect_media_type("R0lGODlhAQABAAAAADs="), Some("image/gif"))
+  // A 3-byte "GIF" prefix alone (e.g. plain text "GIF...") is not an image.
+  assert_eq(detect_media_type("R0lGOA=="), None)
+  assert_eq(detect_media_type("R0lG"), None)
+  assert_eq(detect_media_type("Qk0BAgMEAAAAAA=="), Some("image/bmp"))
+  // Plain text starting with "BM" has non-zero reserved header bytes.
+  assert_eq(detect_media_type("Qk1Ob3Rl"), None)
+}
+
+///|
 test "multipart form data preserves binary files and redacts diagnostics" {
   let form = encode_multipart_form_data(
     [

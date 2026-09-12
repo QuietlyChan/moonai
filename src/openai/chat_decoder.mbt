@@ -46,13 +46,25 @@ fn openai_chat_v4_usage(raw_usage : Json?) -> @provider.LanguageModelV4Usage {
         },
         output_tokens: {
           total: Some(output_tokens),
-          text: Some(output_tokens - reasoning_tokens),
+          text: Some(non_negative_text_tokens(output_tokens, reasoning_tokens)),
           reasoning: Some(reasoning_tokens),
         },
         raw: Some(json),
       }
     }
     _ => @provider_utils.create_null_language_model_usage()
+  }
+}
+
+///|
+/// Some providers report reasoning tokens that exceed the completion total;
+/// clamp the derived text count at zero to keep usage aggregates valid.
+fn non_negative_text_tokens(output_tokens : Int, reasoning_tokens : Int) -> Int {
+  let text = output_tokens - reasoning_tokens
+  if text < 0 {
+    0
+  } else {
+    text
   }
 }
 
@@ -79,7 +91,7 @@ fn openai_chat_v4_finish_reason(
     Some("function_call") | Some("tool_calls") => @provider.V4FinishToolCalls
     _ => @provider.V4FinishOther
   }
-  { unified, raw }
+  { unified, raw, }
 }
 
 ///|
@@ -198,7 +210,13 @@ fn decode_openai_chat_response(
           } =>
             content.push(
               @provider.LanguageModelV4Content::tool_call({
-                tool_call_id: id,
+                // An empty id is treated as absent and replaced with a
+                // generated one so downstream tool results stay resolvable.
+                tool_call_id: if id == "" {
+                  generate_id()
+                } else {
+                  id
+                },
                 tool_name: name,
                 input: arguments,
                 provider_executed: false,
@@ -514,7 +532,7 @@ fn OpenAIChatStreamDecoder::decode_data(
   data : String,
 ) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
   if data.trim() == "[DONE]" {
-    return { events: self.final_events(), consumed_event: true, done: true }
+    return { events: self.final_events(), consumed_event: true, done: true, }
   }
   let json = @json.parse(data) catch {
     error => {
@@ -531,7 +549,7 @@ fn OpenAIChatStreamDecoder::decode_data(
       if self.include_raw_chunks {
         events.insert(0, @provider.V4Raw(Json::string(data)))
       }
-      return { events, consumed_event: true, done: false }
+      return { events, consumed_event: true, done: false, }
     }
   }
   if !self.stream_started && openai_stream_error_object(json) is Some(error) {
@@ -561,7 +579,7 @@ fn OpenAIChatStreamDecoder::decode_data(
     if self.include_raw_chunks {
       events.insert(0, @provider.V4Raw(json))
     }
-    return { events, consumed_event: true, done: false }
+    return { events, consumed_event: true, done: false, }
   }
   if openai_chat_stream_has_output(json) {
     self.output_started = true
@@ -572,7 +590,7 @@ fn OpenAIChatStreamDecoder::decode_data(
   if self.include_raw_chunks {
     events.insert(0, @provider.V4Raw(json))
   }
-  { events, consumed_event: true, done: false }
+  { events, consumed_event: true, done: false, }
 }
 
 ///|
@@ -604,7 +622,7 @@ fn OpenAIChatStreamDecoder::finish_stream(
   if self.finalized {
     @provider_utils.SseDecodeBatch::empty(true)
   } else {
-    { events: self.final_events(), consumed_event: false, done: true }
+    { events: self.final_events(), consumed_event: false, done: true, }
   }
 }
 
