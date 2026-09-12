@@ -861,3 +861,56 @@ test "official OpenAI stream emits shell calls without synthetic input events" {
     _ => fail("expected normalized local shell response content")
   }
 }
+
+///|
+test "official OpenAI stream rewrites rotated item ids by output index" {
+  let runtime = openai_responses_stream_runtime(
+    "openai.responses",
+    @provider_utils.ToolNameMapping::identity(),
+    false,
+    false,
+    store=true,
+    id_generator=() => "generated-id",
+    approval_tool_call_ids=Map([]),
+  )
+  let parts : Array[@provider.LanguageModelV4StreamPart] = []
+  let feed = line => {
+    let batch = runtime.feed_line(line)
+    for part in batch.events {
+      parts.push(part)
+    }
+  }
+  // The provider rotates the opaque item id after the first event; the
+  // output index stays at 0 for the whole item.
+  feed(
+    "data: {\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{\"id\":\"msg_A\",\"type\":\"message\",\"content\":[]}}",
+  )
+  feed("")
+  feed(
+    "data: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg_rotated\",\"output_index\":0,\"delta\":\"stable \"}",
+  )
+  feed("")
+  feed(
+    "data: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg_rotated\",\"output_index\":0,\"delta\":\"ids\"}",
+  )
+  feed("")
+  feed(
+    "data: {\"type\":\"response.output_item.done\",\"output_index\":0,\"item\":{\"id\":\"msg_rotated\",\"type\":\"message\",\"content\":[{\"type\":\"output_text\",\"text\":\"stable ids\",\"annotations\":[]}]}}",
+  )
+  feed("")
+  feed(
+    "data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\",\"status\":\"completed\",\"output\":[],\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}}",
+  )
+  feed("")
+  let deltas : Array[String] = []
+  for part in parts {
+    match part {
+      @provider.V4TextDelta(delta~, ..) => deltas.push(delta)
+      _ => ()
+    }
+  }
+  // Both deltas and the aggregated content resolve to the registered id.
+  assert_eq(deltas, ["stable ", "ids"])
+  let response = runtime.response_metadata_snapshot()
+  assert_true(response is Some(_))
+}

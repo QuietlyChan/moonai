@@ -8,6 +8,10 @@ priv struct OpenAIResponsesStreamRuntime {
   v4_metadata : OpenAIResponsesV4StreamMetadata
   emit_raw_chunks : Bool
   mut raw_event : Json?
+  /// Stable item id per output_index: OpenAI-compatible providers can rotate
+  /// opaque item ids between events while output_index stays stable
+  /// (AI SDK #18548).
+  mut item_ids_by_index : Map[Int, String]
 }
 
 ///|
@@ -64,6 +68,87 @@ fn openai_responses_stream_runtime(
     ),
     emit_raw_chunks,
     raw_event: None,
+    item_ids_by_index: Map([]),
+  }
+}
+
+///|
+/// Rewrite one SSE data line so every event of an output item carries the
+/// item id that output_index was first registered with.
+fn OpenAIResponsesStreamRuntime::rewrite_sse_line(
+  self : OpenAIResponsesStreamRuntime,
+  raw : String,
+) -> String {
+  guard raw.has_prefix("data:") else { return raw }
+  let payload = raw.strip_prefix("data:").unwrap_or(raw)
+  let payload = payload.strip_prefix(" ").unwrap_or(payload)
+  guard payload.has_prefix("{") else { return raw }
+  let json = @json.parse(payload) catch { _ => return raw }
+  let (rewritten, changed) = self.rewrite_event_ids(json)
+  if changed {
+    "data: " + rewritten.stringify()
+  } else {
+    raw
+  }
+}
+
+///|
+fn OpenAIResponsesStreamRuntime::rewrite_event_ids(
+  self : OpenAIResponsesStreamRuntime,
+  json : Json,
+) -> (Json, Bool) {
+  guard json is Object(fields) else { return (json, false) }
+  let kind = match fields.get("type") {
+    Some(String(value)) => Some(value)
+    _ => None
+  }
+  let output_index : Int? = match fields.get("output_index") {
+    Some(Number(value, ..)) => Some(value.to_int())
+    _ => None
+  }
+  match kind {
+    // Registration: the first id seen for an output index becomes stable.
+    Some("response.output_item.added") =>
+      match (output_index, fields.get("item")) {
+        (Some(index), Some({ "id": String(item_id), .. })) => {
+          self.item_ids_by_index[index] = item_id
+          (json, false)
+        }
+        _ => (json, false)
+      }
+    // Item completion removes the mapping; the done event already carries
+    // the terminal id, so nothing to rewrite.
+    Some("response.output_item.done") =>
+      match output_index {
+        Some(index) => {
+          self.item_ids_by_index.remove(index)
+          (json, false)
+        }
+        None => (json, false)
+      }
+    // Terminal response events end the id lifetime.
+    Some("response.completed")
+    | Some("response.failed")
+    | Some("response.incomplete") => {
+      self.item_ids_by_index = Map([])
+      (json, false)
+    }
+    _ =>
+      // Continuation events (deltas, annotations, summaries) reference the
+      // item by item_id + output_index: rewrite a rotated id back to the
+      // stable one.
+      match (fields.get("item_id"), output_index) {
+        (Some(String(item_id)), Some(index)) =>
+          match self.item_ids_by_index.get(index) {
+            Some(stable) if stable != item_id => {
+              let rewritten = @provider.copy_provider_metadata(fields)
+              rewritten["item_id"] = Json::string(stable)
+              (Json::object(rewritten), true)
+            }
+            _ => (json, false)
+          }
+        _ => (json, false)
+      }
   }
 }
 
@@ -108,7 +193,7 @@ fn OpenAIResponsesStreamRuntime::feed_line(
   self : OpenAIResponsesStreamRuntime,
   raw : String,
 ) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise {
-  self.v4_batch(self.decoder.feed_line(raw))
+  self.v4_batch(self.decoder.feed_line(self.rewrite_sse_line(raw)))
 }
 
 ///|
