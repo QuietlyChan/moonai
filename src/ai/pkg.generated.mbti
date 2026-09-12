@@ -31,6 +31,14 @@ pub fn customProvider(language_models? : Map[String, &@provider.LanguageModelV4]
 
 pub fn custom_provider(language_models? : Map[String, &@provider.LanguageModelV4], embedding_models? : Map[String, &@provider.EmbeddingModelV4], image_models? : Map[String, &@provider.ImageModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], reranking_models? : Map[String, &@provider.RerankingModelV4], video_models? : Map[String, &@provider.VideoModelV4], files? : &@provider.FilesV4, skills? : &@provider.SkillsV4, fallback_provider? : &@provider.ProviderV4) -> @registry.CustomProvider
 
+pub async fn deleteFile(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4DeleteFileResult
+
+pub async fn delete_file(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4DeleteFileResult
+
+pub async fn downloadFile(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4DownloadFileResult
+
+pub async fn download_file(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4DownloadFileResult
+
 pub fn dynamicTool(Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : Json, provider_options? : Map[String, Json], metadata? : Map[String, Json], execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn dynamic_tool(Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : Json, provider_options? : Map[String, Json], metadata? : Map[String, Json], execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
@@ -71,6 +79,12 @@ pub async fn generate_text(&@provider.LanguageModelV4, prompt? : String, message
 
 pub async fn generate_video(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4Result
 
+pub async fn getFileMetadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
+
+
+pub async fn get_file_metadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
+
+
 pub fn hasToolCall(Array[String]) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
 pub fn has_tool_call(Array[String]) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
@@ -96,6 +110,8 @@ pub async fn rerank(&@provider.RerankingModelV4, @provider.RerankingModelV4Docum
 pub async fn rerankText(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
 
 pub async fn rerank_text(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
+
+
 
 pub async fn streamSpeechTranslation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
 

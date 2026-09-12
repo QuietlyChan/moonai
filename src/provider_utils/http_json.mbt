@@ -905,3 +905,254 @@ pub async fn download_file(
     }
   }
 }
+
+///|
+/// Perform one GET request expecting a binary payload, sharing the typed
+/// transport errors and response metadata contract with the JSON helpers.
+async fn get_bytes_once(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  timeout_ms : Int,
+  cancellation_token : @provider.CancellationToken?,
+  transport : &HttpTransport,
+) -> BinaryHttpResponse {
+  @provider.check_cancellation(cancellation_token)
+  let response = fetch_buffered_with_timeout(
+    provider_name,
+    HttpRequest::get(url~, headers~),
+    timeout_ms,
+    transport,
+  )
+  let value = read_response_with_size_limit(response, url~)
+  guard response.is_success() else {
+    let response_body = binary_error_body(value)
+    let error_json = parse_json_if_valid(response_body)
+    let (message, retryable) = handle_failed_response(
+      url~,
+      request_body="",
+      request_headers=headers,
+      status_code=response.status_code,
+      response_headers=response.headers,
+      response_body~,
+      error_json~,
+      None,
+      None,
+    )
+    raise @provider.APICallError(
+      message~,
+      url~,
+      request_body="",
+      request_headers=copy_headers(headers),
+      status_code=Some(response.status_code),
+      response_headers=copy_headers(response.headers),
+      response_body~,
+      is_retryable=retryable,
+      data=error_json,
+      cause=None,
+    )
+  }
+  {
+    value,
+    request: @provider.RequestMetadata::new(
+      url~,
+      headers=copy_headers(headers),
+      body="",
+    ),
+    response: @provider.ResponseMetadata::new(
+      status_code=response.status_code,
+      headers=copy_headers(response.headers),
+    ),
+  }
+}
+
+///|
+/// GET a URL-backed binary payload using the shared retry, timeout, and
+/// cancellation policy. Providers use this for authenticated file-content
+/// downloads.
+pub async fn get_bytes(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  timeout_ms? : Int = 120_000,
+  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  cancellation_token? : @provider.CancellationToken,
+  transport? : &HttpTransport,
+) -> BinaryHttpResponse {
+  let resolved_transport = transport.unwrap_or(native_http_transport())
+  let mut retry_number = 0
+  let mut delay = initial_retry_delay(retry_policy)
+  for ;; {
+    @provider.check_cancellation(cancellation_token)
+    try
+      get_bytes_once(
+        provider_name~,
+        url~,
+        headers~,
+        timeout_ms,
+        cancellation_token,
+        resolved_transport,
+      )
+    catch {
+      error if @async.is_cancellation_error(error) ||
+        @async.is_being_cancelled() => raise error
+      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+        retry_number = retry_number + 1
+        if delay > 0 {
+          sleep_with_cancellation(delay, cancellation_token)
+        }
+        delay = next_retry_delay(retry_policy, delay)
+        continue
+      }
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body="",
+          request_headers=headers,
+        )
+    } noraise {
+      result => return result
+    }
+  }
+}
+
+///|
+/// Perform one DELETE request and decode its JSON response. Deletion
+/// endpoints are idempotent from the caller's perspective, so the shared
+/// retry policy applies the same way as for polling GETs.
+async fn delete_json_once(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  timeout_ms : Int,
+  cancellation_token : @provider.CancellationToken?,
+  error_to_message : ((Json) -> String? raise)?,
+  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  validate_response : ((Json) -> Unit raise)?,
+  transport : &HttpTransport,
+) -> JsonHttpResponse {
+  @provider.check_cancellation(cancellation_token)
+  let response = fetch_buffered_with_timeout(
+    provider_name,
+    HttpRequest::delete(url~, headers~),
+    timeout_ms,
+    transport,
+  )
+  let response_body = @utf8.decode(
+    read_response_with_size_limit(response, url~),
+  )
+  let error_json = parse_json_if_valid(response_body)
+  guard response.is_success() else {
+    let (message, retryable) = handle_failed_response(
+      url~,
+      request_body="",
+      request_headers=headers,
+      status_code=response.status_code,
+      response_headers=response.headers,
+      response_body~,
+      error_json~,
+      error_to_message,
+      is_retryable_response,
+    )
+    raise @provider.APICallError(
+      message~,
+      url~,
+      request_body="",
+      request_headers=copy_headers(headers),
+      status_code=Some(response.status_code),
+      response_headers=copy_headers(response.headers),
+      response_body~,
+      is_retryable=retryable,
+      data=error_json,
+      cause=None,
+    )
+  }
+  let value = parse_successful_json_response(
+    response_body,
+    url,
+    "",
+    headers,
+    response.status_code,
+    response.headers,
+  )
+  validate_successful_json_response(
+    value,
+    validate_response,
+    response_body,
+    url,
+    "",
+    headers,
+    response.status_code,
+    response.headers,
+  )
+  {
+    value,
+    request: @provider.RequestMetadata::new(
+      url~,
+      headers=copy_headers(headers),
+      body="",
+    ),
+    response: @provider.ResponseMetadata::new(
+      status_code=response.status_code,
+      headers=copy_headers(response.headers),
+    ),
+  }
+}
+
+///|
+/// DELETE a resource and decode its JSON response using the shared retry,
+/// timeout, and cancellation policy. Providers use this for file deletion
+/// endpoints that report the resulting deletion state.
+pub async fn delete_json(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  timeout_ms? : Int = 120_000,
+  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  cancellation_token? : @provider.CancellationToken,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  validate_response? : (Json) -> Unit raise,
+  transport? : &HttpTransport,
+) -> JsonHttpResponse {
+  let resolved_transport = transport.unwrap_or(native_http_transport())
+  let mut retry_number = 0
+  let mut delay = initial_retry_delay(retry_policy)
+  for ;; {
+    @provider.check_cancellation(cancellation_token)
+    try
+      delete_json_once(
+        provider_name~,
+        url~,
+        headers~,
+        timeout_ms,
+        cancellation_token,
+        error_to_message,
+        is_retryable_response,
+        validate_response,
+        resolved_transport,
+      )
+    catch {
+      error if @async.is_cancellation_error(error) ||
+        @async.is_being_cancelled() => raise error
+      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+        retry_number = retry_number + 1
+        if delay > 0 {
+          sleep_with_cancellation(delay, cancellation_token)
+        }
+        delay = next_retry_delay(retry_policy, delay)
+        continue
+      }
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body="",
+          request_headers=headers,
+        )
+    } noraise {
+      result => return result
+    }
+  }
+}

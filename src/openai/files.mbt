@@ -247,3 +247,165 @@ impl @provider.FilesV4 for OpenAIFiles with fn upload_file(
 ) -> @provider.FilesV4UploadFileResult {
   self.upload(call_options)
 }
+
+///|
+fn OpenAIFiles::file_url(self : OpenAIFiles, file_id : String) -> String {
+  @provider_utils.append_path(
+    self.url(),
+    "/\{@provider_utils.encode_path_segment(file_id)}",
+  )
+}
+
+///|
+fn openai_files_lifecycle_metadata(
+  json : Json,
+  file_id : String,
+) -> Map[String, Json] {
+  match json {
+    Object(_) => openai_files_provider_metadata(json)
+    _ => Map([("openai", Json::object(Map([("id", Json::string(file_id))])))])
+  }
+}
+
+///|
+fn openai_files_lifecycle_fields(json : Json) -> (String?, Int?, Int?, Int?) {
+  let filename = match json {
+    { "filename": String(value), .. } => Some(value)
+    _ => None
+  }
+  let byte_size = match json {
+    { "bytes": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  let created_at = match json {
+    { "created_at": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  let expires_at = match json {
+    { "expires_at": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  (filename, byte_size, created_at, expires_at)
+}
+
+///|
+fn guard_openai_files_error(json : Json, context : String) -> Unit raise {
+  if openai_error_message(json) is Some(message) {
+    raise @provider.InvalidResponseDataError(
+      message="\{context} failed: \{message}",
+      data=json,
+    )
+  }
+}
+
+///|
+async fn OpenAIFiles::fetch_metadata(
+  self : OpenAIFiles,
+  call_options : @provider.FilesV4GetFileMetadataCallOptions,
+) -> @provider.FilesV4FileMetadata {
+  @provider.check_cancellation(None)
+  let response = @provider_utils.get_json(
+    provider_name=self.provider_name,
+    url=self.file_url(call_options.file_id),
+    headers=self.request_headers(),
+    timeout_ms=self.idle_timeout_ms,
+    error_to_message=openai_error_message,
+    transport=self.http_transport,
+  )
+  let json = response.value
+  guard_openai_files_error(json, "OpenAI Files metadata request")
+  let id = match json {
+    { "id": String(value), .. } => value
+    _ => call_options.file_id
+  }
+  let (filename, byte_size, created_at, expires_at) = openai_files_lifecycle_fields(
+    json,
+  )
+  @provider.FilesV4FileMetadata::new(
+    file_id=id,
+    media_type?=None,
+    filename?,
+    byte_size?,
+    created_at?,
+    expires_at?,
+    provider_metadata=openai_files_lifecycle_metadata(json, id),
+  )
+}
+
+///|
+async fn OpenAIFiles::fetch_content(
+  self : OpenAIFiles,
+  call_options : @provider.FilesV4DownloadFileCallOptions,
+) -> @provider.FilesV4DownloadFileResult {
+  let content_url = @provider_utils.append_path(
+    self.file_url(call_options.file_id),
+    "/content",
+  )
+  let response = @provider_utils.get_bytes(
+    provider_name=self.provider_name,
+    url=content_url,
+    headers=self.request_headers(),
+    timeout_ms=self.idle_timeout_ms,
+    transport=self.http_transport,
+  )
+  @provider.FilesV4DownloadFileResult::new(
+    file_id=call_options.file_id,
+    data=response.value,
+    media_type?=response.response.headers.get("content-type"),
+    filename?=None,
+    provider_metadata=Map([
+      (
+        "openai",
+        Json::object(Map([("content_url", Json::string(content_url))])),
+      ),
+    ]),
+  )
+}
+
+///|
+async fn OpenAIFiles::remove(
+  self : OpenAIFiles,
+  call_options : @provider.FilesV4DeleteFileCallOptions,
+) -> @provider.FilesV4DeleteFileResult {
+  @provider.check_cancellation(None)
+  let response = @provider_utils.delete_json(
+    provider_name=self.provider_name,
+    url=self.file_url(call_options.file_id),
+    headers=self.request_headers(),
+    timeout_ms=self.idle_timeout_ms,
+    error_to_message=openai_error_message,
+    transport=self.http_transport,
+  )
+  let json = response.value
+  guard_openai_files_error(json, "OpenAI Files delete request")
+  let deleted = match json {
+    { "deleted": False, .. } => false
+    _ => true
+  }
+  @provider.FilesV4DeleteFileResult::new(
+    file_id=call_options.file_id,
+    deleted~,
+    provider_metadata=openai_files_lifecycle_metadata(
+      json,
+      call_options.file_id,
+    ),
+  )
+}
+
+///|
+impl @provider.FilesV4 for OpenAIFiles with fn get_file_metadata(
+  self,
+  call_options,
+) -> @provider.FilesV4FileMetadata raise {
+  self.fetch_metadata(call_options)
+}
+
+///|
+impl @provider.FilesV4 for OpenAIFiles with fn download_file(self, call_options) -> @provider.FilesV4DownloadFileResult raise {
+  self.fetch_content(call_options)
+}
+
+///|
+impl @provider.FilesV4 for OpenAIFiles with fn delete_file(self, call_options) -> @provider.FilesV4DeleteFileResult raise {
+  self.remove(call_options)
+}

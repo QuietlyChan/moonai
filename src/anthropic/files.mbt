@@ -213,3 +213,148 @@ pub impl @provider.FilesV4 for AnthropicFiles with fn upload_file(
 ) -> @provider.FilesV4UploadFileResult {
   self.upload(options)
 }
+
+///|
+fn AnthropicFiles::file_url(self : AnthropicFiles, file_id : String) -> String {
+  @provider_utils.append_path(
+    self.files_url(),
+    "/\{@provider_utils.encode_path_segment(file_id)}",
+  )
+}
+
+///|
+fn guard_anthropic_files_error(json : Json, context : String) -> Unit raise {
+  match anthropic_error_message(json) {
+    Some(message) =>
+      raise @provider.InvalidResponseDataError(
+        message="\{context} failed: \{message}",
+        data=json,
+      )
+    None => ()
+  }
+}
+
+///|
+fn anthropic_files_lifecycle_fields(json : Json) -> (String?, Int?, Int?) {
+  let filename = match json {
+    { "filename": String(value), .. } => Some(value)
+    _ => None
+  }
+  let byte_size = match json {
+    { "size_bytes": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  let created_at = match json {
+    { "created_at": Number(value, ..), .. } => Some(value.to_int())
+    _ => None
+  }
+  (filename, byte_size, created_at)
+}
+
+///|
+async fn AnthropicFiles::fetch_metadata(
+  self : AnthropicFiles,
+  call_options : @provider.FilesV4GetFileMetadataCallOptions,
+) -> @provider.FilesV4FileMetadata {
+  @provider.check_cancellation(None)
+  let response = @provider_utils.get_json(
+    provider_name=self.provider_name,
+    url=self.file_url(call_options.file_id),
+    headers=self.request_headers(),
+    timeout_ms=self.idle_timeout_ms,
+    error_to_message=anthropic_error_message,
+    transport=self.http_transport,
+  )
+  let json = response.value
+  guard_anthropic_files_error(json, "Anthropic Files metadata request")
+  let id = match json {
+    { "id": String(value), .. } => value
+    _ => call_options.file_id
+  }
+  let (filename, byte_size, created_at) = anthropic_files_lifecycle_fields(json)
+  @provider.FilesV4FileMetadata::new(
+    file_id=id,
+    media_type?=None,
+    filename?,
+    byte_size?,
+    created_at?,
+    provider_metadata=anthropic_file_metadata(json),
+  )
+}
+
+///|
+async fn AnthropicFiles::fetch_content(
+  self : AnthropicFiles,
+  call_options : @provider.FilesV4DownloadFileCallOptions,
+) -> @provider.FilesV4DownloadFileResult {
+  let content_url = @provider_utils.append_path(
+    self.file_url(call_options.file_id),
+    "/content",
+  )
+  let response = @provider_utils.get_bytes(
+    provider_name=self.provider_name,
+    url=content_url,
+    headers=self.request_headers(),
+    timeout_ms=self.idle_timeout_ms,
+    transport=self.http_transport,
+  )
+  @provider.FilesV4DownloadFileResult::new(
+    file_id=call_options.file_id,
+    data=response.value,
+    media_type?=response.response.headers.get("content-type"),
+    filename?=None,
+    provider_metadata=Map([
+      (
+        "anthropic",
+        Json::object(Map([("content_url", Json::string(content_url))])),
+      ),
+    ]),
+  )
+}
+
+///|
+async fn AnthropicFiles::remove(
+  self : AnthropicFiles,
+  call_options : @provider.FilesV4DeleteFileCallOptions,
+) -> @provider.FilesV4DeleteFileResult {
+  @provider.check_cancellation(None)
+  let response = @provider_utils.delete_json(
+    provider_name=self.provider_name,
+    url=self.file_url(call_options.file_id),
+    headers=self.request_headers(),
+    timeout_ms=self.idle_timeout_ms,
+    error_to_message=anthropic_error_message,
+    transport=self.http_transport,
+  )
+  let json = response.value
+  guard_anthropic_files_error(json, "Anthropic Files delete request")
+  @provider.FilesV4DeleteFileResult::new(
+    file_id=call_options.file_id,
+    deleted=true,
+    provider_metadata=anthropic_file_metadata(json),
+  )
+}
+
+///|
+pub impl @provider.FilesV4 for AnthropicFiles with fn get_file_metadata(
+  self,
+  call_options,
+) -> @provider.FilesV4FileMetadata raise {
+  self.fetch_metadata(call_options)
+}
+
+///|
+pub impl @provider.FilesV4 for AnthropicFiles with fn download_file(
+  self,
+  call_options,
+) -> @provider.FilesV4DownloadFileResult raise {
+  self.fetch_content(call_options)
+}
+
+///|
+pub impl @provider.FilesV4 for AnthropicFiles with fn delete_file(
+  self,
+  call_options,
+) -> @provider.FilesV4DeleteFileResult raise {
+  self.remove(call_options)
+}

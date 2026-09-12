@@ -93,6 +93,8 @@ pub fn create_v4_tool_name_mapping(Array[@provider.LanguageModelV4Tool], Map[Str
 
 pub fn decode_base64_text(String) -> String raise
 
+pub async fn delete_json(provider_name~ : String, url~ : String, headers~ : Map[String, String], timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport? : &HttpTransport) -> JsonHttpResponse
+
 pub fn detectMediaType(String, top_level_type? : String) -> String?
 
 pub fn detect_media_type(String, top_level_type? : String) -> String?
@@ -120,6 +122,8 @@ pub fn generateId() -> String
 pub fn generate_id() -> String
 
 pub fn getTopLevelMediaType(String) -> String
+
+pub async fn get_bytes(provider_name~ : String, url~ : String, headers~ : Map[String, String], timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, transport? : &HttpTransport) -> BinaryHttpResponse
 
 pub async fn get_json(provider_name~ : String, url~ : String, headers~ : Map[String, String], timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport? : &HttpTransport) -> JsonHttpResponse
 

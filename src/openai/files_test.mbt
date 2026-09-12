@@ -126,3 +126,95 @@ async test "official OpenAI Files accepts Base64 and defaults upload fields" {
     })
   }
 }
+
+///|
+async test "official OpenAI Files reads metadata with lifecycle fields" {
+  @async.with_task_group() <| group => {
+    let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (request, _body, connection) => {
+          assert_eq(request.path, "/v1/files/file-abc123")
+          let (response_body, content_type) = (
+            "{\"id\":\"file-abc123\",\"bytes\":12,\"created_at\":1700000000,\"filename\":\"server-name.txt\",\"expires_at\":1700003600}",
+            "application/json",
+          )
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": content_type,
+          })
+          connection.write(response_body)
+        },
+        max_connections=1,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let metadata = @ai.get_file_metadata(
+      provider.files(),
+      file_id="file-abc123",
+    )
+    assert_eq(metadata.file_id, "file-abc123")
+    assert_eq(metadata.filename, Some("server-name.txt"))
+    assert_eq(metadata.byte_size, Some(12))
+    assert_eq(metadata.created_at, Some(1700000000))
+    assert_eq(metadata.expires_at, Some(1700003600))
+  }
+}
+
+///|
+async test "official OpenAI Files downloads raw content" {
+  @async.with_task_group() <| group => {
+    let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (request, _body, connection) => {
+          assert_eq(request.path, "/v1/files/file-abc123/content")
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "text/plain",
+          })
+          connection.write("MoonBit file content")
+        },
+        max_connections=1,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let downloaded = @ai.download_file(provider.files(), file_id="file-abc123")
+    assert_eq(downloaded.file_id, "file-abc123")
+    assert_eq(downloaded.data, @utf8.encode("MoonBit file content"))
+    assert_eq(downloaded.media_type, Some("text/plain"))
+  }
+}
+
+///|
+async test "official OpenAI Files deletes a file and reports state" {
+  @async.with_task_group() <| group => {
+    let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
+    group.spawn_bg(no_wait=true) <| () => {
+      server.run_forever(
+        (request, _body, connection) => {
+          assert_eq(request.path, "/v1/files/file-abc123")
+          connection.send_response(200, "OK", extra_headers={
+            "Content-Type": "application/json",
+          })
+          connection.write("{\"id\":\"file-abc123\",\"deleted\":true}")
+        },
+        max_connections=1,
+      )
+    }
+    let provider = create_openai(
+      api_key="test-key",
+      base_url="http://127.0.0.1:\{server.addr.port()}/v1",
+      idle_timeout_ms=2_000,
+    )
+    let deleted = @ai.delete_file(provider.files(), file_id="file-abc123")
+    assert_true(deleted.deleted)
+    assert_eq(deleted.file_id, "file-abc123")
+  }
+}

@@ -97,6 +97,9 @@ pub(open) trait FilesV4 {
   fn specification_version(Self) -> String
   fn provider(Self) -> String
   async fn upload_file(Self, FilesV4UploadFileCallOptions) -> FilesV4UploadFileResult
+  async fn get_file_metadata(Self, FilesV4GetFileMetadataCallOptions) -> FilesV4FileMetadata
+  async fn download_file(Self, FilesV4DownloadFileCallOptions) -> FilesV4DownloadFileResult
+  async fn delete_file(Self, FilesV4DeleteFileCallOptions) -> FilesV4DeleteFileResult
 }
 
 ///|
