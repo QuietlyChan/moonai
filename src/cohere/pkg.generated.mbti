@@ -1,0 +1,53 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/cohere"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const COHERE_MAX_EMBEDDINGS_PER_CALL : Int = 96
+
+pub const VERSION : String = "0.1.0"
+
+pub fn cohere(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+pub fn createCohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
+
+pub fn create_cohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
+
+// Errors
+
+// Types and methods
+type CohereChatLanguageModel
+pub impl @provider.LanguageModelV4 for CohereChatLanguageModel
+
+type CohereEmbeddingModel
+pub impl @provider.EmbeddingModelV4 for CohereEmbeddingModel
+
+pub struct CohereProvider {
+  // private fields
+}
+pub fn CohereProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn CohereProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn CohereProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn CohereProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn CohereProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn CohereProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn CohereProvider::reranking(Self, String) -> &@provider.RerankingModelV4
+pub fn CohereProvider::rerankingModel(Self, String) -> &@provider.RerankingModelV4
+pub fn CohereProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4
+pub impl @provider.ProviderV4 for CohereProvider
+
+type CohereRerankingModel
+pub impl @provider.RerankingModelV4 for CohereRerankingModel
+
+// Type aliases
+pub type CohereChatModelId = String
+
+pub type CohereEmbeddingModelId = String
+
+pub type CohereRerankingModelId = String
+
+// Traits
