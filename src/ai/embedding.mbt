@@ -52,8 +52,30 @@ pub async fn embed(
   provider_options? : Map[String, Json] = Map([]),
   retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
+  runtime_context? : Json,
+  on_start? : async (EmbedStartEvent) -> Unit,
+  on_end? : async (EmbedEndEvent) -> Unit,
 ) -> EmbeddingResponse {
   check_cancellation(cancellation_token)
+  let runtime = runtime_context.unwrap_or(Json::empty_object())
+  let call_id = @provider_utils.generate_id()
+  match on_start {
+    Some(notify) =>
+      notify({
+        runtime_context: runtime,
+        call_id,
+        operation_id: "ai.embed",
+        provider: model.provider(),
+        model_id: model.model_id(),
+        values: [value],
+        max_retries: retry_policy.max_retries,
+        headers: @provider_utils.copy_headers(headers),
+        provider_options: @provider.copy_provider_metadata(provider_options),
+      }) catch {
+        _ => ()
+      }
+    None => ()
+  }
   let response = model.do_embed(
     @provider.EmbeddingModelV4CallOptions::new(
       [value],
@@ -70,6 +92,24 @@ pub async fn embed(
     fail(
       "embedding provider returned \{response.embeddings.length()} embeddings for 1 value",
     )
+  }
+  match on_end {
+    Some(notify) =>
+      notify({
+        runtime_context: runtime,
+        call_id,
+        operation_id: "ai.embed",
+        provider: model.provider(),
+        model_id: model.model_id(),
+        values: [value],
+        embeddings: response.embeddings.copy(),
+        usage: response.usage,
+        warnings: copy_warnings(response.warnings),
+        provider_metadata: copy_provider_metadata(response.provider_metadata),
+      }) catch {
+        _ => ()
+      }
+    None => ()
   }
   {
     embedding: response.embeddings[0],
@@ -93,8 +133,30 @@ pub async fn embed_many(
   retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
   max_parallel_calls? : Int,
+  runtime_context? : Json,
+  on_start? : async (EmbedStartEvent) -> Unit,
+  on_end? : async (EmbedEndEvent) -> Unit,
 ) -> EmbeddingBatchResponse {
   check_cancellation(cancellation_token)
+  let runtime = runtime_context.unwrap_or(Json::empty_object())
+  let call_id = @provider_utils.generate_id()
+  match on_start {
+    Some(notify) =>
+      notify({
+        runtime_context: runtime,
+        call_id,
+        operation_id: "ai.embedMany",
+        provider: model.provider(),
+        model_id: model.model_id(),
+        values: values.copy(),
+        max_retries: retry_policy.max_retries,
+        headers: @provider_utils.copy_headers(headers),
+        provider_options: @provider.copy_provider_metadata(provider_options),
+      }) catch {
+        _ => ()
+      }
+    None => ()
+  }
   guard values.length() > 0 else {
     fail("embed_many requires at least one value")
   }
@@ -186,6 +248,24 @@ pub async fn embed_many(
     }
     offset = next_offset
   }
+  match on_end {
+    Some(notify) =>
+      notify({
+        runtime_context: runtime,
+        call_id,
+        operation_id: "ai.embedMany",
+        provider: model.provider(),
+        model_id: model.model_id(),
+        values: values.copy(),
+        embeddings: embeddings.copy(),
+        usage,
+        warnings: warnings.copy(),
+        provider_metadata: @provider.copy_provider_metadata(provider_metadata),
+      }) catch {
+        _ => ()
+      }
+    None => ()
+  }
   {
     embeddings,
     usage,
@@ -208,6 +288,9 @@ pub async fn embedMany(
   retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
   max_parallel_calls? : Int,
+  runtime_context? : Json,
+  on_start? : async (EmbedStartEvent) -> Unit,
+  on_end? : async (EmbedEndEvent) -> Unit,
 ) -> EmbeddingBatchResponse {
   embed_many(
     model,
@@ -219,6 +302,9 @@ pub async fn embedMany(
     retry_policy~,
     cancellation_token?,
     max_parallel_calls?,
+    runtime_context?,
+    on_start?,
+    on_end?,
   )
 }
 

@@ -104,6 +104,7 @@ fn normalize_provider_content(
                 tool_call,
                 is_automatic: false,
                 signature: None,
+                request_reason: None,
                 provider_metadata: @provider.copy_provider_metadata(
                   value.provider_metadata,
                 ),

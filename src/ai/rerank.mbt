@@ -102,8 +102,32 @@ pub async fn rerank(
   provider_options? : Map[String, Json] = Map([]),
   retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
+  runtime_context? : Json,
+  on_start? : async (RerankStartEvent) -> Unit,
+  on_end? : async (RerankEndEvent) -> Unit,
 ) -> RerankResult {
   check_cancellation(cancellation_token)
+  let runtime = runtime_context.unwrap_or(Json::empty_object())
+  let call_id = @provider_utils.generate_id()
+  match on_start {
+    Some(notify) =>
+      notify({
+        runtime_context: runtime,
+        call_id,
+        operation_id: "ai.rerank",
+        provider: model.provider(),
+        model_id: model.model_id(),
+        documents: rerank_event_documents(documents),
+        query,
+        top_n,
+        max_retries: retry_policy.max_retries,
+        headers: @provider_utils.copy_headers(headers),
+        provider_options: @provider.copy_provider_metadata(provider_options),
+      }) catch {
+        _ => ()
+      }
+    None => ()
+  }
   if top_n is Some(value) && value < 0 {
     raise @provider.InvalidArgumentError(
       argument="topN",
@@ -117,6 +141,24 @@ pub async fn rerank(
       @provider.RerankingModelV4Documents::ObjectDocuments(values.copy())
   }
   if original_documents.length() == 0 {
+    match on_end {
+      Some(notify) =>
+        notify({
+          runtime_context: runtime,
+          call_id,
+          operation_id: "ai.rerank",
+          provider: model.provider(),
+          model_id: model.model_id(),
+          documents: rerank_event_documents(original_documents),
+          query,
+          ranking: [],
+          warnings: [],
+          provider_metadata: Map([]),
+        }) catch {
+          _ => ()
+        }
+      None => ()
+    }
     return {
       original_documents,
       reranked_documents: reranking_documents_from_items([], original_documents),
@@ -162,6 +204,26 @@ pub async fn rerank(
   let reranked_documents = reranking_documents_from_items(
     items, original_documents,
   )
+  match on_end {
+    Some(notify) =>
+      notify({
+        runtime_context: runtime,
+        call_id,
+        operation_id: "ai.rerank",
+        provider: model.provider(),
+        model_id: model.model_id(),
+        documents: rerank_event_documents(original_documents),
+        query,
+        ranking: items.copy(),
+        warnings: response.warnings,
+        provider_metadata: @provider.copy_provider_metadata(
+          response.provider_metadata,
+        ),
+      }) catch {
+        _ => ()
+      }
+    None => ()
+  }
   {
     original_documents,
     reranked_documents,
@@ -184,6 +246,9 @@ pub async fn rerank_text(
   provider_options? : Map[String, Json] = Map([]),
   retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
+  runtime_context? : Json,
+  on_start? : async (RerankStartEvent) -> Unit,
+  on_end? : async (RerankEndEvent) -> Unit,
 ) -> RerankResult {
   rerank(
     model,
@@ -194,6 +259,9 @@ pub async fn rerank_text(
     provider_options~,
     retry_policy~,
     cancellation_token?,
+    runtime_context?,
+    on_start?,
+    on_end?,
   )
 }
 
@@ -208,6 +276,9 @@ pub async fn rerankText(
   provider_options? : Map[String, Json] = Map([]),
   retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
+  runtime_context? : Json,
+  on_start? : async (RerankStartEvent) -> Unit,
+  on_end? : async (RerankEndEvent) -> Unit,
 ) -> RerankResult {
   rerank_text(
     model,
@@ -218,5 +289,8 @@ pub async fn rerankText(
     provider_options~,
     retry_policy~,
     cancellation_token?,
+    runtime_context?,
+    on_start?,
+    on_end?,
   )
 }

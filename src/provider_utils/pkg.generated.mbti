@@ -491,8 +491,9 @@ pub(all) struct ModelToolApprovalRequest {
   tool_call_id : String
   is_automatic : Bool
   signature : String?
+  request_reason : String?
 } derive(Eq, @debug.Debug)
-pub fn ModelToolApprovalRequest::new(approval_id~ : String, tool_call_id~ : String, is_automatic? : Bool, signature? : String) -> Self
+pub fn ModelToolApprovalRequest::new(approval_id~ : String, tool_call_id~ : String, is_automatic? : Bool, signature? : String, request_reason? : String) -> Self
 
 pub(all) struct ModelToolApprovalResponse {
   approval_id : String

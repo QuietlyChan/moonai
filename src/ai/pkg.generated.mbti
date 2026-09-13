@@ -47,11 +47,11 @@ pub fn dynamicTool(Json, description? : String, description_resolver? : (@provid
 
 pub fn dynamic_tool(Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : Json, provider_options? : Map[String, Json], metadata? : Map[String, Json], execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
-pub async fn embed(&@provider.EmbeddingModelV4, String, dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.EmbeddingResponse
+pub async fn embed(&@provider.EmbeddingModelV4, String, dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingResponse
 
-pub async fn embedMany(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int) -> @provider.EmbeddingBatchResponse
+pub async fn embedMany(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int, runtime_context? : Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingBatchResponse
 
-pub async fn embed_many(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int) -> @provider.EmbeddingBatchResponse
+pub async fn embed_many(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int, runtime_context? : Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingBatchResponse
 
 pub fn experimentalGetToolCaller(@provider_utils.Tool) -> @provider_utils.ToolCallerDefinition?
 
@@ -123,11 +123,11 @@ pub fn model_id_of_language_model(&@provider.LanguageModelV4) -> @model.ModelId
 
 pub fn parse_model_id(String) -> @model.ModelId raise @model.InvalidModelIdError
 
-pub async fn rerank(&@provider.RerankingModelV4, @provider.RerankingModelV4Documents, String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
+pub async fn rerank(&@provider.RerankingModelV4, @provider.RerankingModelV4Documents, String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
 
-pub async fn rerankText(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
+pub async fn rerankText(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
 
-pub async fn rerank_text(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> RerankResult
+pub async fn rerank_text(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
 
 pub async fn startBatch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4Request], webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4StartResult
 
@@ -217,6 +217,31 @@ pub suberror StreamObjectFailedError {
 } derive(Eq, @debug.Debug)
 
 // Types and methods
+pub(all) struct EmbedEndEvent {
+  runtime_context : Json
+  call_id : String
+  operation_id : String
+  provider : String
+  model_id : String
+  values : Array[String]
+  embeddings : Array[Array[Double]]
+  usage : @provider.Usage
+  warnings : Array[@provider.Warning]
+  provider_metadata : Map[String, Json]
+} derive(@debug.Debug)
+
+pub(all) struct EmbedStartEvent {
+  runtime_context : Json
+  call_id : String
+  operation_id : String
+  provider : String
+  model_id : String
+  values : Array[String]
+  max_retries : Int
+  headers : Map[String, String]
+  provider_options : Map[String, Json]
+} derive(@debug.Debug)
+
 pub(all) enum ObjectGenerationFailure {
   EmptyResponse
   InvalidJson(message~ : String)
@@ -226,6 +251,19 @@ pub(all) enum ObjectGenerationFailure {
 pub(all) struct ObjectResponse {
   object : Json
   response : @generate_text.GenerateTextResult
+} derive(@debug.Debug)
+
+pub(all) struct RerankEndEvent {
+  runtime_context : Json
+  call_id : String
+  operation_id : String
+  provider : String
+  model_id : String
+  documents : Array[Json]
+  query : String
+  ranking : Array[RerankItem]
+  warnings : Array[@provider.Warning]
+  provider_metadata : Map[String, Json]
 } derive(@debug.Debug)
 
 pub(all) struct RerankItem {
@@ -241,6 +279,20 @@ pub(all) struct RerankResult {
   response : @provider.ResponseMetadata
   provider_metadata : Map[String, Json]
 } derive(Eq, @debug.Debug)
+
+pub(all) struct RerankStartEvent {
+  runtime_context : Json
+  call_id : String
+  operation_id : String
+  provider : String
+  model_id : String
+  documents : Array[Json]
+  query : String
+  top_n : Int?
+  max_retries : Int
+  headers : Map[String, String]
+  provider_options : Map[String, Json]
+} derive(@debug.Debug)
 
 pub(all) enum RerankingDocument {
   TextDocument(String)

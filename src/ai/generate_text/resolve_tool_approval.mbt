@@ -45,7 +45,7 @@ async fn resolve_tool_approval(
               .unwrap_or(Json::empty_object()),
           ),
         ) {
-        Some(true) => ToolApprovalUserApproval
+        Some(true) => ToolApprovalUserApproval(reason=None)
         Some(false) | None => ToolApprovalNotApplicable
       }
     None => ToolApprovalNotApplicable
@@ -87,6 +87,10 @@ async fn resolve_step_tool_approvals(
     let approval_id = @provider_utils.generate_id()
     let is_automatic = status is ToolApprovalApproved(_) ||
       status is ToolApprovalDenied(_)
+    let request_reason = match status {
+      ToolApprovalUserApproval(reason~) => reason
+      _ => None
+    }
     requests.push({
       approval_id,
       tool_call: call,
@@ -98,11 +102,14 @@ async fn resolve_step_tool_approvals(
         call.tool_name,
         call.input,
       ),
+      request_reason,
       provider_metadata: Map([]),
     })
     match status {
-      ToolApprovalUserApproval =>
+      ToolApprovalUserApproval(reason~) => {
+        ignore(reason)
         blocked_tool_call_ids[call.tool_call_id] = true
+      }
       ToolApprovalApproved(reason~) => {
         responses.push({
           approval_id,

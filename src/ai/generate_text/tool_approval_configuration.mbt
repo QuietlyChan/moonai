@@ -4,7 +4,9 @@ pub(all) enum ToolApprovalStatus {
   ToolApprovalNotApplicable
   ToolApprovalApproved(reason~ : String?)
   ToolApprovalDenied(reason~ : String?)
-  ToolApprovalUserApproval
+  /// Human approval required; the optional reason is the policy
+  /// explanation surfaced on the approval request (AI SDK #19658).
+  ToolApprovalUserApproval(reason~ : String?)
 } derive(Debug, Eq)
 
 ///|
@@ -26,9 +28,12 @@ pub fn ToolApprovalStatus::denied(reason? : String) -> ToolApprovalStatus {
 }
 
 ///|
-/// Require an explicit user approval response.
-pub fn ToolApprovalStatus::user_approval() -> ToolApprovalStatus {
-  ToolApprovalUserApproval
+/// Require an explicit user approval response, optionally explaining why
+/// the policy asks for one.
+pub fn ToolApprovalStatus::user_approval(
+  reason? : String,
+) -> ToolApprovalStatus {
+  ToolApprovalUserApproval(reason~)
 }
 
 ///|

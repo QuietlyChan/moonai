@@ -130,6 +130,7 @@ async fn assistant_response_parts(
               tool_call_id=value.tool_call.tool_call_id,
               is_automatic=value.is_automatic,
               signature?,
+              request_reason?=value.request_reason,
             ),
           ).with_provider_options(value.provider_metadata),
         )

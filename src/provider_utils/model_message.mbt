@@ -348,6 +348,9 @@ pub(all) struct ModelToolApprovalRequest {
   tool_call_id : String
   is_automatic : Bool
   signature : String?
+  /// Policy explanation carried from the approval decision
+  /// (AI SDK #19658).
+  request_reason : String?
 } derive(Debug, Eq)
 
 ///|
@@ -551,8 +554,9 @@ pub fn ModelToolApprovalRequest::new(
   tool_call_id~ : String,
   is_automatic? : Bool = false,
   signature? : String,
+  request_reason? : String,
 ) -> ModelToolApprovalRequest {
-  { approval_id, tool_call_id, is_automatic, signature, }
+  { approval_id, tool_call_id, is_automatic, signature, request_reason, }
 }
 
 ///|

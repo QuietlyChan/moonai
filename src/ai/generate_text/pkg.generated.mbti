@@ -128,6 +128,7 @@ pub(all) struct GenerateTextToolApprovalRequestOutput {
   tool_call : GenerateTextToolCall
   is_automatic : Bool
   signature : String?
+  request_reason : String?
   provider_metadata : Map[String, Json]
 } derive(Eq, @debug.Debug)
 
@@ -288,12 +289,12 @@ pub(all) enum ToolApprovalStatus {
   ToolApprovalNotApplicable
   ToolApprovalApproved(reason~ : String?)
   ToolApprovalDenied(reason~ : String?)
-  ToolApprovalUserApproval
+  ToolApprovalUserApproval(reason~ : String?)
 } derive(Eq, @debug.Debug)
 pub fn ToolApprovalStatus::approved(reason? : String) -> Self
 pub fn ToolApprovalStatus::denied(reason? : String) -> Self
 pub fn ToolApprovalStatus::not_applicable() -> Self
-pub fn ToolApprovalStatus::user_approval() -> Self
+pub fn ToolApprovalStatus::user_approval(reason? : String) -> Self
 
 // Type aliases
 pub type ActiveTools = Array[String]

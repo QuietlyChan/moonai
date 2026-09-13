@@ -34,6 +34,9 @@ pub(all) struct GenerateTextToolApprovalRequestOutput {
   tool_call : GenerateTextToolCall
   is_automatic : Bool
   signature : String?
+  /// Policy explanation for why human approval is required
+  /// (AI SDK #19658).
+  request_reason : String?
   provider_metadata : Map[String, Json]
 } derive(Debug, Eq)
 
