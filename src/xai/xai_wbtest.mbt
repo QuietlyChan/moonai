@@ -73,3 +73,37 @@ test "xai image response decode flags moderation blocks" {
   })
   assert_true(blocked2)
 }
+
+///|
+test "xai agent tool factories and wire encoding" {
+  let web_search = xai_web_search_tool(
+    allowed_domains=["example.com"],
+    enable_image_understanding=true,
+  )
+  assert_true(
+    web_search is @provider.V4ProviderTool({ id: "xai.web_search", .. }),
+  )
+  guard web_search is @provider.V4ProviderTool(value) else {
+    fail("expected provider tool")
+  }
+  let encoded = xai_encode_provider_tool(value)
+  assert_true(
+    encoded
+    is Some(
+      {
+        "type": "web_search",
+        "allowed_domains": ["example.com"],
+        "enable_image_understanding": true,
+        ..
+      }
+    ),
+  )
+  let code = xai_code_execution_tool()
+  guard code is @provider.V4ProviderTool(code_value) else {
+    fail("expected provider tool")
+  }
+  assert_true(
+    xai_encode_provider_tool(code_value)
+    is Some({ "type": "code_interpreter", .. }),
+  )
+}

@@ -19,6 +19,14 @@ pub fn supports_reasoning_effort(String) -> Bool
 
 pub fn xai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
+pub fn xai_code_execution_tool() -> @provider.LanguageModelV4Tool
+
+pub fn xai_encode_provider_tool(@provider.LanguageModelV4ProviderTool) -> Json?
+
+pub fn xai_web_search_tool(allowed_domains? : Array[String], excluded_domains? : Array[String], enable_image_search? : Bool, enable_image_understanding? : Bool) -> @provider.LanguageModelV4Tool
+
+pub fn xai_x_search_tool(allowed_x_handles? : Array[String], excluded_x_handles? : Array[String], from_date? : String, to_date? : String, enable_image_understanding? : Bool, enable_video_understanding? : Bool) -> @provider.LanguageModelV4Tool
+
 // Errors
 
 // Types and methods

@@ -192,9 +192,15 @@ fn XaiChatLanguageModel::prepare(
         tools.push({ "type": "function", "function": Json::object(function) })
       }
       @provider.V4ProviderTool(value) =>
-        warnings.push(
-          @provider.Warning::unsupported("provider-defined tool \{value.id}"),
-        )
+        match xai_encode_provider_tool(value) {
+          Some(entry) => tools.push(entry)
+          None =>
+            warnings.push(
+              @provider.Warning::unsupported(
+                "provider-defined tool \{value.id}",
+              ),
+            )
+        }
     }
   }
   if tools.length() > 0 {
