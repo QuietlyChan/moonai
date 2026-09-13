@@ -1,0 +1,74 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/ai/agent"
+
+import {
+  "QuietlyChan/moonai/ai/generate_text",
+  "QuietlyChan/moonai/ai/prompt",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const AGENT_VERSION : String = "agent-v1"
+
+// Errors
+
+// Types and methods
+pub(all) struct AgentCallDraft {
+  settings : ToolLoopAgentSettings
+  call : AgentCallOptions
+}
+
+pub(all) struct AgentCallOptions {
+  prompt : String?
+  messages : Array[@provider_utils.ModelMessage]
+  runtime_context : Json?
+  tools_context : Map[String, Json]?
+  cancellation_token : @provider.CancellationToken?
+  experimental_sandbox : @provider_utils.SandboxSession?
+}
+pub fn AgentCallOptions::new(prompt? : String, messages? : Array[@provider_utils.ModelMessage], runtime_context? : Json, tools_context? : Map[String, Json], cancellation_token? : @provider.CancellationToken, experimental_sandbox? : @provider_utils.SandboxSession) -> Self
+
+pub struct ToolLoopAgent {
+  // private fields
+}
+pub fn ToolLoopAgent::new(settings~ : ToolLoopAgentSettings) -> Self
+pub fn ToolLoopAgent::settings(Self) -> ToolLoopAgentSettings
+pub impl Agent for ToolLoopAgent
+
+pub(all) struct ToolLoopAgentSettings {
+  id : String?
+  model : &@provider.LanguageModelV4
+  tools : Map[String, @provider_utils.Tool]
+  tool_choice : @provider.ToolChoice
+  stop_when : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool]?
+  instructions : @prompt.Instructions?
+  allow_system_in_messages : Bool
+  max_output_tokens : Int?
+  temperature : Double?
+  top_p : Double?
+  seed : Int?
+  stop_sequences : Array[String]
+  response_format : @provider.ResponseFormat
+  reasoning_effort : @provider.ReasoningEffort
+  headers : Map[String, String]
+  provider_options : Map[String, Json]
+  runtime_context : Json
+  tools_context : Map[String, Json]
+  retry_policy : @provider.RetryPolicy
+  experimental_sandbox : @provider_utils.SandboxSession?
+  experimental_download : (async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?])?
+  prepare_call : ((AgentCallDraft) -> AgentCallDraft)?
+}
+pub fn ToolLoopAgentSettings::new(model~ : &@provider.LanguageModelV4, id? : String, tools? : Map[String, @provider_utils.Tool], tool_choice? : @provider.ToolChoice, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, max_output_tokens? : Int, temperature? : Double, top_p? : Double, seed? : Int, stop_sequences? : Array[String], response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], retry_policy? : @provider.RetryPolicy, experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], prepare_call? : ((AgentCallDraft) -> AgentCallDraft)?) -> Self
+
+// Type aliases
+
+// Traits
+pub(open) trait Agent {
+  fn version(Self) -> String
+  fn id(Self) -> String?
+  fn tools(Self) -> Map[String, @provider_utils.Tool]
+  async fn generate(Self, AgentCallOptions) -> @generate_text.GenerateTextResult
+  async fn stream(Self, AgentCallOptions) -> @generate_text.StreamTextResult
+}
