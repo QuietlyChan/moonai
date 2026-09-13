@@ -7,20 +7,54 @@ import {
 }
 
 // Values
+pub fn create_open_responses_extension_registry(extensions? : Array[OpenResponsesExtension]) -> OpenResponsesExtensionRegistry raise
+
 pub fn decode_open_responses_usage(Json) -> @provider.Usage
 
+pub fn is_namespaced_open_responses_type(String) -> Bool
+
+pub fn is_open_responses_extension_event(Json) -> Bool
+
+pub fn is_open_responses_extension_item(Json) -> Bool
+
 pub fn map_open_responses_finish_reason(String, Bool) -> @provider.FinishReason
+
+pub fn open_responses_extension_replay_carrier(extension~ : OpenResponsesExtension, item~ : Json, provider_options_name~ : String) -> @provider.LanguageModelV4Content
 
 // Errors
 
 // Types and methods
+pub(all) struct OpenResponsesExtension {
+  id : String
+  tool_type : String?
+  item_types : Array[String]?
+  event_types : Array[String]?
+  encode_tool : ((String, Json) -> Json?)?
+  encode_tool_choice : ((String, Json) -> Json?)?
+  decode_item : ((Json, String) -> Array[@provider.LanguageModelV4Content]?)?
+  encode_input_item : ((OpenResponsesExtensionInputPart, @provider.LanguageModelV4ProviderTool) -> Json?)?
+  decode_event : ((Json, Map[String, Json]) -> Array[@provider.StreamEvent]?)?
+}
+
+pub(all) enum OpenResponsesExtensionInputPart {
+  ToolCallPart(@provider.LanguageModelV4ToolCallPart)
+  ToolResultPart(@provider.LanguageModelV4ToolResultPart)
+}
+
+pub struct OpenResponsesExtensionRegistry {
+  // private fields
+}
+pub fn OpenResponsesExtensionRegistry::event_extension(Self, String) -> OpenResponsesExtension?
+pub fn OpenResponsesExtensionRegistry::item_extension(Self, String) -> OpenResponsesExtension?
+pub fn OpenResponsesExtensionRegistry::provider_tool_extension(Self, String) -> OpenResponsesExtension?
+
 pub struct OpenResponsesStreamDecoder {
   // private fields
 }
 pub fn OpenResponsesStreamDecoder::feed_line(Self, String) -> @provider_utils.SseDecodeBatch[@provider.StreamEvent] raise
 pub fn OpenResponsesStreamDecoder::finish_stream(Self) -> @provider_utils.SseDecodeBatch[@provider.StreamEvent]
 pub fn OpenResponsesStreamDecoder::flush_buffered(Self) -> @provider_utils.SseDecodeBatch[@provider.StreamEvent] raise
-pub fn OpenResponsesStreamDecoder::new(include_raw_chunks? : Bool, progressive_tool_calls? : Bool, emit_failed_error? : Bool, split_reasoning_summary_parts? : Bool, provider_name? : String, id_generator? : () -> String, observe_json? : (Json) -> Unit, validate_json? : (Json) -> Unit raise, observe_events? : (Json) -> Array[@provider.StreamEvent], build_provider_metadata? : () -> Map[String, Json], build_content? : () -> Array[@provider.GeneratedContent], use_built_content? : Bool, has_extra_tool_calls? : () -> Bool, build_tool_metadata? : (String, Json) -> Map[String, Json], convert_v4_usage? : (Json?) -> @provider.LanguageModelV4Usage) -> Self
+pub fn OpenResponsesStreamDecoder::new(include_raw_chunks? : Bool, progressive_tool_calls? : Bool, emit_failed_error? : Bool, split_reasoning_summary_parts? : Bool, provider_name? : String, id_generator? : () -> String, observe_json? : (Json) -> Unit, validate_json? : (Json) -> Unit raise, observe_events? : (Json) -> Array[@provider.StreamEvent], build_provider_metadata? : () -> Map[String, Json], build_content? : () -> Array[@provider.GeneratedContent], use_built_content? : Bool, has_extra_tool_calls? : () -> Bool, build_tool_metadata? : (String, Json) -> Map[String, Json], convert_v4_usage? : (Json?) -> @provider.LanguageModelV4Usage, extensions? : OpenResponsesExtensionRegistry) -> Self
 pub fn OpenResponsesStreamDecoder::provider_metadata_snapshot(Self) -> Map[String, Json]
 pub fn OpenResponsesStreamDecoder::response(Self) -> @provider.ChatResponse
 pub fn OpenResponsesStreamDecoder::response_metadata_snapshot(Self) -> @provider.ResponseMetadata?
@@ -33,7 +67,7 @@ pub struct OpenResponsesV4StreamDecoder {
 pub fn OpenResponsesV4StreamDecoder::feed_line(Self, String) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise
 pub fn OpenResponsesV4StreamDecoder::finish_stream(Self) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart]
 pub fn OpenResponsesV4StreamDecoder::flush_buffered(Self) -> @provider_utils.SseDecodeBatch[@provider.LanguageModelV4StreamPart] raise
-pub fn OpenResponsesV4StreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String, id_generator? : () -> String) -> Self
+pub fn OpenResponsesV4StreamDecoder::new(include_raw_chunks? : Bool, provider_name? : String, id_generator? : () -> String, extensions? : OpenResponsesExtensionRegistry) -> Self
 pub fn OpenResponsesV4StreamDecoder::response_metadata_snapshot(Self) -> @provider.ResponseMetadata?
 
 type ResponsesContentRef

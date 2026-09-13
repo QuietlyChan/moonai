@@ -41,6 +41,8 @@ fn open_responses_v4_usage_from_json(
 fn decode_open_responses_response_data(
   json : Json,
   id_generator~ : @provider_utils.IdGenerator,
+  extensions? : @protocol.OpenResponsesExtensionRegistry,
+  provider_options_name~ : String,
 ) -> DecodedOpenResponsesResponse raise {
   if response_error_message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
@@ -64,6 +66,38 @@ fn decode_open_responses_response_data(
   let content : Array[@provider.LanguageModelV4Content] = []
   let mut has_tool_calls = false
   for item in output {
+    // Namespaced extension items decode through the registered extension;
+    // a custom replay carrier preserves the original wire item.
+    if extensions is Some(registry) &&
+      @protocol.is_open_responses_extension_item(item) {
+      let item_type = match item {
+        { "type": String(value), .. } => value
+        _ => ""
+      }
+      guard registry.item_extension(item_type) is Some(extension) &&
+        extension.decode_item is Some(decode_item) else {
+        continue
+      }
+      match decode_item(item, "generate") {
+        Some(parts) => {
+          content.push(
+            @protocol.open_responses_extension_replay_carrier(
+              extension~,
+              item~,
+              provider_options_name~,
+            ),
+          )
+          for part in parts {
+            content.push(part)
+            if part is @provider.V4ToolCallOutput(_) {
+              has_tool_calls = true
+            }
+          }
+        }
+        None => ()
+      }
+      continue
+    }
     match item {
       { "type": "message", "content": Array(parts), .. } =>
         for part in parts {

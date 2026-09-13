@@ -14,12 +14,14 @@ pub fn OpenResponsesV4StreamDecoder::new(
   include_raw_chunks? : Bool = false,
   provider_name? : String = "",
   id_generator? : @provider_utils.IdGenerator,
+  extensions? : OpenResponsesExtensionRegistry,
 ) -> OpenResponsesV4StreamDecoder {
   {
     decoder: OpenResponsesStreamDecoder::new(
       include_raw_chunks~,
       provider_name~,
       id_generator?,
+      extensions?,
     ),
   }
 }

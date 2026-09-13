@@ -326,7 +326,13 @@ test "native V4 request preserves tools sampling and structured output" {
       },
     },
   })
-  assert_eq(prepared.warnings, [])
+  // The unregistered provider tool is dropped with an unsupported warning.
+  assert_eq(prepared.warnings, [
+    @provider.Warning::Unsupported(
+      feature="provider-defined tool provider.search",
+      details="No Open Responses extension is registered for this tool.",
+    ),
+  ])
 }
 
 ///|

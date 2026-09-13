@@ -160,11 +160,75 @@ fn encode_open_responses_v4_request(
   prompt : OpenResponsesV4PromptConversion,
   reasoning_effort : String?,
   stream : Bool,
+  warnings~ : Array[@provider.Warning],
+  extensions? : @protocol.OpenResponsesExtensionRegistry,
 ) -> Json {
   let tools : Array[Json] = []
+  // Provider tools routed through an extension encode into their
+  // namespaced wire type; the rest are dropped with a warning.
+  let encoded_extensions : Map[String, String] = Map([])
+  let encoded_extension_args : Map[String, Json] = Map([])
+  let encoded_extension_choice_fns : Map[String, ((String, Json) -> Json?)?] = Map([],
+  )
   for tool in options.tools {
-    if open_responses_v4_tool_to_json(tool) is Some(value) {
-      tools.push(value)
+    match tool {
+      @provider.V4ProviderTool(value) => {
+        let extension = match extensions {
+          Some(registry) => registry.provider_tool_extension(value.id)
+          None => None
+        }
+        match extension {
+          Some(extension) =>
+            match extension.encode_tool {
+              Some(encode_tool) =>
+                match encode_tool(value.name, value.args) {
+                  Some(fields) => {
+                    match fields {
+                      Object(map) => {
+                        let encoded : Map[String, Json] = Map([])
+                        for entry in map.iter2() {
+                          encoded[entry.0] = entry.1
+                        }
+                        encoded["type"] = Json::string(
+                          extension.tool_type.unwrap(),
+                        )
+                        tools.push(Json::object(encoded))
+                      }
+                      _ => tools.push({ "type": extension.tool_type.unwrap() })
+                    }
+                    encoded_extensions[value.name] = extension.tool_type.unwrap()
+                    encoded_extension_args[value.name] = value.args
+                    encoded_extension_choice_fns[value.name] = extension.encode_tool_choice
+                  }
+                  None =>
+                    warnings.push(
+                      @provider.Warning::Unsupported(
+                        feature="provider-defined tool \{value.id}",
+                        details="The Open Responses extension could not encode the tool arguments.",
+                      ),
+                    )
+                }
+              None =>
+                warnings.push(
+                  @provider.Warning::Unsupported(
+                    feature="provider-defined tool \{value.id}",
+                    details="The Open Responses extension has no tool encoder.",
+                  ),
+                )
+            }
+          None =>
+            warnings.push(
+              @provider.Warning::Unsupported(
+                feature="provider-defined tool \{value.id}",
+                details="No Open Responses extension is registered for this tool.",
+              ),
+            )
+        }
+      }
+      other =>
+        if open_responses_v4_tool_to_json(other) is Some(value) {
+          tools.push(value)
+        }
     }
   }
   let fields : Map[String, Json] = Map(
@@ -202,6 +266,33 @@ fn encode_open_responses_v4_request(
     fields["tools"] = Json::array(tools)
   }
   match options.tool_choice {
+    Some(@provider.V4ToolChoiceTool(name)) if encoded_extensions.contains(name) => {
+      let tool_type = encoded_extensions.get(name).unwrap()
+      let encoded_choice : Map[String, Json] = Map([])
+      match encoded_extension_choice_fns.get(name) {
+        Some(Some(encode_choice)) =>
+          match encode_choice(name, encoded_extension_args.get(name).unwrap()) {
+            Some(choice_fields) =>
+              match choice_fields {
+                Object(map) =>
+                  for entry in map.iter2() {
+                    encoded_choice[entry.0] = entry.1
+                  }
+                _ => ()
+              }
+            None =>
+              warnings.push(
+                @provider.Warning::Unsupported(
+                  feature="tool choice for an Open Responses extension tool",
+                  details="The extension could not encode the tool choice.",
+                ),
+              )
+          }
+        _ => ()
+      }
+      encoded_choice["type"] = Json::string(tool_type)
+      fields["tool_choice"] = Json::object(encoded_choice)
+    }
     Some(choice) =>
       fields["tool_choice"] = open_responses_v4_tool_choice_to_json(choice)
     None => ()
@@ -221,6 +312,7 @@ fn prepare_open_responses_v4_request(
   options : @provider.LanguageModelV4CallOptions,
   provider_name : String,
   stream : Bool,
+  extensions? : @protocol.OpenResponsesExtensionRegistry,
 ) -> OpenResponsesV4PreparedRequest raise {
   let parsed = parse_open_responses_provider_options(
     options.provider_options,
@@ -240,6 +332,8 @@ fn prepare_open_responses_v4_request(
       prompt,
       reasoning_effort,
       stream,
+      warnings~,
+      extensions?,
     ),
     warnings,
   }

@@ -51,6 +51,7 @@ test "Open Responses uses the injected fallback tool id" {
       ],
     },
     id_generator=() => "generated-call",
+    provider_options_name="open_responses",
   )
   match decoded.content[0] {
     @provider.V4ToolCallOutput(call) =>
@@ -538,6 +539,7 @@ test "decode non-streaming Open Responses result" {
       },
     },
     id_generator=@provider_utils.generate_id,
+    provider_options_name="open_responses",
   )
   let response = @provider.ChatResponse::from_content(
     @provider.LanguageModelV4Content::to_generated_content_array(
@@ -580,6 +582,7 @@ test "non-streaming Open Responses errors preserve provider detail" {
     decode_open_responses_response_data(
       { "status": "failed", "error": { "message": "upstream unavailable" } },
       id_generator=@provider_utils.generate_id,
+      provider_options_name="open_responses",
     )
   catch {
     @provider.InvalidResponseDataError(message~, ..) =>
@@ -595,6 +598,7 @@ test "non-streaming Open Responses errors preserve provider detail" {
         "incomplete_details": { "reason": "content_filter" },
       },
       id_generator=@provider_utils.generate_id,
+      provider_options_name="open_responses",
     )
   catch {
     @provider.InvalidResponseDataError(message~, ..) =>
@@ -657,6 +661,7 @@ test "non-streaming Open Responses tolerates refusal and unknown output parts" {
       ],
     },
     id_generator=@provider_utils.generate_id,
+    provider_options_name="open_responses",
   )
   let response = @provider.ChatResponse::from_content(
     @provider.LanguageModelV4Content::to_generated_content_array(
@@ -677,6 +682,7 @@ test "non-streaming Open Responses uses status in missing output errors" {
     decode_open_responses_response_data(
       { "status": "failed" },
       id_generator=@provider_utils.generate_id,
+      provider_options_name="open_responses",
     )
   catch {
     @provider.InvalidResponseDataError(message~, ..) =>
@@ -696,6 +702,7 @@ test "non-streaming Open Responses maps terminal reasons like AI SDK" {
       "output": [],
     },
     id_generator=@provider_utils.generate_id,
+    provider_options_name="open_responses",
   )
   assert_eq(filtered.finish_reason.unified, @provider.V4FinishContentFilter)
   assert_eq(filtered.finish_reason.raw, Some("content_filter"))
@@ -714,6 +721,7 @@ test "non-streaming Open Responses maps terminal reasons like AI SDK" {
       ],
     },
     id_generator=@provider_utils.generate_id,
+    provider_options_name="open_responses",
   )
   assert_eq(tool_call.finish_reason.unified, @provider.V4FinishToolCalls)
   assert_eq(tool_call.finish_reason.raw, Some("vendor_limit"))
@@ -725,6 +733,7 @@ test "non-streaming Open Responses reports generic missing output errors" {
     decode_open_responses_response_data(
       Json::empty_object(),
       id_generator=@provider_utils.generate_id,
+      provider_options_name="open_responses",
     )
   catch {
     @provider.InvalidResponseDataError(message~, ..) =>

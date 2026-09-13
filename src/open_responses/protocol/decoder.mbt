@@ -50,6 +50,8 @@ pub struct OpenResponsesStreamDecoder {
   priv mut response_metadata : @provider.ResponseMetadata?
   priv mut provider_metadata : Map[String, Json]
   priv mut finalized : Bool
+  priv extensions : OpenResponsesExtensionRegistry?
+  priv extension_state : Map[String, Json]
 }
 
 ///|
@@ -70,6 +72,7 @@ pub fn OpenResponsesStreamDecoder::new(
   has_extra_tool_calls? : () -> Bool = no_extra_responses_tool_calls,
   build_tool_metadata? : (String, Json) -> Map[String, Json] = empty_responses_tool_metadata,
   convert_v4_usage? : (Json?) -> @provider.LanguageModelV4Usage = @provider.LanguageModelV4Usage::from_token_usage_json,
+  extensions? : OpenResponsesExtensionRegistry,
 ) -> OpenResponsesStreamDecoder {
   {
     sse: @provider_utils.EventSourceBuffer::new(),
@@ -114,6 +117,8 @@ pub fn OpenResponsesStreamDecoder::new(
     response_metadata: None,
     provider_metadata: Map([]),
     finalized: false,
+    extensions,
+    extension_state: {},
   }
 }
 
@@ -565,6 +570,30 @@ fn OpenResponsesStreamDecoder::apply_json(
   let events : Array[@provider.StreamEvent] = []
   let mut done = false
   let event_type = @provider_utils.json_string_field(json, "type").unwrap_or("")
+  // Namespaced extension events decode through the registered extension
+  // with a per-stream state map.
+  if is_open_responses_extension_event(json) {
+    match self.extensions {
+      Some(registry) =>
+        match registry.event_extension(event_type) {
+          Some(extension) =>
+            match extension.decode_event {
+              Some(decode_event) =>
+                match decode_event(json, self.extension_state) {
+                  Some(parts) =>
+                    for part in parts {
+                      events.push(part)
+                    }
+                  None => ()
+                }
+              None => ()
+            }
+          None => ()
+        }
+      None => ()
+    }
+    return (events, done)
+  }
   match event_type {
     "response.created" =>
       match json {

@@ -8,6 +8,7 @@ pub struct OpenResponsesProvider {
   priv idle_timeout_ms : Int
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
+  priv extensions : @protocol.OpenResponsesExtensionRegistry?
 }
 
 ///|
@@ -20,6 +21,7 @@ pub fn create_open_responses(
   idle_timeout_ms? : Int = 120_000,
   id_generator? : @provider_utils.IdGenerator,
   http_transport? : &@provider_utils.HttpTransport,
+  extensions? : @protocol.OpenResponsesExtensionRegistry,
 ) -> OpenResponsesProvider {
   {
     provider_name,
@@ -31,6 +33,7 @@ pub fn create_open_responses(
     http_transport: http_transport.unwrap_or(
       @provider_utils.native_http_transport(),
     ),
+    extensions,
   }
 }
 
@@ -90,6 +93,7 @@ fn OpenResponsesProvider::responses_wire(
     idle_timeout_ms: self.idle_timeout_ms,
     id_generator: self.id_generator,
     http_transport: self.http_transport,
+    extensions: self.extensions,
   }
 }
 
@@ -105,6 +109,7 @@ priv struct OpenResponsesLanguageModel {
   idle_timeout_ms : Int
   id_generator : @provider_utils.IdGenerator
   http_transport : &@provider_utils.HttpTransport
+  extensions : @protocol.OpenResponsesExtensionRegistry?
 }
 
 ///|

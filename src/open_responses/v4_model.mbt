@@ -52,6 +52,7 @@ impl @provider.LanguageModelV4 for OpenResponsesLanguageModelV4 with fn do_gener
     options,
     self.model.provider_options_name,
     false,
+    extensions?=self.model.extensions,
   )
   let cancellation_token = options.cancellation_token
   let response = @provider_utils.post_json(
@@ -94,6 +95,8 @@ impl @provider.LanguageModelV4 for OpenResponsesLanguageModelV4 with fn do_gener
     decode_open_responses_response_data(
       value,
       id_generator=self.model.id_generator,
+      extensions?=self.model.extensions,
+      provider_options_name=self.model.provider_options_name,
     )
   })
   let response_metadata = @provider.merge_response_metadata(
@@ -125,11 +128,13 @@ impl @provider.LanguageModelV4 for OpenResponsesLanguageModelV4 with fn do_strea
     options,
     self.model.provider_options_name,
     true,
+    extensions?=self.model.extensions,
   )
   let decoder = @protocol.OpenResponsesV4StreamDecoder::new(
     include_raw_chunks=options.include_raw_chunks,
     provider_name=self.model.provider_name,
     id_generator=self.model.id_generator,
+    extensions?=self.model.extensions,
   )
   let warnings = prepared.warnings
   let cancellation_token = options.cancellation_token

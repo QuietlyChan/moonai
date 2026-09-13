@@ -2,6 +2,7 @@
 package "QuietlyChan/moonai/open_responses"
 
 import {
+  "QuietlyChan/moonai/open_responses/protocol",
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
@@ -12,7 +13,7 @@ pub const VERSION : String = "0.1.0"
 
 pub fn createOpenResponses(name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int, id_generator? : () -> String, http_transport? : &@provider_utils.HttpTransport) -> OpenResponsesProvider
 
-pub fn create_open_responses(provider_name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int, id_generator? : () -> String, http_transport? : &@provider_utils.HttpTransport) -> OpenResponsesProvider
+pub fn create_open_responses(provider_name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int, id_generator? : () -> String, http_transport? : &@provider_utils.HttpTransport, extensions? : @protocol.OpenResponsesExtensionRegistry) -> OpenResponsesProvider
 
 // Errors
 
