@@ -1,0 +1,33 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/cerebras"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn cerebras(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+pub fn createCerebras(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CerebrasProvider
+
+pub fn create_cerebras(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CerebrasProvider
+
+// Errors
+
+// Types and methods
+pub struct CerebrasProvider {
+  // private fields
+}
+pub fn CerebrasProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn CerebrasProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn CerebrasProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn CerebrasProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for CerebrasProvider
+
+// Type aliases
+pub type CerebrasChatModelId = String
+
+// Traits
