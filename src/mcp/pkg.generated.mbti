@@ -43,6 +43,8 @@ pub async fn discoverAuthorizationServerMetadata(authorization_server_url~ : Str
 
 pub async fn discover_authorization_server_metadata(authorization_server_url~ : String, protocol_version? : String, http_transport? : &@provider_utils.HttpTransport) -> OAuthAuthorizationServerMetadata?
 
+pub fn encode_mcp_header_value(String) -> String
+
 pub async fn experimental_create_mcp_client(MCPClientConfig) -> MCPClient
 
 pub fn experimental_stdio_mcp_transport(StdioConfig) -> StdioMCPTransport

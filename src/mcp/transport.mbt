@@ -287,6 +287,9 @@ pub impl MCPTransport for HttpMCPTransport with fn send(self, message, options) 
     self.protocol_version_value.val,
     request_session,
   )
+  for entry in mcp_standard_request_headers(message).iter2() {
+    headers[entry.0] = entry.1
+  }
   headers["Content-Type"] = "application/json"
   headers["Accept"] = "application/json, text/event-stream"
   let body = message.to_json().stringify()
@@ -526,6 +529,9 @@ pub impl MCPTransport for SseMCPTransport with fn send(self, message, options) {
     self.protocol_version_value.val,
     None,
   )
+  for entry in mcp_standard_request_headers(message).iter2() {
+    headers[entry.0] = entry.1
+  }
   headers["Content-Type"] = "application/json"
   headers["Accept"] = "application/json, text/event-stream"
   let response = self.http_transport.fetch(
