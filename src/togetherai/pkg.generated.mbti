@@ -1,0 +1,60 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/togetherai"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createTogetherAI(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> TogetherAIProvider
+
+pub fn create_togetherai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> TogetherAIProvider
+
+pub fn getModelStructuredOutputSupport(String) -> Bool
+
+pub fn get_model_structured_output_support(String) -> Bool
+
+pub fn togetherai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+type TogetherAIImageModel
+pub impl @provider.ImageModelV4 for TogetherAIImageModel
+
+pub struct TogetherAIProvider {
+  // private fields
+}
+pub fn TogetherAIProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn TogetherAIProvider::completionModel(Self, String) -> &@provider.LanguageModelV4
+pub fn TogetherAIProvider::completion_model(Self, String) -> &@provider.LanguageModelV4
+pub fn TogetherAIProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn TogetherAIProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn TogetherAIProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn TogetherAIProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn TogetherAIProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn TogetherAIProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn TogetherAIProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn TogetherAIProvider::reranking(Self, String) -> &@provider.RerankingModelV4
+pub fn TogetherAIProvider::rerankingModel(Self, String) -> &@provider.RerankingModelV4
+pub fn TogetherAIProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4
+pub impl @provider.ProviderV4 for TogetherAIProvider
+
+type TogetherAIRerankingModel
+pub impl @provider.RerankingModelV4 for TogetherAIRerankingModel
+
+// Type aliases
+pub type TogetherAIChatModelId = String
+
+pub type TogetherAICompletionModelId = String
+
+pub type TogetherAIEmbeddingModelId = String
+
+pub type TogetherAIImageModelId = String
+
+pub type TogetherAIRerankingModelId = String
+
+// Traits
