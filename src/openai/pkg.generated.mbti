@@ -26,6 +26,8 @@ pub fn openai_image(String, api_key? : String, base_url? : String, organization?
 
 pub fn openai_realtime(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAIRealtimeModel raise @provider.InvalidArgumentError
 
+pub fn openai_responses_language_model(OpenAIResponsesModel) -> &@provider.LanguageModelV4
+
 pub fn openai_speech(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.SpeechModelV4 raise @provider.InvalidArgumentError
 
 pub fn openai_transcription(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport) -> &@provider.TranscriptionModelV4 raise @provider.InvalidArgumentError
@@ -500,6 +502,11 @@ pub(all) enum OpenAIResponsesInclude {
   OpenAIIncludeMessageOutputTextLogprobs
 } derive(Eq, @debug.Debug)
 
+pub struct OpenAIResponsesLanguageModelV4 {
+  model : OpenAIResponsesModel
+}
+pub fn OpenAIResponsesLanguageModelV4::new(OpenAIResponsesModel) -> Self
+
 pub(all) struct OpenAIResponsesMetadata {
   response_id : String?
   logprobs : Array[Json]?
@@ -507,6 +514,17 @@ pub(all) struct OpenAIResponsesMetadata {
   reasoning_context : String?
 } derive(Eq, @debug.Debug)
 pub fn OpenAIResponsesMetadata::new(response_id? : String, logprobs? : Array[Json], service_tier? : String, reasoning_context? : String) -> Self
+
+pub(all) struct OpenAIResponsesModel {
+  provider_name : String
+  url : String
+  api_key : String
+  model_id : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  id_generator : () -> String
+  http_transport : &@provider_utils.HttpTransport
+}
 
 pub(all) struct OpenAIResponsesReasoningMetadata {
   item_id : String

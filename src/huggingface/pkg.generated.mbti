@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/huggingface"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createHuggingFace(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> HuggingFaceProvider
+
+pub fn create_huggingface(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> HuggingFaceProvider
+
+pub fn huggingface(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise
+
+// Errors
+
+// Types and methods
+pub struct HuggingFaceProvider {
+  // private fields
+}
+pub fn HuggingFaceProvider::languageModel(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn HuggingFaceProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn HuggingFaceProvider::responses(Self, String) -> &@provider.LanguageModelV4 raise
+pub impl @provider.ProviderV4 for HuggingFaceProvider
+
+// Type aliases
+pub type HuggingFaceResponsesModelId = String
+
+// Traits

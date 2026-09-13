@@ -1,16 +1,26 @@
 ///|
 /// OpenAI's Responses API implementation of the versioned language-model
 /// contract.
-priv struct OpenAIResponsesLanguageModelV4 {
+pub struct OpenAIResponsesLanguageModelV4 {
   model : OpenAIResponsesModel
 }
 
 ///|
 /// Construct a V4 OpenAI Responses model.
-fn OpenAIResponsesLanguageModelV4::new(
+pub fn OpenAIResponsesLanguageModelV4::new(
   model : OpenAIResponsesModel,
 ) -> OpenAIResponsesLanguageModelV4 {
   { model, }
+}
+
+///|
+/// Build the V4 language-model boundary for a Responses wire configuration.
+/// Shared with Responses-protocol providers (e.g. Hugging Face router).
+pub fn openai_responses_language_model(
+  wire : OpenAIResponsesModel,
+) -> &@provider.LanguageModelV4 {
+  let model = OpenAIResponsesLanguageModelV4::new(wire)
+  model as &@provider.LanguageModelV4
 }
 
 ///|

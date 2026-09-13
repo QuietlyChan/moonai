@@ -3,7 +3,7 @@
 ///
 /// This type owns OpenAI-specific capability and option handling while reusing
 /// the protocol decoder from `open_responses`.
-priv struct OpenAIResponsesModel {
+pub(all) struct OpenAIResponsesModel {
   provider_name : String
   url : String
   api_key : String
