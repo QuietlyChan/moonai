@@ -35,15 +35,6 @@ pub(all) suberror SseProviderError {
 } derive(Debug)
 
 ///|
-fn is_retryable_sse_error(error : Error) -> Bool {
-  match error {
-    @provider.APICallError(is_retryable~, ..) => is_retryable
-    SseTransportError(_, _) | SseTimeoutError(_, _) => true
-    _ => false
-  }
-}
-
-///|
 fn[E] decode_sse_batch(
   decode : () -> SseDecodeBatch[E] raise,
   url : String,
@@ -531,7 +522,7 @@ pub async fn[E, T] post_json_sse_events(
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
       error if !emitted.val &&
-        is_retryable_sse_error(error) &&
+        is_retryable_error(error) &&
         retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if start_policy is Some(policy) {

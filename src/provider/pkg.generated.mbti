@@ -962,6 +962,7 @@ pub(all) struct LanguageModelV4MiddlewareContext {
   model : &LanguageModelV4
   do_generate : async () -> LanguageModelV4GenerateResult
   do_stream : async () -> LanguageModelV4StreamResult
+  emit : async (LanguageModelV4StreamPart) -> Unit
 }
 pub async fn LanguageModelV4MiddlewareContext::generate(Self) -> LanguageModelV4GenerateResult
 pub async fn LanguageModelV4MiddlewareContext::stream(Self) -> LanguageModelV4StreamResult

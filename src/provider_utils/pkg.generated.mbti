@@ -161,6 +161,8 @@ pub fn is_parsable_json(String) -> Bool
 
 pub fn is_record(Json) -> Bool
 
+pub fn is_retryable_error(Error) -> Bool
+
 pub fn is_retryable_status(Int) -> Bool
 
 pub fn is_tool_approval_only_message(@provider.LanguageModelMessage) -> Bool

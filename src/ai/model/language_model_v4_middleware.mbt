@@ -156,7 +156,7 @@ pub impl @provider.LanguageModelV4 for MiddlewareLanguageModelV4 with fn do_gene
     model: self.model,
     do_generate,
     do_stream,
-    emit: fn(_ : @provider.LanguageModelV4StreamPart) {},
+    emit: fn(_ : @provider.LanguageModelV4StreamPart) {  },
   }
   match self.middleware.wrap_generate {
     Some(wrap) => wrap(context)

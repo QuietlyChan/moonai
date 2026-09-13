@@ -13,6 +13,8 @@ pub fn as_language_model_v4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
 pub fn default_settings_middleware(@provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4Middleware
 
+pub fn extract_reasoning_middleware(mode~ : ExtractReasoningMode) -> @provider.LanguageModelV4Middleware
+
 pub fn model_id_of_completion(&@provider.CompletionModel) -> ModelId
 
 pub fn model_id_of_embedding(&@provider.EmbeddingModelV4) -> ModelId
@@ -34,6 +36,10 @@ pub fn model_id_of_transcription(&@provider.TranscriptionModelV4) -> ModelId
 pub fn model_id_of_video(&@provider.VideoModelV4) -> ModelId
 
 pub fn parse_model_id(String) -> ModelId raise InvalidModelIdError
+
+pub fn simulate_streaming_middleware() -> @provider.LanguageModelV4Middleware
+
+pub fn stream_retries_middleware(retry_policy? : @provider.RetryPolicy) -> @provider.LanguageModelV4Middleware
 
 pub fn wrapChatModel(&@provider.ChatModel, ChatModelMiddleware) -> &@provider.ChatModel
 
@@ -146,6 +152,11 @@ pub(all) enum EmbeddingModelReference {
 }
 pub fn EmbeddingModelReference::instance(&@provider.EmbeddingModelV4) -> Self
 pub fn EmbeddingModelReference::named(provider~ : String, model_id~ : String) -> Self
+
+pub(all) enum ExtractReasoningMode {
+  ExtractMergeIntoText
+  ExtractStrip
+} derive(Eq, @debug.Debug)
 
 pub(all) enum ImageModelReference {
   Instance(&@provider.ImageModelV4)

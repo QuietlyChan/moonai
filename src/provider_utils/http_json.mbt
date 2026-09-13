@@ -90,15 +90,6 @@ fn metadata_json_int_field_opt(json : Json, field : String) -> Int? {
 }
 
 ///|
-fn is_retryable(error : Error) -> Bool {
-  match error {
-    @provider.APICallError(is_retryable~, ..) => is_retryable
-    HttpTransportError(_, _) | HttpTimeoutError(_, _) => true
-    _ => false
-  }
-}
-
-///|
 /// Parse a successful JSON response while the transport still owns the
 /// request and response diagnostics. AI SDK exposes this boundary through
 /// `createJsonResponseHandler`; the callback below is its MoonBit equivalent.
@@ -394,7 +385,7 @@ pub async fn post_json(
     catch {
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
-      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
           sleep_with_cancellation(delay, cancellation_token)
@@ -515,7 +506,7 @@ pub async fn post_json_binary(
     catch {
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
-      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
           sleep_with_cancellation(delay, cancellation_token)
@@ -577,7 +568,7 @@ pub async fn post_multipart(
     catch {
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
-      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
           sleep_with_cancellation(delay, cancellation_token)
@@ -714,7 +705,7 @@ pub async fn get_json(
     catch {
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
-      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
           sleep_with_cancellation(delay, cancellation_token)
@@ -891,7 +882,7 @@ pub async fn download_file(
     catch {
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
-      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
           sleep_with_cancellation(delay, cancellation_token)
@@ -996,7 +987,7 @@ pub async fn get_bytes(
     catch {
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
-      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
           sleep_with_cancellation(delay, cancellation_token)
@@ -1136,7 +1127,7 @@ pub async fn delete_json(
     catch {
       error if @async.is_cancellation_error(error) ||
         @async.is_being_cancelled() => raise error
-      error if is_retryable(error) && retry_policy.can_retry(retry_number) => {
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
           sleep_with_cancellation(delay, cancellation_token)
@@ -1162,20 +1153,19 @@ pub async fn delete_json(
 /// followed (max 10 hops) and every hop away from `trusted_origin` is
 /// validated with the shared download-URL policy, matching AI SDK's
 /// protected video-polling path.
-pub async fn get_json_protected(
+async fn get_json_protected_once(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
-  cancellation_token? : @provider.CancellationToken,
+  timeout_ms~ : Int,
+  cancellation_token~ : @provider.CancellationToken?,
   error_to_message? : (Json) -> String? raise,
   is_retryable_response? : (Int, Json?) -> Bool? raise,
   validate_response? : (Json) -> Unit raise,
-  trusted_origin? : String,
-  transport? : &HttpTransport,
+  trusted_origin~ : String?,
+  transport~ : &HttpTransport,
 ) -> JsonHttpResponse {
-  let resolved_transport = transport.unwrap_or(native_http_transport())
+  let resolved_transport = transport
   let mut current_url = url
   let mut request_headers = headers
   let mut hops = 0
@@ -1289,6 +1279,65 @@ pub async fn get_json_protected(
         status_code=response.status_code,
         headers=copy_headers(response.headers),
       ),
+    }
+  }
+}
+
+///|
+/// Protected JSON GET with the shared retry policy applied on top: each
+/// attempt re-follows redirects from the original URL so a transient
+/// failure never skips the trusted-origin validation of an earlier hop.
+pub async fn get_json_protected(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  timeout_ms? : Int = 120_000,
+  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  cancellation_token? : @provider.CancellationToken,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  validate_response? : (Json) -> Unit raise,
+  trusted_origin? : String,
+  transport? : &HttpTransport,
+) -> JsonHttpResponse {
+  let resolved_transport = transport.unwrap_or(native_http_transport())
+  let mut retry_number = 0
+  let mut delay = initial_retry_delay(retry_policy)
+  for ;; {
+    @provider.check_cancellation(cancellation_token)
+    try
+      get_json_protected_once(
+        provider_name~,
+        url~,
+        headers~,
+        timeout_ms~,
+        cancellation_token~,
+        error_to_message?,
+        is_retryable_response?,
+        validate_response?,
+        trusted_origin~,
+        transport=resolved_transport,
+      )
+    catch {
+      error if @async.is_cancellation_error(error) ||
+        @async.is_being_cancelled() => raise error
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
+        retry_number = retry_number + 1
+        if delay > 0 {
+          sleep_with_cancellation(delay, cancellation_token)
+        }
+        delay = next_retry_delay(retry_policy, delay)
+        continue
+      }
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body="",
+          request_headers=headers,
+        )
+    } noraise {
+      result => return result
     }
   }
 }

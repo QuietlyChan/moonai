@@ -10,6 +10,21 @@ pub fn is_retryable_status(status_code : Int) -> Bool {
 }
 
 ///|
+/// Classify whether a transport or API error may be retried: transport-level
+/// failures always qualify, and API errors qualify when the provider adapter
+/// flagged them retryable. Cancellation and protocol errors do not.
+pub fn is_retryable_error(error : Error) -> Bool {
+  match error {
+    @provider.APICallError(is_retryable~, ..) => is_retryable
+    HttpTransportError(_, _)
+    | HttpTimeoutError(_, _)
+    | SseTransportError(_, _)
+    | SseTimeoutError(_, _) => true
+    _ => false
+  }
+}
+
+///|
 /// Return the first retry delay, capped by the configured maximum.
 pub fn initial_retry_delay(policy : @provider.RetryPolicy) -> Int {
   if policy.initial_delay_ms > policy.max_delay_ms {
