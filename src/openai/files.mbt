@@ -7,6 +7,7 @@ priv struct OpenAIFiles {
   headers : Map[String, String]
   idle_timeout_ms : Int
   http_transport : &@provider_utils.HttpTransport
+  streaming_http_transport : &@provider_utils.StreamingBodyTransport
 }
 
 ///|
@@ -55,6 +56,7 @@ fn openai_files(
   headers~ : Map[String, String],
   idle_timeout_ms~ : Int,
   http_transport~ : &@provider_utils.HttpTransport,
+  streaming_http_transport? : &@provider_utils.StreamingBodyTransport,
 ) -> OpenAIFiles {
   {
     provider_name: "\{provider_name}.files",
@@ -63,6 +65,9 @@ fn openai_files(
     headers: @provider_utils.copy_headers(headers),
     idle_timeout_ms,
     http_transport,
+    streaming_http_transport: streaming_http_transport.unwrap_or(
+      @provider_utils.native_streaming_body_transport(),
+    ),
   }
 }
 
@@ -229,19 +234,79 @@ async fn OpenAIFiles::upload(
   call_options : @provider.FilesV4UploadFileCallOptions,
 ) -> @provider.FilesV4UploadFileResult {
   let parsed = parse_openai_files_options(call_options, self.provider_name)
-  let form_data = self.form_data(call_options, parsed)
-  let response = @provider_utils.post_multipart(
-    provider_name=self.provider_name,
-    url=self.url(),
-    headers=self.request_headers(),
-    form_data~,
-    timeout_ms=self.idle_timeout_ms,
-    error_to_message=openai_error_message,
-    transport=self.http_transport,
-  )
-  @provider_utils.handle_json_response(response, value => {
-    decode_openai_file_upload(value, call_options, parsed)
-  })
+  // Streamed upload data is written incrementally (AI SDK #20036) and
+  // never buffered as a whole; buffered variants keep the retryable
+  // multipart path.
+  match call_options.data {
+    @provider.UploadFileStream(stream) => {
+      let plan = @provider_utils.plan_multipart_streaming(
+        self.streaming_field_plans(call_options, parsed, stream),
+      )
+      let response = @provider_utils.post_multipart_streaming(
+        url=self.url(),
+        headers=self.request_headers(),
+        plan~,
+        error_to_message=openai_error_message,
+        transport=self.streaming_http_transport,
+      )
+      @provider_utils.handle_json_response(response, value => {
+        decode_openai_file_upload(value, call_options, parsed)
+      })
+    }
+    _ => {
+      let form_data = self.form_data(call_options, parsed)
+      let response = @provider_utils.post_multipart(
+        provider_name=self.provider_name,
+        url=self.url(),
+        headers=self.request_headers(),
+        form_data~,
+        timeout_ms=self.idle_timeout_ms,
+        error_to_message=openai_error_message,
+        transport=self.http_transport,
+      )
+      @provider_utils.handle_json_response(response, value => {
+        decode_openai_file_upload(value, call_options, parsed)
+      })
+    }
+  }
+}
+
+///|
+fn OpenAIFiles::streaming_field_plans(
+  self : OpenAIFiles,
+  call_options : @provider.FilesV4UploadFileCallOptions,
+  parsed : ParsedOpenAIFilesOptions,
+  stream : &@provider.UploadByteStream,
+) -> Array[@provider_utils.MultipartFieldPlan] {
+  ignore(self)
+  let filename = call_options.filename.unwrap_or("blob")
+  let fields : Array[@provider_utils.MultipartFieldPlan] = [
+    @provider_utils.MultipartPlanStream(
+      name="file",
+      filename~,
+      media_type=call_options.media_type,
+      stream~,
+    ),
+    @provider_utils.MultipartPlanText(
+      name="purpose",
+      value=parsed.options.purpose.unwrap_or("assistants"),
+    ),
+  ]
+  if parsed.options.expires_after is Some(seconds) {
+    fields.push(
+      @provider_utils.MultipartPlanText(
+        name="expires_after[anchor]",
+        value="created_at",
+      ),
+    )
+    fields.push(
+      @provider_utils.MultipartPlanText(
+        name="expires_after[seconds]",
+        value=seconds.to_string(),
+      ),
+    )
+  }
+  fields
 }
 
 ///|

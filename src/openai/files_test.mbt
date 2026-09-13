@@ -251,14 +251,20 @@ impl @provider.UploadByteStream for TwoChunkStream with fn size_hint_bytes(self)
 }
 
 ///|
-async test "official OpenAI Files drains a streaming upload into one file" {
+async test "official OpenAI Files uploads streamed data incrementally" {
   @async.with_task_group() <| group => {
     let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
     group.spawn_bg(no_wait=true) <| () => {
       server.run_forever(
         (request, body, connection) => {
           assert_eq(request.path, "/v1/files")
+          // Streamed uploads carry an exact Content-Length (#20036).
           let request_body = body.read_all().text()
+          // Streamed uploads carry an exact Content-Length (#20036).
+          match request.headers.get("content-length") {
+            Some(value) => assert_eq(value, request_body.length().to_string())
+            None => fail("expected a Content-Length header")
+          }
           assert_true(request_body.contains("first-chunk-payload"))
           assert_true(request_body.contains("second-chunk-payload"))
           assert_true(

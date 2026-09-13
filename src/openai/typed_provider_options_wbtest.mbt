@@ -262,9 +262,8 @@ test "OpenAI service tier fast and ultrafast parse from provider options" {
     },
   )
   let body = prepare_openai_v4_chat_request(
-      "gpt-5", options, "openai.chat", false, true,
-    ).body
-    .stringify()
+    "gpt-5", options, "openai.chat", false, true,
+  ).body.stringify()
   assert_true(body.contains("\"service_tier\":\"fast\""))
   assert_true(body.contains("\"reasoning_effort\":\"max\""))
 }
@@ -281,8 +280,7 @@ test "OpenAI ultrafast service tier passes through to the wire" {
     provider_options={ "openai": { "serviceTier": "ultrafast" } },
   )
   let body = prepare_openai_v4_chat_request(
-      "gpt-5.6-sol", options, "openai.chat", false, true,
-    ).body
-    .stringify()
+    "gpt-5.6-sol", options, "openai.chat", false, true,
+  ).body.stringify()
   assert_true(body.contains("\"service_tier\":\"ultrafast\""))
 }
