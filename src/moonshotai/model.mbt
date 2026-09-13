@@ -1,6 +1,7 @@
 ///|
 /// Moonshot AI provider factory.
 pub struct MoonshotAIProvider {
+  priv provider_name : String
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
@@ -10,128 +11,15 @@ pub struct MoonshotAIProvider {
 }
 
 ///|
-/// Return whether a Moonshot model supports native JSON Schema output.
-///
-/// Official `moonshot-v1-*` models support structured output alongside the
-/// Kimi K series.
-pub fn get_model_structured_output_support(model_id : String) -> Bool {
-  model_id.has_prefix("kimi-k") ||
-  model_id == "moonshot-v1-8k" ||
-  model_id == "moonshot-v1-32k" ||
-  model_id == "moonshot-v1-128k" ||
-  model_id == "moonshot-v1-auto" ||
-  model_id == "moonshot-v1-8k-vision-preview" ||
-  model_id == "moonshot-v1-32k-vision-preview" ||
-  model_id == "moonshot-v1-128k-vision-preview"
-}
-
-///|
-/// The K2.6/K2.7 models reject a required tool choice.
-fn moonshotai_rejects_required_tool_choice(model_id : String) -> Bool {
-  model_id == "kimi-k2.6" ||
-  model_id == "kimi-k2.7-code" ||
-  model_id == "kimi-k2.7-code-highspeed"
-}
-
-///|
-/// AI SDK-style camel-case alias.
-pub fn getModelStructuredOutputSupport(model_id : String) -> Bool {
-  get_model_structured_output_support(model_id)
-}
-
-///|
-fn moonshotai_error_message(json : Json) -> String? raise {
-  @provider.check_cancellation(None)
-  match json {
-    { "error": { "message": String(message), .. }, .. } => Some(message)
-    _ => None
-  }
-}
-
-///|
-fn moonshotai_error_structure() -> @openai_compatible.OpenAICompatibleErrorStructure {
-  @openai_compatible.OpenAICompatibleErrorStructure::new(
-    error_to_message=moonshotai_error_message,
+/// Load the Moonshot API key or fall back to MOONSHOT_API_KEY.
+fn load_moonshot_api_key(
+  api_key : String,
+) -> String raise @provider.LoadAPIKeyError {
+  @provider_utils.load_api_key(
+    api_key,
+    environment_variable_name="MOONSHOT_API_KEY",
+    description="Moonshot",
   )
-}
-
-///|
-fn copy_json_object(values : Map[String, Json]) -> Map[String, Json] {
-  let result : Map[String, Json] = Map([])
-  for entry in values.iter2() {
-    result[entry.0] = entry.1
-  }
-  result
-}
-
-///|
-fn strip_moonshot_schema_keyword(body : Map[String, Json]) -> Unit {
-  match body.get("response_format") {
-    Some(Object(response_format)) =>
-      match response_format.get("json_schema") {
-        Some(Object(json_schema)) =>
-          match json_schema.get("schema") {
-            Some(Object(schema)) => {
-              let schema_copy = copy_json_object(schema)
-              schema_copy.remove("$schema")
-              let json_schema_copy = copy_json_object(json_schema)
-              json_schema_copy["schema"] = Json::object(schema_copy)
-              let response_format_copy = copy_json_object(response_format)
-              response_format_copy["json_schema"] = Json::object(
-                json_schema_copy,
-              )
-              body["response_format"] = Json::object(response_format_copy)
-            }
-            _ => ()
-          }
-        _ => ()
-      }
-    _ => ()
-  }
-}
-
-///|
-fn moonshotai_transform_request_body(json : Json) -> Json {
-  guard json is Object(source) else { return json }
-  let body = copy_json_object(source)
-  // Moonshot AI expects the OpenAI-compatible completion-token field name.
-  match body.get("max_tokens") {
-    Some(value) => {
-      body["max_completion_tokens"] = value
-      body.remove("max_tokens")
-    }
-    None => ()
-  }
-  // The K2.6/K2.7 models reject a required tool choice; omit the setting.
-  match (body.get("model"), body.get("tool_choice")) {
-    (Some(String(model_id)), Some(String("required"))) if moonshotai_rejects_required_tool_choice(
-        model_id,
-      ) => body.remove("tool_choice")
-    _ => ()
-  }
-  match body.get("thinking") {
-    Some(Object(value)) => {
-      let thinking = copy_json_object(value)
-      match thinking.get("budgetTokens") {
-        Some(tokens) => {
-          thinking["budget_tokens"] = tokens
-          thinking.remove("budgetTokens")
-        }
-        None => ()
-      }
-      body["thinking"] = Json::object(thinking)
-    }
-    _ => ()
-  }
-  match body.get("reasoningHistory") {
-    Some(value) => {
-      body["reasoning_history"] = value
-      body.remove("reasoningHistory")
-    }
-    None => ()
-  }
-  strip_moonshot_schema_keyword(body)
-  Json::object(body)
 }
 
 ///|
@@ -139,12 +27,14 @@ fn moonshotai_transform_request_body(json : Json) -> Json {
 pub fn create_moonshot_ai(
   api_key? : String = "",
   base_url? : String = "https://api.moonshot.ai/v1",
+  provider_name? : String = "moonshotai.chat",
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> MoonshotAIProvider {
   {
+    provider_name,
     api_key,
     base_url: @provider_utils.without_trailing_slash(base_url),
     headers: @provider_utils.copy_headers(headers),
@@ -161,6 +51,7 @@ pub fn create_moonshot_ai(
 pub fn createMoonshotAI(
   api_key? : String = "",
   base_url? : String = "https://api.moonshot.ai/v1",
+  provider_name? : String = "moonshotai.chat",
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
@@ -169,6 +60,7 @@ pub fn createMoonshotAI(
   create_moonshot_ai(
     api_key~,
     base_url~,
+    provider_name~,
     headers~,
     idle_timeout_ms~,
     http_transport?,
@@ -180,24 +72,18 @@ pub fn createMoonshotAI(
 fn MoonshotAIProvider::language_model_value(
   self : MoonshotAIProvider,
   model_id : MoonshotAIChatModelId,
-) -> @openai_compatible.OpenAICompatibleChatLanguageModel {
-  @openai_compatible.OpenAICompatibleChatLanguageModel::new(
-    model_id,
-    @openai_compatible.OpenAICompatibleChatConfig::new(
-      provider_name="moonshotai.chat",
-      base_url=self.base_url,
-      api_key=self.api_key,
-      api_key_environment_variable="MOONSHOT_API_KEY",
-      headers=self.headers,
-      include_usage=true,
-      supports_structured_outputs=get_model_structured_output_support(model_id),
-      transform_request_body=moonshotai_transform_request_body,
-      error_structure=moonshotai_error_structure(),
-      convert_usage=convert_moonshotai_chat_usage,
-      idle_timeout_ms=self.idle_timeout_ms,
-      id_generator=self.id_generator,
-      http_transport=self.http_transport,
-    ),
+) -> MoonshotAIChatLanguageModel {
+  MoonshotAIChatLanguageModel::new(
+    model_id~,
+    provider_name=self.provider_name,
+    base_url=self.base_url,
+    api_key=self.api_key,
+    headers=self.headers,
+    include_usage=true,
+    supports_structured_outputs=get_model_structured_output_support(model_id),
+    idle_timeout_ms=self.idle_timeout_ms,
+    id_generator=self.id_generator,
+    http_transport=self.http_transport,
   )
 }
 

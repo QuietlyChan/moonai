@@ -39,7 +39,16 @@ pub fn convert_moonshotai_chat_usage(
         },
         output_tokens: {
           total: Some(output_tokens),
-          text: Some(output_tokens - reasoning),
+          // Some deployments report reasoning tokens beyond the
+          // completion total; the text share never goes negative
+          // (AI SDK usage precedence).
+          text: Some(
+            if output_tokens - reasoning > 0 {
+              output_tokens - reasoning
+            } else {
+              0
+            },
+          ),
           reasoning: Some(reasoning),
         },
         raw: Some(json),
