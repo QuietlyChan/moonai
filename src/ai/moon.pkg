@@ -8,6 +8,7 @@ import {
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/async",
   "moonbitlang/core/debug",
+  "moonbitlang/core/encoding/base64",
   "moonbitlang/core/json",
   "moonbitlang/core/encoding/utf8",
 }

@@ -89,6 +89,8 @@ pub async fn getBatchStatus(&@provider.BatchV4, batch_id~ : String, headers? : M
 
 pub async fn getFileMetadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
 
+pub fn getTextFromDataUrl(String) -> String raise InvalidArgumentError
+
 pub async fn getVideoStatus(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
 
 pub async fn get_batch_results(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> Array[@provider.BatchV4ItemResult]
@@ -97,11 +99,15 @@ pub async fn get_batch_status(&@provider.BatchV4, batch_id~ : String, headers? :
 
 pub async fn get_file_metadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
 
+pub fn get_text_from_data_url(String) -> String raise InvalidArgumentError
+
 pub async fn get_video_status(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
 
 pub fn hasToolCall(Array[String]) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
 pub fn has_tool_call(Array[String]) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
+
+pub fn invalid_argument(parameter~ : String, value~ : Json, message~ : String) -> InvalidArgumentError
 
 pub fn isExecutableTool(@provider_utils.Tool) -> Bool
 
@@ -204,6 +210,10 @@ pub fn wrap_language_model_v4(&@provider.LanguageModelV4, @provider.LanguageMode
 pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[@provider.LanguageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
 // Errors
+pub(all) suberror InvalidArgumentError {
+  InvalidArgumentError(parameter~ : String, value~ : Json, message~ : String)
+} derive(Eq, @debug.Debug)
+
 pub suberror NoObjectGeneratedError {
   NoObjectGeneratedError(message~ : String, text~ : String?, response~ : @generate_text.GenerateTextResult, failure~ : ObjectGenerationFailure)
 } derive(@debug.Debug)

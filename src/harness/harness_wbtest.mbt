@@ -109,7 +109,7 @@ async test "bridge session sends controls and tracks delivered cursor" {
     HarnessV1PromptTurnOptions::new(
       prompt=HarnessV1Prompt::text("hello"),
       emit=event => events.push(event),
-      instructions="Use MoonBit",
+      instructions=Text("Use MoonBit"),
     ),
   )
   control.submit_tool_result(
@@ -135,6 +135,24 @@ async test "bridge session sends controls and tracks delivered cursor" {
   )
   assert_eq(events.length(), 4)
   assert_eq(session.bridge_state().last_seen_event_id(), 4)
+}
+
+///|
+test "prompt turn options reduce system-message instructions to text (#20612)" {
+  let options = HarnessV1PromptTurnOptions::new(
+    prompt=HarnessV1Prompt::text("hello"),
+    emit=_ => (),
+    instructions=SystemMessage(
+      @provider_utils.ModelMessage::system("Use MoonBit"),
+    ),
+  )
+  assert_eq(options.instructions, Some("Use MoonBit"))
+  let plain = HarnessV1PromptTurnOptions::new(
+    prompt=HarnessV1Prompt::text("hello"),
+    emit=_ => (),
+    instructions=Text("Use MoonBit"),
+  )
+  assert_eq(plain.instructions, Some("Use MoonBit"))
 }
 
 ///|

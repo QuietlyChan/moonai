@@ -72,6 +72,34 @@ async test "embedMany keeps the same runtime context contract (#20583)" {
 }
 
 ///|
+async test "embedMany rejects a non-positive max_parallel_calls (#20304)" {
+  let model = @testing.MockEmbeddingModel::new(
+    lifecycle_test_embedding_response(),
+    provider_name="test.embed",
+  )
+  try
+    embed_many(
+      model as &@provider.EmbeddingModelV4,
+      ["one"],
+      max_parallel_calls=0,
+    )
+  catch {
+    error => {
+      guard error is @ai.InvalidArgumentError(parameter~, value~, message~) else {
+        fail("expected InvalidArgumentError")
+      }
+      assert_eq(parameter, "max_parallel_calls")
+      assert_eq(value, Json::number(0))
+      assert_eq(
+        message, "Invalid argument for parameter max_parallel_calls: max_parallel_calls must be greater than zero",
+      )
+    }
+  } noraise {
+    _ => fail("expected InvalidArgumentError")
+  }
+}
+
+///|
 async test "embed lifecycle callback failures never break the operation" {
   let model = @testing.MockEmbeddingModel::new(
     lifecycle_test_embedding_response(),

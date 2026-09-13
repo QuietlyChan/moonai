@@ -177,6 +177,16 @@ pub fn HarnessV1StartOptions::new(
 }
 
 ///|
+/// Instructions for the underlying agent runtime, mirroring upstream
+/// `HarnessAgentSettings.instructions`: a plain string or a single system
+/// model message. Only the extracted text crosses the string-only HarnessV1
+/// adapter boundary.
+pub(all) enum HarnessInstructions {
+  Text(String)
+  SystemMessage(@provider_utils.ModelMessage)
+} derive(Debug, Eq)
+
+///|
 /// Options for a fresh prompt turn.
 pub(all) struct HarnessV1PromptTurnOptions {
   prompt : HarnessV1Prompt
@@ -187,14 +197,21 @@ pub(all) struct HarnessV1PromptTurnOptions {
 }
 
 ///|
-/// Construct prompt-turn options.
+/// Construct prompt-turn options. Structured system-message instructions are
+/// reduced to their text content here, matching upstream's extraction before
+/// instructions reach HarnessV1 adapters.
 pub fn HarnessV1PromptTurnOptions::new(
   prompt~ : HarnessV1Prompt,
   emit~ : (HarnessV1StreamPart) -> Unit,
   tools? : Array[HarnessV1ToolSpec] = [],
-  instructions? : String,
+  instructions? : HarnessInstructions,
   cancellation_token? : @provider.CancellationToken,
 ) -> HarnessV1PromptTurnOptions {
+  let instructions = match instructions {
+    Some(Text(text)) => Some(text)
+    Some(SystemMessage(message)) => Some(message.content)
+    None => None
+  }
   { prompt, tools: tools.copy(), instructions, cancellation_token, emit, }
 }
 

@@ -79,6 +79,11 @@ pub struct CallbackHarnessV1SandboxProvider {
 pub fn CallbackHarnessV1SandboxProvider::new(provider_id~ : String, create_session~ : async (HarnessV1SandboxCreateOptions) -> HarnessV1NetworkSandboxSession, bridge_ports? : Array[Int], resume_session? : async (String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession) -> Self
 pub impl HarnessV1SandboxProvider for CallbackHarnessV1SandboxProvider
 
+pub(all) enum HarnessInstructions {
+  Text(String)
+  SystemMessage(@provider_utils.ModelMessage)
+} derive(Eq, @debug.Debug)
+
 pub(all) struct HarnessV1Bootstrap {
   harness_id : String
   bootstrap_dir : String
@@ -321,7 +326,7 @@ pub(all) struct HarnessV1PromptTurnOptions {
   cancellation_token : @provider.CancellationToken?
   emit : (HarnessV1StreamPart) -> Unit
 }
-pub fn HarnessV1PromptTurnOptions::new(prompt~ : HarnessV1Prompt, emit~ : (HarnessV1StreamPart) -> Unit, tools? : Array[HarnessV1ToolSpec], instructions? : String, cancellation_token? : @provider.CancellationToken) -> Self
+pub fn HarnessV1PromptTurnOptions::new(prompt~ : HarnessV1Prompt, emit~ : (HarnessV1StreamPart) -> Unit, tools? : Array[HarnessV1ToolSpec], instructions? : HarnessInstructions, cancellation_token? : @provider.CancellationToken) -> Self
 
 pub(all) struct HarnessV1ResumeSessionState {
   harness_id : String

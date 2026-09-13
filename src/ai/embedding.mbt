@@ -174,7 +174,11 @@ pub async fn embed_many(
   let parallel_limit = match max_parallel_calls {
     Some(value) => {
       guard value > 0 else {
-        fail("embed_many max_parallel_calls must be greater than zero")
+        raise invalid_argument(
+          parameter="max_parallel_calls",
+          value=Json::number(value.to_double()),
+          message="max_parallel_calls must be greater than zero",
+        )
       }
       value
     }
