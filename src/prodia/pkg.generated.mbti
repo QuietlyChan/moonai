@@ -1,0 +1,43 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/prodia"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createProdia(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ProdiaProvider
+
+pub fn create_prodia(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ProdiaProvider
+
+pub fn prodia(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+
+// Errors
+
+// Types and methods
+type ProdiaImageModel
+pub impl @provider.ImageModelV4 for ProdiaImageModel
+
+pub struct ProdiaProvider {
+  // private fields
+}
+pub fn ProdiaProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn ProdiaProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn ProdiaProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn ProdiaProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn ProdiaProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub fn ProdiaProvider::video_model(Self, String) -> &@provider.VideoModelV4
+pub impl @provider.ProviderV4 for ProdiaProvider
+
+type ProdiaVideoModel
+pub impl @provider.VideoModelV4 for ProdiaVideoModel
+
+// Type aliases
+pub type ProdiaImageModelId = String
+
+pub type ProdiaVideoModelId = String
+
+// Traits

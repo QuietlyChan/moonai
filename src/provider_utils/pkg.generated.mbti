@@ -259,6 +259,8 @@ pub async fn[E, T] post_json_sse_events(provider_name~ : String, url~ : String, 
 
 pub async fn post_multipart(provider_name~ : String, url~ : String, headers~ : Map[String, String], form_data~ : MultipartFormData, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport? : &HttpTransport) -> JsonHttpResponse
 
+pub async fn post_multipart_binary(provider_name~ : String, url~ : String, headers~ : Map[String, String], form_data~ : MultipartFormData, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, transport? : &HttpTransport) -> BinaryHttpResponse
+
 pub async fn post_multipart_streaming(url~ : String, headers~ : Map[String, String], plan~ : MultipartStreamingPlan, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport~ : &StreamingBodyTransport) -> JsonHttpResponse
 
 pub fn provider_metadata_from_json(Json, String) -> Map[String, Json]

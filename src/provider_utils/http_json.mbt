@@ -1539,3 +1539,107 @@ pub async fn post_bytes(
     }
   }
 }
+
+///|
+/// POST a multipart form and return the raw response bytes (for providers
+/// whose job endpoints answer with multipart bodies containing both a
+/// metadata part and binary artifacts, e.g. Prodia). Retry semantics match
+/// `post_multipart`.
+pub async fn post_multipart_binary(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  form_data~ : MultipartFormData,
+  timeout_ms? : Int = 120_000,
+  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  cancellation_token? : @provider.CancellationToken,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  transport? : &HttpTransport,
+) -> BinaryHttpResponse {
+  let resolved_transport = transport.unwrap_or(native_http_transport())
+  let request_headers = copy_headers(headers)
+  request_headers["Content-Type"] = form_data.content_type
+  let mut retry_number = 0
+  let mut delay = initial_retry_delay(retry_policy)
+  for ;; {
+    @provider.check_cancellation(cancellation_token)
+    try {
+      @provider.check_cancellation(cancellation_token)
+      let response = fetch_buffered_with_timeout(
+        provider_name,
+        HttpRequest::post(url~, headers=request_headers, body=form_data.body),
+        timeout_ms,
+        resolved_transport,
+      )
+      let value = if response.is_success() {
+        response.body
+      } else {
+        read_response_with_size_limit(response, url~)
+      }
+      guard response.is_success() else {
+        let response_body = binary_error_body(value)
+        let error_json = parse_json_if_valid(response_body)
+        let (message, retryable) = handle_failed_response(
+          url~,
+          request_body=form_data.diagnostic_body,
+          request_headers~,
+          status_code=response.status_code,
+          response_headers=response.headers,
+          response_body~,
+          error_json~,
+          error_to_message,
+          is_retryable_response,
+        )
+        raise @provider.APICallError(
+          message~,
+          url~,
+          request_body=form_data.diagnostic_body,
+          request_headers~,
+          status_code=Some(response.status_code),
+          response_headers=response.headers,
+          response_body~,
+          is_retryable=retryable,
+          data=error_json,
+          cause=None,
+        )
+      }
+      let request : @provider.RequestMetadata = @provider.RequestMetadata::new(
+        url~,
+        headers=request_headers,
+        body=form_data.diagnostic_body,
+      )
+      let response_metadata : @provider.ResponseMetadata = {
+        ..@provider.ResponseMetadata::empty(),
+        status_code: Some(response.status_code),
+        headers: response.headers,
+      }
+      let http_response : BinaryHttpResponse = {
+        value,
+        request,
+        response: response_metadata,
+      }
+      http_response
+    } catch {
+      error if @async.is_cancellation_error(error) ||
+        @async.is_being_cancelled() => raise error
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
+        retry_number = retry_number + 1
+        if delay > 0 {
+          sleep_with_cancellation(delay, cancellation_token)
+        }
+        delay = next_retry_delay(retry_policy, delay)
+        continue
+      }
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body=form_data.diagnostic_body,
+          request_headers~,
+        )
+    } noraise {
+      result => return result
+    }
+  }
+}
