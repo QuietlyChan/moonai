@@ -1,0 +1,33 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/gmicloud"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createGmicloud(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GmicloudProvider
+
+pub fn create_gmicloud(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GmicloudProvider
+
+pub fn gmicloud(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+pub struct GmicloudProvider {
+  // private fields
+}
+pub fn GmicloudProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn GmicloudProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn GmicloudProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn GmicloudProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for GmicloudProvider
+
+// Type aliases
+pub type GmicloudChatModelId = String
+
+// Traits
