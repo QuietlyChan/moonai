@@ -1,0 +1,50 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/google"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const GOOGLE_MAX_EMBEDDINGS_PER_CALL : Int = 100
+
+pub const VERSION : String = "0.1.0"
+
+pub fn createGoogle(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GoogleProvider
+
+pub fn create_google(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GoogleProvider
+
+pub fn getModelPath(String) -> String
+
+pub fn get_model_path(String) -> String
+
+pub fn google(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+type GoogleChatLanguageModel
+pub impl @provider.LanguageModelV4 for GoogleChatLanguageModel
+
+type GoogleEmbeddingModel
+pub impl @provider.EmbeddingModelV4 for GoogleEmbeddingModel
+
+pub struct GoogleProvider {
+  // private fields
+}
+pub fn GoogleProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn GoogleProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn GoogleProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GoogleProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GoogleProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GoogleProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn GoogleProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for GoogleProvider
+
+// Type aliases
+pub type GoogleChatModelId = String
+
+pub type GoogleEmbeddingModelId = String
+
+// Traits
