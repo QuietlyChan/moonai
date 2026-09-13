@@ -16,3 +16,11 @@ test "google direct factory builds the same language model boundary" {
   assert_eq(model.provider(), "google.chat")
   assert_eq(model.model_id(), "gemini-2.5-pro")
 }
+
+///|
+test "google provider exposes image generation models" {
+  let provider = create_google(api_key="g-test")
+  let image = provider.image("gemini-2.5-flash-image")
+  assert_eq(image.provider(), "google.image")
+  assert_eq(image.model_id(), "gemini-2.5-flash-image")
+}

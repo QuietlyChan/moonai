@@ -30,6 +30,9 @@ pub impl @provider.LanguageModelV4 for GoogleChatLanguageModel
 type GoogleEmbeddingModel
 pub impl @provider.EmbeddingModelV4 for GoogleEmbeddingModel
 
+type GoogleImageModel
+pub impl @provider.ImageModelV4 for GoogleImageModel
+
 pub struct GoogleProvider {
   // private fields
 }
@@ -38,6 +41,9 @@ pub fn GoogleProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GoogleProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GoogleProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GoogleProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GoogleProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn GoogleProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn GoogleProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn GoogleProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GoogleProvider::language_model(Self, String) -> &@provider.LanguageModelV4
 pub impl @provider.ProviderV4 for GoogleProvider

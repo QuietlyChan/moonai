@@ -164,11 +164,46 @@ pub impl @provider.ProviderV4 for GoogleProvider with fn reranking_model(
 }
 
 ///|
+/// Select a Google image generation model (native IMAGE modality).
+pub fn GoogleProvider::image(
+  self : GoogleProvider,
+  model_id : String,
+) -> &@provider.ImageModelV4 {
+  let model = google_image_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.ImageModelV4
+}
+
+///|
+/// Alias for `image`.
+pub fn GoogleProvider::image_model(
+  self : GoogleProvider,
+  model_id : String,
+) -> &@provider.ImageModelV4 {
+  self.image(model_id)
+}
+
+///|
+/// Camel-case alias for `image_model`.
+pub fn GoogleProvider::imageModel(
+  self : GoogleProvider,
+  model_id : String,
+) -> &@provider.ImageModelV4 {
+  self.image_model(model_id)
+}
+
+///|
 pub impl @provider.ProviderV4 for GoogleProvider with fn image_model(
-  _self,
+  self,
   model_id,
 ) {
-  raise @provider.NoSuchModelError(model_id~, model_type=@provider.ImageModel)
+  GoogleProvider::image_model(self, model_id)
 }
 
 ///|
