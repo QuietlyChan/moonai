@@ -196,7 +196,7 @@ fn parse_openai_responses_provider_options(
   let service_tier = reader.take_string(
     "serviceTier",
     aliases=["service_tier"],
-    allowed=["auto", "flex", "priority", "default"],
+    allowed=["auto", "flex", "priority", "fast", "ultrafast", "default"],
   )
   let store = reader.take_bool("store")
   let pass_through_unsupported_files = reader
@@ -357,7 +357,7 @@ fn parse_openai_chat_provider_options(
   let service_tier = reader.take_string(
     "serviceTier",
     aliases=["service_tier"],
-    allowed=["auto", "flex", "priority", "default"],
+    allowed=["auto", "flex", "priority", "fast", "ultrafast", "default"],
   )
   let strict_json_schema = reader
     .take_bool("strictJsonSchema", aliases=["strict_json_schema"])

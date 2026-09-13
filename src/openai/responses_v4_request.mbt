@@ -246,7 +246,8 @@ fn prepare_openai_v4_responses_request(
     )
     service_tier = None
   }
-  if service_tier == Some("priority") &&
+  // 'fast' is OpenAI's newer interchangeable name for the 'priority' tier.
+  if (service_tier == Some("priority") || service_tier == Some("fast")) &&
     !capabilities.supports_priority_processing {
     warnings.push(
       @provider.Warning::Unsupported(

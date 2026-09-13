@@ -245,3 +245,44 @@ test "official OpenAI options ignore a custom provider display namespace" {
   assert_eq(transcription_stream.language, Some("en"))
   assert_eq(transcription_stream.delay, Some("low"))
 }
+
+///|
+test "OpenAI service tier fast and ultrafast parse from provider options" {
+  // providerOptions serviceTier strings, including the new 'fast' and
+  // 'ultrafast' tiers (AI SDK #18589).
+  let options = @provider.LanguageModelV4CallOptions::new(
+    @provider.LanguageModelV4Prompt::new([
+      @provider.V4UserMessage(
+        content=[@provider.V4PromptText(text="hi", provider_options=Map([]))],
+        provider_options=Map([]),
+      ),
+    ]),
+    provider_options={
+      "openai": { "serviceTier": "fast", "reasoningEffort": "max" },
+    },
+  )
+  let body = prepare_openai_v4_chat_request(
+      "gpt-5", options, "openai.chat", false, true,
+    ).body
+    .stringify()
+  assert_true(body.contains("\"service_tier\":\"fast\""))
+  assert_true(body.contains("\"reasoning_effort\":\"max\""))
+}
+
+///|
+test "OpenAI ultrafast service tier passes through to the wire" {
+  let options = @provider.LanguageModelV4CallOptions::new(
+    @provider.LanguageModelV4Prompt::new([
+      @provider.V4UserMessage(
+        content=[@provider.V4PromptText(text="hi", provider_options=Map([]))],
+        provider_options=Map([]),
+      ),
+    ]),
+    provider_options={ "openai": { "serviceTier": "ultrafast" } },
+  )
+  let body = prepare_openai_v4_chat_request(
+      "gpt-5.6-sol", options, "openai.chat", false, true,
+    ).body
+    .stringify()
+  assert_true(body.contains("\"service_tier\":\"ultrafast\""))
+}
