@@ -57,8 +57,8 @@ pub impl @provider.ProviderV4 for DeepSeekProvider with fn transcription_model(
 }
 
 ///|
-pub impl @provider.ProviderV4 for DeepSeekProvider with fn files(_self) {
-  None
+pub impl @provider.ProviderV4 for DeepSeekProvider with fn files(self) {
+  Some(DeepSeekProvider::files(self))
 }
 
 ///|

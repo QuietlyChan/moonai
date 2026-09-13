@@ -8,6 +8,8 @@ import {
 import {
   "QuietlyChan/moonai/ai",
   "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/socket",
   "moonbitlang/core/encoding/utf8",
 } for "test"
 

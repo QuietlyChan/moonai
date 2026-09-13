@@ -86,7 +86,16 @@ test "DeepSeek V4 request preserves structured provider inputs" {
     "model": "deepseek-reasoner",
     "messages": [
       { "role": "system", "content": "Be concise." },
-      { "role": "user", "content": "Check the city" },
+      {
+        "role": "user",
+        "content": [
+          { "type": "text", "text": "Check the city" },
+          {
+            "type": "image_url",
+            "image_url": { "url": "data:image/png;base64,aW1hZ2U=" },
+          },
+        ],
+      },
       {
         "role": "assistant",
         "content": "Checking.",
@@ -139,13 +148,7 @@ test "DeepSeek V4 request preserves structured provider inputs" {
     "thinking": { "type": "enabled" },
     "reasoning_effort": "low",
   })
-  assert_eq(prepared.warnings.length(), 5)
-  assert_true(
-    prepared.warnings.any(warning => {
-      warning
-      is @provider.Unsupported(feature="user message part type: file", ..)
-    }),
-  )
+  assert_eq(prepared.warnings.length(), 4)
   assert_true(
     prepared.warnings.any(warning => {
       warning is @provider.Unsupported(feature="topK", ..)

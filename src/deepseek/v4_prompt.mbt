@@ -167,6 +167,161 @@ fn deepseek_v4_assistant_message(
 }
 
 ///|
+/// Media types DeepSeek vision accepts for inline and URL image input.
+fn deepseek_supported_image_media_type(media_type : String) -> String? {
+  let normalized = match media_type.find(";") {
+    Some(index) => media_type[:index].trim().to_lower().to_owned()
+    None => media_type.trim().to_lower().to_owned()
+  }
+  if normalized == "image/gif" ||
+    normalized == "image/jpeg" ||
+    normalized == "image/jpg" ||
+    normalized == "image/png" ||
+    normalized == "image/webp" {
+    Some(normalized)
+  } else {
+    None
+  }
+}
+
+///|
+/// Read an imageDetail option from a file part's DeepSeek provider options.
+fn deepseek_file_part_image_detail(options : Map[String, Json]) -> String? {
+  match deepseek_message_provider_string(options, field="imageDetail") {
+    Some(value) =>
+      if value == "low" ||
+        value == "high" ||
+        value == "original" ||
+        value == "auto" {
+        Some(value)
+      } else {
+        None
+      }
+    None => None
+  }
+}
+
+///|
+/// Read a fileData flag from a file part's DeepSeek provider options.
+fn deepseek_file_part_file_data(options : Map[String, Json]) -> Bool {
+  deepseek_message_provider_bool(options, field="fileData") == Some(true)
+}
+
+///|
+/// Convert one image file part into a DeepSeek content part.
+///
+/// Hard failures (unsupported media type, over-long URLs, conflicting
+/// options) raise; returning None marks the part as unsupported so the
+/// caller downgrades it to a warning.
+fn deepseek_v4_image_content_part(
+  data : @provider.LanguageModelV4FileData,
+  media_type~ : String,
+  filename~ : String?,
+  provider_options~ : Map[String, Json],
+) -> Json? raise {
+  let image_detail = deepseek_file_part_image_detail(provider_options)
+  let file_data = deepseek_file_part_file_data(provider_options)
+  match data {
+    @provider.V4FileReference(reference) => {
+      let file_id = @provider_utils.resolve_provider_reference(
+        reference, "deepseek",
+      )
+      Some({ "type": "file", "file_id": Json::string(file_id) })
+    }
+    @provider.V4FileUrl(url) => {
+      if file_data {
+        raise @provider.InvalidPromptError(
+          message="DeepSeek `fileData` image parts require inline data, not a URL.",
+        )
+      }
+      guard url.length() <= 8192 else {
+        raise @provider.InvalidPromptError(
+          message="DeepSeek image URLs must not exceed 8192 characters.",
+        )
+      }
+      guard deepseek_supported_image_media_type(media_type) is Some(_) else {
+        raise @provider.UnsupportedFunctionalityError(
+          functionality="DeepSeek image media type \{media_type}",
+        )
+      }
+      let fields : Map[String, Json] = Map([("url", Json::string(url))])
+      if image_detail is Some(detail) {
+        fields["detail"] = Json::string(detail)
+      }
+      Some({ "type": "image_url", "image_url": Json::object(fields) })
+    }
+    @provider.V4FileData(value) => {
+      let data_url = deepseek_image_data_url(value, media_type~)
+      deepseek_v4_inline_image_part(
+        data_url,
+        filename~,
+        image_detail~,
+        file_data~,
+      )
+    }
+    @provider.V4FileBytes(bytes) => {
+      let data_url = deepseek_image_data_url(
+        @provider_utils.convert_bytes_to_base64(bytes),
+        media_type~,
+      )
+      deepseek_v4_inline_image_part(
+        data_url,
+        filename~,
+        image_detail~,
+        file_data~,
+      )
+    }
+    @provider.V4FileText(_) => None
+  }
+}
+
+///|
+fn deepseek_image_data_url(
+  base64 : String,
+  media_type~ : String,
+) -> String raise {
+  let resolved = match deepseek_supported_image_media_type(media_type) {
+    Some(value) => value
+    None =>
+      raise @provider.UnsupportedFunctionalityError(
+        functionality="DeepSeek image media type \{media_type}",
+      )
+  }
+  let wire_media = if resolved == "image/jpg" { "image/jpeg" } else { resolved }
+  "data:\{wire_media};base64,\{base64}"
+}
+
+///|
+fn deepseek_v4_inline_image_part(
+  data_url : String,
+  filename~ : String?,
+  image_detail~ : String?,
+  file_data~ : Bool,
+) -> Json? raise {
+  if file_data {
+    if image_detail is Some(_) {
+      raise @provider.InvalidPromptError(
+        message="DeepSeek `imageDetail` cannot be combined with `fileData`.",
+      )
+    }
+    let fields : Map[String, Json] = Map([
+      ("type", Json::string("file")),
+      ("file_data", Json::string(data_url)),
+    ])
+    if filename is Some(name) {
+      fields["filename"] = Json::string(name)
+    }
+    Some(Json::object(fields))
+  } else {
+    let image_url : Map[String, Json] = Map([("url", Json::string(data_url))])
+    if image_detail is Some(detail) {
+      image_url["detail"] = Json::string(detail)
+    }
+    Some({ "type": "image_url", "image_url": Json::object(image_url) })
+  }
+}
+
+///|
 /// Read a string option from a message's DeepSeek provider options.
 fn deepseek_message_provider_string(
   options : Map[String, Json],
@@ -205,7 +360,7 @@ fn convert_v4_prompt_to_deepseek(
   response_format : @provider.LanguageModelV4ResponseFormat,
   model_id : String,
   supports_structured_outputs : Bool,
-) -> DeepSeekV4PromptConversion {
+) -> DeepSeekV4PromptConversion raise {
   let messages : Array[Json] = []
   let warnings : Array[@provider.Warning] = []
   match response_format {
@@ -248,28 +403,100 @@ fn convert_v4_prompt_to_deepseek(
         messages.push(Json::object(fields))
       }
       @provider.V4UserMessage(content~, provider_options~) => {
-        let text = StringBuilder()
-        for part in content {
-          match part {
-            @provider.V4PromptText(text=value, ..) => text.write_string(value)
-            _ =>
-              warnings.push(
-                @provider.Warning::Unsupported(
-                  feature="user message part type: \{deepseek_v4_prompt_part_type(part)}",
-                  details="DeepSeek Chat accepts text user content only.",
-                ),
-              )
+        let has_image_part = {
+          let mut found = false
+          for part in content {
+            match part {
+              @provider.V4PromptFile(data~, media_type~, ..) =>
+                if @provider_utils.get_top_level_media_type(media_type) ==
+                  "image" &&
+                  data
+                  is (@provider.V4FileReference(_)
+                  | @provider.V4FileUrl(_)
+                  | @provider.V4FileData(_)
+                  | @provider.V4FileBytes(_)) {
+                  found = true
+                }
+              _ => ()
+            }
           }
+          found
         }
-        let fields : Map[String, Json] = Map([
-          ("role", Json::string("user")),
-          ("content", Json::string(text.to_string())),
-        ])
-        match deepseek_message_provider_string(provider_options, field="name") {
-          Some(name) => fields["name"] = Json::string(name)
-          None => ()
+        if !has_image_part {
+          let text = StringBuilder()
+          for part in content {
+            match part {
+              @provider.V4PromptText(text=value, ..) => text.write_string(value)
+              _ =>
+                warnings.push(
+                  @provider.Warning::Unsupported(
+                    feature="user message part type: \{deepseek_v4_prompt_part_type(part)}",
+                    details="DeepSeek Chat accepts text user content only.",
+                  ),
+                )
+            }
+          }
+          let fields : Map[String, Json] = Map([
+            ("role", Json::string("user")),
+            ("content", Json::string(text.to_string())),
+          ])
+          match
+            deepseek_message_provider_string(provider_options, field="name") {
+            Some(name) => fields["name"] = Json::string(name)
+            None => ()
+          }
+          messages.push(Json::object(fields))
+          // Continue with the next message; the remaining branch handles
+          // vision-shaped user content.
+        } else {
+          let user_content : Array[Json] = []
+          for part in content {
+            match part {
+              @provider.V4PromptText(text=value, ..) =>
+                user_content.push({ "type": "text", "text": value })
+              @provider.V4PromptFile(
+                data~,
+                media_type~,
+                filename~,
+                provider_options=part_options
+              ) => {
+                let converted = deepseek_v4_image_content_part(
+                  data,
+                  media_type~,
+                  filename~,
+                  provider_options=part_options,
+                )
+                match converted {
+                  Some(value) => user_content.push(value)
+                  None =>
+                    warnings.push(
+                      @provider.Warning::Unsupported(
+                        feature="user message part type: file",
+                        details="DeepSeek vision accepts image data, URLs, and file references only.",
+                      ),
+                    )
+                }
+              }
+              _ =>
+                warnings.push(
+                  @provider.Warning::Unsupported(
+                    feature="user message part type: \{deepseek_v4_prompt_part_type(part)}",
+                    details="DeepSeek Chat accepts text and image user content only.",
+                  ),
+                )
+            }
+          }
+          let fields : Map[String, Json] = Map([
+            ("role", Json::string("user")),
+            ("content", Json::array(user_content)),
+          ])
+          match
+            deepseek_message_provider_string(provider_options, field="name") {
+            Some(name) => fields["name"] = Json::string(name)
+            None => ()
+          }
+          messages.push(Json::object(fields))
         }
-        messages.push(Json::object(fields))
       }
       @provider.V4AssistantMessage(content~, provider_options~) => {
         let prefix = deepseek_message_provider_bool(

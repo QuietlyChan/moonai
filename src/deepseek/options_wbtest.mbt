@@ -144,7 +144,10 @@ test "DeepSeek public factories expose AI SDK model contracts" {
   assert_true(generic_provider.reranking_model("missing") is None)
   assert_true(generic_provider.speech_model("missing") is None)
   assert_true(generic_provider.transcription_model("missing") is None)
-  assert_true(generic_provider.files() is None)
+  match generic_provider.files() {
+    Some(files) => assert_eq(files.provider(), "deepseek.files")
+    None => fail("expected DeepSeek to expose the Files API")
+  }
   assert_true(generic_provider.skills() is None)
   try generic_provider.embedding_model("missing") catch {
     @provider.NoSuchModelError(model_id~, model_type~) => {

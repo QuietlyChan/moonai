@@ -18,6 +18,8 @@ pub fn deepSeek(String, api_key? : String, base_url? : String, headers? : Map[St
 
 pub fn deepseek(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
+pub fn deepseek_files(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> DeepSeekFiles
+
 // Errors
 
 // Types and methods
@@ -31,6 +33,17 @@ pub(all) struct DeepSeekErrorDetail {
   param : Json?
   code : Json?
 } derive(Eq, @debug.Debug)
+
+pub struct DeepSeekFiles {
+  // private fields
+}
+pub impl @provider.FilesV4 for DeepSeekFiles
+
+pub(all) struct DeepSeekFilesOptions {
+  expires_after : Double?
+} derive(Eq, @debug.Debug)
+pub fn DeepSeekFilesOptions::new(expires_after? : Double) -> Self raise
+pub fn DeepSeekFilesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
 
 pub(all) struct DeepSeekLanguageModelChatOptions {
   thinking_type : String?
@@ -47,6 +60,7 @@ pub struct DeepSeekProvider {
   // private fields
 }
 pub fn DeepSeekProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn DeepSeekProvider::files(Self) -> DeepSeekFiles
 pub fn DeepSeekProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn DeepSeekProvider::language_model(Self, String) -> &@provider.LanguageModelV4
 pub impl @provider.ProviderV4 for DeepSeekProvider
