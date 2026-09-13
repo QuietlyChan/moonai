@@ -15,3 +15,11 @@ test "prodia direct factory builds the same image boundary" {
   assert_eq(model.provider(), "prodia")
   assert_eq(model.model_id(), "sd3.5_large")
 }
+
+///|
+test "prodia provider exposes language models" {
+  let provider = create_prodia(api_key="pr-test")
+  let lm = provider.language_model("prodia-llama-4")
+  assert_eq(lm.provider(), "prodia")
+  assert_eq(lm.model_id(), "prodia-llama-4")
+}

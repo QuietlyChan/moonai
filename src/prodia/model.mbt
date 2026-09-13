@@ -125,14 +125,37 @@ pub impl @provider.ProviderV4 for ProdiaProvider with fn specification_version(
 }
 
 ///|
+/// Select a Prodia language model.
+pub fn ProdiaProvider::language_model(
+  self : ProdiaProvider,
+  model_id : String,
+) -> &@provider.LanguageModelV4 {
+  let model = prodia_language_model_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.LanguageModelV4
+}
+
+///|
+/// Camel-case alias for `language_model`.
+pub fn ProdiaProvider::languageModel(
+  self : ProdiaProvider,
+  model_id : String,
+) -> &@provider.LanguageModelV4 {
+  self.language_model(model_id)
+}
+
+///|
 pub impl @provider.ProviderV4 for ProdiaProvider with fn language_model(
-  _self,
+  self,
   model_id,
 ) {
-  raise @provider.NoSuchModelError(
-    model_id~,
-    model_type=@provider.LanguageModel,
-  )
+  ProdiaProvider::language_model(self, model_id)
 }
 
 ///|

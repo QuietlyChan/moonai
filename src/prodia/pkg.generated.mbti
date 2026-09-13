@@ -21,12 +21,17 @@ pub fn prodia(String, api_key? : String, base_url? : String, headers? : Map[Stri
 type ProdiaImageModel
 pub impl @provider.ImageModelV4 for ProdiaImageModel
 
+type ProdiaLanguageModel
+pub impl @provider.LanguageModelV4 for ProdiaLanguageModel
+
 pub struct ProdiaProvider {
   // private fields
 }
 pub fn ProdiaProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn ProdiaProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn ProdiaProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn ProdiaProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn ProdiaProvider::language_model(Self, String) -> &@provider.LanguageModelV4
 pub fn ProdiaProvider::video(Self, String) -> &@provider.VideoModelV4
 pub fn ProdiaProvider::videoModel(Self, String) -> &@provider.VideoModelV4
 pub fn ProdiaProvider::video_model(Self, String) -> &@provider.VideoModelV4
