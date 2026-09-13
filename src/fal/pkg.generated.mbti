@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/fal"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createFal(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> FalProvider
+
+pub fn create_fal(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> FalProvider
+
+pub fn fal(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+
+// Errors
+
+// Types and methods
+type FalImageModel
+pub impl @provider.ImageModelV4 for FalImageModel
+
+pub struct FalProvider {
+  // private fields
+}
+pub fn FalProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn FalProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn FalProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub impl @provider.ProviderV4 for FalProvider
+
+// Type aliases
+pub type FalImageModelId = String
+
+// Traits
