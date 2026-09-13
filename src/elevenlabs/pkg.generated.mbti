@@ -1,0 +1,41 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/elevenlabs"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createElevenLabs(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ElevenLabsProvider
+
+pub fn create_elevenlabs(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ElevenLabsProvider
+
+// Errors
+
+// Types and methods
+pub struct ElevenLabsProvider {
+  // private fields
+}
+pub fn ElevenLabsProvider::speech(Self, String) -> &@provider.SpeechModelV4
+pub fn ElevenLabsProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
+pub fn ElevenLabsProvider::speech_model(Self, String) -> &@provider.SpeechModelV4
+pub fn ElevenLabsProvider::transcription(Self, String) -> &@provider.TranscriptionModelV4
+pub fn ElevenLabsProvider::transcriptionModel(Self, String) -> &@provider.TranscriptionModelV4
+pub fn ElevenLabsProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4
+pub impl @provider.ProviderV4 for ElevenLabsProvider
+
+type ElevenLabsSpeechModel
+pub impl @provider.SpeechModelV4 for ElevenLabsSpeechModel
+
+type ElevenLabsTranscriptionModel
+pub impl @provider.TranscriptionModelV4 for ElevenLabsTranscriptionModel
+
+// Type aliases
+pub type ElevenLabsSpeechModelId = String
+
+pub type ElevenLabsTranscriptionModelId = String
+
+// Traits
