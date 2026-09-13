@@ -31,7 +31,13 @@ pub struct BflProvider {
 pub fn BflProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn BflProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn BflProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn BflProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn BflProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub fn BflProvider::video_model(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for BflProvider
+
+type BflVideoModel
+pub impl @provider.VideoModelV4 for BflVideoModel
 
 // Type aliases
 pub type BflImageModelId = String

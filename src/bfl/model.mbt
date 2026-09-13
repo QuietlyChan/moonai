@@ -140,6 +140,43 @@ pub impl @provider.ProviderV4 for BflProvider with fn image_model(
 }
 
 ///|
+/// Select a Black Forest Labs video model.
+pub fn BflProvider::video(
+  self : BflProvider,
+  model_id : String,
+) -> &@provider.VideoModelV4 {
+  let model = bfl_video_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    poll_interval_ms=self.poll_interval_ms,
+    poll_timeout_ms=self.poll_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.VideoModelV4
+}
+
+///|
+/// Alias for `video`.
+pub fn BflProvider::video_model(
+  self : BflProvider,
+  model_id : String,
+) -> &@provider.VideoModelV4 {
+  self.video(model_id)
+}
+
+///|
+/// Camel-case alias for `video_model`.
+pub fn BflProvider::videoModel(
+  self : BflProvider,
+  model_id : String,
+) -> &@provider.VideoModelV4 {
+  self.video_model(model_id)
+}
+
+///|
 pub impl @provider.ProviderV4 for BflProvider with fn speech_model(
   _self,
   _model_id,
