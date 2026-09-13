@@ -23,6 +23,9 @@ pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[Str
 type GatewayEmbeddingModel
 pub impl @provider.EmbeddingModelV4 for GatewayEmbeddingModel
 
+type GatewayImageModel
+pub impl @provider.ImageModelV4 for GatewayImageModel
+
 type GatewayLanguageModel
 pub impl @provider.LanguageModelV4 for GatewayLanguageModel
 
@@ -34,6 +37,9 @@ pub fn GatewayProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GatewayProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GatewayProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GatewayProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GatewayProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn GatewayProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn GatewayProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn GatewayProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GatewayProvider::language_model(Self, String) -> &@provider.LanguageModelV4
 pub fn GatewayProvider::reranking(Self, String) -> &@provider.RerankingModelV4

@@ -26,3 +26,12 @@ test "gateway provider exposes embedding and reranking models" {
   assert_eq(reranking.provider(), "gateway")
   assert_eq(reranking.model_id(), "cohere/rerank-v3.5")
 }
+
+///|
+test "gateway provider exposes image models" {
+  let provider = create_gateway(api_key="gw-test")
+  let image = provider.image("openai/gpt-image-2")
+  assert_eq(image.provider(), "gateway")
+  assert_eq(image.model_id(), "openai/gpt-image-2")
+  assert_eq(image.max_images_per_call(), None)
+}

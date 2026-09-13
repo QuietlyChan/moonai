@@ -132,10 +132,10 @@ pub impl @provider.ProviderV4 for GatewayProvider with fn reranking_model(
 
 ///|
 pub impl @provider.ProviderV4 for GatewayProvider with fn image_model(
-  _self,
+  self,
   model_id,
 ) {
-  raise @provider.NoSuchModelError(model_id~, model_type=@provider.ImageModel)
+  GatewayProvider::image_model(self, model_id)
 }
 
 ///|
@@ -181,6 +181,41 @@ pub fn gateway(
     idle_timeout_ms~,
     http_transport?,
   ).language_model(model_id)
+}
+
+///|
+/// Select a gateway image model.
+pub fn GatewayProvider::image(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.ImageModelV4 {
+  let model = gateway_image_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.ImageModelV4
+}
+
+///|
+/// Alias for `image`.
+pub fn GatewayProvider::image_model(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.ImageModelV4 {
+  self.image(model_id)
+}
+
+///|
+/// Camel-case alias for `image_model`.
+pub fn GatewayProvider::imageModel(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.ImageModelV4 {
+  self.image_model(model_id)
 }
 
 ///|
