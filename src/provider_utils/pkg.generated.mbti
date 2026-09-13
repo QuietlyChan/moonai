@@ -209,6 +209,12 @@ pub fn merge_headers(Map[String, String], Map[String, String]) -> Map[String, St
 
 pub fn merge_provider_options_resolutions(ProviderOptionsResolution, ProviderOptionsResolution) -> ProviderOptionsResolution
 
+pub fn multipart_boundary(String) -> String?
+
+pub fn multipart_response_part_by_content_type_prefix(Array[MultipartResponsePart], prefix~ : String) -> MultipartResponsePart?
+
+pub fn multipart_response_part_by_name(Array[MultipartResponsePart], name~ : String) -> MultipartResponsePart?
+
 pub fn native_http_transport() -> &HttpTransport
 
 pub fn native_streaming_body_transport() -> &StreamingBodyTransport
@@ -232,6 +238,8 @@ pub fn parseTranscriptionStreamPart(String) -> @provider.TranscriptionModelV4Str
 pub fn parse_json(String) -> Json raise @provider.JSONParseError
 
 pub fn[T] parse_json_with(String, (Json) -> T raise, context? : @provider.TypeValidationContext) -> T raise
+
+pub fn parse_multipart_response(content_type~ : String, data~ : Bytes) -> Array[MultipartResponsePart] raise
 
 pub fn parse_partial_json(String) -> PartialJsonResult
 
@@ -582,6 +590,11 @@ pub(all) struct MultipartFormData {
   body : Bytes
   diagnostic_body : String
 } derive(Eq, @debug.Debug)
+
+pub(all) struct MultipartResponsePart {
+  headers : Map[String, String]
+  body : Bytes
+} derive(@debug.Debug)
 
 pub(all) struct MultipartStreamingPlan {
   boundary : String
