@@ -1,0 +1,39 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/bfl"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const BFL_POLL_INTERVAL_MS : Int = 500
+
+pub const BFL_POLL_TIMEOUT_MS : Int = 60_000
+
+pub const VERSION : String = "0.1.0"
+
+pub fn bfl(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+
+pub fn createBfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
+
+pub fn create_bfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
+
+// Errors
+
+// Types and methods
+type BflImageModel
+pub impl @provider.ImageModelV4 for BflImageModel
+
+pub struct BflProvider {
+  // private fields
+}
+pub fn BflProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn BflProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn BflProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub impl @provider.ProviderV4 for BflProvider
+
+// Type aliases
+pub type BflImageModelId = String
+
+// Traits
