@@ -1341,3 +1341,97 @@ pub async fn get_json_protected(
     }
   }
 }
+
+///|
+/// POST multipart/form-data with an incrementally written streamed field
+/// (AI SDK streaming file uploads, #20036) and decode its JSON response.
+///
+/// The streamed payload is written through
+/// `StreamingBodyTransport::fetch_streaming_body`, so the request body is
+/// never buffered as a whole. The streamed field cannot be replayed;
+/// callers needing transport-level retries should buffer instead (the
+/// ordinary `post_multipart` path). Request metadata uses the plan's
+/// redacted diagnostic representation.
+pub async fn post_multipart_streaming(
+  url~ : String,
+  headers~ : Map[String, String],
+  plan~ : MultipartStreamingPlan,
+  cancellation_token? : @provider.CancellationToken,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  validate_response? : (Json) -> Unit raise,
+  transport~ : &StreamingBodyTransport,
+) -> JsonHttpResponse {
+  @provider.check_cancellation(cancellation_token)
+  let request_headers = copy_headers(headers)
+  request_headers["Content-Type"] = plan.content_type
+  request_headers["Content-Length"] = plan.content_length.to_string()
+  let response = transport.fetch_streaming_body(
+    meth=HttpPost,
+    url~,
+    headers=request_headers,
+    prefix=plan.prefix,
+    body=plan.stream,
+    suffix=plan.suffix,
+    content_length=plan.content_length,
+  )
+  let response_body = @utf8.decode(
+    read_response_with_size_limit(response, url~),
+  )
+  guard response.is_success() else {
+    let error_json = parse_json_if_valid(response_body)
+    let (message, retryable) = handle_failed_response(
+      url~,
+      request_body=plan.diagnostic_body,
+      request_headers~,
+      status_code=response.status_code,
+      response_headers=response.headers,
+      response_body~,
+      error_json~,
+      error_to_message,
+      is_retryable_response,
+    )
+    raise @provider.APICallError(
+      message~,
+      url~,
+      request_body=plan.diagnostic_body,
+      request_headers~,
+      status_code=Some(response.status_code),
+      response_headers=response.headers,
+      response_body~,
+      is_retryable=retryable,
+      data=error_json,
+      cause=None,
+    )
+  }
+  let value = parse_successful_json_response(
+    response_body,
+    url,
+    plan.diagnostic_body,
+    request_headers,
+    response.status_code,
+    response.headers,
+  )
+  validate_successful_json_response(
+    value,
+    validate_response,
+    response_body,
+    url,
+    plan.diagnostic_body,
+    request_headers,
+    response.status_code,
+    response.headers,
+  )
+  {
+    value,
+    request: @provider.RequestMetadata::new(
+      url~,
+      headers=request_headers,
+      body=plan.diagnostic_body,
+    ),
+    response: @provider.ResponseMetadata::new(
+      status_code=response.status_code,
+      headers=response.headers,
+    ),
+  }
+}

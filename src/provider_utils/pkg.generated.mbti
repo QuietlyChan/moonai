@@ -211,6 +211,8 @@ pub fn merge_provider_options_resolutions(ProviderOptionsResolution, ProviderOpt
 
 pub fn native_http_transport() -> &HttpTransport
 
+pub fn native_streaming_body_transport() -> &StreamingBodyTransport
+
 pub fn native_websocket_connector() -> &WebSocketConnector
 
 pub fn next_retry_delay(@provider.RetryPolicy, Int) -> Int
@@ -237,6 +239,8 @@ pub fn parse_transcription_stream_client_frame(String) -> TranscriptionStreamCli
 
 pub fn parse_transcription_stream_part(String) -> @provider.TranscriptionModelV4StreamPart?
 
+pub fn plan_multipart_streaming(Array[MultipartFieldPlan], boundary? : String) -> MultipartStreamingPlan raise
+
 pub async fn post_json(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport? : &HttpTransport) -> JsonHttpResponse
 
 pub async fn post_json_binary(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, transport? : &HttpTransport) -> BinaryHttpResponse
@@ -244,6 +248,8 @@ pub async fn post_json_binary(provider_name~ : String, url~ : String, headers~ :
 pub async fn[E, T] post_json_sse_events(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, idle_timeout_ms? : Int, expected_terminator? : String, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, start_events~ : Array[E], is_stream_error~ : (E) -> Bool, feed_line~ : (String) -> SseDecodeBatch[E] raise, flush_buffered~ : () -> SseDecodeBatch[E] raise, finish_stream? : () -> SseDecodeBatch[E] raise, response~ : () -> T, start_policy? : SseStreamStartPolicy, transport? : &HttpTransport, on_event~ : async (E) -> Unit) -> SseHttpResponse[T]
 
 pub async fn post_multipart(provider_name~ : String, url~ : String, headers~ : Map[String, String], form_data~ : MultipartFormData, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport? : &HttpTransport) -> JsonHttpResponse
+
+pub async fn post_multipart_streaming(url~ : String, headers~ : Map[String, String], plan~ : MultipartStreamingPlan, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport~ : &StreamingBodyTransport) -> JsonHttpResponse
 
 pub fn provider_metadata_from_json(Json, String) -> Map[String, Json]
 
@@ -562,12 +568,28 @@ pub(all) struct MultipartField {
 pub fn MultipartField::file(name~ : String, filename~ : String, media_type~ : String, data~ : Bytes) -> Self
 pub fn MultipartField::text(name~ : String, value~ : String) -> Self
 
+pub(all) enum MultipartFieldPlan {
+  MultipartPlanText(name~ : String, value~ : String)
+  MultipartPlanBytes(name~ : String, filename~ : String, media_type~ : String, data~ : Bytes)
+  MultipartPlanStream(name~ : String, filename~ : String, media_type~ : String, stream~ : &@provider.UploadByteStream)
+}
+
 pub(all) struct MultipartFormData {
   boundary : String
   content_type : String
   body : Bytes
   diagnostic_body : String
 } derive(Eq, @debug.Debug)
+
+pub(all) struct MultipartStreamingPlan {
+  boundary : String
+  content_type : String
+  prefix : Bytes
+  suffix : Bytes
+  stream : &@provider.UploadByteStream
+  content_length : Int64
+  diagnostic_body : String
+}
 
 pub(all) enum MultipartValue {
   MultipartText(String)
@@ -964,6 +986,10 @@ pub(open) trait HttpStreamResponse {
 pub(open) trait HttpTransport {
   async fn fetch(Self, HttpRequest) -> HttpResponse
   async fn fetch_stream(Self, HttpRequest) -> &HttpStreamResponse
+}
+
+pub(open) trait StreamingBodyTransport : HttpTransport {
+  async fn fetch_streaming_body(Self, meth~ : HttpMethod, url~ : String, headers~ : Map[String, String], prefix~ : Bytes, body~ : &@provider.UploadByteStream, suffix~ : Bytes, content_length~ : Int64) -> HttpResponse
 }
 
 pub(open) trait WebSocketConnection {

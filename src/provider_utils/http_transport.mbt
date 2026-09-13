@@ -126,6 +126,29 @@ pub(open) trait HttpTransport {
 }
 
 ///|
+/// Transport-level support for writing a request body incrementally
+/// (AI SDK streaming file uploads, #20036).
+///
+/// `prefix` is written before the streamed payload and `suffix` after it —
+/// multipart file fields carry trailing form data and the closing boundary.
+/// `content_length` is the exact total body size; callers must supply it
+/// (multipart plans derive it from the stream's `size_hint_bytes`), which
+/// lets transports set Content-Length instead of relying on chunked
+/// encoding.
+pub(open) trait StreamingBodyTransport: HttpTransport {
+  async fn fetch_streaming_body(
+    Self,
+    meth~ : HttpMethod,
+    url~ : String,
+    headers~ : Map[String, String],
+    prefix~ : Bytes,
+    body~ : &@provider.UploadByteStream,
+    suffix~ : Bytes,
+    content_length~ : Int64,
+  ) -> HttpResponse
+}
+
+///|
 priv struct NativeHttpStreamResponse {
   client : @http.Client
   response : @http.Response
@@ -238,7 +261,49 @@ impl HttpTransport for NativeHttpTransport with fn fetch_stream(_self, request) 
 }
 
 ///|
+impl StreamingBodyTransport for NativeHttpTransport with fn fetch_streaming_body(
+  _self,
+  meth~,
+  url~,
+  headers~,
+  prefix~,
+  body~,
+  suffix~,
+  content_length~,
+) -> HttpResponse {
+  guard meth == HttpPost else {
+    fail("native streaming-body transport supports POST requests only")
+  }
+  let content_headers = copy_headers(headers)
+  content_headers["Content-Length"] = content_length.to_string()
+  let client = @http.post_stream(url, headers=content_headers)
+  // The response wrapper takes ownership on success; close only on failure.
+  errdefer client.close()
+  client.write(prefix)
+  for ;; {
+    match body.read_chunk() {
+      Some(chunk) => client.write(chunk)
+      None => break
+    }
+  }
+  client.write(suffix)
+  let response = client.end_request()
+  HttpResponse::new(
+    status_code=response.code,
+    reason=response.reason,
+    headers=response.headers,
+    body=client.read_all().binary(),
+  )
+}
+
+///|
 /// Return the default native transport as an injectable trait object.
 pub fn native_http_transport() -> &HttpTransport {
+  NativeHttpTransport::new()
+}
+
+///|
+/// Return the default native transport with streaming-body upload support.
+pub fn native_streaming_body_transport() -> &StreamingBodyTransport {
   NativeHttpTransport::new()
 }

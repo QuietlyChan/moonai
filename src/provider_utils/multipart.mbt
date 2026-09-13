@@ -275,3 +275,177 @@ pub fn encode_multipart_form_data(
     diagnostic_body: diagnostic.to_string(),
   }
 }
+
+///|
+/// One field in a streaming multipart plan: text, buffered file bytes, or
+/// a file backed by an incrementally-readable stream.
+pub(all) enum MultipartFieldPlan {
+  MultipartPlanText(name~ : String, value~ : String)
+  MultipartPlanBytes(
+    name~ : String,
+    filename~ : String,
+    media_type~ : String,
+    data~ : Bytes
+  )
+  MultipartPlanStream(
+    name~ : String,
+    filename~ : String,
+    media_type~ : String,
+    stream~ : &@provider.UploadByteStream
+  )
+}
+
+///|
+/// A multipart/form-data request split for incremental upload
+/// (AI SDK streaming file uploads, #20036).
+///
+/// `prefix` covers every byte up to and including the streamed field's
+/// headers; `suffix` covers the trailing form fields and the closing
+/// boundary. `content_length` is the exact total body size, derived from
+/// the streamed field's `size_hint_bytes`.
+pub(all) struct MultipartStreamingPlan {
+  boundary : String
+  content_type : String
+  prefix : Bytes
+  suffix : Bytes
+  /// The streamed payload written between prefix and suffix.
+  stream : &@provider.UploadByteStream
+  content_length : Int64
+  diagnostic_body : String
+}
+
+///|
+fn multipart_plan_field_parts(
+  fields : Array[MultipartFieldPlan],
+  index : Int,
+  boundary : String,
+  buffer : @buffer.Buffer,
+  diagnostic : StringBuilder,
+) -> Unit raise {
+  let field = fields[index]
+  validate_multipart_token(field_name_of_plan(field), "field name")
+  write_multipart_string(buffer, "--\{boundary}\r\n")
+  diagnostic.write_string("--\{boundary}\r\n")
+  match field {
+    MultipartPlanText(value~, ..) => {
+      let disposition = "Content-Disposition: form-data; name=\"\{field_name_of_plan(field)}\"\r\n\r\n"
+      write_multipart_string(buffer, disposition)
+      write_multipart_string(buffer, value)
+      write_multipart_string(buffer, "\r\n")
+      diagnostic.write_string(disposition)
+      diagnostic.write_string(value)
+      diagnostic.write_string("\r\n")
+    }
+    MultipartPlanBytes(filename~, media_type~, data~, ..) => {
+      validate_multipart_token(filename, "filename")
+      validate_multipart_token(media_type, "media type")
+      let name = field_name_of_plan(field)
+      let disposition = "Content-Disposition: form-data; name=\"\{name}\"; filename=\"\{filename}\"\r\n"
+      let content_type = "Content-Type: \{media_type}\r\n\r\n"
+      write_multipart_string(buffer, disposition)
+      write_multipart_string(buffer, content_type)
+      buffer.write_bytes(data)
+      write_multipart_string(buffer, "\r\n")
+      diagnostic.write_string(disposition)
+      diagnostic.write_string(content_type)
+      diagnostic.write_string(
+        multipart_file_diagnostic(name, filename, media_type, data.length()),
+      )
+      diagnostic.write_string("\r\n")
+    }
+    MultipartPlanStream(filename~, media_type~, ..) => {
+      // Headers only; the payload arrives from the stream and the trailing
+      // CRLF belongs to the suffix.
+      validate_multipart_token(filename, "filename")
+      validate_multipart_token(media_type, "media type")
+      let name = field_name_of_plan(field)
+      let disposition = "Content-Disposition: form-data; name=\"\{name}\"; filename=\"\{filename}\"\r\n"
+      let content_type = "Content-Type: \{media_type}\r\n\r\n"
+      write_multipart_string(buffer, disposition)
+      write_multipart_string(buffer, content_type)
+      diagnostic.write_string(disposition)
+      diagnostic.write_string(content_type)
+      diagnostic.write_string("<stream>")
+      diagnostic.write_string("\r\n")
+    }
+  }
+}
+
+///|
+fn field_name_of_plan(field : MultipartFieldPlan) -> String {
+  match field {
+    MultipartPlanText(name~, ..) => name
+    MultipartPlanBytes(name~, ..) => name
+    MultipartPlanStream(name~, ..) => name
+  }
+}
+
+///|
+/// Build a streaming multipart plan. Raises when the streamed field does
+/// not declare a size hint — exact Content-Length is required so transports
+/// can avoid chunked encoding.
+pub fn plan_multipart_streaming(
+  fields : Array[MultipartFieldPlan],
+  boundary? : String = "moonai-7MA4YWxkTrZu0gW",
+) -> MultipartStreamingPlan raise {
+  validate_multipart_token(boundary, "boundary")
+  let prefix = @buffer.Buffer()
+  let suffix = @buffer.Buffer()
+  let diagnostic = StringBuilder()
+  let mut stream : &@provider.UploadByteStream? = None
+  let mut stream_index = -1
+  for index, field in fields {
+    if field is MultipartPlanStream(..) {
+      guard stream_index < 0 else {
+        fail("multipart streaming plans support at most one streamed field")
+      }
+      stream_index = index
+    }
+  }
+  guard stream_index >= 0 else {
+    fail("multipart streaming plans require one streamed field")
+  }
+  for index, field in fields {
+    if field is MultipartPlanStream(stream=found, ..) {
+      stream = Some(found)
+    }
+    // The streamed field's boundary and headers belong to the prefix; its
+    // payload separator and everything after it belong to the suffix.
+    if index > stream_index {
+      multipart_plan_field_parts(fields, index, boundary, suffix, diagnostic)
+    } else {
+      multipart_plan_field_parts(fields, index, boundary, prefix, diagnostic)
+    }
+    if index == stream_index {
+      write_multipart_string(suffix, "\r\n")
+      diagnostic.write_string("\r\n")
+    }
+  }
+  write_multipart_string(suffix, "--\{boundary}--\r\n")
+  diagnostic.write_string("--\{boundary}--\r\n")
+  let stream = match stream {
+    Some(value) => value
+    None => fail("multipart streaming plans require one streamed field")
+  }
+  let stream_size = match stream.size_hint_bytes() {
+    Some(size) => size
+    None =>
+      raise @provider.UnsupportedFunctionalityError(
+        functionality="streaming multipart upload without a size hint",
+      )
+  }
+  let prefix_bytes = prefix.to_bytes()
+  let suffix_bytes = suffix.to_bytes()
+  let content_length = prefix_bytes.length().to_int64() +
+    stream_size +
+    suffix_bytes.length().to_int64()
+  {
+    boundary,
+    content_type: "multipart/form-data; boundary=\{boundary}",
+    prefix: prefix_bytes,
+    suffix: suffix_bytes,
+    stream,
+    content_length,
+    diagnostic_body: diagnostic.to_string(),
+  }
+}
