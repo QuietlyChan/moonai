@@ -1,0 +1,48 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/xai"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createXai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> XaiProvider
+
+pub fn create_xai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> XaiProvider
+
+pub fn supportsReasoningEffort(String) -> Bool
+
+pub fn supports_reasoning_effort(String) -> Bool
+
+pub fn xai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+type XaiChatLanguageModel
+pub impl @provider.LanguageModelV4 for XaiChatLanguageModel
+
+type XaiImageModel
+pub impl @provider.ImageModelV4 for XaiImageModel
+
+pub struct XaiProvider {
+  // private fields
+}
+pub fn XaiProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn XaiProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn XaiProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn XaiProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn XaiProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn XaiProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn XaiProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for XaiProvider
+
+// Type aliases
+pub type XaiChatModelId = String
+
+pub type XaiImageModelId = String
+
+// Traits
