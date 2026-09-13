@@ -1,0 +1,43 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/cartesia"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const CARTESIA_API_VERSION : String = "2025-04-16"
+
+pub const VERSION : String = "0.1.0"
+
+pub fn createCartesia(api_key? : String, base_url? : String, api_version? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> CartesiaProvider
+
+pub fn create_cartesia(api_key? : String, base_url? : String, api_version? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> CartesiaProvider
+
+// Errors
+
+// Types and methods
+pub struct CartesiaProvider {
+  // private fields
+}
+pub fn CartesiaProvider::speech(Self, String) -> &@provider.SpeechModelV4
+pub fn CartesiaProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
+pub fn CartesiaProvider::speech_model(Self, String) -> &@provider.SpeechModelV4
+pub fn CartesiaProvider::transcription(Self, String) -> &@provider.TranscriptionModelV4
+pub fn CartesiaProvider::transcriptionModel(Self, String) -> &@provider.TranscriptionModelV4
+pub fn CartesiaProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4
+pub impl @provider.ProviderV4 for CartesiaProvider
+
+type CartesiaSpeechModel
+pub impl @provider.SpeechModelV4 for CartesiaSpeechModel
+
+type CartesiaTranscriptionModel
+pub impl @provider.TranscriptionModelV4 for CartesiaTranscriptionModel
+
+// Type aliases
+pub type CartesiaSpeechModelId = String
+
+pub type CartesiaTranscriptionModelId = String
+
+// Traits
