@@ -2,16 +2,25 @@
 package "QuietlyChan/moonai/ai/model"
 
 import {
+  "QuietlyChan/moonai/ai/prompt",
   "QuietlyChan/moonai/provider",
   "moonbitlang/core/debug",
 }
 
 // Values
+pub fn add_tool_input_examples_middleware(prefix? : String, format? : (@provider.LanguageModelV4FunctionToolInputExample, Int) -> String, remove? : Bool) -> @provider.LanguageModelV4Middleware
+
 pub fn asLanguageModelV4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
 pub fn as_language_model_v4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
+pub fn default_embedding_settings_middleware(headers? : Map[String, String], provider_options? : Map[String, Json]) -> @provider.EmbeddingModelV4Middleware
+
+pub fn default_instructions_middleware(instructions~ : @prompt.Instructions) -> @provider.LanguageModelV4Middleware
+
 pub fn default_settings_middleware(@provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4Middleware
+
+pub fn extract_json_middleware(transform? : (String) -> String) -> @provider.LanguageModelV4Middleware
 
 pub fn extract_reasoning_middleware(mode~ : ExtractReasoningMode) -> @provider.LanguageModelV4Middleware
 
