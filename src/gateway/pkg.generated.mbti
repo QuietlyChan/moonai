@@ -7,6 +7,8 @@ import {
 }
 
 // Values
+pub const GATEWAY_MAX_EMBEDDINGS_PER_CALL : Int = 2048
+
 pub const VERSION : String = "0.1.0"
 
 pub fn createGateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
@@ -18,6 +20,9 @@ pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[Str
 // Errors
 
 // Types and methods
+type GatewayEmbeddingModel
+pub impl @provider.EmbeddingModelV4 for GatewayEmbeddingModel
+
 type GatewayLanguageModel
 pub impl @provider.LanguageModelV4 for GatewayLanguageModel
 
@@ -26,9 +31,18 @@ pub struct GatewayProvider {
 }
 pub fn GatewayProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn GatewayProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn GatewayProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GatewayProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GatewayProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GatewayProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GatewayProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn GatewayProvider::reranking(Self, String) -> &@provider.RerankingModelV4
+pub fn GatewayProvider::rerankingModel(Self, String) -> &@provider.RerankingModelV4
+pub fn GatewayProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4
 pub impl @provider.ProviderV4 for GatewayProvider
+
+type GatewayRerankingModel
+pub impl @provider.RerankingModelV4 for GatewayRerankingModel
 
 // Type aliases
 pub type GatewayModelId = String

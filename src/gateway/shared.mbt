@@ -11,12 +11,13 @@ fn gateway_error_to_message(json : Json) -> String? raise {
 }
 
 ///|
-fn gateway_request_headers(
+/// Auth + content-type + UA base shared by every gateway model surface.
+fn gateway_base_headers(
   api_key~ : String,
   headers~ : Map[String, String],
   extra~ : Map[String, String],
-  model_id~ : String,
-  streaming~ : Bool,
+  content_type~ : String,
+  accept~ : String,
 ) -> Map[String, String] raise @provider.LoadAPIKeyError {
   let api_key = @provider_utils.load_api_key(
     api_key,
@@ -25,10 +26,8 @@ fn gateway_request_headers(
   )
   let base : Map[String, String] = Map([
     ("Authorization", "Bearer \{api_key}"),
-    ("Content-Type", "application/json"),
-    ("ai-language-model-specification-version", "4"),
-    ("ai-language-model-id", model_id),
-    ("accept", if streaming { "text/event-stream" } else { "application/json" }),
+    ("Content-Type", content_type),
+    ("accept", accept),
   ])
   @provider_utils.with_user_agent_suffix(
     @provider_utils.merge_headers(
@@ -37,6 +36,26 @@ fn gateway_request_headers(
     ),
     ["ai-sdk/gateway/\{VERSION}"],
   )
+}
+
+///|
+fn gateway_request_headers(
+  api_key~ : String,
+  headers~ : Map[String, String],
+  extra~ : Map[String, String],
+  model_id~ : String,
+  streaming~ : Bool,
+) -> Map[String, String] raise @provider.LoadAPIKeyError {
+  let resolved = gateway_base_headers(
+    api_key~,
+    headers~,
+    extra~,
+    content_type="application/json",
+    accept=if streaming { "text/event-stream" } else { "application/json" },
+  )
+  resolved["ai-language-model-specification-version"] = "4"
+  resolved["ai-language-model-id"] = model_id
+  resolved
 }
 
 ///|

@@ -116,21 +116,18 @@ pub impl @provider.ProviderV4 for GatewayProvider with fn language_model(
 
 ///|
 pub impl @provider.ProviderV4 for GatewayProvider with fn embedding_model(
-  _self,
+  self,
   model_id,
 ) {
-  raise @provider.NoSuchModelError(
-    model_id~,
-    model_type=@provider.EmbeddingModel,
-  )
+  GatewayProvider::embedding_model(self, model_id)
 }
 
 ///|
 pub impl @provider.ProviderV4 for GatewayProvider with fn reranking_model(
-  _self,
-  _model_id,
+  self,
+  model_id,
 ) {
-  None
+  Some(GatewayProvider::reranking_model(self, model_id))
 }
 
 ///|
@@ -184,4 +181,74 @@ pub fn gateway(
     idle_timeout_ms~,
     http_transport?,
   ).language_model(model_id)
+}
+
+///|
+/// Select a gateway embedding model.
+pub fn GatewayProvider::embedding(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.EmbeddingModelV4 {
+  let model = gateway_embedding_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.EmbeddingModelV4
+}
+
+///|
+/// Alias for `embedding`.
+pub fn GatewayProvider::embedding_model(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.EmbeddingModelV4 {
+  self.embedding(model_id)
+}
+
+///|
+/// Camel-case alias for `embedding_model`.
+pub fn GatewayProvider::embeddingModel(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.EmbeddingModelV4 {
+  self.embedding_model(model_id)
+}
+
+///|
+/// Select a gateway reranking model.
+pub fn GatewayProvider::reranking(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.RerankingModelV4 {
+  let model = gateway_reranking_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.RerankingModelV4
+}
+
+///|
+/// Alias for `reranking`.
+pub fn GatewayProvider::reranking_model(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.RerankingModelV4 {
+  self.reranking(model_id)
+}
+
+///|
+/// Camel-case alias for `reranking_model`.
+pub fn GatewayProvider::rerankingModel(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.RerankingModelV4 {
+  self.reranking_model(model_id)
 }
