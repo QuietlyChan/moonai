@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/assemblyai"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const ASSEMBLYAI_POLL_INTERVAL_MS : Int = 3000
+
+pub const ASSEMBLYAI_POLL_TIMEOUT_MS : Int = 600_000
+
+pub const VERSION : String = "0.1.0"
+
+pub fn createAssemblyAI(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> AssemblyAIProvider
+
+pub fn create_assemblyai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> AssemblyAIProvider
+
+// Errors
+
+// Types and methods
+pub struct AssemblyAIProvider {
+  // private fields
+}
+pub fn AssemblyAIProvider::transcription(Self, String) -> &@provider.TranscriptionModelV4
+pub fn AssemblyAIProvider::transcriptionModel(Self, String) -> &@provider.TranscriptionModelV4
+pub fn AssemblyAIProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4
+pub impl @provider.ProviderV4 for AssemblyAIProvider
+
+type AssemblyAITranscriptionModel
+pub impl @provider.TranscriptionModelV4 for AssemblyAITranscriptionModel
+
+// Type aliases
+pub type AssemblyAITranscriptionModelId = String
+
+// Traits

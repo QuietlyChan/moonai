@@ -1435,3 +1435,107 @@ pub async fn post_multipart_streaming(
     ),
   }
 }
+
+///|
+/// POST a raw byte payload and parse a successful JSON response (for
+/// providers whose upload endpoints accept binary bodies, e.g. AssemblyAI
+/// /v2/upload). Retry semantics match `post_json`.
+pub async fn post_bytes(
+  provider_name~ : String,
+  url~ : String,
+  headers~ : Map[String, String],
+  body~ : Bytes,
+  timeout_ms? : Int = 120_000,
+  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  cancellation_token? : @provider.CancellationToken,
+  error_to_message? : (Json) -> String? raise,
+  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  transport? : &HttpTransport,
+) -> JsonHttpResponse {
+  let resolved_transport = transport.unwrap_or(native_http_transport())
+  let mut retry_number = 0
+  let mut delay = initial_retry_delay(retry_policy)
+  for ;; {
+    @provider.check_cancellation(cancellation_token)
+    try {
+      @provider.check_cancellation(cancellation_token)
+      let response = fetch_buffered_with_timeout(
+        provider_name,
+        HttpRequest::post(url~, headers~, body~),
+        timeout_ms,
+        resolved_transport,
+      )
+      let response_body = binary_error_body(response.body)
+      guard response.is_success() else {
+        let error_json = parse_json_if_valid(response_body)
+        let (message, retryable) = handle_failed_response(
+          url~,
+          request_body="<binary \{body.length()} bytes>",
+          request_headers=headers,
+          status_code=response.status_code,
+          response_headers=response.headers,
+          response_body~,
+          error_json~,
+          error_to_message,
+          is_retryable_response,
+        )
+        raise @provider.APICallError(
+          message~,
+          url~,
+          request_body="<binary>",
+          request_headers=headers,
+          status_code=Some(response.status_code),
+          response_headers=response.headers,
+          response_body~,
+          is_retryable=retryable,
+          data=error_json,
+          cause=None,
+        )
+      }
+      let value = parse_json_if_valid(response_body)
+      guard value is Some(value) else {
+        raise @provider.JSONParseError(
+          text=response_body,
+          cause="response is not valid JSON",
+        )
+      }
+      let request : @provider.RequestMetadata = @provider.RequestMetadata::new(
+        url~,
+        headers~,
+        body="<binary \{body.length()} bytes>",
+      )
+      let response_metadata : @provider.ResponseMetadata = {
+        ..@provider.ResponseMetadata::empty(),
+        status_code: Some(response.status_code),
+        headers: response.headers,
+        body: Some(response_body),
+      }
+      let http_response : JsonHttpResponse = {
+        value,
+        request,
+        response: response_metadata,
+      }
+      http_response
+    } catch {
+      error if @async.is_cancellation_error(error) ||
+        @async.is_being_cancelled() => raise error
+      error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
+        retry_number = retry_number + 1
+        if delay > 0 {
+          sleep_with_cancellation(delay, cancellation_token)
+        }
+        delay = next_retry_delay(retry_policy, delay)
+        continue
+      }
+      error =>
+        raise normalize_api_transport_error(
+          error,
+          url~,
+          request_body="<binary>",
+          request_headers=headers,
+        )
+    } noraise {
+      result => return result
+    }
+  }
+}

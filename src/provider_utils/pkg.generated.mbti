@@ -241,6 +241,8 @@ pub fn parse_transcription_stream_part(String) -> @provider.TranscriptionModelV4
 
 pub fn plan_multipart_streaming(Array[MultipartFieldPlan], boundary? : String) -> MultipartStreamingPlan raise
 
+pub async fn post_bytes(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Bytes, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, transport? : &HttpTransport) -> JsonHttpResponse
+
 pub async fn post_json(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, validate_response? : (Json) -> Unit raise, transport? : &HttpTransport) -> JsonHttpResponse
 
 pub async fn post_json_binary(provider_name~ : String, url~ : String, headers~ : Map[String, String], body~ : Json, timeout_ms? : Int, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, error_to_message? : (Json) -> String? raise, is_retryable_response? : (Int, Json?) -> Bool? raise, transport? : &HttpTransport) -> BinaryHttpResponse
