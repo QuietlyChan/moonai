@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/klingai"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createKlingai(api_key? : String, access_key? : String, secret_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> KlingaiProvider raise @provider.LoadAPIKeyError
+
+pub fn create_klingai(api_key? : String, access_key? : String, secret_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> KlingaiProvider raise @provider.LoadAPIKeyError
+
+pub fn klingai(String, api_key? : String, access_key? : String, secret_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.VideoModelV4 raise @provider.LoadAPIKeyError
+
+pub fn resolve_klingai_auth_token(api_key? : String, access_key? : String, secret_key? : String) -> String raise @provider.LoadAPIKeyError
+
+// Errors
+
+// Types and methods
+pub struct KlingaiProvider {
+  // private fields
+}
+pub fn KlingaiProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn KlingaiProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub fn KlingaiProvider::video_model(Self, String) -> &@provider.VideoModelV4
+pub impl @provider.ProviderV4 for KlingaiProvider
+
+type KlingaiVideoModel
+pub impl @provider.VideoModelV4 for KlingaiVideoModel
+
+// Type aliases
+pub type KlingaiVideoModelId = String
+
+// Traits
