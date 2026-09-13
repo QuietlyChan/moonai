@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/zai"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createZai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> ZaiProvider
+
+pub fn create_zai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> ZaiProvider
+
+pub fn zai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+type ZaiChatLanguageModel
+pub impl @provider.LanguageModelV4 for ZaiChatLanguageModel
+
+pub struct ZaiProvider {
+  // private fields
+}
+pub fn ZaiProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn ZaiProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn ZaiProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn ZaiProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for ZaiProvider
+
+// Type aliases
+pub type ZaiChatModelId = String
+
+// Traits
