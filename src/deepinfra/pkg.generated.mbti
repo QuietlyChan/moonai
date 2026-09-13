@@ -1,0 +1,52 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/deepinfra"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createDeepInfra(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepInfraProvider
+
+pub fn create_deepinfra(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepInfraProvider
+
+pub fn deepinfra(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+type DeepInfraChatLanguageModel
+pub impl @provider.LanguageModelV4 for DeepInfraChatLanguageModel
+
+type DeepInfraImageModel
+pub impl @provider.ImageModelV4 for DeepInfraImageModel
+
+pub struct DeepInfraProvider {
+  // private fields
+}
+pub fn DeepInfraProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn DeepInfraProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn DeepInfraProvider::completionModel(Self, String) -> &@provider.LanguageModelV4
+pub fn DeepInfraProvider::completion_model(Self, String) -> &@provider.LanguageModelV4
+pub fn DeepInfraProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn DeepInfraProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn DeepInfraProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn DeepInfraProvider::image(Self, String) -> &@provider.ImageModelV4
+pub fn DeepInfraProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn DeepInfraProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn DeepInfraProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for DeepInfraProvider
+
+// Type aliases
+pub type DeepInfraChatModelId = String
+
+pub type DeepInfraCompletionModelId = String
+
+pub type DeepInfraEmbeddingModelId = String
+
+pub type DeepInfraImageModelId = String
+
+// Traits
