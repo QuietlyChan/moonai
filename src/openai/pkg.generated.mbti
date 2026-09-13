@@ -30,7 +30,11 @@ pub fn openai_responses_language_model(OpenAIResponsesModel) -> &@provider.Langu
 
 pub fn openai_speech(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.SpeechModelV4 raise @provider.InvalidArgumentError
 
+pub fn openai_speech_model(provider_name~ : String, base_url~ : String, model_id~ : String, api_key~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int, http_transport~ : &@provider_utils.HttpTransport) -> OpenAISpeechModel
+
 pub fn openai_transcription(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport) -> &@provider.TranscriptionModelV4 raise @provider.InvalidArgumentError
+
+pub fn openai_transcription_model(provider_name~ : String, base_url~ : String, model_id~ : String, api_key~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int, http_transport~ : &@provider_utils.HttpTransport, websocket_connector~ : &@provider_utils.WebSocketConnector) -> OpenAITranscriptionModel
 
 pub fn openai_translation(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], websocket_connector? : &@provider_utils.WebSocketConnector) -> &@provider.SpeechTranslationModelV4 raise @provider.InvalidArgumentError
 
@@ -594,6 +598,17 @@ pub(all) enum OpenAIShellSkill {
 pub fn OpenAIShellSkill::inline(name~ : String, description~ : String, data~ : String) -> Self
 pub fn OpenAIShellSkill::reference(@provider.ProviderReference, version? : String) -> Self
 
+pub(all) struct OpenAISpeechModel {
+  provider_name : String
+  base_url : String
+  model_id : String
+  api_key : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  http_transport : &@provider_utils.HttpTransport
+}
+pub impl @provider.SpeechModelV4 for OpenAISpeechModel
+
 pub(all) struct OpenAISpeechModelOptions {
   instructions : String?
   speed : Double?
@@ -671,6 +686,18 @@ pub fn OpenAITools::webSearch(Self, options? : OpenAIWebSearchOptions, on_input_
 pub fn OpenAITools::webSearchPreview(Self, options? : OpenAIWebSearchPreviewOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::web_search(Self, options? : OpenAIWebSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::web_search_preview(Self, options? : OpenAIWebSearchPreviewOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+
+pub(all) struct OpenAITranscriptionModel {
+  provider_name : String
+  base_url : String
+  model_id : String
+  api_key : String
+  headers : Map[String, String]
+  idle_timeout_ms : Int
+  http_transport : &@provider_utils.HttpTransport
+  websocket_connector : &@provider_utils.WebSocketConnector
+}
+pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel
 
 pub(all) struct OpenAITranscriptionModelOptions {
   include_values : Array[String]?

@@ -1,0 +1,54 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/mistral"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createMistral(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MistralProvider
+
+pub fn create_mistral(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MistralProvider
+
+pub fn mistral(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+type MistralChatLanguageModel
+pub impl @provider.LanguageModelV4 for MistralChatLanguageModel
+
+type MistralEmbeddingModel
+pub impl @provider.EmbeddingModelV4 for MistralEmbeddingModel
+
+pub struct MistralProvider {
+  // private fields
+}
+pub fn MistralProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn MistralProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn MistralProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn MistralProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn MistralProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn MistralProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn MistralProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn MistralProvider::speech(Self, String) -> &@provider.SpeechModelV4
+pub fn MistralProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
+pub fn MistralProvider::speech_model(Self, String) -> &@provider.SpeechModelV4
+pub fn MistralProvider::transcription(Self, String) -> &@provider.TranscriptionModelV4
+pub fn MistralProvider::transcriptionModel(Self, String) -> &@provider.TranscriptionModelV4
+pub fn MistralProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4
+pub impl @provider.ProviderV4 for MistralProvider
+
+// Type aliases
+pub type MistralChatModelId = String
+
+pub type MistralEmbeddingModelId = String
+
+pub type MistralSpeechModelId = String
+
+pub type MistralTranscriptionModelId = String
+
+// Traits

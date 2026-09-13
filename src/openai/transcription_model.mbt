@@ -1,6 +1,6 @@
 ///|
 /// Official OpenAI audio transcription model.
-priv struct OpenAITranscriptionModel {
+pub(all) struct OpenAITranscriptionModel {
   provider_name : String
   base_url : String
   model_id : String
@@ -36,7 +36,8 @@ priv struct ParsedOpenAITranscriptionStreamOptions {
 }
 
 ///|
-fn openai_transcription_model(
+/// Build a standalone OpenAI transcription_model wire model for cross-package reuse.
+pub fn openai_transcription_model(
   provider_name~ : String,
   base_url~ : String,
   model_id~ : String,
@@ -790,28 +791,28 @@ async fn OpenAITranscriptionModel::stream_transcription_v4(
 }
 
 ///|
-impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn specification_version(
+pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn specification_version(
   _self,
 ) -> String {
   "v4"
 }
 
 ///|
-impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn provider(
+pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn provider(
   self,
 ) -> String {
   self.provider_name
 }
 
 ///|
-impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn model_id(
+pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn model_id(
   self,
 ) -> String {
   self.model_id
 }
 
 ///|
-impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_generate(
+pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_generate(
   self,
   options,
 ) {
@@ -819,7 +820,7 @@ impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_gene
 }
 
 ///|
-impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_stream(
+pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_stream(
   self,
   options,
   on_part,

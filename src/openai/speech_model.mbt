@@ -1,6 +1,6 @@
 ///|
 /// Official OpenAI text-to-speech model.
-priv struct OpenAISpeechModel {
+pub(all) struct OpenAISpeechModel {
   provider_name : String
   base_url : String
   model_id : String
@@ -11,7 +11,8 @@ priv struct OpenAISpeechModel {
 }
 
 ///|
-fn openai_speech_model(
+/// Build a standalone OpenAI speech_model wire model for cross-package reuse.
+pub fn openai_speech_model(
   provider_name~ : String,
   base_url~ : String,
   model_id~ : String,
@@ -169,24 +170,24 @@ async fn OpenAISpeechModel::generate_speech_v4(
 }
 
 ///|
-impl @provider.SpeechModelV4 for OpenAISpeechModel with fn specification_version(
+pub impl @provider.SpeechModelV4 for OpenAISpeechModel with fn specification_version(
   _self,
 ) -> String {
   "v4"
 }
 
 ///|
-impl @provider.SpeechModelV4 for OpenAISpeechModel with fn provider(self) -> String {
+pub impl @provider.SpeechModelV4 for OpenAISpeechModel with fn provider(self) -> String {
   self.provider_name
 }
 
 ///|
-impl @provider.SpeechModelV4 for OpenAISpeechModel with fn model_id(self) -> String {
+pub impl @provider.SpeechModelV4 for OpenAISpeechModel with fn model_id(self) -> String {
   self.model_id
 }
 
 ///|
-impl @provider.SpeechModelV4 for OpenAISpeechModel with fn do_generate(
+pub impl @provider.SpeechModelV4 for OpenAISpeechModel with fn do_generate(
   self,
   options,
 ) {
