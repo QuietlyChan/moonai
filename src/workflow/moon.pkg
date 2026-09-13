@@ -5,6 +5,7 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/env",
   "moonbitlang/core/json",
 }
 

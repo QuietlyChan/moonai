@@ -51,7 +51,7 @@ fn workflow_message_to_json(message : @provider_utils.ModelMessage) -> Json {
 
 ///|
 fn workflow_message_from_json(
-  value : Json,
+  value~ : Json,
 ) -> @provider_utils.ModelMessage raise {
   guard value is Object(fields) else {
     raise WorkflowError(message="snapshot message must be an object")
@@ -147,7 +147,7 @@ pub fn workflow_snapshot_to_json(snapshot~ : WorkflowSessionSnapshot) -> Json {
 /// Deserialize a workflow session snapshot from JSON produced by
 /// `workflow_snapshot_to_json`.
 pub fn workflow_snapshot_from_json(
-  value : Json,
+  value~ : Json,
 ) -> WorkflowSessionSnapshot raise {
   guard value is Object(fields) else {
     raise WorkflowError(message="workflow snapshot must be an object")
@@ -164,7 +164,7 @@ pub fn workflow_snapshot_from_json(
   match fields.get("messages") {
     Some(Array(items)) =>
       for item in items {
-        messages.push(workflow_message_from_json(item))
+        messages.push(workflow_message_from_json(value=item))
       }
     _ => ()
   }

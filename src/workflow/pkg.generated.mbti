@@ -12,11 +12,19 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
+pub fn resolve_workflow_tool_approval_secret(secret~ : WorkflowToolApprovalSecret) -> String raise WorkflowError
+
 pub fn validate_workflow_output(spec~ : WorkflowOutputSpecification, text~ : String) -> Json raise WorkflowOutputValidationError
 
-pub fn workflow_snapshot_from_json(Json) -> WorkflowSessionSnapshot raise
+pub async fn workflow_generate_video(model~ : &@provider.VideoModelV4, options~ : @provider.VideoModelV4CallOptions, step_id~ : String, poll_interval_ms? : Int, poll_timeout_ms? : Int) -> @provider.VideoModelV4Result
+
+pub fn workflow_snapshot_from_json(value~ : Json) -> WorkflowSessionSnapshot raise
 
 pub fn workflow_snapshot_to_json(snapshot~ : WorkflowSessionSnapshot) -> Json
+
+pub fn workflow_ui_chunks_from_text(text~ : String, tool_calls~ : Array[@provider.ToolCall]) -> Array[Json]
+
+pub fn workflow_ui_message_chunk(@provider.LanguageModelV4StreamPart) -> Json?
 
 // Errors
 pub suberror WorkflowError {
@@ -45,6 +53,19 @@ pub(all) struct WorkflowAgentResult {
   snapshot : WorkflowSessionSnapshot
 } derive(@debug.Debug)
 
+pub(all) struct WorkflowChatResponse {
+  chunks : Array[Json]
+  snapshot : Json
+  steps : Int
+} derive(@debug.Debug)
+
+pub struct WorkflowChatTransport {
+  // private fields
+}
+pub fn WorkflowChatTransport::new(agent~ : WorkflowAgent) -> Self
+pub fn WorkflowChatTransport::reconnect_to_stream(Self, snapshot_json~ : Json) -> Array[Json] raise
+pub async fn WorkflowChatTransport::send_messages(Self, prompt~ : String) -> WorkflowChatResponse
+
 pub struct WorkflowHarnessBridge {
   session : &@harness.HarnessV1Session
 }
@@ -68,6 +89,10 @@ pub(all) struct WorkflowSessionSnapshot {
   messages : Array[@provider_utils.ModelMessage]
   steps : Int
 } derive(@debug.Debug)
+
+pub(all) struct WorkflowToolApprovalSecret {
+  environment_variable : String
+} derive(Eq, @debug.Debug)
 
 // Type aliases
 

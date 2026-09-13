@@ -20,7 +20,7 @@ test "workflow session snapshot roundtrips full history" {
     steps: 2,
   }
   let restored = workflow_snapshot_from_json(
-    workflow_snapshot_to_json(snapshot~),
+    value=workflow_snapshot_to_json(snapshot~),
   )
   assert_eq(restored.agent_id, Some("research-agent"))
   assert_eq(restored.steps, 2)
@@ -36,7 +36,7 @@ test "workflow session snapshot roundtrips full history" {
 ///|
 test "workflow snapshot rejects unknown roles and missing ids" {
   try
-    workflow_snapshot_from_json({ "messages": [{ "role": "referee" }] })
+    workflow_snapshot_from_json(value={ "messages": [{ "role": "referee" }] })
   catch {
     WorkflowError(message~) =>
       assert_true(message.contains("unknown snapshot role"))
@@ -45,7 +45,7 @@ test "workflow snapshot rejects unknown roles and missing ids" {
     _ => fail("expected snapshot rejection")
   }
   try
-    workflow_snapshot_from_json({
+    workflow_snapshot_from_json(value={
       "messages": [{ "role": "tool", "content": "x" }],
     })
   catch {
