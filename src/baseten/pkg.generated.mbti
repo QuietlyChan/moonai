@@ -1,0 +1,38 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/baseten"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const MAX_EMBEDDINGS_PER_CALL : Int = 128
+
+pub const VERSION : String = "0.1.0"
+
+pub fn createBaseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
+
+pub fn create_baseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
+
+// Errors
+
+// Types and methods
+pub struct BasetenProvider {
+  // private fields
+}
+pub fn BasetenProvider::chat(Self, model_id? : String) -> &@provider.LanguageModelV4 raise
+pub fn BasetenProvider::chatModel(Self, model_id? : String) -> &@provider.LanguageModelV4 raise
+pub fn BasetenProvider::embedding(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
+pub fn BasetenProvider::embeddingModel(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
+pub fn BasetenProvider::embedding_model(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
+pub fn BasetenProvider::languageModel(Self, model_id? : String) -> &@provider.LanguageModelV4 raise
+pub fn BasetenProvider::language_model(Self, model_id? : String) -> &@provider.LanguageModelV4 raise
+pub impl @provider.ProviderV4 for BasetenProvider
+
+// Type aliases
+pub type BasetenChatModelId = String
+
+pub type BasetenEmbeddingModelId = String
+
+// Traits
