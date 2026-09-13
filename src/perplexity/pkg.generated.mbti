@@ -1,0 +1,45 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/perplexity"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const PERPLEXITY_MAX_EMBEDDINGS_PER_CALL : Int = 512
+
+pub const VERSION : String = "0.1.0"
+
+pub fn createPerplexity(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> PerplexityProvider
+
+pub fn create_perplexity(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> PerplexityProvider
+
+pub fn perplexity(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+type PerplexityEmbeddingModel
+pub impl @provider.EmbeddingModelV4 for PerplexityEmbeddingModel
+
+type PerplexityLanguageModel
+pub impl @provider.LanguageModelV4 for PerplexityLanguageModel
+
+pub struct PerplexityProvider {
+  // private fields
+}
+pub fn PerplexityProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn PerplexityProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
+pub fn PerplexityProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
+pub fn PerplexityProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn PerplexityProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn PerplexityProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for PerplexityProvider
+
+// Type aliases
+pub type PerplexityEmbeddingModelId = String
+
+pub type PerplexityLanguageModelId = String
+
+// Traits

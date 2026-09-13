@@ -1,0 +1,13 @@
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "QuietlyChan/moonai/openai_compatible",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/json",
+}
+
+import {
+  "QuietlyChan/moonai/provider",
+} for "test"
+
+supported_targets = "+native"
