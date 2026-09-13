@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/gateway"
+
+import {
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn createGateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
+
+pub fn create_gateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
+
+pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.LanguageModelV4
+
+// Errors
+
+// Types and methods
+type GatewayLanguageModel
+pub impl @provider.LanguageModelV4 for GatewayLanguageModel
+
+pub struct GatewayProvider {
+  // private fields
+}
+pub fn GatewayProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn GatewayProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn GatewayProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
+pub fn GatewayProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub impl @provider.ProviderV4 for GatewayProvider
+
+// Type aliases
+pub type GatewayModelId = String
+
+// Traits
