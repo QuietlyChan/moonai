@@ -18,7 +18,7 @@ pub fn anthropic(String, api_key? : String, auth_token? : String, base_url? : St
 
 pub fn anthropicTools() -> AnthropicTools
 
-pub fn anthropic_files(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, api_key_environment_variable? : String) -> AnthropicFiles raise
+pub fn anthropic_files(api_key? : String, auth_token? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], anthropic_version? : String, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, streaming_http_transport? : &@provider_utils.StreamingBodyTransport, api_key_environment_variable? : String) -> AnthropicFiles raise
 
 pub fn anthropic_tools() -> AnthropicTools
 

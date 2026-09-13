@@ -47,6 +47,7 @@ pub struct DeepSeekFiles {
   priv headers : Map[String, String]
   priv idle_timeout_ms : Int
   priv http_transport : &@provider_utils.HttpTransport
+  priv streaming_http_transport : &@provider_utils.StreamingBodyTransport
 }
 
 ///|
@@ -58,6 +59,7 @@ pub fn deepseek_files(
   headers? : Map[String, String] = Map([]),
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
+  streaming_http_transport? : &@provider_utils.StreamingBodyTransport,
 ) -> DeepSeekFiles {
   {
     provider_name,
@@ -69,6 +71,9 @@ pub fn deepseek_files(
     idle_timeout_ms,
     http_transport: http_transport.unwrap_or(
       @provider_utils.native_http_transport(),
+    ),
+    streaming_http_transport: streaming_http_transport.unwrap_or(
+      @provider_utils.native_streaming_body_transport(),
     ),
   }
 }
@@ -215,6 +220,52 @@ fn deepseek_files_has_supported_extension(filename : String?) -> Bool {
 }
 
 ///|
+/// Validate declared media type/filename only, without content sniffing —
+/// used by the streaming upload path where bytes arrive incrementally.
+fn guard_deepseek_files_media_type_declared(
+  media_type~ : String,
+  filename~ : String?,
+) -> Unit raise {
+  let normalized = deepseek_files_normalize_media_type(media_type)
+  if deepseek_files_is_supported_image(normalized) {
+    return
+  }
+  if deepseek_files_is_generic_media(normalized) {
+    if deepseek_files_has_supported_extension(filename) {
+      return
+    }
+    raise @provider.InvalidArgumentError(
+      argument="mediaType",
+      message="DeepSeek file uploads support JPEG, PNG, GIF, and WebP images. Provide a supported media type or a filename ending in .jpg, .jpeg, .png, .gif, or .webp. Received \"\{media_type}\".",
+    )
+  }
+  raise @provider.InvalidArgumentError(
+    argument="mediaType",
+    message="DeepSeek file uploads support JPEG, PNG, GIF, and WebP images. Received unsupported media type \"\{media_type}\".",
+  )
+}
+
+///|
+fn guard_deepseek_files_stream_size(
+  stream : &@provider.UploadByteStream,
+) -> Unit raise {
+  match stream.size_hint_bytes() {
+    Some(size) => {
+      guard size <= 67_108_864L else {
+        raise @provider.InvalidArgumentError(
+          argument="data",
+          message="DeepSeek file uploads must not exceed 64 MiB (67108864 bytes). Streamed payload is \{size} bytes.",
+        )
+      }
+    }
+    None =>
+      raise @provider.UnsupportedFunctionalityError(
+        functionality="DeepSeek streaming file upload without a size hint",
+      )
+  }
+}
+
+///|
 fn guard_deepseek_files_media_type(
   media_type~ : String,
   filename~ : String?,
@@ -340,12 +391,44 @@ async fn DeepSeekFiles::upload(
   call_options : @provider.FilesV4UploadFileCallOptions,
 ) -> @provider.FilesV4UploadFileResult {
   let parsed = parse_deepseek_files_options(call_options.provider_options)
-  let file_bytes = @provider_utils.collect_upload_file_data(call_options.data)
-  guard_deepseek_files_size(file_bytes)
   match call_options.filename {
     Some(name) => guard_deepseek_files_filename(name)
     None => ()
   }
+  // Streamed payloads upload incrementally (AI SDK #20036): validation
+  // relies on the declared media type and filename because content is not
+  // buffered for sniffing.
+  if call_options.data is @provider.UploadFileStream(stream) {
+    guard_deepseek_files_stream_size(stream)
+    guard_deepseek_files_media_type_declared(
+      media_type=call_options.media_type,
+      filename=call_options.filename,
+    )
+    let plan = @provider_utils.plan_multipart_streaming(
+      [
+        @provider_utils.MultipartPlanStream(
+          name="file",
+          filename=call_options.filename.unwrap_or("blob"),
+          media_type=call_options.media_type,
+          stream~,
+        ),
+        @provider_utils.MultipartPlanText(name="purpose", value="user_data"),
+        ..deepseek_files_expires_after_plans(parsed.expires_after),
+      ],
+    )
+    let response = @provider_utils.post_multipart_streaming(
+      url=self.files_url(),
+      headers=self.request_headers(),
+      plan~,
+      error_to_message=deepseek_files_error_message,
+      transport=self.streaming_http_transport,
+    )
+    return @provider_utils.handle_json_response(response, value => {
+      decode_deepseek_file_upload(value, call_options, warnings=parsed.warnings)
+    })
+  }
+  let file_bytes = @provider_utils.collect_upload_file_data(call_options.data)
+  guard_deepseek_files_size(file_bytes)
   guard_deepseek_files_media_type(
     media_type=call_options.media_type,
     filename=call_options.filename,
@@ -387,6 +470,26 @@ async fn DeepSeekFiles::upload(
   @provider_utils.handle_json_response(response, value => {
     decode_deepseek_file_upload(value, call_options, warnings=parsed.warnings)
   })
+}
+
+///|
+fn deepseek_files_expires_after_plans(
+  expires_after : Int?,
+) -> Array[@provider_utils.MultipartFieldPlan] {
+  match expires_after {
+    Some(seconds) =>
+      [
+        @provider_utils.MultipartPlanText(
+          name="expires_after[anchor]",
+          value="created_at",
+        ),
+        @provider_utils.MultipartPlanText(
+          name="expires_after[seconds]",
+          value=seconds.to_string(),
+        ),
+      ]
+    None => []
+  }
 }
 
 ///|

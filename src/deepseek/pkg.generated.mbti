@@ -18,7 +18,7 @@ pub fn deepSeek(String, api_key? : String, base_url? : String, headers? : Map[St
 
 pub fn deepseek(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
-pub fn deepseek_files(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> DeepSeekFiles
+pub fn deepseek_files(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, streaming_http_transport? : &@provider_utils.StreamingBodyTransport) -> DeepSeekFiles
 
 // Errors
 

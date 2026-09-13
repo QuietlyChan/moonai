@@ -10,6 +10,7 @@ pub struct AnthropicFiles {
   priv headers : Map[String, String]
   priv idle_timeout_ms : Int
   priv http_transport : &@provider_utils.HttpTransport
+  priv streaming_http_transport : &@provider_utils.StreamingBodyTransport
 }
 
 ///|
@@ -23,6 +24,7 @@ pub fn anthropic_files(
   anthropic_version? : String = "2023-06-01",
   idle_timeout_ms? : Int = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
+  streaming_http_transport? : &@provider_utils.StreamingBodyTransport,
   api_key_environment_variable? : String,
 ) -> AnthropicFiles raise {
   guard api_key == "" || auth_token == "" else {
@@ -42,6 +44,9 @@ pub fn anthropic_files(
     idle_timeout_ms,
     http_transport: http_transport.unwrap_or(
       @provider_utils.native_http_transport(),
+    ),
+    streaming_http_transport: streaming_http_transport.unwrap_or(
+      @provider_utils.native_streaming_body_transport(),
     ),
   }
 }
@@ -184,6 +189,28 @@ async fn AnthropicFiles::upload(
   self : AnthropicFiles,
   options : @provider.FilesV4UploadFileCallOptions,
 ) -> @provider.FilesV4UploadFileResult {
+  // Streamed payloads upload incrementally (AI SDK #20036); the file field
+  // is the only form field, so the suffix is just the closing boundary.
+  if options.data is @provider.UploadFileStream(stream) {
+    let plan = @provider_utils.plan_multipart_streaming([
+      @provider_utils.MultipartPlanStream(
+        name="file",
+        filename=options.filename.unwrap_or("blob"),
+        media_type=options.media_type,
+        stream~,
+      ),
+    ])
+    let response = @provider_utils.post_multipart_streaming(
+      url=self.files_url(),
+      headers=self.request_headers(),
+      plan~,
+      error_to_message=anthropic_error_message,
+      transport=self.streaming_http_transport,
+    )
+    return @provider_utils.handle_json_response(response, value => {
+      decode_anthropic_file_upload(value, options)
+    })
+  }
   let fields : Array[@provider_utils.MultipartField] = [
     @provider_utils.MultipartField::file(
       name="file",
