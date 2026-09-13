@@ -1,0 +1,74 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/workflow"
+
+import {
+  "QuietlyChan/moonai/ai/agent",
+  "QuietlyChan/moonai/harness",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn validate_workflow_output(spec~ : WorkflowOutputSpecification, text~ : String) -> Json raise WorkflowOutputValidationError
+
+pub fn workflow_snapshot_from_json(Json) -> WorkflowSessionSnapshot raise
+
+pub fn workflow_snapshot_to_json(snapshot~ : WorkflowSessionSnapshot) -> Json
+
+// Errors
+pub suberror WorkflowError {
+  WorkflowError(message~ : String)
+} derive(Eq, @debug.Debug)
+
+pub suberror WorkflowOutputValidationError {
+  WorkflowOutputValidationError(message~ : String, text~ : String)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub struct WorkflowAgent {
+  // private fields
+}
+pub async fn WorkflowAgent::generate(Self, options~ : @agent.AgentCallOptions) -> WorkflowAgentResult
+pub fn WorkflowAgent::messages(Self) -> Array[@provider_utils.ModelMessage]
+pub fn WorkflowAgent::new(agent~ : &@agent.Agent, output? : WorkflowOutputSpecification) -> Self
+pub fn WorkflowAgent::restore(Self, snapshot~ : WorkflowSessionSnapshot) -> Unit
+pub fn WorkflowAgent::snapshot(Self) -> Json
+
+pub(all) struct WorkflowAgentResult {
+  text : String
+  output : Json?
+  steps : Int
+  usage : @provider.LanguageModelV4Usage
+  snapshot : WorkflowSessionSnapshot
+} derive(@debug.Debug)
+
+pub struct WorkflowHarnessBridge {
+  session : &@harness.HarnessV1Session
+}
+pub fn WorkflowHarnessBridge::new(session~ : &@harness.HarnessV1Session) -> Self
+pub async fn WorkflowHarnessBridge::run_prompt_turn(Self, prompt~ : String, instructions? : String) -> WorkflowHarnessTurnResult
+
+pub(all) struct WorkflowHarnessTurnResult {
+  text : String
+  reasoning : String
+  tool_inputs_started : Int
+  events : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) struct WorkflowOutputSpecification {
+  schema : Json
+  name : String?
+} derive(@debug.Debug)
+
+pub(all) struct WorkflowSessionSnapshot {
+  agent_id : String?
+  messages : Array[@provider_utils.ModelMessage]
+  steps : Int
+} derive(@debug.Debug)
+
+// Type aliases
+
+// Traits

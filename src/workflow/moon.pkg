@@ -1,0 +1,23 @@
+import {
+  "QuietlyChan/moonai/ai",
+  "QuietlyChan/moonai/ai/agent",
+  "QuietlyChan/moonai/harness",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+import {
+  "QuietlyChan/moonai/ai",
+  "QuietlyChan/moonai/ai/agent",
+  "QuietlyChan/moonai/harness",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai/provider_utils",
+  "QuietlyChan/moonai/testing",
+  "moonbitlang/async",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+} for "test"
+
+supported_targets = "+native"
