@@ -33,6 +33,9 @@ pub fn xai_x_search_tool(allowed_x_handles? : Array[String], excluded_x_handles?
 type XaiChatLanguageModel
 pub impl @provider.LanguageModelV4 for XaiChatLanguageModel
 
+type XaiFiles
+pub impl @provider.FilesV4 for XaiFiles
+
 type XaiImageModel
 pub impl @provider.ImageModelV4 for XaiImageModel
 
@@ -41,6 +44,7 @@ pub struct XaiProvider {
 }
 pub fn XaiProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn XaiProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn XaiProvider::files(Self) -> &@provider.FilesV4
 pub fn XaiProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::image_model(Self, String) -> &@provider.ImageModelV4

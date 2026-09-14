@@ -25,3 +25,11 @@ test "xai provider exposes video models" {
   assert_eq(video.model_id(), "grok-imagine-video")
   assert_eq(video.max_videos_per_call(), Some(1))
 }
+
+///|
+test "xai provider exposes files surface" {
+  let provider = create_xai(api_key="sk-test")
+  let files = provider.files()
+  assert_eq(files.provider(), "xai")
+  assert_eq(files.specification_version(), "v4")
+}

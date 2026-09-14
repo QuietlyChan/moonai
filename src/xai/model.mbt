@@ -226,8 +226,21 @@ pub impl @provider.ProviderV4 for XaiProvider with fn transcription_model(
 }
 
 ///|
-pub impl @provider.ProviderV4 for XaiProvider with fn files(_self) {
-  None
+/// Select the xAI files surface.
+pub fn XaiProvider::files(self : XaiProvider) -> &@provider.FilesV4 {
+  let files = xai_files_value(
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  files as &@provider.FilesV4
+}
+
+///|
+pub impl @provider.ProviderV4 for XaiProvider with fn files(self) {
+  Some(XaiProvider::files(self))
 }
 
 ///|
