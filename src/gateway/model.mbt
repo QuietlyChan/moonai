@@ -289,6 +289,19 @@ pub fn GatewayProvider::imageModel(
 }
 
 ///|
+/// Select the gateway batch surface.
+pub fn GatewayProvider::batch(self : GatewayProvider) -> &@provider.BatchV4 {
+  let batch = gateway_batch_value(
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  batch as &@provider.BatchV4
+}
+
+///|
 /// Select a gateway embedding model.
 pub fn GatewayProvider::embedding(
   self : GatewayProvider,

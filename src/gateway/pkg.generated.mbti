@@ -21,6 +21,9 @@ pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[Str
 // Errors
 
 // Types and methods
+type GatewayBatch
+pub impl @provider.BatchV4 for GatewayBatch
+
 type GatewayEmbeddingModel
 pub impl @provider.EmbeddingModelV4 for GatewayEmbeddingModel
 
@@ -33,6 +36,7 @@ pub impl @provider.LanguageModelV4 for GatewayLanguageModel
 pub struct GatewayProvider {
   // private fields
 }
+pub fn GatewayProvider::batch(Self) -> &@provider.BatchV4
 pub fn GatewayProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn GatewayProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GatewayProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4

@@ -46,3 +46,11 @@ test "gateway provider exposes speech and transcription models" {
   assert_eq(transcription.provider(), "gateway.transcription")
   assert_eq(transcription.model_id(), "openai/whisper-large-v3")
 }
+
+///|
+test "gateway provider exposes batch surface" {
+  let provider = create_gateway(api_key="gw-test")
+  let batch = provider.batch()
+  assert_eq(batch.provider(), "gateway.batch")
+  assert_eq(batch.specification_version(), "v4")
+}
