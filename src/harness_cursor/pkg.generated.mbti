@@ -1,0 +1,46 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/harness_cursor"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn cursor_builtin_tool(name~ : String) -> CursorBuiltinTool?
+
+pub fn cursor_builtin_tools() -> Array[CursorBuiltinTool]
+
+pub fn cursor_jwt_expires_at(access_token~ : String) -> Int? raise
+
+pub fn cursor_token_expiring_soon(expires_at~ : Int, now~ : Int) -> Bool
+
+pub fn parse_cursor_access_token(payload~ : Json) -> String?
+
+pub fn read_cursor_subscription(auth_json~ : String?, credential_store~ : String?) -> String?
+
+pub fn resolve_cursor_auth_path(home_directory~ : String, appdata~ : String?, xdg_config_home~ : String?) -> String
+
+pub fn should_resolve_cursor_native_subscription(ai_gateway_auth~ : Bool, has_direct_credential~ : Bool) -> Bool
+
+// Errors
+
+// Types and methods
+pub(all) struct CursorBuiltinTool {
+  name : String
+  native_name : String
+  title : String
+  kind : CursorToolKind
+} derive(Eq, @debug.Debug)
+
+pub(all) enum CursorToolKind {
+  Bash
+  Edit
+  Readonly
+  Other
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
