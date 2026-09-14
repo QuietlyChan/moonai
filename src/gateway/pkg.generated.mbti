@@ -4,6 +4,7 @@ package "QuietlyChan/moonai/gateway"
 import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/debug",
 }
 
 // Values
@@ -58,6 +59,51 @@ pub impl @provider.RerankingModelV4 for GatewayRerankingModel
 
 type GatewaySpeechModel
 pub impl @provider.SpeechModelV4 for GatewaySpeechModel
+
+pub(all) enum GatewaySpendGroupBy {
+  SpendDay
+  SpendUser
+  SpendModel
+  SpendTag
+  SpendProvider
+  SpendCredentialType
+} derive(Eq, @debug.Debug)
+
+pub struct GatewaySpendReport {
+  // private fields
+}
+pub async fn GatewaySpendReport::get_spend_report(Self, params~ : GatewaySpendReportParams) -> Array[GatewaySpendReportRow]
+pub fn GatewaySpendReport::new(api_key~ : String, base_url~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int, http_transport~ : &@provider_utils.HttpTransport) -> Self
+
+pub(all) struct GatewaySpendReportParams {
+  start_date : String
+  end_date : String
+  group_by : GatewaySpendGroupBy?
+  date_part_hour : Bool?
+  user_id : String?
+  model : String?
+  provider : String?
+  credential_type : String?
+  tags : Array[String]?
+} derive(@debug.Debug)
+
+pub(all) struct GatewaySpendReportRow {
+  day : String?
+  hour : String?
+  user : String?
+  model : String?
+  tag : String?
+  provider_name : String?
+  credential_type : String?
+  total_cost : Double
+  market_cost : Double?
+  input_tokens : Int?
+  output_tokens : Int?
+  cached_input_tokens : Int?
+  cache_creation_input_tokens : Int?
+  reasoning_tokens : Int?
+  request_count : Int?
+} derive(@debug.Debug)
 
 type GatewayTranscriptionModel
 pub impl @provider.TranscriptionModelV4 for GatewayTranscriptionModel

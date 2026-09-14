@@ -52,3 +52,41 @@ test "gateway error message resolves nested payloads" {
   )
   assert_eq(gateway_error_to_message({ "code": 404 }), None)
 }
+
+///|
+test "gateway spend report query and origin derivation" {
+  let query = gateway_spend_query(params={
+    start_date: "2026-09-01",
+    end_date: "2026-09-07",
+    group_by: Some(SpendModel),
+    date_part_hour: None,
+    user_id: None,
+    model: Some("anthropic/claude-sonnet-4.5"),
+    provider: None,
+    credential_type: Some("byok"),
+    tags: Some(["team-a", "team-b"]),
+  })
+  assert_true(query.contains("start_date=2026-09-01"))
+  assert_true(query.contains("end_date=2026-09-07"))
+  assert_true(query.contains("group_by=model"))
+  assert_true(query.contains("model=anthropic/claude-sonnet-4.5"))
+  assert_true(query.contains("credential_type=byok"))
+  assert_true(query.contains("tags=team-a,team-b"))
+  assert_eq(
+    gateway_spend_origin(base_url="https://ai-gateway.vercel.sh/v4/ai"),
+    Some("https://ai-gateway.vercel.sh"),
+  )
+}
+
+///|
+test "gateway spend report row decode maps snake_case fields" {
+  let row = decode_gateway_spend_row({
+    "model": "openai/gpt-5.2",
+    "total_cost": 0.42,
+    "input_tokens": 100,
+    "output_tokens": 50,
+  })
+  assert_eq(row.model, Some("openai/gpt-5.2"))
+  assert_eq(row.total_cost, 0.42)
+  assert_eq(row.input_tokens, Some(100))
+}
