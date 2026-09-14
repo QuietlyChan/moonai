@@ -207,6 +207,43 @@ pub impl @provider.ProviderV4 for GoogleProvider with fn image_model(
 }
 
 ///|
+/// Select a Google video model (Veo).
+pub fn GoogleProvider::video(
+  self : GoogleProvider,
+  model_id : GoogleVideoModelId,
+) -> &@provider.VideoModelV4 {
+  let model = google_video_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    poll_interval_ms=5000,
+    poll_timeout_ms=600_000,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.VideoModelV4
+}
+
+///|
+/// Alias for `video`.
+pub fn GoogleProvider::video_model(
+  self : GoogleProvider,
+  model_id : GoogleVideoModelId,
+) -> &@provider.VideoModelV4 {
+  self.video(model_id)
+}
+
+///|
+/// Camel-case alias for `video_model`.
+pub fn GoogleProvider::videoModel(
+  self : GoogleProvider,
+  model_id : GoogleVideoModelId,
+) -> &@provider.VideoModelV4 {
+  self.video_model(model_id)
+}
+
+///|
 pub impl @provider.ProviderV4 for GoogleProvider with fn speech_model(
   _self,
   _model_id,

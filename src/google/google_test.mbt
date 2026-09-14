@@ -24,3 +24,11 @@ test "google provider exposes image generation models" {
   assert_eq(image.provider(), "google.image")
   assert_eq(image.model_id(), "gemini-2.5-flash-image")
 }
+
+///|
+test "google provider exposes video models (Veo)" {
+  let provider = create_google(api_key="g-test")
+  let video = provider.video("veo-3.0-generate-001")
+  assert_eq(video.provider(), "google.video")
+  assert_eq(video.model_id(), "veo-3.0-generate-001")
+}

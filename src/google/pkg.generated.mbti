@@ -46,11 +46,19 @@ pub fn GoogleProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn GoogleProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn GoogleProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GoogleProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn GoogleProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn GoogleProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub fn GoogleProvider::video_model(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for GoogleProvider
+
+type GoogleVideoModel
+pub impl @provider.VideoModelV4 for GoogleVideoModel
 
 // Type aliases
 pub type GoogleChatModelId = String
 
 pub type GoogleEmbeddingModelId = String
+
+pub type GoogleVideoModelId = String
 
 // Traits
