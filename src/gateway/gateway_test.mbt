@@ -35,3 +35,14 @@ test "gateway provider exposes image models" {
   assert_eq(image.model_id(), "openai/gpt-image-2")
   assert_eq(image.max_images_per_call(), None)
 }
+
+///|
+test "gateway provider exposes speech and transcription models" {
+  let provider = create_gateway(api_key="gw-test")
+  let speech = provider.speech("elevenlabs/eleven_turbo_v2_5")
+  assert_eq(speech.provider(), "gateway")
+  assert_eq(speech.model_id(), "elevenlabs/eleven_turbo_v2_5")
+  let transcription = provider.transcription("openai/whisper-large-v3")
+  assert_eq(transcription.provider(), "gateway.transcription")
+  assert_eq(transcription.model_id(), "openai/whisper-large-v3")
+}

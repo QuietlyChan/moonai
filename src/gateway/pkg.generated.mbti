@@ -45,10 +45,22 @@ pub fn GatewayProvider::language_model(Self, String) -> &@provider.LanguageModel
 pub fn GatewayProvider::reranking(Self, String) -> &@provider.RerankingModelV4
 pub fn GatewayProvider::rerankingModel(Self, String) -> &@provider.RerankingModelV4
 pub fn GatewayProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4
+pub fn GatewayProvider::speech(Self, String) -> &@provider.SpeechModelV4
+pub fn GatewayProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
+pub fn GatewayProvider::speech_model(Self, String) -> &@provider.SpeechModelV4
+pub fn GatewayProvider::transcription(Self, String) -> &@provider.TranscriptionModelV4
+pub fn GatewayProvider::transcriptionModel(Self, String) -> &@provider.TranscriptionModelV4
+pub fn GatewayProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4
 pub impl @provider.ProviderV4 for GatewayProvider
 
 type GatewayRerankingModel
 pub impl @provider.RerankingModelV4 for GatewayRerankingModel
+
+type GatewaySpeechModel
+pub impl @provider.SpeechModelV4 for GatewaySpeechModel
+
+type GatewayTranscriptionModel
+pub impl @provider.TranscriptionModelV4 for GatewayTranscriptionModel
 
 // Type aliases
 pub type GatewayModelId = String

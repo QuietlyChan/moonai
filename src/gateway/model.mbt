@@ -139,19 +139,89 @@ pub impl @provider.ProviderV4 for GatewayProvider with fn image_model(
 }
 
 ///|
+/// Select a gateway speech model.
+pub fn GatewayProvider::speech(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.SpeechModelV4 {
+  let model = gateway_speech_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.SpeechModelV4
+}
+
+///|
+/// Alias for `speech`.
+pub fn GatewayProvider::speech_model(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.SpeechModelV4 {
+  self.speech(model_id)
+}
+
+///|
+/// Camel-case alias for `speech_model`.
+pub fn GatewayProvider::speechModel(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.SpeechModelV4 {
+  self.speech_model(model_id)
+}
+
+///|
+/// Select a gateway transcription model.
+pub fn GatewayProvider::transcription(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.TranscriptionModelV4 {
+  let model = gateway_transcription_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.TranscriptionModelV4
+}
+
+///|
+/// Alias for `transcription`.
+pub fn GatewayProvider::transcription_model(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.TranscriptionModelV4 {
+  self.transcription(model_id)
+}
+
+///|
+/// Camel-case alias for `transcription_model`.
+pub fn GatewayProvider::transcriptionModel(
+  self : GatewayProvider,
+  model_id : String,
+) -> &@provider.TranscriptionModelV4 {
+  self.transcription_model(model_id)
+}
+
+///|
 pub impl @provider.ProviderV4 for GatewayProvider with fn speech_model(
-  _self,
-  _model_id,
+  self,
+  model_id,
 ) {
-  None
+  Some(GatewayProvider::speech_model(self, model_id))
 }
 
 ///|
 pub impl @provider.ProviderV4 for GatewayProvider with fn transcription_model(
-  _self,
-  _model_id,
+  self,
+  model_id,
 ) {
-  None
+  Some(GatewayProvider::transcription_model(self, model_id))
 }
 
 ///|
