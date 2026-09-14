@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "QuietlyChan/moonai/harness_github_copilot"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const VERSION : String = "0.1.0"
+
+pub fn get_plaintext_copilot_token(config~ : Json, account_key~ : String) -> String?
+
+pub fn normalize_github_host(String) -> String?
+
+pub fn select_github_copilot_account(config~ : Json) -> GitHubCopilotAccount?
+
+pub fn to_github_copilot_account(value~ : Json) -> GitHubCopilotAccount?
+
+// Errors
+
+// Types and methods
+pub(all) struct GitHubCopilotAccount {
+  host : String
+  login : String
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
