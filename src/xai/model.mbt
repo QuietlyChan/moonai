@@ -140,6 +140,41 @@ pub impl @provider.ProviderV4 for XaiProvider with fn specification_version(
 }
 
 ///|
+/// Select an xAI video model.
+pub fn XaiProvider::video(
+  self : XaiProvider,
+  model_id : XaiVideoModelId,
+) -> &@provider.VideoModelV4 {
+  let model = xai_video_value(
+    model_id,
+    api_key=self.api_key,
+    base_url=self.base_url,
+    headers=self.headers,
+    idle_timeout_ms=self.idle_timeout_ms,
+    http_transport=self.http_transport,
+  )
+  model as &@provider.VideoModelV4
+}
+
+///|
+/// Alias for `video`.
+pub fn XaiProvider::video_model(
+  self : XaiProvider,
+  model_id : XaiVideoModelId,
+) -> &@provider.VideoModelV4 {
+  self.video(model_id)
+}
+
+///|
+/// Camel-case alias for `video_model`.
+pub fn XaiProvider::videoModel(
+  self : XaiProvider,
+  model_id : XaiVideoModelId,
+) -> &@provider.VideoModelV4 {
+  self.video_model(model_id)
+}
+
+///|
 pub impl @provider.ProviderV4 for XaiProvider with fn language_model(
   self,
   model_id,

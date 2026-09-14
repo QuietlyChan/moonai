@@ -16,3 +16,12 @@ test "xai direct factory builds the same language model boundary" {
   assert_eq(model.provider(), "xai.chat")
   assert_eq(model.model_id(), "grok-4.6")
 }
+
+///|
+test "xai provider exposes video models" {
+  let provider = create_xai(api_key="sk-test")
+  let video = provider.video("grok-imagine-video")
+  assert_eq(video.provider(), "xai.video")
+  assert_eq(video.model_id(), "grok-imagine-video")
+  assert_eq(video.max_videos_per_call(), Some(1))
+}

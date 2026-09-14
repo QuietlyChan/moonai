@@ -46,11 +46,19 @@ pub fn XaiProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn XaiProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn XaiProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn XaiProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub fn XaiProvider::video_model(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for XaiProvider
+
+type XaiVideoModel
+pub impl @provider.VideoModelV4 for XaiVideoModel
 
 // Type aliases
 pub type XaiChatModelId = String
 
 pub type XaiImageModelId = String
+
+pub type XaiVideoModelId = String
 
 // Traits
