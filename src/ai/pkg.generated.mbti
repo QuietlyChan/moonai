@@ -23,6 +23,8 @@ pub async fn cancel_batch(&@provider.BatchV4, batch_id~ : String, headers? : Map
 
 pub async fn complete(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
 
+pub fn cosine_similarity(vector1~ : Array[Double], vector2~ : Array[Double]) -> Double raise InvalidArgumentError
+
 pub fn createProviderRegistry(Map[String, &@provider.ProviderV4], separator? : String, language_model_middleware? : @provider.LanguageModelV4Middleware, image_model_middleware? : @provider.ImageModelV4Middleware) -> @registry.ProviderRegistry raise @provider.InvalidArgumentError
 
 pub async fn createRealtimeClientSecret(&@provider.RealtimeModelV4, options? : @provider.RealtimeClientSecretOptions) -> @provider.RealtimeClientSecretResult
@@ -62,6 +64,8 @@ pub fn experimental_get_tool_caller(@provider_utils.Tool) -> @provider_utils.Too
 pub async fn experimental_streamTranscribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
 
 pub fn experimental_tool_caller(@provider_utils.Tool, @provider_utils.ToolCallerDefinition) -> @provider_utils.Tool
+
+pub fn format_warning(warning~ : @provider.Warning, provider~ : String?, model~ : String?) -> String
 
 pub async fn generateImage(&@provider.ImageModelV4, String, n? : Int, max_images_per_call? : Int, size? : String, aspect_ratio? : String, seed? : Int, files? : Array[@provider.ImageModelV4File], mask? : @provider.ImageModelV4File, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.ImageResponse
 
@@ -125,6 +129,8 @@ pub async fn listBatches(&@provider.BatchV4, limit? : Int, cursor? : String, hea
 
 pub async fn list_batches(&@provider.BatchV4, limit? : Int, cursor? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4ListResult
 
+pub fn log_warnings(options~ : LogWarningsOptions) -> Unit
+
 pub fn model_id_of_language_model(&@provider.LanguageModelV4) -> @model.ModelId
 
 pub fn parse_model_id(String) -> @model.ModelId raise @model.InvalidModelIdError
@@ -134,6 +140,8 @@ pub async fn rerank(&@provider.RerankingModelV4, @provider.RerankingModelV4Docum
 pub async fn rerankText(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
 
 pub async fn rerank_text(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
+
+pub fn split_array(array~ : Array[String], chunk_size~ : Int) -> Array[Array[String]] raise InvalidArgumentError
 
 pub async fn startBatch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4Request], webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4StartResult
 
@@ -168,6 +176,10 @@ pub fn toolSet(Array[(String, @provider_utils.Tool)]) -> Map[String, @provider_u
 pub fn tool_set(Array[(String, @provider_utils.Tool)]) -> Map[String, @provider_utils.Tool]
 
 pub async fn transcribe(&@provider.TranscriptionModelV4, audio~ : @provider.TranscriptionAudio, media_type~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+
+pub fn ui_chunks_from_text(text~ : String, tool_calls~ : Array[@provider.ToolCall]) -> Array[Json]
+
+pub fn ui_message_chunk(@provider.LanguageModelV4StreamPart) -> Json?
 
 pub async fn uploadFile(&@provider.FilesV4, data~ : @provider.UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> @provider.FilesV4UploadFileResult
 
@@ -252,6 +264,12 @@ pub(all) struct EmbedStartEvent {
   provider_options : Map[String, Json]
 } derive(@debug.Debug)
 
+pub(all) struct LogWarningsOptions {
+  warnings : Array[@provider.Warning]
+  provider : String?
+  model : String?
+} derive(@debug.Debug)
+
 pub(all) enum ObjectGenerationFailure {
   EmptyResponse
   InvalidJson(message~ : String)
@@ -320,6 +338,16 @@ pub(all) struct StreamObjectResponse {
   provider_result : @provider.LanguageModelV4GenerateResult
   warnings : Array[@provider.Warning]
 } derive(@debug.Debug)
+
+pub struct UiMessageStream {
+  // private fields
+}
+pub fn UiMessageStream::close(Self) -> Unit
+pub fn UiMessageStream::enqueue(Self, Json) -> Unit
+pub fn UiMessageStream::length(Self) -> Int
+pub fn UiMessageStream::new() -> Self
+pub fn UiMessageStream::to_chunks(Self) -> Array[Json]
+pub fn UiMessageStream::to_sse(Self) -> String
 
 // Type aliases
 pub type ActiveTools = Array[String]
