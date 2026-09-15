@@ -1,0 +1,10 @@
+import {
+  "QuietlyChan/moonai/ai/agent",
+  "QuietlyChan/moonai/ai/prompt",
+  "QuietlyChan/moonai-examples/shared",
+  "moonbitlang/async",
+}
+
+supported_targets = "+native"
+
+pkgtype(kind: "executable")

@@ -1,0 +1,11 @@
+import {
+  "QuietlyChan/moonai/ai",
+  "QuietlyChan/moonai/provider",
+  "QuietlyChan/moonai-examples/shared",
+  "moonbitlang/async",
+  "moonbitlang/core/json",
+}
+
+supported_targets = "+native"
+
+pkgtype(kind: "executable")

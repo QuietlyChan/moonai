@@ -142,3 +142,17 @@ moon check
 moon test
 cd examples/react_use_chat && npm run build
 ```
+
+## Added modules
+
+- `middleware/` — wrap any model with default-settings, reasoning-extraction,
+  and simulated-streaming middlewares (runs offline against the demo model).
+- `ui_stream/` — turn V4 stream parts into the UI message chunk protocol and
+  encode them as SSE `data:` frames (runs offline).
+- `agent_loop/` — `ToolLoopAgent` with the shared calculator tool, driving
+  the full multi-step tool loop (runs offline).
+- `structured_output/` — JSON-schema-validated generation via
+  `response_format` + `@ai.validate_object` (runs offline; the demo model
+  answers with a schema-conformant object when a JSON response format is set).
+- `multimodal/` — rerank / speech / transcribe / video API patterns plus the
+  `cosine_similarity` util. Live calls require a provider key.

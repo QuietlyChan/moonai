@@ -123,15 +123,29 @@ fn DemoLanguageModel::next_output(
       demo_finish_reason(@provider.V4FinishToolCalls),
     )
   } else {
-    let text = match demo_last_tool_output(options.prompt) {
-      Some(value) =>
-        "The " +
-        self.selected_tool.val +
-        " tool returned " +
-        value.stringify() +
-        ". This response was composed by MoonAI's multi-step agent loop."
+    let json_answer : String? = match options.response_format {
+      @provider.V4ResponseJson(_) => {
+        let answer : Map[String, Json] = Map([
+          ("answer", Json::string("MoonAI is a provider-neutral MoonBit AI SDK.")),
+          ("confidence", Json::number(0.98)),
+        ])
+        Some(Json::object(answer).stringify())
+      }
+      _ => None
+    }
+    let text = match json_answer {
+      Some(value) => value
       None =>
-        "MoonAI is a provider-neutral MoonBit SDK for streaming text, structured provider options, and tool-driven agents. Set MOONAI_PROVIDER to connect this example to a live model."
+        match demo_last_tool_output(options.prompt) {
+          Some(value) =>
+            "The " +
+            self.selected_tool.val +
+            " tool returned " +
+            value.stringify() +
+            ". This response was composed by MoonAI's multi-step agent loop."
+          None =>
+            "MoonAI is a provider-neutral MoonBit SDK for streaming text, structured provider options, and tool-driven agents. Set MOONAI_PROVIDER to connect this example to a live model."
+        }
     }
     (
       [@provider.LanguageModelV4Content::text(text)],
