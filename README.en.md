@@ -197,7 +197,7 @@ adapter can connect to a sandbox-exposed WebSocket bridge.
 
 ## Installation
 
-The package is published on Mooncakes. The current release is `0.1.0` and can
+The package is published on Mooncakes. The current release is `0.2.0` and can
 be installed with:
 
 ```shell

@@ -162,7 +162,7 @@ CLI 命令、参数、环境变量和工作目录；未传入时，适配器可�
 
 ## 安装
 
-项目已发布到 Mooncakes，当前版本为 `0.1.0`，可直接安装：
+项目已发布到 Mooncakes，当前版本为 `0.2.0`，可直接安装：
 
 ```shell
 moon add QuietlyChan/moonai
