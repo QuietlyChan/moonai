@@ -5,7 +5,7 @@ version = "0.1.0"
 source = "."
 
 import {
-  "QuietlyChan/moonai@0.1.0",
+  "QuietlyChan/moonai@0.2.0",
   "moonbitlang/async@0.22.7",
 }
 
