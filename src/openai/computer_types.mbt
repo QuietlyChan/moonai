@@ -1,19 +1,21 @@
 ///|
 /// Mouse button accepted by an OpenAI computer action.
+#derive(Debug, Eq)
 pub(all) enum OpenAIComputerButton {
   ComputerButtonLeft
   ComputerButtonRight
   ComputerButtonWheel
   ComputerButtonBack
   ComputerButtonForward
-} derive(Debug, Eq)
+}
 
 ///|
 /// One point in a computer drag path.
+#derive(Debug, Eq)
 pub(all) struct OpenAIComputerPoint {
   x : Double
   y : Double
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct one computer-action point.
@@ -26,6 +28,7 @@ pub fn OpenAIComputerPoint::new(
 
 ///|
 /// A computer action emitted by the OpenAI computer tool.
+#derive(Debug, Eq)
 pub(all) enum OpenAIComputerAction {
   ComputerClick(
     button~ : OpenAIComputerButton,
@@ -47,15 +50,16 @@ pub(all) enum OpenAIComputerAction {
   )
   ComputerTypeText(String)
   ComputerWait
-} derive(Debug, Eq)
+}
 
 ///|
 /// Safety check attached to a computer tool call.
+#derive(Debug, Eq)
 pub(all) struct OpenAIComputerSafetyCheck {
   id : String
   code : String?
   message : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct one computer safety check.

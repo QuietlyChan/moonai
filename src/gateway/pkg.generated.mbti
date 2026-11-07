@@ -7,15 +7,15 @@ import {
 }
 
 // Values
-pub const GATEWAY_MAX_EMBEDDINGS_PER_CALL : Int = 2048
+pub const GATEWAY_MAX_EMBEDDINGS_PER_CALL : Int32 = 2048
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createGateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
+pub fn createGateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
 
-pub fn create_gateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
+pub fn create_gateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
 
-pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.LanguageModelV4
+pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.LanguageModelV4
 
 // Errors
 

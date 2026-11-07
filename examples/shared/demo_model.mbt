@@ -1,7 +1,7 @@
 ///|
 /// Small deterministic V4 model used to run every example without a key.
 priv struct DemoLanguageModel {
-  call_count : Ref[Int]
+  call_count : Ref[Int32]
   selected_tool : Ref[String]
 }
 
@@ -81,8 +81,8 @@ fn demo_tool_call(user_text : String) -> (String, String) {
 
 ///|
 fn demo_usage(
-  input_tokens : Int,
-  output_tokens : Int,
+  input_tokens : Int32,
+  output_tokens : Int32,
 ) -> @provider.LanguageModelV4Usage {
   @provider.LanguageModelV4Usage::from_usage(
     @provider.Usage::new(input_tokens~, output_tokens~),

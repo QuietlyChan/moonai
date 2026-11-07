@@ -7,15 +7,15 @@ import {
 }
 
 // Values
-pub const PERPLEXITY_MAX_EMBEDDINGS_PER_CALL : Int = 512
+pub const PERPLEXITY_MAX_EMBEDDINGS_PER_CALL : Int32 = 512
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createPerplexity(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> PerplexityProvider
+pub fn createPerplexity(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> PerplexityProvider
 
-pub fn create_perplexity(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> PerplexityProvider
+pub fn create_perplexity(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> PerplexityProvider
 
-pub fn perplexity(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn perplexity(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
 // Errors
 

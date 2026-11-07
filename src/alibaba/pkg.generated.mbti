@@ -5,52 +5,58 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn alibaba(String, api_key? : String, base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn alibaba(String, api_key? : String, base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
-pub fn createAlibaba(api_key? : String, base_url? : String, embedding_base_url? : String, video_base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> AlibabaProvider
+pub fn createAlibaba(api_key? : String, base_url? : String, embedding_base_url? : String, video_base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> AlibabaProvider
 
-pub fn create_alibaba(api_key? : String, base_url? : String, embedding_base_url? : String, video_base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> AlibabaProvider
+pub fn create_alibaba(api_key? : String, base_url? : String, embedding_base_url? : String, video_base_url? : String, headers? : Map[String, String], include_usage? : Bool, idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> AlibabaProvider
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct AlibabaCacheControl {
   cache_type : String
-} derive(Eq, @debug.Debug)
+}
 pub fn AlibabaCacheControl::new(cache_type~ : String) -> Self
-pub fn AlibabaCacheControl::to_provider_options(Self) -> Map[String, Json]
+pub fn AlibabaCacheControl::to_provider_options(Self) -> Map[String, @json.Json]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AlibabaCompletionTokensDetails {
-  reasoning_tokens : Int?
-} derive(Eq, @debug.Debug)
-pub fn AlibabaCompletionTokensDetails::new(reasoning_tokens? : Int) -> Self
+  reasoning_tokens : Int32?
+}
+pub fn AlibabaCompletionTokensDetails::new(reasoning_tokens? : Int32) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AlibabaEmbeddingModelOptions {
   text_type : String?
-  dimension : Int?
+  dimension : Int32?
   output_type : String?
-} derive(Eq, @debug.Debug)
-pub fn AlibabaEmbeddingModelOptions::new(text_type? : String, dimension? : Int, output_type? : String) -> Self raise
-pub fn AlibabaEmbeddingModelOptions::to_provider_options(Self) -> Map[String, Json]
+}
+pub fn AlibabaEmbeddingModelOptions::new(text_type? : String, dimension? : Int32, output_type? : String) -> Self raise
+pub fn AlibabaEmbeddingModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AlibabaLanguageModelChatOptions {
   enable_thinking : Bool?
-  thinking_budget : Int?
+  thinking_budget : Int32?
   parallel_tool_calls : Bool?
-} derive(Eq, @debug.Debug)
-pub fn AlibabaLanguageModelChatOptions::new(enable_thinking? : Bool, thinking_budget? : Int, parallel_tool_calls? : Bool) -> Self raise
-pub fn AlibabaLanguageModelChatOptions::to_provider_options(Self) -> Map[String, Json]
+}
+pub fn AlibabaLanguageModelChatOptions::new(enable_thinking? : Bool, thinking_budget? : Int32, parallel_tool_calls? : Bool) -> Self raise
+pub fn AlibabaLanguageModelChatOptions::to_provider_options(Self) -> Map[String, @json.Json]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AlibabaPromptTokensDetails {
-  cached_tokens : Int?
-  cache_creation_input_tokens : Int?
-} derive(Eq, @debug.Debug)
-pub fn AlibabaPromptTokensDetails::new(cached_tokens? : Int, cache_creation_input_tokens? : Int) -> Self
+  cached_tokens : Int32?
+  cache_creation_input_tokens : Int32?
+}
+pub fn AlibabaPromptTokensDetails::new(cached_tokens? : Int32, cache_creation_input_tokens? : Int32) -> Self
 
 pub struct AlibabaProvider {
   // private fields
@@ -66,24 +72,27 @@ pub fn AlibabaProvider::video(Self, String) -> &@provider.VideoModelV4
 pub fn AlibabaProvider::videoModel(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for AlibabaProvider
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AlibabaUsage {
-  prompt_tokens : Int?
-  completion_tokens : Int?
-  total_tokens : Int?
+  prompt_tokens : Int32?
+  completion_tokens : Int32?
+  total_tokens : Int32?
   prompt_tokens_details : AlibabaPromptTokensDetails?
   completion_tokens_details : AlibabaCompletionTokensDetails?
-} derive(Eq, @debug.Debug)
-pub fn AlibabaUsage::from_json(Json) -> Self?
-pub fn AlibabaUsage::new(prompt_tokens? : Int, completion_tokens? : Int, total_tokens? : Int, prompt_tokens_details? : AlibabaPromptTokensDetails, completion_tokens_details? : AlibabaCompletionTokensDetails) -> Self
-pub fn AlibabaUsage::to_json(Self) -> Json
+}
+pub fn AlibabaUsage::from_json(@json.Json) -> Self?
+pub fn AlibabaUsage::new(prompt_tokens? : Int32, completion_tokens? : Int32, total_tokens? : Int32, prompt_tokens_details? : AlibabaPromptTokensDetails, completion_tokens_details? : AlibabaCompletionTokensDetails) -> Self
+pub fn AlibabaUsage::to_json(Self) -> @json.Json
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AlibabaVideoMedia {
   media_type : String
   url : String
   reference_voice : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn AlibabaVideoMedia::new(media_type~ : String, url~ : String, reference_voice? : String) -> Self raise
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AlibabaVideoModelOptions {
   negative_prompt : String?
   audio_url : String?
@@ -94,11 +103,11 @@ pub(all) struct AlibabaVideoModelOptions {
   reference_urls : Array[String]
   ratio : String?
   media : Array[AlibabaVideoMedia]
-  poll_interval_ms : Int?
-  poll_timeout_ms : Int?
-} derive(Eq, @debug.Debug)
-pub fn AlibabaVideoModelOptions::new(negative_prompt? : String, audio_url? : String, prompt_extend? : Bool, shot_type? : String, watermark? : Bool, audio? : Bool, reference_urls? : Array[String], ratio? : String, media? : Array[AlibabaVideoMedia], poll_interval_ms? : Int, poll_timeout_ms? : Int) -> Self raise
-pub fn AlibabaVideoModelOptions::to_provider_options(Self) -> Map[String, Json]
+  poll_interval_ms : Int32?
+  poll_timeout_ms : Int32?
+}
+pub fn AlibabaVideoModelOptions::new(negative_prompt? : String, audio_url? : String, prompt_extend? : Bool, shot_type? : String, watermark? : Bool, audio? : Bool, reference_urls? : Array[String], ratio? : String, media? : Array[AlibabaVideoMedia], poll_interval_ms? : Int32, poll_timeout_ms? : Int32) -> Self raise
+pub fn AlibabaVideoModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
 
 // Type aliases
 pub type AlibabaChatModelId = String

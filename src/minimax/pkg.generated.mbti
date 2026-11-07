@@ -5,25 +5,27 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createMiniMax(api_key? : String, base_url? : String, video_base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MiniMaxProvider
+pub fn createMiniMax(api_key? : String, base_url? : String, video_base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MiniMaxProvider
 
-pub fn create_minimax(api_key? : String, base_url? : String, video_base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MiniMaxProvider
+pub fn create_minimax(api_key? : String, base_url? : String, video_base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MiniMaxProvider
 
-pub fn minimax(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise
+pub fn minimax(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct MiniMaxLanguageModelOptions {
   thinking : MiniMaxThinkingMode?
-} derive(Eq, @debug.Debug)
+}
 pub fn MiniMaxLanguageModelOptions::new(thinking? : MiniMaxThinkingMode) -> Self
-pub fn MiniMaxLanguageModelOptions::to_provider_options(Self) -> Map[String, Json]
+pub fn MiniMaxLanguageModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
 
 pub struct MiniMaxProvider {
   // private fields
@@ -35,21 +37,23 @@ pub fn MiniMaxProvider::video(Self, String) -> &@provider.VideoModelV4
 pub fn MiniMaxProvider::videoModel(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for MiniMaxProvider
 
+#derive(Eq, @debug.Debug)
 pub(all) enum MiniMaxThinkingMode {
   AdaptiveThinking
   DisabledThinking
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct MiniMaxVideoModelOptions {
   resolution : String?
   ratio : String?
   reference_audio_urls : Array[String]
   aigc_watermark : Bool?
-  poll_interval_ms : Int?
-  poll_timeout_ms : Int?
-} derive(Eq, @debug.Debug)
-pub fn MiniMaxVideoModelOptions::new(resolution? : String, ratio? : String, reference_audio_urls? : Array[String], aigc_watermark? : Bool, poll_interval_ms? : Int, poll_timeout_ms? : Int) -> Self raise
-pub fn MiniMaxVideoModelOptions::to_provider_options(Self) -> Map[String, Json]
+  poll_interval_ms : Int32?
+  poll_timeout_ms : Int32?
+}
+pub fn MiniMaxVideoModelOptions::new(resolution? : String, ratio? : String, reference_audio_urls? : Array[String], aigc_watermark? : Bool, poll_interval_ms? : Int32, poll_timeout_ms? : Int32) -> Self raise
+pub fn MiniMaxVideoModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
 
 // Type aliases
 pub type MiniMaxChatModelId = String

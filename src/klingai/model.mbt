@@ -4,7 +4,7 @@ pub struct KlingaiProvider {
   priv auth_token : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,9 +17,9 @@ pub fn create_klingai(
   api_key? : String,
   access_key? : String,
   secret_key? : String,
-  base_url? : String = "https://api-singapore.klingai.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  base_url~ : String = "https://api-singapore.klingai.com",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> KlingaiProvider raise @provider.LoadAPIKeyError {
   {
@@ -39,9 +39,9 @@ pub fn createKlingai(
   api_key? : String,
   access_key? : String,
   secret_key? : String,
-  base_url? : String = "https://api-singapore.klingai.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  base_url~ : String = "https://api-singapore.klingai.com",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> KlingaiProvider raise @provider.LoadAPIKeyError {
   create_klingai(
@@ -168,9 +168,9 @@ pub fn klingai(
   api_key? : String,
   access_key? : String,
   secret_key? : String,
-  base_url? : String = "https://api-singapore.klingai.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  base_url~ : String = "https://api-singapore.klingai.com",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.VideoModelV4 raise @provider.LoadAPIKeyError {
   create_klingai(

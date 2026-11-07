@@ -9,7 +9,7 @@ pub struct OpenAICompatibleCompletionConfig {
   priv query_params : Map[String, String]
   priv include_usage : Bool
   priv error_structure : OpenAICompatibleErrorStructure
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -18,13 +18,13 @@ pub struct OpenAICompatibleCompletionConfig {
 pub fn OpenAICompatibleCompletionConfig::new(
   provider_name~ : String,
   base_url~ : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   api_key_environment_variable? : String,
-  headers? : Map[String, String] = Map([]),
-  query_params? : Map[String, String] = Map([]),
-  include_usage? : Bool = false,
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-  idle_timeout_ms? : Int = 120_000,
+  headers~ : Map[String, String] = Map([]),
+  query_params~ : Map[String, String] = Map([]),
+  include_usage~ : Bool = false,
+  error_structure~ : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> OpenAICompatibleCompletionConfig {
   {

@@ -7,6 +7,7 @@
 /// - `OutputArray`: the model returns a JSON array whose items match
 ///   `item_schema`, optionally clamped by `min_items`/`max_items`
 ///   (AI SDK #20270).
+#derive(Debug)
 pub(all) enum OutputSpec {
   OutputText
   OutputObject(schema~ : Json, name~ : String?, description~ : String?)
@@ -14,10 +15,10 @@ pub(all) enum OutputSpec {
     item_schema~ : Json,
     name~ : String?,
     description~ : String?,
-    min_items~ : Int?,
-    max_items~ : Int?
+    min_items~ : Int32?,
+    max_items~ : Int32?
   )
-} derive(Debug)
+}
 
 ///|
 /// Plain text output strategy.
@@ -41,8 +42,8 @@ pub fn OutputSpec::array(
   item_schema~ : Json,
   name? : String,
   description? : String,
-  min_items? : Int,
-  max_items? : Int,
+  min_items? : Int32,
+  max_items? : Int32,
 ) -> OutputSpec {
   OutputArray(item_schema~, name~, description~, min_items~, max_items~)
 }

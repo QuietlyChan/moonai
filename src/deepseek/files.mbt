@@ -1,10 +1,11 @@
 ///|
 /// Typed DeepSeek Files upload options.
+#derive(Debug, Eq)
 pub(all) struct DeepSeekFilesOptions {
   /// Number of seconds after creation before the file expires.
   /// Must be between one hour and thirty days.
   expires_after : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct DeepSeek Files upload options.
@@ -26,7 +27,7 @@ pub fn DeepSeekFilesOptions::new(
 /// Convert typed FilesV4 options into the DeepSeek provider namespace.
 pub fn DeepSeekFilesOptions::to_provider_options(
   self : DeepSeekFilesOptions,
-  provider_name? : String = "deepseek",
+  provider_name~ : String = "deepseek",
 ) -> Map[String, Json] {
   let values : Map[String, Json] = Map([])
   if self.expires_after is Some(value) {
@@ -45,7 +46,7 @@ pub struct DeepSeekFiles {
   priv base_url : String
   priv api_key : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
   priv streaming_http_transport : &@provider_utils.StreamingBodyTransport
 }
@@ -53,11 +54,11 @@ pub struct DeepSeekFiles {
 ///|
 /// Construct a DeepSeek Files API client directly.
 pub fn deepseek_files(
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  provider_name? : String = "deepseek.files",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  provider_name~ : String = "deepseek.files",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   streaming_http_transport? : &@provider_utils.StreamingBodyTransport,
 ) -> DeepSeekFiles {
@@ -111,7 +112,7 @@ fn DeepSeekFiles::request_headers(
 
 ///|
 priv struct ParsedDeepSeekFilesOptions {
-  expires_after : Int?
+  expires_after : Int32?
   warnings : Array[@provider.Warning]
 }
 
@@ -125,7 +126,7 @@ fn parse_deepseek_files_options(
     aliases=["deepseek"],
   )
   let reader = @provider_utils.ProviderOptionsReader::new(resolution)
-  let expires_after : Int? = match
+  let expires_after : Int32? = match
     reader.take_double("expiresAfter", aliases=["expires_after"]) {
     Some(value) => {
       let seconds = value.to_int()
@@ -474,7 +475,7 @@ async fn DeepSeekFiles::upload(
 
 ///|
 fn deepseek_files_expires_after_plans(
-  expires_after : Int?,
+  expires_after : Int32?,
 ) -> Array[@provider_utils.MultipartFieldPlan] {
   match expires_after {
     Some(seconds) =>

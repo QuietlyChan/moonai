@@ -7,7 +7,7 @@ struct ProdiaImageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn prodia_image_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> ProdiaImageModel {
   {
@@ -134,7 +134,7 @@ pub impl @provider.ImageModelV4 for ProdiaImageModel with fn model_id(self) -> S
 ///|
 pub impl @provider.ImageModelV4 for ProdiaImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 

@@ -4,7 +4,7 @@ pub struct ZaiProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
 }
@@ -13,10 +13,10 @@ pub struct ZaiProvider {
 /// Create a Z.AI provider. The API key defaults to the `ZAI_API_KEY`
 /// environment variable.
 pub fn create_zai(
-  api_key? : String = "",
-  base_url? : String = "https://api.z.ai/api/paas/v4",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.z.ai/api/paas/v4",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> ZaiProvider {
@@ -35,10 +35,10 @@ pub fn create_zai(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createZai(
-  api_key? : String = "",
-  base_url? : String = "https://api.z.ai/api/paas/v4",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.z.ai/api/paas/v4",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> ZaiProvider {
@@ -178,10 +178,10 @@ pub impl @provider.ProviderV4 for ZaiProvider with fn skills(_self) {
 /// Construct the default V4 Z.AI language model directly.
 pub fn zai(
   model_id : ZaiChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.z.ai/api/paas/v4",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.z.ai/api/paas/v4",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

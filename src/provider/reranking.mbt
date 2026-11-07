@@ -1,10 +1,11 @@
 ///|
 /// Documents accepted by a V4 reranking model. A call must use one document
 /// representation consistently.
+#derive(Debug, Eq)
 pub(all) enum RerankingModelV4Documents {
   TextDocuments(Array[String])
   ObjectDocuments(Array[Json])
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct text documents for reranking.
@@ -26,7 +27,7 @@ pub fn RerankingModelV4Documents::objects(
 /// Return the number of documents in a reranking request.
 pub fn RerankingModelV4Documents::length(
   self : RerankingModelV4Documents,
-) -> Int {
+) -> Int32 {
   match self {
     TextDocuments(values) => values.length()
     ObjectDocuments(values) => values.length()
@@ -35,15 +36,16 @@ pub fn RerankingModelV4Documents::length(
 
 ///|
 /// A single provider-produced reranking entry.
+#derive(Debug, Eq)
 pub(all) struct RerankingModelV4Ranking {
-  index : Int
+  index : Int32
   relevance_score : Double
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a reranking entry.
 pub fn RerankingModelV4Ranking::new(
-  index : Int,
+  index : Int32,
   relevance_score : Double,
 ) -> RerankingModelV4Ranking {
   { index, relevance_score, }
@@ -51,25 +53,26 @@ pub fn RerankingModelV4Ranking::new(
 
 ///|
 /// Normalized options passed to a reranking model.
+#derive(Debug)
 pub(all) struct RerankingModelV4CallOptions {
   documents : RerankingModelV4Documents
   query : String
-  top_n : Int?
+  top_n : Int32?
   headers : Map[String, String]
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct reranking call options.
 pub fn RerankingModelV4CallOptions::new(
   documents : RerankingModelV4Documents,
   query : String,
-  top_n? : Int,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  top_n? : Int32,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> RerankingModelV4CallOptions {
   {
@@ -85,20 +88,21 @@ pub fn RerankingModelV4CallOptions::new(
 
 ///|
 /// Response returned by a reranking provider.
+#derive(Debug, Eq)
 pub(all) struct RerankingModelV4Result {
   ranking : Array[RerankingModelV4Ranking]
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a reranking response.
 pub fn RerankingModelV4Result::new(
   ranking : Array[RerankingModelV4Ranking],
   response? : ResponseMetadata,
-  provider_metadata? : Map[String, Json] = Map([]),
-  warnings? : Array[Warning] = [],
+  provider_metadata~ : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
 ) -> RerankingModelV4Result {
   {
     ranking: ranking.copy(),

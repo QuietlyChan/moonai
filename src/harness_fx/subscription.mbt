@@ -20,10 +20,11 @@ pub const FX_GROK_ACCOUNT_ID_ENV : String = "AI_SDK_FX_GROK_ACCOUNT_ID"
 
 ///|
 /// A resolved fx subscription credential for one provider (chatgpt/grok).
+#derive(Debug, Eq)
 pub(all) struct FxSubscriptionCredential {
   access_token : String
   account_id : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Convert a provider name ("chatgpt"/"grok") into its access-token env var.

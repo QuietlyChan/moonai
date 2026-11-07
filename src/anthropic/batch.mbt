@@ -14,7 +14,7 @@ priv struct AnthropicBatch {
   api_key_environment_variable : String?
   anthropic_version : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
   id_generator : @provider_utils.IdGenerator
 }
@@ -28,7 +28,7 @@ fn anthropic_batch(
   api_key_environment_variable~ : String?,
   anthropic_version~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   id_generator~ : @provider_utils.IdGenerator,
 ) -> AnthropicBatch {

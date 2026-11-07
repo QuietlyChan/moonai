@@ -1,9 +1,10 @@
 ///|
 /// Modality of one batch request or item result.
+#derive(Debug, Eq)
 pub(all) enum BatchV4Modality {
   BatchModalityText
   BatchModalityImage
-} derive(Debug, Eq)
+}
 
 ///|
 /// Model identifier for one batch request.
@@ -11,27 +12,30 @@ pub type BatchV4ModelId = String
 
 ///|
 /// Normalized lifecycle state of a batch.
+#derive(Debug, Eq)
 pub(all) enum BatchV4State {
   BatchPending
   BatchCompleted
   BatchFailed
-} derive(Debug, Eq)
+}
 
 ///|
 /// Terminal state of one batch request that finished without a result.
+#derive(Debug, Eq)
 pub(all) enum BatchV4TerminatedState {
   BatchCancelled
   BatchExpired
-} derive(Debug, Eq)
+}
 
 ///|
 /// Serializable error information for a batch or batch item.
+#derive(Debug, Eq)
 pub(all) struct BatchV4Error {
   message : String
   error_type : String?
   code : String?
-  status_code : Int?
-} derive(Debug, Eq)
+  status_code : Int32?
+}
 
 ///|
 /// Construct a batch error.
@@ -39,27 +43,28 @@ pub fn BatchV4Error::new(
   message~ : String,
   error_type? : String,
   code? : String,
-  status_code? : Int,
+  status_code? : Int32,
 ) -> BatchV4Error {
   { message, error_type, code, status_code, }
 }
 
 ///|
 /// Per-request counts reported by the provider while a batch is running.
+#derive(Debug, Eq)
 pub(all) struct BatchV4RequestCounts {
-  total : Int
-  pending : Int
-  completed : Int
-  failed : Int
-} derive(Debug, Eq)
+  total : Int32
+  pending : Int32
+  completed : Int32
+  failed : Int32
+}
 
 ///|
 /// Construct validated request counts.
 pub fn BatchV4RequestCounts::new(
-  total~ : Int,
-  pending~ : Int,
-  completed~ : Int,
-  failed~ : Int,
+  total~ : Int32,
+  pending~ : Int32,
+  completed~ : Int32,
+  failed~ : Int32,
 ) -> BatchV4RequestCounts raise {
   guard total >= 0 && pending >= 0 && completed >= 0 && failed >= 0 else {
     fail("batch request counts must not be negative")
@@ -69,6 +74,7 @@ pub fn BatchV4RequestCounts::new(
 
 ///|
 /// Normalized lifecycle status of a batch.
+#derive(Debug)
 pub(all) struct BatchV4Status {
   state : BatchV4State
   raw_status : String?
@@ -77,7 +83,7 @@ pub(all) struct BatchV4Status {
   created_at : String?
   expires_at : String?
   provider_metadata : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// Construct a batch status.
@@ -88,7 +94,7 @@ pub fn BatchV4Status::new(
   error? : BatchV4Error,
   created_at? : String,
   expires_at? : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> BatchV4Status {
   {
     state,
@@ -103,17 +109,18 @@ pub fn BatchV4Status::new(
 
 ///|
 /// Shared call options for batch operations.
+#derive(Debug)
 pub(all) struct BatchV4CallOptions {
   provider_options : Map[String, Json]
   headers : Map[String, String]
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct batch call options.
 pub fn BatchV4CallOptions::new(
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4CallOptions {
   { provider_options, headers, cancellation_token, }
@@ -121,64 +128,68 @@ pub fn BatchV4CallOptions::new(
 
 ///|
 /// Options for starting a batch.
+#derive(Debug)
 pub(all) struct BatchV4StartOptions {
   requests : Array[BatchV4Request]
   webhook_url : String?
   call_options : BatchV4CallOptions
-} derive(Debug)
+}
 
 ///|
 /// Construct batch start options.
 pub fn BatchV4StartOptions::new(
   requests~ : Array[BatchV4Request],
   webhook_url? : String,
-  call_options? : BatchV4CallOptions = BatchV4CallOptions::new(),
+  call_options~ : BatchV4CallOptions = BatchV4CallOptions::new(),
 ) -> BatchV4StartOptions {
   { requests, webhook_url, call_options, }
 }
 
 ///|
 /// A normalized text generation request within a batch.
+#derive(Debug)
 pub(all) struct BatchV4TextRequest {
   request_id : String
   model_id : BatchV4ModelId
   prompt : String
-  max_output_tokens : Int?
+  max_output_tokens : Int32?
   temperature : Double?
   top_p : Double?
   top_k : Double?
   presence_penalty : Double?
   frequency_penalty : Double?
-  seed : Int?
+  seed : Int32?
   stop_sequences : Array[String]
   reasoning : LanguageModelV4ReasoningEffort
   response_format : LanguageModelV4ResponseFormat
   tools : Array[LanguageModelV4Tool]
   tool_choice : LanguageModelV4ToolChoice?
   provider_options : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// A normalized image generation request within a batch.
+#derive(Debug)
 pub(all) struct BatchV4ImageRequest {
   request_id : String
   model_id : BatchV4ModelId
   prompt : String
-  n : Int?
+  n : Int32?
   size : String?
   aspect_ratio : String?
-  seed : Int?
+  seed : Int32?
   files : Array[ImageModelV4File]
   mask : ImageModelV4File?
   provider_options : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// One request in a batch, discriminated by modality.
+#derive(Debug)
 pub(all) enum BatchV4Request {
   BatchTextRequest(BatchV4TextRequest)
   BatchImageRequest(BatchV4ImageRequest)
-} derive(Debug)
+}
 
 ///|
 /// Return the application-provided correlation id of a batch request.
@@ -191,98 +202,105 @@ pub fn BatchV4Request::request_id(self : BatchV4Request) -> String {
 
 ///|
 /// Per-request warning emitted while starting or reading a batch.
+#derive(Debug)
 pub(all) struct BatchV4RequestWarning {
   request_id : String?
   warning : Warning
-} derive(Debug)
+}
 
 ///|
 /// Result of starting a batch.
+#derive(Debug)
 pub(all) struct BatchV4StartResult {
   batch_id : String
   status : BatchV4Status
   warnings : Array[BatchV4RequestWarning]
-} derive(Debug)
+}
 
 ///|
 /// Construct a batch start result.
 pub fn BatchV4StartResult::new(
   batch_id~ : String,
   status~ : BatchV4Status,
-  warnings? : Array[BatchV4RequestWarning] = [],
+  warnings~ : Array[BatchV4RequestWarning] = [],
 ) -> BatchV4StartResult {
   { batch_id, status, warnings: warnings.copy(), }
 }
 
 ///|
 /// Options for a batch status, results, or cancel operation.
+#derive(Debug)
 pub(all) struct BatchV4OperationOptions {
   batch_id : String
   call_options : BatchV4CallOptions
-} derive(Debug)
+}
 
 ///|
 /// Construct batch operation options.
 pub fn BatchV4OperationOptions::new(
   batch_id~ : String,
-  call_options? : BatchV4CallOptions = BatchV4CallOptions::new(),
+  call_options~ : BatchV4CallOptions = BatchV4CallOptions::new(),
 ) -> BatchV4OperationOptions {
   { batch_id, call_options, }
 }
 
 ///|
 /// Result of requesting cancellation of a batch.
+#derive(Debug)
 pub(all) struct BatchV4CancelResult {
   provider_metadata : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// Construct a batch cancel result.
 pub fn BatchV4CancelResult::new(
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> BatchV4CancelResult {
   { provider_metadata: copy_provider_metadata(provider_metadata), }
 }
 
 ///|
 /// Options for listing batches.
+#derive(Debug)
 pub(all) struct BatchV4ListOptions {
-  limit : Int?
+  limit : Int32?
   cursor : String?
   call_options : BatchV4CallOptions
-} derive(Debug)
+}
 
 ///|
 /// Construct batch list options.
 pub fn BatchV4ListOptions::new(
-  limit? : Int,
+  limit? : Int32,
   cursor? : String,
-  call_options? : BatchV4CallOptions = BatchV4CallOptions::new(),
+  call_options~ : BatchV4CallOptions = BatchV4CallOptions::new(),
 ) -> BatchV4ListOptions {
   { limit, cursor, call_options, }
 }
 
 ///|
 /// One batch returned by a list operation.
+#derive(Debug)
 pub(all) struct BatchV4ListItem {
   batch_id : String
   status : BatchV4Status
-} derive(Debug)
+}
 
 ///|
 /// Result of listing batches.
+#derive(Debug)
 pub(all) struct BatchV4ListResult {
   batches : Array[BatchV4ListItem]
   next_cursor : String?
   provider_metadata : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// Construct a batch list result.
 pub fn BatchV4ListResult::new(
   batches~ : Array[BatchV4ListItem],
   next_cursor? : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> BatchV4ListResult {
   {
     batches: batches.copy(),
@@ -293,13 +311,15 @@ pub fn BatchV4ListResult::new(
 
 ///|
 /// Payload of a succeeded batch item, discriminated by modality.
+#derive(Debug)
 pub(all) enum BatchV4ItemPayload {
   BatchTextResult(LanguageModelV4GenerateResult)
   BatchImageResult(ImageModelV4Result)
-} derive(Debug)
+}
 
 ///|
 /// Terminal result for one request in a batch.
+#derive(Debug)
 pub(all) enum BatchV4ItemResult {
   BatchItemSucceeded(
     id~ : String,
@@ -320,7 +340,7 @@ pub(all) enum BatchV4ItemResult {
     error~ : BatchV4Error?,
     provider_metadata~ : Map[String, Json]
   )
-} derive(Debug)
+}
 
 ///|
 /// Return the application-provided correlation id of a batch item result.

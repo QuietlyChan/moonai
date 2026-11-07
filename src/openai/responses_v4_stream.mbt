@@ -35,7 +35,7 @@ fn OpenAIResponsesV4StreamMetadata::new(
 }
 
 ///|
-fn openai_v4_stream_find_id(values : Array[String], id : String) -> Int? {
+fn openai_v4_stream_find_id(values : Array[String], id : String) -> Int32? {
   for index, value in values {
     if value == id {
       return Some(index)
@@ -48,7 +48,7 @@ fn openai_v4_stream_find_id(values : Array[String], id : String) -> Int? {
 fn OpenAIResponsesV4StreamMetadata::ensure_message(
   self : OpenAIResponsesV4StreamMetadata,
   id : String,
-) -> Int {
+) -> Int32 {
   match openai_v4_stream_find_id(self.message_ids, id) {
     Some(index) => index
     None => {
@@ -64,7 +64,7 @@ fn OpenAIResponsesV4StreamMetadata::ensure_message(
 fn OpenAIResponsesV4StreamMetadata::ensure_reasoning(
   self : OpenAIResponsesV4StreamMetadata,
   id : String,
-) -> Int {
+) -> Int32 {
   match openai_v4_stream_find_id(self.reasoning_ids, id) {
     Some(index) => index
     None => {
@@ -80,7 +80,7 @@ fn OpenAIResponsesV4StreamMetadata::ensure_summary(
   self : OpenAIResponsesV4StreamMetadata,
   summary_id : String,
   item_id : String,
-) -> Int {
+) -> Int32 {
   match openai_v4_stream_find_id(self.summary_ids, summary_id) {
     Some(index) => index
     None => {

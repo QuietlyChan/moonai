@@ -4,10 +4,11 @@ pub const VERSION : String = "0.1.0"
 
 ///|
 /// A GitHub account entry selected from the Copilot CLI config.
+#derive(Debug, Eq)
 pub(all) struct GitHubCopilotAccount {
   host : String
   login : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Normalize a GitHub host to `https://<host>/` origin form. Purely

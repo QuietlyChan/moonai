@@ -222,7 +222,7 @@ async test "official OpenAI Files deletes a file and reports state" {
 ///|
 priv struct TwoChunkStream {
   chunks : Array[Bytes]
-  mut index : Int
+  mut index : Int32
 }
 
 ///|

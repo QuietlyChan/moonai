@@ -17,17 +17,20 @@ pub fn customProvider(language_models? : Map[String, &@provider.LanguageModelV4]
 pub fn custom_provider(language_models? : Map[String, &@provider.LanguageModelV4], embedding_models? : Map[String, &@provider.EmbeddingModelV4], image_models? : Map[String, &@provider.ImageModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], reranking_models? : Map[String, &@provider.RerankingModelV4], video_models? : Map[String, &@provider.VideoModelV4], files? : &@provider.FilesV4, skills? : &@provider.SkillsV4, fallback_provider? : &@provider.ProviderV4) -> CustomProvider
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror InvalidRegistryModelIdError {
   InvalidRegistryModelIdError(value~ : String, separator~ : String, model_type~ : @model.ModelType)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror NoSuchProviderCapabilityError {
   NoSuchProviderCapabilityError(provider_id~ : String, capability~ : String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror NoSuchProviderError {
   NoSuchProviderError(provider_id~ : String, available_provider_ids~ : Array[String])
-} derive(Eq, @debug.Debug)
+}
 pub fn NoSuchProviderError::available_provider_ids(Self) -> Array[String]
 pub fn NoSuchProviderError::provider_id(Self) -> String
 

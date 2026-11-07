@@ -6,7 +6,7 @@ struct MistralEmbeddingModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -16,7 +16,7 @@ fn mistral_embedding_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> MistralEmbeddingModel {
   {
@@ -82,7 +82,7 @@ pub impl @provider.EmbeddingModelV4 for MistralEmbeddingModel with fn model_id(
 ///|
 pub impl @provider.EmbeddingModelV4 for MistralEmbeddingModel with fn max_embeddings_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 

@@ -1,24 +1,25 @@
 ///|
 /// An MCP protocol, client, or transport operation failed.
+#derive(Debug, Eq)
 pub(all) suberror MCPClientError {
   MCPClientError(
     message~ : String,
-    code~ : Int?,
+    code~ : Int32?,
     data~ : Json?,
-    status_code~ : Int?,
+    status_code~ : Int32?,
     url~ : String?,
     response_body~ : String?,
     cause~ : String?
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an MCP client error with optional protocol and HTTP diagnostics.
 pub fn MCPClientError::new(
   message~ : String,
-  code? : Int,
+  code? : Int32,
   data? : Json,
-  status_code? : Int,
+  status_code? : Int32,
   url? : String,
   response_body? : String,
   cause? : String,
@@ -44,15 +45,17 @@ pub fn MCPClientError::message(self : MCPClientError) -> String {
 
 ///|
 /// An OAuth operation for an MCP server failed.
+#derive(Debug, Eq)
 pub(all) suberror MCPClientOAuthError {
   MCPClientOAuthError(message~ : String, cause~ : String?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// The MCP server requires authorization.
+#derive(Debug, Eq)
 pub(all) suberror UnauthorizedError {
   UnauthorizedError(message~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 fn mcp_error(message : String) -> MCPClientError {

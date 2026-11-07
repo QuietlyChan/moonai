@@ -4,7 +4,7 @@ pub struct GatewayProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -12,10 +12,10 @@ pub struct GatewayProvider {
 /// Create an AI Gateway provider. The API key defaults to the
 /// `AI_GATEWAY_API_KEY` environment variable.
 pub fn create_gateway(
-  api_key? : String = "",
-  base_url? : String = "https://ai-gateway.vercel.sh/v4/ai",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ai-gateway.vercel.sh/v4/ai",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> GatewayProvider {
   {
@@ -32,10 +32,10 @@ pub fn create_gateway(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createGateway(
-  api_key? : String = "",
-  base_url? : String = "https://ai-gateway.vercel.sh/v4/ai",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ai-gateway.vercel.sh/v4/ai",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> GatewayProvider {
   create_gateway(
@@ -168,10 +168,10 @@ pub impl @provider.ProviderV4 for GatewayProvider with fn skills(_self) {
 /// Construct the default V4 gateway language model directly.
 pub fn gateway(
   model_id : GatewayModelId,
-  api_key? : String = "",
-  base_url? : String = "https://ai-gateway.vercel.sh/v4/ai",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ai-gateway.vercel.sh/v4/ai",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.LanguageModelV4 {
   create_gateway(

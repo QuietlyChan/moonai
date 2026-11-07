@@ -1,7 +1,7 @@
 ///|
 /// Buffer kept back while streaming so a closing markdown fence that
 /// arrives split across deltas is still stripped.
-const EXTRACT_JSON_SUFFIX_BUFFER_SIZE : Int = 12
+const EXTRACT_JSON_SUFFIX_BUFFER_SIZE : Int32 = 12
 
 ///|
 priv enum ExtractJsonPhase {

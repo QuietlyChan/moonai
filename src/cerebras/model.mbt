@@ -4,7 +4,7 @@ pub struct CerebrasProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
 }
@@ -13,10 +13,10 @@ pub struct CerebrasProvider {
 /// Create a Cerebras provider. The API key defaults to the
 /// `CEREBRAS_API_KEY` environment variable.
 pub fn create_cerebras(
-  api_key? : String = "",
-  base_url? : String = "https://api.cerebras.ai/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.cerebras.ai/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> CerebrasProvider {
@@ -35,10 +35,10 @@ pub fn create_cerebras(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createCerebras(
-  api_key? : String = "",
-  base_url? : String = "https://api.cerebras.ai/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.cerebras.ai/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> CerebrasProvider {
@@ -168,10 +168,10 @@ pub impl @provider.ProviderV4 for CerebrasProvider with fn skills(_self) {
 /// Construct the default V4 Cerebras language model directly.
 pub fn cerebras(
   model_id : CerebrasChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.cerebras.ai/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.cerebras.ai/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

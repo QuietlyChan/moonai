@@ -7,15 +7,15 @@ import {
 }
 
 // Values
-pub const ASSEMBLYAI_POLL_INTERVAL_MS : Int = 3000
+pub const ASSEMBLYAI_POLL_INTERVAL_MS : Int32 = 3000
 
-pub const ASSEMBLYAI_POLL_TIMEOUT_MS : Int = 600_000
+pub const ASSEMBLYAI_POLL_TIMEOUT_MS : Int32 = 600_000
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createAssemblyAI(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> AssemblyAIProvider
+pub fn createAssemblyAI(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, poll_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> AssemblyAIProvider
 
-pub fn create_assemblyai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> AssemblyAIProvider
+pub fn create_assemblyai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, poll_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> AssemblyAIProvider
 
 // Errors
 

@@ -120,7 +120,7 @@ fn alibaba_chat_value(
   base_url~ : String,
   headers~ : Map[String, String],
   include_usage~ : Bool,
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   id_generator~ : @provider_utils.IdGenerator,
 ) -> AlibabaChatModel {

@@ -101,7 +101,7 @@ pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn model
 ///|
 pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn max_embeddings_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   match self.middleware.override_max_embeddings_per_call {
     Some(resolve) => resolve(self.model)
     None => self.model.max_embeddings_per_call()

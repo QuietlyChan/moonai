@@ -1,9 +1,10 @@
 ///|
 /// Audio data returned by a speech provider.
+#derive(Debug, Eq)
 pub(all) enum SpeechAudioData {
   SpeechAudioBytes(Bytes)
   SpeechAudioBase64(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct binary generated speech data.
@@ -28,6 +29,7 @@ pub fn SpeechAudioData::is_empty(self : SpeechAudioData) -> Bool {
 
 ///|
 /// Provider-neutral options for converting text to speech.
+#derive(Debug)
 pub(all) struct SpeechCallOptions {
   text : String
   voice : String?
@@ -39,7 +41,7 @@ pub(all) struct SpeechCallOptions {
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct one speech generation call.
@@ -50,9 +52,9 @@ pub fn SpeechCallOptions::new(
   instructions? : String,
   speed? : Double,
   language? : String,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> SpeechCallOptions {
   {
@@ -71,6 +73,7 @@ pub fn SpeechCallOptions::new(
 
 ///|
 /// Result returned by a speech model.
+#derive(Debug, Eq)
 pub(all) struct SpeechResponse {
   audio : SpeechAudioData
   media_type : String
@@ -78,7 +81,7 @@ pub(all) struct SpeechResponse {
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a speech response without transport diagnostics.

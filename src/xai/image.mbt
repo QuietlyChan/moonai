@@ -6,7 +6,7 @@ struct XaiImageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -16,7 +16,7 @@ fn xai_image_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> XaiImageModel {
   {
@@ -36,7 +36,7 @@ fn xai_image_value(
 fn xai_image_request_body(
   model_id : String,
   prompt~ : String?,
-  n~ : Int,
+  n~ : Int32,
   aspect_ratio~ : String?,
   image_urls~ : Array[String],
   provider_options~ : Map[String, Json],
@@ -118,7 +118,7 @@ pub impl @provider.ImageModelV4 for XaiImageModel with fn model_id(self) -> Stri
 ///|
 pub impl @provider.ImageModelV4 for XaiImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(3)
 }
 

@@ -4,6 +4,7 @@ pub type MoonshotAIChatModelId = String
 
 ///|
 /// Moonshot model families with distinct thinking and reasoning behavior.
+#derive(Debug, Eq)
 pub(all) enum MoonshotAIModelFamily {
   KimiK25
   KimiK26
@@ -11,7 +12,7 @@ pub(all) enum MoonshotAIModelFamily {
   KimiK3
   MoonshotV1
   Unknown
-} derive(Debug, Eq)
+}
 
 ///|
 /// Detect the Moonshot model family for a model id.
@@ -84,29 +85,30 @@ pub fn getModelStructuredOutputSupport(model_id : String) -> Bool {
 
 ///|
 /// Provider-specific options for Moonshot AI language models.
+#derive(Debug, Eq)
 pub(all) struct MoonshotAILanguageModelOptions {
   strict_json_schema : Bool?
   logprobs : Bool?
-  top_logprobs : Int?
+  top_logprobs : Int32?
   reasoning_effort : String?
   prediction : Json?
   thinking_type : String?
-  thinking_budget_tokens : Int?
+  thinking_budget_tokens : Int32?
   reasoning_history : String?
   prompt_cache_key : String?
   safety_identifier : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct validated Moonshot AI language-model options.
 pub fn MoonshotAILanguageModelOptions::new(
   strict_json_schema? : Bool,
   logprobs? : Bool,
-  top_logprobs? : Int,
+  top_logprobs? : Int32,
   reasoning_effort? : String,
   prediction? : Json,
   thinking_type? : String,
-  thinking_budget_tokens? : Int,
+  thinking_budget_tokens? : Int32,
   reasoning_history? : String,
   prompt_cache_key? : String,
   safety_identifier? : String,
@@ -253,7 +255,7 @@ fn parse_moonshot_options(
       }
     None => None
   }
-  let thinking_budget_tokens : Int? = match reader.take_object("thinking") {
+  let thinking_budget_tokens : Int32? = match reader.take_object("thinking") {
     Some(thinking) =>
       match thinking.get("budgetTokens") {
         Some(Number(value, ..)) => Some(value.to_int())

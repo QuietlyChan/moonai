@@ -3,6 +3,7 @@ package "QuietlyChan/moonai/harness_grok_build"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -12,22 +13,23 @@ pub const VERSION : String = "0.1.0"
 
 pub const XAI_CLIENT_ID : String = "b1a00492-073a-47ea-816f-4c329264a828"
 
-pub fn grok_normalize_expires_at(Json) -> Int64?
+pub fn grok_normalize_expires_at(@json.Json) -> Int64?
 
-pub fn grok_select_oauth_record(value~ : Json) -> GrokOAuthRecord?
+pub fn grok_select_oauth_record(value~ : @json.Json) -> GrokOAuthRecord?
 
 pub fn should_resolve_grok_native_subscription(ai_gateway_auth~ : Bool, has_direct_credential~ : Bool) -> Bool
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct GrokOAuthRecord {
   scope : String
   issuer : String
   key : String
   refresh_token : String
   expires_at : Int64
-} derive(Eq, @debug.Debug)
+}
 
 // Type aliases
 

@@ -5,28 +5,31 @@
 /// The older `Usage` type only has a total plus cache counters, so the V4
 /// shape intentionally uses optional values and preserves what a provider did
 /// (or did not) report.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4InputTokens {
-  total : Int?
-  no_cache : Int?
-  cache_read : Int?
-  cache_write : Int?
-} derive(Debug, Eq)
+  total : Int32?
+  no_cache : Int32?
+  cache_read : Int32?
+  cache_write : Int32?
+}
 
 ///|
 /// Output-token accounting for the V4 language-model contract.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4OutputTokens {
-  total : Int?
-  text : Int?
-  reasoning : Int?
-} derive(Debug, Eq)
+  total : Int32?
+  text : Int32?
+  reasoning : Int32?
+}
 
 ///|
 /// Usage information returned by a V4 language model.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4Usage {
   input_tokens : LanguageModelV4InputTokens
   output_tokens : LanguageModelV4OutputTokens
   raw : Json?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 usage value for a provider response that did not report
@@ -61,7 +64,7 @@ pub fn LanguageModelV4Usage::zero() -> LanguageModelV4Usage {
 }
 
 ///|
-fn v4_usage_int_field(json : Json, field : String) -> Int? {
+fn v4_usage_int_field(json : Json, field : String) -> Int32? {
   match json {
     Object(values) =>
       match values.get(field) {
@@ -77,7 +80,7 @@ fn v4_usage_nested_int_field(
   json : Json,
   object_field : String,
   field : String,
-) -> Int? {
+) -> Int32? {
   match json {
     Object(values) =>
       match values.get(object_field) {

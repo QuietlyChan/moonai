@@ -1,21 +1,21 @@
 ///|
 priv struct MockHttpStreamResponse {
-  status : Int
+  status : Int32
   reason_text : String
   response_headers : Map[String, String]
   chunks : Array[String]
-  delays_ms : Array[Int]
-  next_chunk : Ref[Int]
+  delays_ms : Array[Int32]
+  next_chunk : Ref[Int32]
   closed : Ref[Bool]
 }
 
 ///|
 fn MockHttpStreamResponse::new(
   chunks : Array[String],
-  status? : Int = 200,
-  reason? : String = "OK",
-  headers? : Map[String, String] = Map([]),
-  delays_ms? : Array[Int] = [],
+  status~ : Int32 = 200,
+  reason~ : String = "OK",
+  headers~ : Map[String, String] = Map([]),
+  delays_ms~ : Array[Int32] = [],
 ) -> MockHttpStreamResponse {
   {
     status,
@@ -1082,8 +1082,8 @@ async test "SSE provider errors preserve HTTP diagnostics" {
 
 ///|
 priv struct AlwaysFailingHttpTransport {
-  buffered_calls : Ref[Int]
-  stream_calls : Ref[Int]
+  buffered_calls : Ref[Int32]
+  stream_calls : Ref[Int32]
 }
 
 ///|

@@ -4,11 +4,11 @@ pub type LumaImageModelId = String
 
 ///|
 /// Default polling interval for generation status checks.
-pub const LUMA_POLL_INTERVAL_MS : Int = 3000
+pub const LUMA_POLL_INTERVAL_MS : Int32 = 3000
 
 ///|
 /// Default maximum poll attempts before giving up.
-pub const LUMA_MAX_POLL_ATTEMPTS : Int = 60
+pub const LUMA_MAX_POLL_ATTEMPTS : Int32 = 60
 
 ///|
 /// Provider options accepted under the `luma` namespace (all optional):

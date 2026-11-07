@@ -1,18 +1,20 @@
 ///|
 /// Base error for failures originating in a harness adapter.
+#derive(Debug, Eq)
 pub(all) suberror HarnessError {
   HarnessError(message~ : String, cause~ : String?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Raised when a harness or sandbox cannot provide a requested capability.
+#derive(Debug, Eq)
 pub(all) suberror HarnessCapabilityUnsupportedError {
   HarnessCapabilityUnsupportedError(
     message~ : String,
     harness_id~ : String?,
     cause~ : String?
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an unsupported-capability error.

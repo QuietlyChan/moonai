@@ -16,7 +16,7 @@ fn response_headers(content_type : String) -> Map[String, String] {
 ///|
 async fn send_json(
   conn : @http.ServerConnection,
-  code : Int,
+  code : Int32,
   reason : String,
   value : Json,
 ) -> Unit {
@@ -32,7 +32,7 @@ async fn send_json(
 ///|
 async fn send_error(
   conn : @http.ServerConnection,
-  code : Int,
+  code : Int32,
   reason : String,
   message : String,
 ) -> Unit {
@@ -128,7 +128,7 @@ fn ui_message_limit(
   messages : Array[Json],
   trigger : String,
   message_id : String?,
-) -> Int raise {
+) -> Int32 raise {
   guard trigger == "submit-message" || trigger == "regenerate-message" else {
     fail("Trigger must be submit-message or regenerate-message.")
   }
@@ -726,7 +726,7 @@ async fn handle_request(
 }
 
 ///|
-fn configured_port() -> Int {
+fn configured_port() -> Int32 {
   match @env.get_env_var("MOONAI_PORT") {
     Some(value) => @string.parse_int(value) catch { _ => 8080 }
     None => 8080

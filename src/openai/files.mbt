@@ -5,17 +5,18 @@ priv struct OpenAIFiles {
   base_url : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
   streaming_http_transport : &@provider_utils.StreamingBodyTransport
 }
 
 ///|
 /// Typed provider options for OpenAI Files uploads.
+#derive(Debug, Eq)
 pub(all) struct OpenAIFilesOptions {
   purpose : String?
   expires_after : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct OpenAI Files upload options.
@@ -30,7 +31,7 @@ pub fn OpenAIFilesOptions::new(
 /// Convert typed FilesV4 options into the OpenAI provider namespace.
 pub fn OpenAIFilesOptions::to_provider_options(
   self : OpenAIFilesOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   let values : Map[String, Json] = Map([])
   if self.purpose is Some(value) {
@@ -54,7 +55,7 @@ fn openai_files(
   base_url~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   streaming_http_transport? : &@provider_utils.StreamingBodyTransport,
 ) -> OpenAIFiles {
@@ -349,7 +350,9 @@ fn openai_files_lifecycle_metadata(
 }
 
 ///|
-fn openai_files_lifecycle_fields(json : Json) -> (String?, Int?, Int?, Int?) {
+fn openai_files_lifecycle_fields(
+  json : Json,
+) -> (String?, Int32?, Int32?, Int32?) {
   let filename = match json {
     { "filename": String(value), .. } => Some(value)
     _ => None

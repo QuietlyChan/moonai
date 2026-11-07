@@ -7,10 +7,10 @@ pub async fn stream_speech_translation(
   target_language~ : String,
   source_language? : String,
   output_audio_format? : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
-  on_event? : async (SpeechTranslationStreamEvent) -> Unit = _ => (),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
+  on_event~ : async (SpeechTranslationStreamEvent) -> Unit = _ => (),
   cancellation_token? : CancellationToken,
 ) -> SpeechTranslationResponse {
   check_cancellation(cancellation_token)
@@ -111,10 +111,10 @@ pub async fn streamSpeechTranslation(
   target_language~ : String,
   source_language? : String,
   output_audio_format? : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
-  on_event? : async (SpeechTranslationStreamEvent) -> Unit = _ => (),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
+  on_event~ : async (SpeechTranslationStreamEvent) -> Unit = _ => (),
   cancellation_token? : CancellationToken,
 ) -> SpeechTranslationResponse {
   stream_speech_translation(

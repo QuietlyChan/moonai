@@ -1,5 +1,6 @@
 ///|
 /// Explicit authentication source used by the OpenCode adapter.
+#derive(Debug, Eq)
 pub(all) enum OpenCodeAuthOptions {
   OpenCodeGatewayAuth(api_key~ : String?, base_url~ : String?)
   OpenCodeAnthropicAuth(
@@ -19,15 +20,16 @@ pub(all) enum OpenCodeAuthOptions {
     name~ : String?,
     query_params~ : Map[String, String]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// OpenCode's split provider/model coordinate.
+#derive(Debug, Eq)
 pub(all) struct OpenCodeModelCoordinate {
   provider_id : String?
   model_id : String?
   model : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Infer the provider family used for ambient credentials.
@@ -110,7 +112,7 @@ pub fn resolve_open_code_env(
   auth? : OpenCodeAuthOptions,
   model? : String,
   provider? : String,
-  environment? : Map[String, String] = @env.get_env_vars(),
+  environment~ : Map[String, String] = @env.get_env_vars(),
 ) -> Map[String, String] {
   match auth {
     Some(OpenCodeCompatibleAuth(api_key~, base_url~, name~, query_params~)) => {
@@ -221,7 +223,7 @@ pub fn resolveOpenCodeEnv(
   auth? : OpenCodeAuthOptions,
   model? : String,
   provider? : String,
-  environment? : Map[String, String] = @env.get_env_vars(),
+  environment~ : Map[String, String] = @env.get_env_vars(),
 ) -> Map[String, String] {
   resolve_open_code_env(auth?, model?, provider?, environment~)
 }

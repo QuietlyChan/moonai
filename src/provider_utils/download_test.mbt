@@ -4,7 +4,7 @@ priv struct DownloadTestStream {
 }
 
 ///|
-impl HttpStreamResponse for DownloadTestStream with fn status_code(_self) -> Int {
+impl HttpStreamResponse for DownloadTestStream with fn status_code(_self) -> Int32 {
   200
 }
 

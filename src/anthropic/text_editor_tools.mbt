@@ -192,7 +192,7 @@ pub fn textEditor_20250429(
 ///|
 /// Create Anthropic's current application-executed text editor.
 pub fn text_editor_20250728(
-  max_characters? : Int,
+  max_characters? : Int32,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
   needs_approval? : @provider_utils.ToolNeedsApproval,
@@ -214,7 +214,7 @@ pub fn text_editor_20250728(
 ///|
 /// AI SDK-style camel-case spelling.
 pub fn textEditor_20250728(
-  max_characters? : Int,
+  max_characters? : Int32,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
   needs_approval? : @provider_utils.ToolNeedsApproval,

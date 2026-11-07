@@ -8,12 +8,13 @@ pub struct WorkflowHarnessBridge {
 
 ///|
 /// The outcome of one bridged harness turn.
+#derive(Debug, Eq)
 pub(all) struct WorkflowHarnessTurnResult {
   text : String
   reasoning : String
-  tool_inputs_started : Int
-  events : Int
-} derive(Debug, Eq)
+  tool_inputs_started : Int32
+  events : Int32
+}
 
 ///|
 /// Wrap a harness session for workflow consumption.

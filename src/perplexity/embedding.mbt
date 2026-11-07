@@ -9,13 +9,13 @@ struct PerplexityEmbeddingModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
 /// Maximum embeddings Perplexity accepts per call.
-pub const PERPLEXITY_MAX_EMBEDDINGS_PER_CALL : Int = 512
+pub const PERPLEXITY_MAX_EMBEDDINGS_PER_CALL : Int32 = 512
 
 ///|
 fn perplexity_embedding_value(
@@ -23,7 +23,7 @@ fn perplexity_embedding_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> PerplexityEmbeddingModel {
   {
@@ -61,7 +61,7 @@ fn perplexity_decode_embedding(
 ///|
 fn perplexity_embedding_response(
   value : Json,
-) -> (Array[Array[Double]], Int?) raise {
+) -> (Array[Array[Double]], Int32?) raise {
   match value {
     { "data": Array(items), .. } => {
       let embeddings : Array[Array[Double]] = []
@@ -79,7 +79,7 @@ fn perplexity_embedding_response(
           _ => fail("perplexity embedding response has malformed data items")
         }
       }
-      let mut tokens : Int? = None
+      let mut tokens : Int32? = None
       match value {
         { "usage": { "prompt_tokens": Number(count, ..), .. }, .. } =>
           tokens = Some(count.to_int())
@@ -115,7 +115,7 @@ pub impl @provider.EmbeddingModelV4 for PerplexityEmbeddingModel with fn model_i
 ///|
 pub impl @provider.EmbeddingModelV4 for PerplexityEmbeddingModel with fn max_embeddings_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(PERPLEXITY_MAX_EMBEDDINGS_PER_CALL)
 }
 

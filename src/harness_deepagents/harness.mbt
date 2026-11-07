@@ -3,9 +3,9 @@
 pub(all) struct DeepAgentsHarnessSettings {
   auth : DeepAgentsAuthOptions?
   model : String?
-  port : Int?
-  startup_timeout_ms : Int
-  recursion_limit : Int?
+  port : Int32?
+  startup_timeout_ms : Int32
+  recursion_limit : Int32?
   transport : @harness.HarnessV1BridgeTransportConfig?
 }
 
@@ -14,9 +14,9 @@ pub(all) struct DeepAgentsHarnessSettings {
 pub fn DeepAgentsHarnessSettings::new(
   auth? : DeepAgentsAuthOptions,
   model? : String,
-  port? : Int,
-  startup_timeout_ms? : Int = 120_000,
-  recursion_limit? : Int,
+  port? : Int32,
+  startup_timeout_ms~ : Int32 = 120_000,
+  recursion_limit? : Int32,
   transport? : @harness.HarnessV1BridgeTransportConfig,
 ) -> DeepAgentsHarnessSettings {
   { auth, model, port, startup_timeout_ms, recursion_limit, transport, }
@@ -215,7 +215,7 @@ pub impl @harness.HarnessV1 for DeepAgentsHarness with fn do_start(
 ///|
 /// Create a DeepAgents Harness V1 adapter.
 pub fn createDeepAgents(
-  settings? : DeepAgentsHarnessSettings = DeepAgentsHarnessSettings::new(),
+  settings~ : DeepAgentsHarnessSettings = DeepAgentsHarnessSettings::new(),
 ) -> DeepAgentsHarness {
   { settings, }
 }
@@ -223,7 +223,7 @@ pub fn createDeepAgents(
 ///|
 /// Snake-case alias for `createDeepAgents`.
 pub fn create_deep_agents(
-  settings? : DeepAgentsHarnessSettings = DeepAgentsHarnessSettings::new(),
+  settings~ : DeepAgentsHarnessSettings = DeepAgentsHarnessSettings::new(),
 ) -> DeepAgentsHarness {
   createDeepAgents(settings~)
 }

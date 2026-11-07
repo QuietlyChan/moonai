@@ -20,9 +20,9 @@ pub fn SpeechTranslationModelV4StreamOptions::new(
   target_language~ : String,
   source_language? : String,
   output_audio_format? : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
   cancellation_token? : CancellationToken,
 ) -> SpeechTranslationModelV4StreamOptions {
   {
@@ -76,22 +76,23 @@ pub fn SpeechTranslationModelV4StreamOptions::to_speech_translation_call_options
 
 ///|
 /// Usage reported by a V4 speech translation model.
+#derive(Debug, Eq)
 pub(all) struct SpeechTranslationModelV4Usage {
   input_audio_seconds : Double?
-  input_audio_tokens : Int?
-  output_audio_tokens : Int?
-  input_text_tokens : Int?
-  output_text_tokens : Int?
-} derive(Debug, Eq)
+  input_audio_tokens : Int32?
+  output_audio_tokens : Int32?
+  input_text_tokens : Int32?
+  output_text_tokens : Int32?
+}
 
 ///|
 /// Construct V4 speech translation usage.
 pub fn SpeechTranslationModelV4Usage::new(
   input_audio_seconds? : Double,
-  input_audio_tokens? : Int,
-  output_audio_tokens? : Int,
-  input_text_tokens? : Int,
-  output_text_tokens? : Int,
+  input_audio_tokens? : Int32,
+  output_audio_tokens? : Int32,
+  input_text_tokens? : Int32,
+  output_text_tokens? : Int32,
 ) -> SpeechTranslationModelV4Usage {
   {
     input_audio_seconds,
@@ -104,6 +105,7 @@ pub fn SpeechTranslationModelV4Usage::new(
 
 ///|
 /// Normalized parts emitted by a V4 speech translation stream.
+#derive(Debug, Eq)
 pub(all) enum SpeechTranslationModelV4StreamPart {
   SpeechTranslationV4StreamStart(warnings~ : Array[Warning])
   SpeechTranslationV4Audio(
@@ -131,7 +133,7 @@ pub(all) enum SpeechTranslationModelV4StreamPart {
     text~ : String,
     start_second~ : Double?,
     end_second~ : Double?,
-    channel_index~ : Int?,
+    channel_index~ : Int32?,
     provider_metadata~ : Map[String, Json]
   )
   SpeechTranslationV4SourceTranscriptFinal(
@@ -139,7 +141,7 @@ pub(all) enum SpeechTranslationModelV4StreamPart {
     text~ : String,
     start_second~ : Double?,
     end_second~ : Double?,
-    channel_index~ : Int?,
+    channel_index~ : Int32?,
     provider_metadata~ : Map[String, Json]
   )
   SpeechTranslationV4ResponseMetadata(ResponseMetadata)
@@ -152,7 +154,7 @@ pub(all) enum SpeechTranslationModelV4StreamPart {
   )
   SpeechTranslationV4Raw(Json)
   SpeechTranslationV4Error(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Convert an old wire event to the V4 vocabulary.
@@ -318,10 +320,11 @@ pub fn SpeechTranslationModelV4StreamPart::to_stream_event(
 
 ///|
 /// Metadata returned after a V4 speech translation call.
+#derive(Debug, Eq)
 pub(all) struct SpeechTranslationModelV4StreamResult {
   request : RequestMetadata?
   response : ResponseMetadata?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 speech translation stream result.

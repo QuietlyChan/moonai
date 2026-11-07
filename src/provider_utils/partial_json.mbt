@@ -1,5 +1,6 @@
 ///|
 /// Outcome of parsing a possibly-truncated JSON prefix.
+#derive(Debug, Eq)
 pub(all) enum PartialJsonParseState {
   /// The input was empty or whitespace only.
   PartialUndefinedInput
@@ -10,14 +11,15 @@ pub(all) enum PartialJsonParseState {
   PartialSuccessfulRepair
   /// The input could not be repaired into valid JSON.
   PartialFailedParse
-} derive(Debug, Eq)
+}
 
 ///|
 /// Result of parsing a possibly-truncated JSON prefix.
+#derive(Debug, Eq)
 pub(all) struct PartialJsonResult {
   value : Json
   state : PartialJsonParseState
-} derive(Debug, Eq)
+}
 
 ///|
 fn unwrap_or_null(value : Json?) -> Json {
@@ -34,7 +36,7 @@ priv struct PartialScanState {
   mut in_string : Bool
   mut escaped : Bool
   mut in_token : Bool
-  mut token_start : Int
+  mut token_start : Int32
   /// True once a colon (or an array comma) has been consumed and a value is
   /// expected next.
   mut awaiting_value : Bool
@@ -60,7 +62,7 @@ fn partial_scan_new() -> PartialScanState {
 /// backslash; delimiters (44 comma, 58 colon, whitespace) end bare tokens.
 fn partial_scan_feed(
   state : PartialScanState,
-  offset : Int,
+  offset : Int32,
   byte : Byte,
 ) -> Unit {
   if state.in_string {
@@ -118,7 +120,7 @@ fn partial_scan_feed(
 /// Build the repaired text for the prefix [0, end): close an open string,
 /// complete or drop a trailing bare token, trim a dangling comma, and close
 /// all open containers.
-fn repair_partial_prefix(bytes : Bytes, end : Int) -> String? {
+fn repair_partial_prefix(bytes : Bytes, end : Int32) -> String? {
   let state = partial_scan_new()
   for index = 0; index < end; index = index + 1 {
     partial_scan_feed(state, index, bytes[index])

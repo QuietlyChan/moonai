@@ -1,7 +1,7 @@
 ///|
 /// Return whether an HTTP status conventionally represents a transient
 /// failure for an idempotent provider request.
-pub fn is_retryable_status(status_code : Int) -> Bool {
+pub fn is_retryable_status(status_code : Int32) -> Bool {
   status_code == 408 ||
   status_code == 409 ||
   status_code == 425 ||
@@ -26,7 +26,7 @@ pub fn is_retryable_error(error : Error) -> Bool {
 
 ///|
 /// Return the first retry delay, capped by the configured maximum.
-pub fn initial_retry_delay(policy : @provider.RetryPolicy) -> Int {
+pub fn initial_retry_delay(policy : @provider.RetryPolicy) -> Int32 {
   if policy.initial_delay_ms > policy.max_delay_ms {
     policy.max_delay_ms
   } else {
@@ -36,7 +36,10 @@ pub fn initial_retry_delay(policy : @provider.RetryPolicy) -> Int {
 
 ///|
 /// Compute the next exponential retry delay, capped by the policy.
-pub fn next_retry_delay(policy : @provider.RetryPolicy, current : Int) -> Int {
+pub fn next_retry_delay(
+  policy : @provider.RetryPolicy,
+  current : Int32,
+) -> Int32 {
   if current <= 0 || policy.max_delay_ms <= 0 {
     0
   } else {
@@ -53,7 +56,7 @@ pub fn next_retry_delay(policy : @provider.RetryPolicy, current : Int) -> Int {
 /// Sleep in short slices so a cooperative cancellation token is observed
 /// during a retry backoff instead of only after the full delay.
 pub async fn sleep_with_cancellation(
-  delay_ms : Int,
+  delay_ms : Int32,
   cancellation_token : @provider.CancellationToken?,
 ) -> Unit {
   let mut remaining = delay_ms

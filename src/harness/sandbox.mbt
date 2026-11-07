@@ -1,5 +1,6 @@
 ///|
 /// Outbound network policy applied to a harness sandbox.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1NetworkPolicy {
   HarnessNetworkAllowAll
   HarnessNetworkDenyAll
@@ -8,20 +9,20 @@ pub(all) enum HarnessV1NetworkPolicy {
     allowed_cidrs~ : Array[String],
     denied_cidrs~ : Array[String]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Network-capable sandbox session used by harness adapters.
 pub struct HarnessV1NetworkSandboxSession {
   priv sandbox_id : String
   priv default_working_directory_value : String
-  priv exposed_ports : Ref[Array[Int]]
+  priv exposed_ports : Ref[Array[Int32]]
   priv restricted_session : @provider_utils.SandboxSession
-  priv get_port_url_callback : async (Int, String?) -> String
+  priv get_port_url_callback : async (Int32, String?) -> String
   priv stop_callback : async () -> Unit
   priv destroy_callback : async () -> Unit
   priv set_network_policy_callback : async (HarnessV1NetworkPolicy) -> Unit
-  priv set_ports_callback : async (Array[Int], @provider.CancellationToken?) -> Unit
+  priv set_ports_callback : async (Array[Int32], @provider.CancellationToken?) -> Unit
 }
 
 ///|
@@ -30,14 +31,15 @@ pub fn HarnessV1NetworkSandboxSession::new(
   id~ : String,
   default_working_directory~ : String,
   restricted~ : @provider_utils.SandboxSession,
-  get_port_url~ : async (Int, String?) -> String,
+  get_port_url~ : async (Int32, String?) -> String,
   stop~ : async () -> Unit,
-  ports? : Array[Int] = [],
-  destroy? : async () -> Unit = () => (),
-  set_network_policy? : async (HarnessV1NetworkPolicy) -> Unit = _ => (),
-  set_ports? : async (Array[Int], @provider.CancellationToken?) -> Unit = (_, _) => {
-    ()
-  },
+  ports~ : Array[Int32] = [],
+  destroy~ : async () -> Unit = () => (),
+  set_network_policy~ : async (HarnessV1NetworkPolicy) -> Unit = _ => (),
+  set_ports~ : async (Array[Int32], @provider.CancellationToken?) -> Unit = (
+    _,
+    _,
+  ) => (),
 ) -> HarnessV1NetworkSandboxSession {
   {
     sandbox_id: id,
@@ -72,7 +74,7 @@ pub fn HarnessV1NetworkSandboxSession::default_working_directory(
 /// Currently exposed bridge ports.
 pub fn HarnessV1NetworkSandboxSession::ports(
   self : HarnessV1NetworkSandboxSession,
-) -> Array[Int] {
+) -> Array[Int32] {
   self.exposed_ports.val.copy()
 }
 
@@ -88,7 +90,7 @@ pub fn HarnessV1NetworkSandboxSession::restricted(
 /// Resolve a reachable URL for an exposed port.
 pub async fn HarnessV1NetworkSandboxSession::get_port_url(
   self : HarnessV1NetworkSandboxSession,
-  port~ : Int,
+  port~ : Int32,
   protocol? : String,
 ) -> String {
   (self.get_port_url_callback)(port, protocol)
@@ -123,7 +125,7 @@ pub async fn HarnessV1NetworkSandboxSession::set_network_policy(
 /// Replace the set of exposed ports.
 pub async fn HarnessV1NetworkSandboxSession::set_ports(
   self : HarnessV1NetworkSandboxSession,
-  ports : Array[Int],
+  ports : Array[Int32],
   cancellation_token? : @provider.CancellationToken,
 ) -> Unit {
   (self.set_ports_callback)(ports.copy(), cancellation_token)
@@ -153,7 +155,7 @@ pub fn HarnessV1SandboxCreateOptions::new(
 pub(open) trait HarnessV1SandboxProvider {
   fn specification_version(Self) -> String
   fn provider_id(Self) -> String
-  fn bridge_ports(Self) -> Array[Int]
+  fn bridge_ports(Self) -> Array[Int32]
   async fn create_session(Self, HarnessV1SandboxCreateOptions) -> HarnessV1NetworkSandboxSession
   async fn resume_session(Self, String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession
 }
@@ -162,7 +164,7 @@ pub(open) trait HarnessV1SandboxProvider {
 /// Callback-backed sandbox provider for hosts and tests.
 pub struct CallbackHarnessV1SandboxProvider {
   priv provider_id_value : String
-  priv bridge_ports_value : Array[Int]
+  priv bridge_ports_value : Array[Int32]
   priv create_callback : async (HarnessV1SandboxCreateOptions) -> HarnessV1NetworkSandboxSession
   priv resume_callback : async (String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession
 }
@@ -172,8 +174,8 @@ pub struct CallbackHarnessV1SandboxProvider {
 pub fn CallbackHarnessV1SandboxProvider::new(
   provider_id~ : String,
   create_session~ : async (HarnessV1SandboxCreateOptions) -> HarnessV1NetworkSandboxSession,
-  bridge_ports? : Array[Int] = [],
-  resume_session? : async (String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession = (
+  bridge_ports~ : Array[Int32] = [],
+  resume_session~ : async (String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession = (
     _,
     _,
   ) => {

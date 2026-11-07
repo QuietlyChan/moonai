@@ -2,7 +2,7 @@
 priv struct AgentSequenceModel {
   results : Array[@provider.LanguageModelV4GenerateResult]
   stream_steps : Array[Array[@provider.LanguageModelV4StreamPart]]
-  call_count : Ref[Int]
+  call_count : Ref[Int32]
   captured_headers : Ref[Array[Map[String, String]]]
   captured_temperatures : Ref[Array[Double?]]
 }
@@ -10,7 +10,7 @@ priv struct AgentSequenceModel {
 ///|
 fn AgentSequenceModel::new(
   results : Array[@provider.LanguageModelV4GenerateResult],
-  stream_steps? : Array[Array[@provider.LanguageModelV4StreamPart]] = [],
+  stream_steps~ : Array[Array[@provider.LanguageModelV4StreamPart]] = [],
 ) -> AgentSequenceModel {
   {
     results,
@@ -108,7 +108,7 @@ fn agent_finish(
 }
 
 ///|
-fn agent_loop_tools(executions : Ref[Int]) -> @provider_utils.ToolSet {
+fn agent_loop_tools(executions : Ref[Int32]) -> @provider_utils.ToolSet {
   @provider_utils.tool_set([
     (
       "lookup",
@@ -168,7 +168,7 @@ fn agent_generate_step(
 
 ///|
 async test "ToolLoopAgent runs the tool loop and tags the agent header" {
-  let executions : Ref[Int] = Ref(0)
+  let executions : Ref[Int32] = Ref(0)
   let model = AgentSequenceModel::new([
     agent_generate_step(
       [agent_model_tool_call("call-1", "lookup", "{\"query\":\"Moon\"}")],
@@ -211,7 +211,7 @@ async test "ToolLoopAgent runs the tool loop and tags the agent header" {
 
 ///|
 async test "ToolLoopAgent streams a single step" {
-  let executions : Ref[Int] = Ref(0)
+  let executions : Ref[Int32] = Ref(0)
   let model = AgentSequenceModel::new([], stream_steps=[
     agent_text_stream_step(text="streamed answer"),
   ])

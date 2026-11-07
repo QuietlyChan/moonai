@@ -6,7 +6,7 @@ priv struct CapturingV4Model {
 
 ///|
 fn CapturingV4Model::new(
-  stream_events? : Array[@provider.LanguageModelV4StreamPart] = [],
+  stream_events~ : Array[@provider.LanguageModelV4StreamPart] = [],
 ) -> CapturingV4Model {
   { captured_options: Ref(None), stream_events, }
 }
@@ -155,7 +155,7 @@ async test "add tool input examples middleware keeps examples when asked" {
     model as &@provider.LanguageModelV4,
     add_tool_input_examples_middleware(prefix="Examples:", remove=false, format=fn(
       example : @provider.LanguageModelV4FunctionToolInputExample,
-      _index : Int,
+      _index : Int32,
     ) -> String {
       "Q: \{(example.input).stringify()}"
     }),

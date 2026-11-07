@@ -1,24 +1,26 @@
 ///|
 /// The payload returned for a generated image.
+#derive(Debug, Eq)
 pub(all) enum ImageData {
   Base64(String)
   Url(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// An image supplied for editing, variation, or inpainting.
+#derive(Debug, Eq)
 pub(all) enum ImageFile {
   ImageFileBase64(data~ : String, media_type~ : String, filename~ : String)
   ImageFileBytes(data~ : Bytes, media_type~ : String, filename~ : String)
   ImageFileUrl(url~ : String, filename~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a base64-backed image input file.
 pub fn ImageFile::base64(
   data~ : String,
   media_type~ : String,
-  filename? : String = "image",
+  filename~ : String = "image",
 ) -> ImageFile {
   ImageFileBase64(data~, media_type~, filename~)
 }
@@ -28,23 +30,24 @@ pub fn ImageFile::base64(
 pub fn ImageFile::bytes(
   data~ : Bytes,
   media_type~ : String,
-  filename? : String = "image",
+  filename~ : String = "image",
 ) -> ImageFile {
   ImageFileBytes(data~, media_type~, filename~)
 }
 
 ///|
 /// Construct a URL-backed image input file.
-pub fn ImageFile::url(url~ : String, filename? : String = "image") -> ImageFile {
+pub fn ImageFile::url(url~ : String, filename~ : String = "image") -> ImageFile {
   ImageFileUrl(url~, filename~)
 }
 
 ///|
 /// One generated image and optional provider-revised prompt.
+#derive(Debug, Eq)
 pub(all) struct GeneratedImage {
   data : ImageData
   revised_prompt : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct one generated image.
@@ -57,33 +60,34 @@ pub fn GeneratedImage::new(
 
 ///|
 /// Options passed to one provider image request.
+#derive(Debug)
 pub(all) struct ImageCallOptions {
   prompt : String
-  n : Int
+  n : Int32
   size : String?
   aspect_ratio : String?
-  seed : Int?
+  seed : Int32?
   files : Array[ImageFile]
   mask : ImageFile?
   headers : Map[String, String]
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct normalized image generation options.
 pub fn ImageCallOptions::new(
   prompt : String,
-  n? : Int = 1,
+  n~ : Int32 = 1,
   size? : String,
   aspect_ratio? : String,
-  seed? : Int,
-  files? : Array[ImageFile] = [],
+  seed? : Int32,
+  files~ : Array[ImageFile] = [],
   mask? : ImageFile,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ImageCallOptions {
   {
@@ -103,6 +107,7 @@ pub fn ImageCallOptions::new(
 
 ///|
 /// Result returned by an image generation call.
+#derive(Debug, Eq)
 pub(all) struct ImageResponse {
   images : Array[GeneratedImage]
   usage : Usage
@@ -110,7 +115,7 @@ pub(all) struct ImageResponse {
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an image response without transport diagnostics.

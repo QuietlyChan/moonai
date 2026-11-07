@@ -1,7 +1,7 @@
 ///|
 priv struct SequenceLanguageModel {
   results : Array[@provider.LanguageModelV4GenerateResult]
-  call_count : Ref[Int]
+  call_count : Ref[Int32]
   captured_options : Ref[Array[@provider.LanguageModelV4CallOptions]]
   provider_name : String
   model_name : String
@@ -10,8 +10,8 @@ priv struct SequenceLanguageModel {
 ///|
 fn SequenceLanguageModel::new(
   results : Array[@provider.LanguageModelV4GenerateResult],
-  provider_name? : String = "test.generate-text",
-  model_name? : String = "sequence-model",
+  provider_name~ : String = "test.generate-text",
+  model_name~ : String = "sequence-model",
 ) -> SequenceLanguageModel {
   {
     results,
@@ -72,8 +72,8 @@ impl @provider.LanguageModelV4 for SequenceLanguageModel with fn do_stream(
 ///|
 fn generation_result(
   content : Array[@provider.LanguageModelV4Content],
-  input_tokens : Int,
-  output_tokens : Int,
+  input_tokens : Int32,
+  output_tokens : Int32,
   finish_reason : @provider.LanguageModelV4UnifiedFinishReason,
 ) -> @provider.LanguageModelV4GenerateResult {
   {
@@ -94,8 +94,8 @@ fn generated_tool_call(
   id : String,
   name : String,
   input : String,
-  provider_executed? : Bool = false,
-  dynamic? : Bool = false,
+  provider_executed~ : Bool = false,
+  dynamic~ : Bool = false,
 ) -> @provider.LanguageModelV4Content {
   @provider.LanguageModelV4Content::tool_call({
     tool_call_id: id,

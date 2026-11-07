@@ -6,7 +6,7 @@ pub(all) struct OpenAITranscriptionModel {
   model_id : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
   websocket_connector : &@provider_utils.WebSocketConnector
 }
@@ -43,7 +43,7 @@ pub fn openai_transcription_model(
   model_id~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   websocket_connector~ : &@provider_utils.WebSocketConnector,
 ) -> OpenAITranscriptionModel {
@@ -328,7 +328,7 @@ async fn send_openai_transcription_audio(
 }
 
 ///|
-fn openai_transcription_close_error(code : Int?, reason : String?) -> String {
+fn openai_transcription_close_error(code : Int32?, reason : String?) -> String {
   let code_text = match code {
     Some(value) => value.to_string()
     None => "unknown"
@@ -538,7 +538,7 @@ fn decode_openai_transcription_response(
   json : Json,
   model_id : String,
   provider_name : String,
-  request_created_at : Int,
+  request_created_at : Int32,
   warnings : Array[@provider.Warning],
 ) -> @provider.TranscriptionModelV4Result raise {
   if openai_error_message(json) is Some(message) {

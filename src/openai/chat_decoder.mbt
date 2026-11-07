@@ -59,7 +59,10 @@ fn openai_chat_v4_usage(raw_usage : Json?) -> @provider.LanguageModelV4Usage {
 ///|
 /// Some providers report reasoning tokens that exceed the completion total;
 /// clamp the derived text count at zero to keep usage aggregates valid.
-fn non_negative_text_tokens(output_tokens : Int, reasoning_tokens : Int) -> Int {
+fn non_negative_text_tokens(
+  output_tokens : Int32,
+  reasoning_tokens : Int32,
+) -> Int32 {
   let text = output_tokens - reasoning_tokens
   if text < 0 {
     0
@@ -293,7 +296,7 @@ priv struct OpenAIChatStreamDecoder {
   mut finish_reason : @provider.FinishReason
   mut finish_reason_raw : String?
   mut response_metadata : @provider.ResponseMetadata?
-  mut source_index : Int
+  mut source_index : Int32
   mut text_started : Bool
   mut metadata_emitted : Bool
   mut output_started : Bool
@@ -384,7 +387,7 @@ fn OpenAIChatStreamDecoder::record_json(
 fn OpenAIChatStreamDecoder::apply_tool_delta(
   self : OpenAIChatStreamDecoder,
   json : Json,
-  fallback_index : Int,
+  fallback_index : Int32,
   events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit raise {
   guard json is Object(_) else { return }

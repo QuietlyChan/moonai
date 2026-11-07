@@ -5,14 +5,15 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const HARNESS_V1_SPECIFICATION_VERSION : String = "harness-v1"
 
-pub fn commonTool(common_name~ : HarnessV1BuiltinToolName, native_name~ : String, input_schema~ : Json, description? : String, tool_use_kind? : HarnessV1BuiltinToolUseKind) -> HarnessV1BuiltinTool
+pub fn commonTool(common_name~ : HarnessV1BuiltinToolName, native_name~ : String, input_schema~ : @json.Json, description? : String, tool_use_kind? : HarnessV1BuiltinToolUseKind) -> HarnessV1BuiltinTool
 
-pub fn common_tool(common_name~ : HarnessV1BuiltinToolName, native_name~ : String, input_schema~ : Json, description? : String, tool_use_kind? : HarnessV1BuiltinToolUseKind) -> HarnessV1BuiltinTool
+pub fn common_tool(common_name~ : HarnessV1BuiltinToolName, native_name~ : String, input_schema~ : @json.Json, description? : String, tool_use_kind? : HarnessV1BuiltinToolUseKind) -> HarnessV1BuiltinTool
 
 pub fn compact_harness_env(Map[String, String]) -> Map[String, String]
 
@@ -22,7 +23,7 @@ pub async fn connect_harness_v1_websocket(String, token? : String, headers? : Ma
 
 pub fn decode_harness_v1_bridge_frame(String) -> HarnessV1StreamPart raise HarnessError
 
-pub fn decode_harness_v1_bridge_json(Json) -> HarnessV1StreamPart raise HarnessError
+pub fn decode_harness_v1_bridge_json(@json.Json) -> HarnessV1StreamPart raise HarnessError
 
 pub fn decode_harness_v1_bridge_outbound_frame(String) -> HarnessV1BridgeOutboundFrame raise HarnessError
 
@@ -36,15 +37,15 @@ pub let harness_v1_builtin_tool_names : Array[String]
 
 pub fn harness_v1_diagnostic_reporter(HarnessV1Observability?) -> ((HarnessV1Diagnostic) -> Unit)?
 
-pub fn harness_v1_lifecycle_last_seen_event_id(Json) -> Int
+pub fn harness_v1_lifecycle_last_seen_event_id(@json.Json) -> Int32
 
 pub fn isHarnessV1BuiltinToolIncluded(String, HarnessV1BuiltinToolFiltering?) -> Bool
 
 pub fn is_harness_v1_builtin_tool_included(String, HarnessV1BuiltinToolFiltering?) -> Bool
 
-pub fn nativeHarnessTool(native_name~ : String, input_schema~ : Json, description? : String, tool_use_kind? : HarnessV1BuiltinToolUseKind) -> HarnessV1BuiltinTool
+pub fn nativeHarnessTool(native_name~ : String, input_schema~ : @json.Json, description? : String, tool_use_kind? : HarnessV1BuiltinToolUseKind) -> HarnessV1BuiltinTool
 
-pub fn native_harness_tool(native_name~ : String, input_schema~ : Json, description? : String, tool_use_kind? : HarnessV1BuiltinToolUseKind) -> HarnessV1BuiltinTool
+pub fn native_harness_tool(native_name~ : String, input_schema~ : @json.Json, description? : String, tool_use_kind? : HarnessV1BuiltinToolUseKind) -> HarnessV1BuiltinTool
 
 pub async fn send_harness_v1_bridge_command(&HarnessV1BridgeConnection, HarnessV1BridgeCommand) -> Unit
 
@@ -55,14 +56,16 @@ pub async fn start_harness_v1(&HarnessV1, HarnessV1StartOptions) -> &HarnessV1Se
 pub fn validate_harness_v1_lifecycle_state(String, String, String) -> Unit raise HarnessError
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror HarnessCapabilityUnsupportedError {
   HarnessCapabilityUnsupportedError(message~ : String, harness_id~ : String?, cause~ : String?)
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessCapabilityUnsupportedError::new(message~ : String, harness_id? : String, cause? : String) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror HarnessError {
   HarnessError(message~ : String, cause~ : String?)
-} derive(Eq, @debug.Debug)
+}
 
 // Types and methods
 pub struct CallbackHarnessV1BridgeConnection {
@@ -76,60 +79,66 @@ pub impl HarnessV1BridgeConnection for CallbackHarnessV1BridgeConnection
 pub struct CallbackHarnessV1SandboxProvider {
   // private fields
 }
-pub fn CallbackHarnessV1SandboxProvider::new(provider_id~ : String, create_session~ : async (HarnessV1SandboxCreateOptions) -> HarnessV1NetworkSandboxSession, bridge_ports? : Array[Int], resume_session? : async (String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession) -> Self
+pub fn CallbackHarnessV1SandboxProvider::new(provider_id~ : String, create_session~ : async (HarnessV1SandboxCreateOptions) -> HarnessV1NetworkSandboxSession, bridge_ports? : Array[Int32], resume_session? : async (String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession) -> Self
 pub impl HarnessV1SandboxProvider for CallbackHarnessV1SandboxProvider
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessInstructions {
   Text(String)
   SystemMessage(@provider_utils.ModelMessage)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1Bootstrap {
   harness_id : String
   bootstrap_dir : String
   files : Array[HarnessV1BootstrapFile]
   commands : Array[HarnessV1BootstrapCommand]
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1Bootstrap::identity(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1BootstrapCommand {
   command : String
   working_directory : String?
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1BootstrapFile {
   path : String
   content : String
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1BridgeCommand {
-  HarnessBridgeStart(prompt~ : String, tools~ : Array[HarnessV1ToolSpec], model~ : String?, permission_mode~ : HarnessV1PermissionMode?, tool_filtering~ : HarnessV1BuiltinToolFiltering?, extension~ : Map[String, Json])
-  HarnessBridgeToolResult(tool_call_id~ : String, output~ : Json, is_error~ : Bool)
+  HarnessBridgeStart(prompt~ : String, tools~ : Array[HarnessV1ToolSpec], model~ : String?, permission_mode~ : HarnessV1PermissionMode?, tool_filtering~ : HarnessV1BuiltinToolFiltering?, extension~ : Map[String, @json.Json])
+  HarnessBridgeToolResult(tool_call_id~ : String, output~ : @json.Json, is_error~ : Bool)
   HarnessBridgeToolApproval(approval_id~ : String, approved~ : Bool, reason~ : String?)
   HarnessBridgeUserMessage(String)
   HarnessBridgeAbort
   HarnessBridgeDestroy
-  HarnessBridgeResume(last_seen_event_id~ : Int)
+  HarnessBridgeResume(last_seen_event_id~ : Int32)
   HarnessBridgeStop
   HarnessBridgeSuspend
-} derive(Eq, @debug.Debug)
-pub fn HarnessV1BridgeCommand::to_json(Self) -> Json
+}
+pub fn HarnessV1BridgeCommand::to_json(Self) -> @json.Json
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1BridgeOutboundFrame {
-  HarnessBridgeStreamPart(seq~ : Int?, part~ : HarnessV1StreamPart)
-  HarnessBridgeHello(state~ : String?, last_seq~ : Int?)
-  HarnessBridgeStopped(data~ : Json)
+  HarnessBridgeStreamPart(seq~ : Int32?, part~ : HarnessV1StreamPart)
+  HarnessBridgeHello(state~ : String?, last_seq~ : Int32?)
+  HarnessBridgeStopped(data~ : @json.Json)
   HarnessBridgeThread(thread_id~ : String)
-  HarnessBridgeSandboxLog(seq~ : Int?, source~ : String, stream~ : String, line~ : String)
-  HarnessBridgeDebugEvent(seq~ : Int?, level~ : HarnessV1DebugLevel, subsystem~ : String, message~ : String, attrs~ : Json?, error~ : Json?)
-  HarnessBridgeReady(port~ : Int)
-} derive(Eq, @debug.Debug)
+  HarnessBridgeSandboxLog(seq~ : Int32?, source~ : String, stream~ : String, line~ : String)
+  HarnessBridgeDebugEvent(seq~ : Int32?, level~ : HarnessV1DebugLevel, subsystem~ : String, message~ : String, attrs~ : @json.Json?, error~ : @json.Json?)
+  HarnessBridgeReady(port~ : Int32)
+}
 
 pub struct HarnessV1BridgeSession {
   // private fields
 }
 pub fn HarnessV1BridgeSession::bridge_state(Self) -> HarnessV1BridgeState
-pub fn HarnessV1BridgeSession::new(session_id~ : String, harness_id~ : String, connection~ : &HarnessV1BridgeConnection, model_id? : String, resumed? : Bool, last_seen_event_id? : Int, extension? : Map[String, Json], permission_mode? : HarnessV1PermissionMode, tool_filtering? : HarnessV1BuiltinToolFiltering, diagnostic_reporter? : (HarnessV1Diagnostic) -> Unit) -> Self
+pub fn HarnessV1BridgeSession::new(session_id~ : String, harness_id~ : String, connection~ : &HarnessV1BridgeConnection, model_id? : String, resumed? : Bool, last_seen_event_id? : Int32, extension? : Map[String, @json.Json], permission_mode? : HarnessV1PermissionMode, tool_filtering? : HarnessV1BuiltinToolFiltering, diagnostic_reporter? : (HarnessV1Diagnostic) -> Unit) -> Self
 pub impl HarnessV1Session for HarnessV1BridgeSession
 
 pub struct HarnessV1BridgeState {
@@ -137,12 +146,12 @@ pub struct HarnessV1BridgeState {
 }
 pub fn HarnessV1BridgeState::close(Self) -> Unit
 pub async fn HarnessV1BridgeState::consume(Self, (HarnessV1StreamPart) -> Unit) -> Unit raise HarnessError
-pub fn HarnessV1BridgeState::last_seen_event_id(Self) -> Int
+pub fn HarnessV1BridgeState::last_seen_event_id(Self) -> Int32
 pub fn HarnessV1BridgeState::lifecycle_state(Self) -> String?
-pub fn HarnessV1BridgeState::new(&HarnessV1BridgeConnection, last_seen_event_id? : Int, diagnostic_reporter? : (HarnessV1Diagnostic) -> Unit, session_id? : String) -> Self
-pub fn HarnessV1BridgeState::remote_last_seq(Self) -> Int
+pub fn HarnessV1BridgeState::new(&HarnessV1BridgeConnection, last_seen_event_id? : Int32, diagnostic_reporter? : (HarnessV1Diagnostic) -> Unit, session_id? : String) -> Self
+pub fn HarnessV1BridgeState::remote_last_seq(Self) -> Int32
 pub async fn HarnessV1BridgeState::send(Self, HarnessV1BridgeCommand) -> Unit raise HarnessError
-pub fn HarnessV1BridgeState::stop_data(Self) -> Json?
+pub fn HarnessV1BridgeState::stop_data(Self) -> @json.Json?
 pub fn HarnessV1BridgeState::thread_id(Self) -> String?
 
 pub(all) enum HarnessV1BridgeTransportConfig {
@@ -163,11 +172,13 @@ pub(all) struct HarnessV1BuiltinTool {
 }
 pub fn HarnessV1BuiltinTool::wire_name(Self) -> String?
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1BuiltinToolFiltering {
   HarnessAllowTools(Array[String])
   HarnessDenyTools(Array[String])
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1BuiltinToolName {
   HarnessRead
   HarnessWrite
@@ -176,25 +187,28 @@ pub(all) enum HarnessV1BuiltinToolName {
   HarnessGrep
   HarnessGlob
   HarnessWebSearch
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1BuiltinToolName::to_string(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1BuiltinToolUseKind {
   HarnessReadonlyTool
   HarnessEditTool
   HarnessBashTool
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1CallWarning {
   HarnessUnsupportedSetting(setting~ : String, details~ : String?)
   HarnessUnsupportedTool(tool~ : String, details~ : String?)
   HarnessOtherWarning(message~ : String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1CompactionTrigger {
   HarnessManualCompaction
   HarnessAutomaticCompaction
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1CompactionTrigger::from_string(String) -> Self raise HarnessError
 pub fn HarnessV1CompactionTrigger::to_string(Self) -> String
 
@@ -205,31 +219,35 @@ pub(all) struct HarnessV1ContinueTurnOptions {
 }
 pub fn HarnessV1ContinueTurnOptions::new(emit~ : (HarnessV1StreamPart) -> Unit, tools? : Array[HarnessV1ToolSpec], cancellation_token? : @provider.CancellationToken) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1ContinueTurnState {
   harness_id : String
   specification_version : String
-  data : Json
+  data : @json.Json
   pending_tool_approvals : Array[HarnessV1PendingToolApproval]
   pending_tool_results : Array[HarnessV1PendingToolResult]
-} derive(Eq, @debug.Debug)
-pub fn HarnessV1ContinueTurnState::new(harness_id~ : String, data? : Json, pending_tool_approvals? : Array[HarnessV1PendingToolApproval], pending_tool_results? : Array[HarnessV1PendingToolResult]) -> Self
+}
+pub fn HarnessV1ContinueTurnState::new(harness_id~ : String, data? : @json.Json, pending_tool_approvals? : Array[HarnessV1PendingToolApproval], pending_tool_results? : Array[HarnessV1PendingToolResult]) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1DebugConfig {
   enabled : Bool
   level : HarnessV1DebugLevel?
   subsystems : Array[String]
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1DebugLevel {
   HarnessDebugError
   HarnessDebugWarn
   HarnessDebugInfo
   HarnessDebugDebug
   HarnessDebugTrace
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1DebugLevel::from_string(String) -> Self raise HarnessError
 pub fn HarnessV1DebugLevel::to_string(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1Diagnostic {
   level : HarnessV1DebugLevel
   message : String
@@ -237,38 +255,40 @@ pub(all) struct HarnessV1Diagnostic {
   kind : String
   source : String?
   stream : String?
-  attrs : Json?
-  error : Json?
+  attrs : @json.Json?
+  error : @json.Json?
   session_id : String?
   timestamp : UInt64
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1FileChangeKind {
   HarnessFileCreate
   HarnessFileModify
   HarnessFileDelete
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1FileChangeKind::from_string(String) -> Self raise HarnessError
 pub fn HarnessV1FileChangeKind::to_string(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1NetworkPolicy {
   HarnessNetworkAllowAll
   HarnessNetworkDenyAll
   HarnessNetworkCustom(allowed_hosts~ : Array[String], allowed_cidrs~ : Array[String], denied_cidrs~ : Array[String])
-} derive(Eq, @debug.Debug)
+}
 
 pub struct HarnessV1NetworkSandboxSession {
   // private fields
 }
 pub fn HarnessV1NetworkSandboxSession::default_working_directory(Self) -> String
 pub async fn HarnessV1NetworkSandboxSession::destroy(Self) -> Unit
-pub async fn HarnessV1NetworkSandboxSession::get_port_url(Self, port~ : Int, protocol? : String) -> String
+pub async fn HarnessV1NetworkSandboxSession::get_port_url(Self, port~ : Int32, protocol? : String) -> String
 pub fn HarnessV1NetworkSandboxSession::id(Self) -> String
-pub fn HarnessV1NetworkSandboxSession::new(id~ : String, default_working_directory~ : String, restricted~ : @provider_utils.SandboxSession, get_port_url~ : async (Int, String?) -> String, stop~ : async () -> Unit, ports? : Array[Int], destroy? : async () -> Unit, set_network_policy? : async (HarnessV1NetworkPolicy) -> Unit, set_ports? : async (Array[Int], @provider.CancellationToken?) -> Unit) -> Self
-pub fn HarnessV1NetworkSandboxSession::ports(Self) -> Array[Int]
+pub fn HarnessV1NetworkSandboxSession::new(id~ : String, default_working_directory~ : String, restricted~ : @provider_utils.SandboxSession, get_port_url~ : async (Int32, String?) -> String, stop~ : async () -> Unit, ports? : Array[Int32], destroy? : async () -> Unit, set_network_policy? : async (HarnessV1NetworkPolicy) -> Unit, set_ports? : async (Array[Int32], @provider.CancellationToken?) -> Unit) -> Self
+pub fn HarnessV1NetworkSandboxSession::ports(Self) -> Array[Int32]
 pub fn HarnessV1NetworkSandboxSession::restricted(Self) -> @provider_utils.SandboxSession
 pub async fn HarnessV1NetworkSandboxSession::set_network_policy(Self, HarnessV1NetworkPolicy) -> Unit
-pub async fn HarnessV1NetworkSandboxSession::set_ports(Self, Array[Int], cancellation_token? : @provider.CancellationToken) -> Unit
+pub async fn HarnessV1NetworkSandboxSession::set_ports(Self, Array[Int32], cancellation_token? : @provider.CancellationToken) -> Unit
 pub async fn HarnessV1NetworkSandboxSession::stop(Self) -> Unit
 
 pub(all) struct HarnessV1Observability {
@@ -276,6 +296,7 @@ pub(all) struct HarnessV1Observability {
   report : (HarnessV1Diagnostic) -> Unit
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1PendingToolApproval {
   approval_id : String
   tool_call_id : String
@@ -284,26 +305,29 @@ pub(all) struct HarnessV1PendingToolApproval {
   kind : String
   provider_executed : Bool
   native_name : String?
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1PendingToolResult {
   tool_call_id : String
   tool_name : String
   input : String
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1PermissionMode {
   HarnessAllowReads
   HarnessAllowEdits
   HarnessAllowAll
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1PermissionMode::from_string(String) -> Self raise HarnessError
 pub fn HarnessV1PermissionMode::to_string(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1Prompt {
   HarnessTextPrompt(String)
   HarnessUserMessage(@provider_utils.ModelMessage)
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1Prompt::text(String) -> Self
 pub fn HarnessV1Prompt::to_text(Self) -> String raise HarnessCapabilityUnsupportedError
 
@@ -328,13 +352,14 @@ pub(all) struct HarnessV1PromptTurnOptions {
 }
 pub fn HarnessV1PromptTurnOptions::new(prompt~ : HarnessV1Prompt, emit~ : (HarnessV1StreamPart) -> Unit, tools? : Array[HarnessV1ToolSpec], instructions? : HarnessInstructions, cancellation_token? : @provider.CancellationToken) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1ResumeSessionState {
   harness_id : String
   specification_version : String
-  data : Json
+  data : @json.Json
   continue_from : HarnessV1ContinueTurnState?
-} derive(Eq, @debug.Debug)
-pub fn HarnessV1ResumeSessionState::new(harness_id~ : String, data? : Json, continue_from? : HarnessV1ContinueTurnState) -> Self
+}
+pub fn HarnessV1ResumeSessionState::new(harness_id~ : String, data? : @json.Json, continue_from? : HarnessV1ContinueTurnState) -> Self
 
 pub(all) struct HarnessV1SandboxCreateOptions {
   session_id : String?
@@ -343,18 +368,20 @@ pub(all) struct HarnessV1SandboxCreateOptions {
 }
 pub fn HarnessV1SandboxCreateOptions::new(session_id? : String, identity? : String, cancellation_token? : @provider.CancellationToken) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1Skill {
   name : String
   description : String
   content : String
   files : Array[HarnessV1SkillFile]
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1Skill::new(name~ : String, description~ : String, content~ : String, files? : Array[HarnessV1SkillFile]) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1SkillFile {
   path : String
   content : String
-} derive(Eq, @debug.Debug)
+}
 
 pub(all) struct HarnessV1StartOptions {
   session_id : String
@@ -368,7 +395,7 @@ pub(all) struct HarnessV1StartOptions {
   sandbox_session : HarnessV1NetworkSandboxSession
   session_work_dir : String
 }
-pub fn HarnessV1StartOptions::lifecycle_state(Self) -> Json?
+pub fn HarnessV1StartOptions::lifecycle_state(Self) -> @json.Json?
 pub fn HarnessV1StartOptions::new(session_id~ : String, sandbox_session~ : HarnessV1NetworkSandboxSession, session_work_dir~ : String, skills? : Array[HarnessV1Skill], resume_from? : HarnessV1ResumeSessionState, continue_from? : HarnessV1ContinueTurnState, permission_mode? : HarnessV1PermissionMode, builtin_tool_filtering? : HarnessV1BuiltinToolFiltering, cancellation_token? : @provider.CancellationToken, observability? : HarnessV1Observability) -> Self
 
 pub(all) struct HarnessV1StdioConfig {
@@ -380,54 +407,58 @@ pub(all) struct HarnessV1StdioConfig {
 }
 pub fn HarnessV1StdioConfig::new(command~ : String, args? : Array[String], env? : Map[String, String], inherit_env? : Bool, cwd? : String) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HarnessV1StreamPart {
   HarnessStreamStart(warnings~ : Array[HarnessV1CallWarning], model_id~ : String?)
-  HarnessTextStart(id~ : String, harness_metadata~ : Map[String, Json])
-  HarnessTextDelta(id~ : String, delta~ : String, harness_metadata~ : Map[String, Json])
-  HarnessTextEnd(id~ : String, harness_metadata~ : Map[String, Json])
-  HarnessReasoningStart(id~ : String, harness_metadata~ : Map[String, Json])
-  HarnessReasoningDelta(id~ : String, delta~ : String, harness_metadata~ : Map[String, Json])
-  HarnessReasoningEnd(id~ : String, harness_metadata~ : Map[String, Json])
-  HarnessToolInputStart(id~ : String, tool_name~ : String, provider_executed~ : Bool?, dynamic~ : Bool?, title~ : String?, provider_metadata~ : Map[String, Json])
-  HarnessToolInputDelta(id~ : String, delta~ : String, provider_metadata~ : Map[String, Json])
-  HarnessToolInputEnd(id~ : String, provider_metadata~ : Map[String, Json])
+  HarnessTextStart(id~ : String, harness_metadata~ : Map[String, @json.Json])
+  HarnessTextDelta(id~ : String, delta~ : String, harness_metadata~ : Map[String, @json.Json])
+  HarnessTextEnd(id~ : String, harness_metadata~ : Map[String, @json.Json])
+  HarnessReasoningStart(id~ : String, harness_metadata~ : Map[String, @json.Json])
+  HarnessReasoningDelta(id~ : String, delta~ : String, harness_metadata~ : Map[String, @json.Json])
+  HarnessReasoningEnd(id~ : String, harness_metadata~ : Map[String, @json.Json])
+  HarnessToolInputStart(id~ : String, tool_name~ : String, provider_executed~ : Bool?, dynamic~ : Bool?, title~ : String?, provider_metadata~ : Map[String, @json.Json])
+  HarnessToolInputDelta(id~ : String, delta~ : String, provider_metadata~ : Map[String, @json.Json])
+  HarnessToolInputEnd(id~ : String, provider_metadata~ : Map[String, @json.Json])
   HarnessToolCall(call~ : @provider.LanguageModelV4ToolCall, native_name~ : String?)
   HarnessToolApprovalRequest(@provider.LanguageModelV4ToolApprovalRequest)
   HarnessToolResult(@provider.LanguageModelV4ToolResult)
-  HarnessFinishStep(finish_reason~ : @provider.LanguageModelV4FinishReason, usage~ : @provider.LanguageModelV4Usage, harness_metadata~ : Map[String, Json])
-  HarnessFinish(finish_reason~ : @provider.LanguageModelV4FinishReason, total_usage~ : @provider.LanguageModelV4Usage, harness_metadata~ : Map[String, Json])
-  HarnessFileChange(event~ : HarnessV1FileChangeKind, path~ : String, harness_metadata~ : Map[String, Json])
-  HarnessCompaction(trigger~ : HarnessV1CompactionTrigger, summary~ : String, tokens_before~ : Int?, tokens_after~ : Int?, harness_metadata~ : Map[String, Json])
-  HarnessStreamError(error~ : Json)
-  HarnessRaw(raw_value~ : Json)
-} derive(Eq, @debug.Debug)
+  HarnessFinishStep(finish_reason~ : @provider.LanguageModelV4FinishReason, usage~ : @provider.LanguageModelV4Usage, harness_metadata~ : Map[String, @json.Json])
+  HarnessFinish(finish_reason~ : @provider.LanguageModelV4FinishReason, total_usage~ : @provider.LanguageModelV4Usage, harness_metadata~ : Map[String, @json.Json])
+  HarnessFileChange(event~ : HarnessV1FileChangeKind, path~ : String, harness_metadata~ : Map[String, @json.Json])
+  HarnessCompaction(trigger~ : HarnessV1CompactionTrigger, summary~ : String, tokens_before~ : Int32?, tokens_after~ : Int32?, harness_metadata~ : Map[String, @json.Json])
+  HarnessStreamError(error~ : @json.Json)
+  HarnessRaw(raw_value~ : @json.Json)
+}
 pub fn HarnessV1StreamPart::to_provider_stream_part(Self) -> @provider.LanguageModelV4StreamPart?
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1ToolApprovalSubmission {
   approval_id : String
   approved : Bool
   reason : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn HarnessV1ToolApprovalSubmission::new(approval_id~ : String, approved~ : Bool, reason? : String) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1ToolResultSubmission {
   tool_call_id : String
-  output : Json
+  output : @json.Json
   is_error : Bool
-} derive(Eq, @debug.Debug)
-pub fn HarnessV1ToolResultSubmission::new(tool_call_id~ : String, output~ : Json, is_error? : Bool) -> Self
+}
+pub fn HarnessV1ToolResultSubmission::new(tool_call_id~ : String, output~ : @json.Json, is_error? : Bool) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HarnessV1ToolSpec {
   name : String
   description : String?
-  input_schema : Json?
-} derive(Eq, @debug.Debug)
-pub fn HarnessV1ToolSpec::new(name~ : String, description? : String, input_schema? : Json) -> Self
+  input_schema : @json.Json?
+}
+pub fn HarnessV1ToolSpec::new(name~ : String, description? : String, input_schema? : @json.Json) -> Self
 
 // Type aliases
 pub type HarnessV1DiagnosticReporter = (HarnessV1Diagnostic) -> Unit
 
-pub type HarnessV1Metadata = Map[String, Json]
+pub type HarnessV1Metadata = Map[String, @json.Json]
 
 // Traits
 pub(open) trait HarnessV1 {
@@ -449,7 +480,7 @@ pub(open) trait HarnessV1BridgeConnection {
 pub(open) trait HarnessV1SandboxProvider {
   fn specification_version(Self) -> String
   fn provider_id(Self) -> String
-  fn bridge_ports(Self) -> Array[Int]
+  fn bridge_ports(Self) -> Array[Int32]
   async fn create_session(Self, HarnessV1SandboxCreateOptions) -> HarnessV1NetworkSandboxSession
   async fn resume_session(Self, String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession
 }

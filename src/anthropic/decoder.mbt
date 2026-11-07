@@ -5,11 +5,11 @@ priv struct AnthropicStreamDecoder {
   include_raw_chunks : Bool
   text : StringBuilder
   reasoning : StringBuilder
-  mut input_tokens : Int
-  mut output_tokens : Int
-  mut cache_creation_input_tokens : Int
-  mut cache_read_input_tokens : Int
-  mut reasoning_tokens : Int
+  mut input_tokens : Int32
+  mut output_tokens : Int32
+  mut cache_creation_input_tokens : Int32
+  mut cache_read_input_tokens : Int32
+  mut reasoning_tokens : Int32
   mut finish_reason : @provider.FinishReason
   block_kinds : Array[String]
   block_ids : Array[String]
@@ -28,8 +28,8 @@ priv struct AnthropicStreamDecoder {
   block_dynamic : Array[Bool]
   block_tool_metadata : Array[Map[String, Json]]
   sources : Array[@provider.GeneratedSource]
-  source_block_indices : Array[Int]
-  mut source_index : Int
+  source_block_indices : Array[Int32]
+  mut source_index : Int32
   tool_calls : Array[@provider.ToolCall]
   tool_results : Array[@provider.ToolResult]
   server_tool_names : Map[String, String]
@@ -286,7 +286,7 @@ fn anthropic_citation_source(
 /// events. Citation deltas use the same shape as non-streaming citation data.
 fn AnthropicStreamDecoder::append_anthropic_citations(
   self : AnthropicStreamDecoder,
-  block_index : Int,
+  block_index : Int32,
   citations : Array[Json],
   events : Array[@provider.StreamEvent],
 ) -> Unit {
@@ -376,7 +376,7 @@ fn anthropic_web_search_sources(
 ///|
 fn AnthropicStreamDecoder::append_anthropic_web_search_sources(
   self : AnthropicStreamDecoder,
-  block_index : Int,
+  block_index : Int32,
   content : Json,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
@@ -483,7 +483,7 @@ fn AnthropicStreamDecoder::begin_message(self : AnthropicStreamDecoder) -> Unit 
 ///|
 fn AnthropicStreamDecoder::ensure_block(
   self : AnthropicStreamDecoder,
-  index : Int,
+  index : Int32,
   data : Json,
 ) -> Unit raise {
   guard index >= 0 else {
@@ -516,7 +516,7 @@ fn AnthropicStreamDecoder::ensure_block(
 ///|
 fn AnthropicStreamDecoder::block_id(
   self : AnthropicStreamDecoder,
-  index : Int,
+  index : Int32,
   kind : String,
 ) -> String {
   if self.block_ids[index] != "" {
@@ -534,7 +534,7 @@ fn AnthropicStreamDecoder::block_id(
 ///|
 fn AnthropicStreamDecoder::start_text_block(
   self : AnthropicStreamDecoder,
-  index : Int,
+  index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
   if !self.block_started[index] {
@@ -546,7 +546,7 @@ fn AnthropicStreamDecoder::start_text_block(
 ///|
 fn AnthropicStreamDecoder::start_reasoning_block(
   self : AnthropicStreamDecoder,
-  index : Int,
+  index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
   if !self.block_started[index] {
@@ -558,7 +558,7 @@ fn AnthropicStreamDecoder::start_reasoning_block(
 ///|
 fn AnthropicStreamDecoder::start_tool_block(
   self : AnthropicStreamDecoder,
-  index : Int,
+  index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
   if !self.block_started[index] {
@@ -1042,7 +1042,7 @@ fn anthropic_custom_block(
 ///|
 fn AnthropicStreamDecoder::finish_tool_block(
   self : AnthropicStreamDecoder,
-  index : Int,
+  index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit raise {
   if self.block_ready[index] {
@@ -1087,7 +1087,7 @@ fn AnthropicStreamDecoder::finish_tool_block(
 ///|
 fn AnthropicStreamDecoder::finish_block(
   self : AnthropicStreamDecoder,
-  index : Int,
+  index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit raise {
   if self.block_stopped[index] {
@@ -2018,7 +2018,7 @@ fn anthropic_usage_from_json(json : Json) -> @provider.Usage {
 }
 
 ///|
-fn anthropic_v4_reasoning_tokens(json : Json) -> Int? {
+fn anthropic_v4_reasoning_tokens(json : Json) -> Int32? {
   match @provider_utils.json_int_field_opt(json, "thinking_tokens") {
     Some(value) => Some(value)
     None =>

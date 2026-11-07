@@ -1,38 +1,43 @@
 ///|
 /// Successful SSE response together with transport diagnostics.
+#derive(Debug)
 pub(all) struct SseHttpResponse[T] {
   value : T
   request : @provider.RequestMetadata
   response : @provider.ResponseMetadata
-} derive(Debug)
+}
 
 ///|
+#derive(Debug)
 suberror SseTransportError {
   SseTransportError(String, String)
-} derive(Debug)
+}
 
 ///|
+#derive(Debug)
 suberror SseTimeoutError {
   SseTimeoutError(String, String)
-} derive(Debug)
+}
 
 ///|
+#derive(Debug)
 suberror SseProtocolError {
   SseProtocolError(String, String)
-} derive(Debug)
+}
 
 ///|
 /// A provider error frame carried inside an otherwise successful SSE HTTP
 /// response. The transport converts it to `APICallError` while it still owns
 /// the request and response diagnostics.
+#derive(Debug)
 pub(all) suberror SseProviderError {
   SseProviderError(
     message~ : String,
-    status_code~ : Int,
+    status_code~ : Int32,
     response_body~ : String,
     is_retryable~ : Bool
   )
-} derive(Debug)
+}
 
 ///|
 fn[E] decode_sse_batch(
@@ -206,7 +211,7 @@ async fn[E] start_waiting_sse_synchronized(
 ///|
 async fn read_stream_line(
   reader : &HttpStreamResponse,
-  idle_timeout_ms : Int,
+  idle_timeout_ms : Int32,
   provider_name : String,
 ) -> String?? {
   let read = () => {
@@ -234,7 +239,7 @@ async fn[E, T] run_sse_attempt(
   url~ : String,
   headers~ : Map[String, String],
   body~ : Json,
-  idle_timeout_ms : Int,
+  idle_timeout_ms : Int32,
   expected_terminator : String,
   feed_line~ : (String) -> SseDecodeBatch[E] raise,
   flush_buffered~ : () -> SseDecodeBatch[E] raise,
@@ -244,7 +249,7 @@ async fn[E, T] run_sse_attempt(
   is_stream_error : (E) -> Bool,
   cancellation_token : @provider.CancellationToken?,
   error_to_message : ((Json) -> String? raise)?,
-  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  is_retryable_response : ((Int32, Json?) -> Bool? raise)?,
   emitted : Ref[Bool],
   start_policy : SseStreamStartPolicy?,
   transport : &HttpTransport,
@@ -474,12 +479,12 @@ pub async fn[E, T] post_json_sse_events(
   url~ : String,
   headers~ : Map[String, String],
   body~ : Json,
-  idle_timeout_ms? : Int = 120_000,
-  expected_terminator? : String = "stream terminator",
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  idle_timeout_ms~ : Int32 = 120_000,
+  expected_terminator~ : String = "stream terminator",
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   start_events~ : Array[E],
   is_stream_error~ : (E) -> Bool,
   feed_line~ : (String) -> SseDecodeBatch[E] raise,

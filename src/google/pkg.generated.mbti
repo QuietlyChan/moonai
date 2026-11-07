@@ -7,19 +7,19 @@ import {
 }
 
 // Values
-pub const GOOGLE_MAX_EMBEDDINGS_PER_CALL : Int = 100
+pub const GOOGLE_MAX_EMBEDDINGS_PER_CALL : Int32 = 100
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createGoogle(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GoogleProvider
+pub fn createGoogle(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GoogleProvider
 
-pub fn create_google(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GoogleProvider
+pub fn create_google(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GoogleProvider
 
 pub fn getModelPath(String) -> String
 
 pub fn get_model_path(String) -> String
 
-pub fn google(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn google(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
 // Errors
 

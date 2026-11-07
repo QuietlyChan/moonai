@@ -1,17 +1,19 @@
 ///|
 /// Call sites that may invoke an OpenAI function tool.
+#derive(Debug, Eq)
 pub(all) enum OpenAIToolCaller {
   Direct
   Programmatic
-} derive(Debug, Eq)
+}
 
 ///|
 /// A group of function tools that can be discovered through OpenAI tool
 /// search.
+#derive(Debug, Eq)
 pub(all) struct OpenAIToolNamespace {
   name : String
   description : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an OpenAI function-tool namespace.
@@ -29,12 +31,13 @@ pub fn OpenAIToolNamespace::new(
 /// options in the OpenAI package mirrors AI SDK's exported
 /// `OpenAIToolOptions` without coupling the shared provider contract to
 /// OpenAI-specific fields.
+#derive(Debug, Eq)
 pub(all) struct OpenAIToolOptions {
   allowed_callers : Array[OpenAIToolCaller]?
   defer_loading : Bool?
   output_schema : Json?
   tool_namespace : OpenAIToolNamespace?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed options for an OpenAI function tool.
@@ -96,10 +99,11 @@ pub fn OpenAIToolOptions::to_provider_options(
 
 ///|
 /// Code Interpreter container selection.
+#derive(Debug, Eq)
 pub(all) enum OpenAICodeInterpreterContainer {
   ExistingContainer(String)
   AutoContainer(file_ids~ : Array[String]?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Select an existing Code Interpreter container by ID.
@@ -143,12 +147,13 @@ fn OpenAICodeInterpreterContainer::to_args_json(
 
 ///|
 /// Memory limit for an OpenAI-managed shell container.
+#derive(Debug, Eq)
 pub(all) enum OpenAIShellMemoryLimit {
   Memory1G
   Memory4G
   Memory16G
   Memory64G
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIShellMemoryLimit::wire_name(self : OpenAIShellMemoryLimit) -> String {
@@ -162,11 +167,12 @@ fn OpenAIShellMemoryLimit::wire_name(self : OpenAIShellMemoryLimit) -> String {
 
 ///|
 /// A secret exposed only to one domain in a shell network allowlist.
+#derive(Debug, Eq)
 pub(all) struct OpenAIShellDomainSecret {
   domain : String
   name : String
   value : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a domain-scoped shell secret.
@@ -180,13 +186,14 @@ pub fn OpenAIShellDomainSecret::new(
 
 ///|
 /// Network access policy for an OpenAI-managed shell container.
+#derive(Debug, Eq)
 pub(all) enum OpenAIShellNetworkPolicy {
   ShellNetworkDisabled
   ShellNetworkAllowlist(
     allowed_domains~ : Array[String],
     domain_secrets~ : Array[OpenAIShellDomainSecret]?
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Disable network access for a shell container.
@@ -205,13 +212,14 @@ pub fn OpenAIShellNetworkPolicy::allowlist(
 
 ///|
 /// A skill installed into an OpenAI-managed shell container.
+#derive(Debug, Eq)
 pub(all) enum OpenAIShellSkill {
   ShellSkillReference(
     provider_reference~ : @provider.ProviderReference,
     version~ : String?
   )
   ShellInlineSkill(name~ : String, description~ : String, data~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Reference a skill uploaded to one or more providers.
@@ -234,11 +242,12 @@ pub fn OpenAIShellSkill::inline(
 
 ///|
 /// A local skill directory exposed to a client-executed shell.
+#derive(Debug, Eq)
 pub(all) struct OpenAILocalShellSkill {
   name : String
   description : String
   path : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a local shell skill descriptor.
@@ -252,6 +261,7 @@ pub fn OpenAILocalShellSkill::new(
 
 ///|
 /// Execution environment for the OpenAI shell tool.
+#derive(Debug, Eq)
 pub(all) enum OpenAIShellEnvironment {
   ShellContainerAuto(
     file_ids~ : Array[String]?,
@@ -261,7 +271,7 @@ pub(all) enum OpenAIShellEnvironment {
   )
   ShellContainerReference(container_id~ : String)
   ShellLocal(skills~ : Array[OpenAILocalShellSkill]?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Configure an automatically managed OpenAI shell container.
@@ -1058,7 +1068,7 @@ fn prepare_openai_v4_responses_tools(
   warnings : Array[@provider.Warning],
 ) -> Array[Json] raise {
   let prepared : Array[Json] = []
-  let namespace_output_indices : Map[String, Int] = Map([])
+  let namespace_output_indices : Map[String, Int32] = Map([])
   let namespace_descriptions : Map[String, String] = Map([])
   let namespace_tools : Map[String, Array[Json]] = Map([])
   for tool in tools {

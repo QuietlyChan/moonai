@@ -12,7 +12,7 @@ pub(all) struct SandboxProcessOptions {
 pub fn SandboxProcessOptions::new(
   command~ : String,
   working_directory? : String,
-  env? : Map[String, String] = Map([]),
+  env~ : Map[String, String] = Map([]),
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxProcessOptions {
   { command, working_directory, env: copy_headers(env), cancellation_token, }
@@ -42,8 +42,8 @@ pub fn SandboxReadFileOptions::new(
 pub(all) struct SandboxReadTextFileOptions {
   path : String
   encoding : String?
-  start_line : Int?
-  end_line : Int?
+  start_line : Int32?
+  end_line : Int32?
   cancellation_token : @provider.CancellationToken?
 }
 
@@ -52,8 +52,8 @@ pub(all) struct SandboxReadTextFileOptions {
 pub fn SandboxReadTextFileOptions::new(
   path~ : String,
   encoding? : String,
-  start_line? : Int,
-  end_line? : Int,
+  start_line? : Int32,
+  end_line? : Int32,
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxReadTextFileOptions {
   { path, encoding, start_line, end_line, cancellation_token, }
@@ -73,7 +73,7 @@ pub struct SandboxByteStream {
 /// Construct a sandbox byte stream from pull and cancellation callbacks.
 pub fn SandboxByteStream::new(
   read_next~ : async () -> Bytes?,
-  cancel? : () -> Unit = () => (),
+  cancel~ : () -> Unit = () => (),
 ) -> SandboxByteStream {
   { read_next_callback: read_next, cancel_callback: cancel, }
 }
@@ -148,18 +148,19 @@ pub fn SandboxWriteTextFileOptions::new(
 
 ///|
 /// Result returned after a sandbox command exits.
+#derive(Debug, Eq)
 pub(all) struct SandboxProcessResult {
-  exit_code : Int
+  exit_code : Int32
   stdout : String
   stderr : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a completed sandbox process result.
 pub fn SandboxProcessResult::new(
-  exit_code~ : Int,
-  stdout? : String = "",
-  stderr? : String = "",
+  exit_code~ : Int32,
+  stdout~ : String = "",
+  stderr~ : String = "",
 ) -> SandboxProcessResult {
   { exit_code, stdout, stderr, }
 }
@@ -172,13 +173,14 @@ pub fn SandboxProcessResult::to_json(self : SandboxProcessResult) -> Json {
 
 ///|
 /// Exit status returned by `SandboxProcess::wait`.
+#derive(Debug, Eq)
 pub(all) struct SandboxProcessExit {
-  exit_code : Int
-} derive(Debug, Eq)
+  exit_code : Int32
+}
 
 ///|
 /// Construct a sandbox process exit status.
-pub fn SandboxProcessExit::new(exit_code~ : Int) -> SandboxProcessExit {
+pub fn SandboxProcessExit::new(exit_code~ : Int32) -> SandboxProcessExit {
   { exit_code, }
 }
 
@@ -193,7 +195,7 @@ pub type SandboxProcessKillFunction = async () -> Unit
 ///|
 /// Handle for a long-running sandbox process.
 pub struct SandboxProcess {
-  priv process_id : Int?
+  priv process_id : Int32?
   priv stdout_stream : SandboxByteStream
   priv stderr_stream : SandboxByteStream
   priv wait_callback : SandboxProcessWaitFunction
@@ -211,7 +213,7 @@ pub fn SandboxProcess::new(
   stderr~ : SandboxByteStream,
   wait~ : SandboxProcessWaitFunction,
   kill~ : SandboxProcessKillFunction,
-  pid? : Int,
+  pid? : Int32,
 ) -> SandboxProcess {
   {
     process_id: pid,
@@ -224,7 +226,7 @@ pub fn SandboxProcess::new(
 
 ///|
 /// Return the process identifier when the sandbox exposes one.
-pub fn SandboxProcess::pid(self : SandboxProcess) -> Int? {
+pub fn SandboxProcess::pid(self : SandboxProcess) -> Int32? {
   self.process_id
 }
 

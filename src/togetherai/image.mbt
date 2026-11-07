@@ -6,7 +6,7 @@ struct TogetherAIImageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -16,7 +16,7 @@ fn togetherai_image_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> TogetherAIImageModel {
   {
@@ -33,7 +33,7 @@ fn togetherai_image_value(
 ///|
 /// Split a `widthxheight` size string into the two integers TogetherAI
 /// expects as `width` and `height`.
-fn togetherai_parse_dimension(value : String) -> Int? {
+fn togetherai_parse_dimension(value : String) -> Int32? {
   try @string.parse_int64(value, base=10) catch {
     _ => None
   } noraise {
@@ -47,8 +47,8 @@ fn togetherai_parse_dimension(value : String) -> Int? {
 fn togetherai_image_request_body(
   model_id : String,
   prompt~ : String?,
-  seed~ : Int?,
-  n~ : Int,
+  seed~ : Int32?,
+  n~ : Int32,
   size~ : String?,
   image_url~ : String?,
   provider_options~ : Map[String, Json],
@@ -131,7 +131,7 @@ pub impl @provider.ImageModelV4 for TogetherAIImageModel with fn model_id(self) 
 ///|
 pub impl @provider.ImageModelV4 for TogetherAIImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 

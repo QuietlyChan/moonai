@@ -1,7 +1,7 @@
 ///|
 priv struct ScriptedUploadStream {
   chunks : Array[Bytes]
-  next : Ref[Int]
+  next : Ref[Int32]
 }
 
 ///|
@@ -85,7 +85,7 @@ async test "streaming multipart upload reassembles the buffered body" {
   @async.with_task_group() <| group => {
     let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
     let received_body : Ref[Bytes] = Ref(b"")
-    let received_length : Ref[Int] = Ref(0)
+    let received_length : Ref[Int32] = Ref(0)
     group.spawn_bg(no_wait=true) <| () => {
       server.run_forever(
         (_request, body, connection) => {
@@ -146,7 +146,7 @@ test "streaming multipart plans require exactly one sized stream" {
 ///|
 priv struct UnsizedUploadStream {
   chunks : Array[Bytes]
-  next : Ref[Int]
+  next : Ref[Int32]
 }
 
 ///|

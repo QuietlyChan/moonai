@@ -35,7 +35,7 @@ pub struct OpenAICompatibleChatConfig {
   priv convert_usage : OpenAICompatibleUsageConverter
   priv validate_response : OpenAICompatibleJsonValidator
   priv validate_stream_chunk : OpenAICompatibleJsonValidator
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv id_generator : @provider_utils.IdGenerator
   priv generate_reasoning_ids : Bool
   priv text_stream_id : String
@@ -51,30 +51,30 @@ pub struct OpenAICompatibleChatConfig {
 pub fn OpenAICompatibleChatConfig::new(
   provider_name~ : String,
   base_url~ : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   api_key_environment_variable? : String,
-  headers? : Map[String, String] = Map([]),
-  query_params? : Map[String, String] = Map([]),
-  include_usage? : Bool = false,
-  supports_structured_outputs? : Bool = false,
-  supports_top_k? : Bool = false,
-  supports_frequency_penalty? : Bool = true,
-  supported_urls? : Array[@provider.SupportedUrlRule] = [],
-  transform_request_body? : (Json) -> Json = value => value,
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
+  headers~ : Map[String, String] = Map([]),
+  query_params~ : Map[String, String] = Map([]),
+  include_usage~ : Bool = false,
+  supports_structured_outputs~ : Bool = false,
+  supports_top_k~ : Bool = false,
+  supports_frequency_penalty~ : Bool = true,
+  supported_urls~ : Array[@provider.SupportedUrlRule] = [],
+  transform_request_body~ : (Json) -> Json = value => value,
+  error_structure~ : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
   metadata_extractor? : OpenAICompatibleMetadataExtractor,
-  convert_usage? : OpenAICompatibleUsageConverter = convert_openai_compatible_chat_usage,
-  validate_response? : OpenAICompatibleJsonValidator = validate_openai_compatible_chat_response,
-  validate_stream_chunk? : OpenAICompatibleJsonValidator = validate_openai_compatible_chat_chunk,
-  idle_timeout_ms? : Int = 120_000,
+  convert_usage~ : OpenAICompatibleUsageConverter = convert_openai_compatible_chat_usage,
+  validate_response~ : OpenAICompatibleJsonValidator = validate_openai_compatible_chat_response,
+  validate_stream_chunk~ : OpenAICompatibleJsonValidator = validate_openai_compatible_chat_chunk,
+  idle_timeout_ms~ : Int32 = 120_000,
   id_generator? : @provider_utils.IdGenerator,
-  generate_reasoning_ids? : Bool = false,
-  text_stream_id? : String = "txt-0",
-  close_text_before_reasoning? : Bool = false,
-  close_text_before_tool_calls? : Bool = false,
+  generate_reasoning_ids~ : Bool = false,
+  text_stream_id~ : String = "txt-0",
+  close_text_before_reasoning~ : Bool = false,
+  close_text_before_tool_calls~ : Bool = false,
   http_transport? : &@provider_utils.HttpTransport,
-  prompt_converter? : OpenAICompatibleV4PromptConverter = default_openai_compatible_v4_prompt_converter,
-  transform_options? : OpenAICompatibleV4OptionsTransformer = identity_compatible_v4_options,
+  prompt_converter~ : OpenAICompatibleV4PromptConverter = default_openai_compatible_v4_prompt_converter,
+  transform_options~ : OpenAICompatibleV4OptionsTransformer = identity_compatible_v4_options,
 ) -> OpenAICompatibleChatConfig {
   {
     provider_name,

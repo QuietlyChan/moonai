@@ -297,7 +297,7 @@ fn anthropic_v4_system_content(
   warnings : Array[@provider.Warning],
   tool_name_mapping : @provider_utils.ToolNameMapping,
   validator : AnthropicCacheControlValidator,
-) -> (Array[Json], Int) {
+) -> (Array[Json], Int32) {
   let tool_changes = anthropic_tool_changes(
     provider_options, provider_name, warnings, tool_name_mapping,
   )
@@ -867,7 +867,7 @@ fn append_anthropic_v4_system_block(
   beta_features : Array[String],
   warnings : Array[@provider.Warning],
   content : Array[Json],
-  tool_change_count : Int,
+  tool_change_count : Int32,
   is_first_block : Bool,
   system_is_set : Bool,
 ) -> Bool {

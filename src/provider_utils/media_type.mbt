@@ -32,7 +32,7 @@ pub fn isFullMediaType(media_type : String) -> Bool {
 }
 
 ///|
-fn bytes_match(bytes : BytesView, signature : Array[Int]) -> Bool {
+fn bytes_match(bytes : BytesView, signature : Array[Int32]) -> Bool {
   if bytes.length() < signature.length() {
     return false
   }
@@ -45,7 +45,7 @@ fn bytes_match(bytes : BytesView, signature : Array[Int]) -> Bool {
 }
 
 ///|
-fn decoded_signature_prefix(data : String, max_bytes : Int) -> Bytes {
+fn decoded_signature_prefix(data : String, max_bytes : Int32) -> Bytes {
   // Decode only the bounded prefix needed by the signature table. Four Base64
   // characters encode three bytes, so round up to a complete quartet.
   let max_chars = (max_bytes + 2) / 3 * 4
@@ -55,7 +55,7 @@ fn decoded_signature_prefix(data : String, max_bytes : Int) -> Bytes {
 }
 
 ///|
-fn id3_tag_length(bytes : BytesView) -> Int? {
+fn id3_tag_length(bytes : BytesView) -> Int32? {
   if bytes.length() < 10 ||
     bytes[0].to_int() != 0x49 ||
     bytes[1].to_int() != 0x44 ||

@@ -11,9 +11,9 @@ pub const CARTESIA_API_VERSION : String = "2025-04-16"
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createCartesia(api_key? : String, base_url? : String, api_version? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> CartesiaProvider
+pub fn createCartesia(api_key? : String, base_url? : String, api_version? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> CartesiaProvider
 
-pub fn create_cartesia(api_key? : String, base_url? : String, api_version? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> CartesiaProvider
+pub fn create_cartesia(api_key? : String, base_url? : String, api_version? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> CartesiaProvider
 
 // Errors
 

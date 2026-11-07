@@ -11,7 +11,7 @@ struct XaiVideoModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -21,7 +21,7 @@ fn xai_video_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> XaiVideoModel {
   {
@@ -134,7 +134,7 @@ pub impl @provider.VideoModelV4 for XaiVideoModel with fn model_id(self) -> Stri
 ///|
 pub impl @provider.VideoModelV4 for XaiVideoModel with fn max_videos_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 

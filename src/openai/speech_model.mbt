@@ -6,7 +6,7 @@ pub(all) struct OpenAISpeechModel {
   model_id : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -18,7 +18,7 @@ pub fn openai_speech_model(
   model_id~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAISpeechModel {
   {

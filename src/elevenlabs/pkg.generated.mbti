@@ -9,9 +9,9 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createElevenLabs(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ElevenLabsProvider
+pub fn createElevenLabs(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> ElevenLabsProvider
 
-pub fn create_elevenlabs(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ElevenLabsProvider
+pub fn create_elevenlabs(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> ElevenLabsProvider
 
 // Errors
 

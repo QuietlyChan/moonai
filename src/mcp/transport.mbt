@@ -1,10 +1,11 @@
 ///|
 /// Request-scoped options passed to an MCP transport.
+#derive(Debug)
 pub(all) struct MCPTransportSendOptions {
   cancellation_token : @provider.CancellationToken?
   related_request_id : JSONRPCId?
   resumption_token : String?
-} derive(Debug)
+}
 
 ///|
 /// Construct MCP transport send options.
@@ -18,9 +19,10 @@ pub fn MCPTransportSendOptions::new(
 
 ///|
 /// Cleanup options passed to an MCP transport.
+#derive(Debug)
 pub(all) struct MCPTransportCloseOptions {
   cancellation_token : @provider.CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct MCP transport close options.
@@ -51,7 +53,7 @@ pub(open) trait MCPTransport {
 pub struct MockMCPTransport {
   responses : Array[Array[JSONRPCMessage]]
   sent_messages : Array[JSONRPCMessage]
-  priv next_response : Ref[Int]
+  priv next_response : Ref[Int32]
   priv started : Ref[Bool]
   priv closed : Ref[Bool]
   priv negotiated_version : Ref[String?]
@@ -60,7 +62,7 @@ pub struct MockMCPTransport {
 ///|
 /// Construct a mock transport with one response batch per send.
 pub fn MockMCPTransport::new(
-  responses? : Array[Array[JSONRPCMessage]] = [],
+  responses~ : Array[Array[JSONRPCMessage]] = [],
 ) -> MockMCPTransport {
   {
     responses,
@@ -221,12 +223,12 @@ pub struct HttpMCPTransport {
 /// Construct a Streamable HTTP MCP transport.
 pub fn HttpMCPTransport::new(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   initial_session_id? : String,
   initial_protocol_version? : String,
   on_session_id_change? : (String?) -> Unit,
   on_session_expired? : (String) -> Unit,
-  terminate_session_on_close? : Bool = true,
+  terminate_session_on_close~ : Bool = true,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> HttpMCPTransport {
   {
@@ -455,7 +457,7 @@ pub struct SseMCPTransport {
 /// Construct a legacy SSE MCP transport.
 pub fn SseMCPTransport::new(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   http_transport? : &@provider_utils.HttpTransport,
 ) -> SseMCPTransport {
   {
@@ -611,9 +613,9 @@ pub(all) struct StdioConfig {
 /// Construct stdio server configuration.
 pub fn StdioConfig::new(
   command~ : String,
-  args? : Array[String] = [],
-  env? : Map[String, String] = Map([]),
-  inherit_env? : Bool = true,
+  args~ : Array[String] = [],
+  env~ : Map[String, String] = Map([]),
+  inherit_env~ : Bool = true,
   cwd? : String,
 ) -> StdioConfig {
   { command, args, env, inherit_env, cwd, }
@@ -625,7 +627,7 @@ pub struct StdioMCPTransport {
   config : StdioConfig
   priv stdin_writer : Ref[@process.WriteToProcess?]
   priv stdout_reader : Ref[@process.ReadFromProcess?]
-  priv pid : Ref[Int?]
+  priv pid : Ref[Int32?]
   priv protocol_version_value : Ref[String?]
 }
 

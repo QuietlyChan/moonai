@@ -207,14 +207,14 @@ async test "Alibaba embedding sorts values and exposes sparse metadata" {
 
 ///|
 priv struct AlibabaEmbeddingResponseTransport {
-  status_code : Int
+  status_code : Int32
   body : String
 }
 
 ///|
 fn AlibabaEmbeddingResponseTransport::new(
   body : String,
-  status_code? : Int = 200,
+  status_code~ : Int32 = 200,
 ) -> AlibabaEmbeddingResponseTransport {
   { status_code, body, }
 }

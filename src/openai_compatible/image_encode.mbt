@@ -2,7 +2,7 @@
 fn encode_image_request_data(
   model_id : String,
   prompt : String?,
-  n : Int,
+  n : Int32,
   size : String?,
   provider_options : Map[String, Json],
   include_response_format : Bool,

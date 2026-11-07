@@ -9,11 +9,12 @@ pub const TRANSCRIPTION_STREAM_AUDIO_DONE_FRAME_TYPE : String = "transcription-s
 ///|
 /// Session metadata carried by the first client frame of a shared
 /// transcription WebSocket stream.
+#derive(Debug, Eq)
 pub(all) struct TranscriptionStreamStartFrame {
   input_audio_format : @provider.AudioFormat
   provider_options : Map[String, Json]?
   include_raw_chunks : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a transcription stream start frame.
@@ -27,12 +28,13 @@ pub fn TranscriptionStreamStartFrame::new(
 
 ///|
 /// Classification of one client text frame in the shared envelope.
+#derive(Debug, Eq)
 pub(all) enum TranscriptionStreamClientFrame {
   TranscriptionStreamStart(TranscriptionStreamStartFrame)
   TranscriptionStreamAudioDone
   TranscriptionStreamInvalid(String)
   TranscriptionStreamUnknown
-} derive(Debug, Eq)
+}
 
 ///|
 fn envelope_copy_json_map(source : Map[String, Json]) -> Map[String, Json] {
@@ -308,7 +310,7 @@ fn string_headers_to_json(headers : Map[String, String]) -> Json {
 }
 
 ///|
-fn envelope_pad_two(value : Int) -> String {
+fn envelope_pad_two(value : Int32) -> String {
   if value < 10 {
     "0\{value}"
   } else {
@@ -317,7 +319,7 @@ fn envelope_pad_two(value : Int) -> String {
 }
 
 ///|
-fn envelope_pad_four(value : Int) -> String {
+fn envelope_pad_four(value : Int32) -> String {
   if value < 10 {
     "000\{value}"
   } else if value < 100 {
@@ -330,7 +332,7 @@ fn envelope_pad_four(value : Int) -> String {
 }
 
 ///|
-fn envelope_civil_from_days(days_since_epoch : Int) -> (Int, Int, Int) {
+fn envelope_civil_from_days(days_since_epoch : Int32) -> (Int32, Int32, Int32) {
   let z = days_since_epoch + 719468
   let era = z / 146097
   let day_of_era = z - era * 146097
@@ -351,7 +353,7 @@ fn envelope_civil_from_days(days_since_epoch : Int) -> (Int, Int, Int) {
 }
 
 ///|
-fn envelope_timestamp_to_iso(created_at : Int) -> String? {
+fn envelope_timestamp_to_iso(created_at : Int32) -> String? {
   guard created_at >= 0 else { return None }
   let days = created_at / 86400
   let seconds_in_day = created_at % 86400
@@ -366,7 +368,7 @@ fn envelope_timestamp_to_iso(created_at : Int) -> String? {
 }
 
 ///|
-fn parse_envelope_decimal(value : String) -> Int? {
+fn parse_envelope_decimal(value : String) -> Int32? {
   try @string.parse_int(value) catch {
     _ => None
   } noraise {
@@ -375,12 +377,12 @@ fn parse_envelope_decimal(value : String) -> Int? {
 }
 
 ///|
-fn envelope_is_leap_year(year : Int) -> Bool {
+fn envelope_is_leap_year(year : Int32) -> Bool {
   year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
 }
 
 ///|
-fn envelope_days_in_month(year : Int, month : Int) -> Int {
+fn envelope_days_in_month(year : Int32, month : Int32) -> Int32 {
   match month {
     2 => if envelope_is_leap_year(year) { 29 } else { 28 }
     4 | 6 | 9 | 11 => 30
@@ -389,7 +391,7 @@ fn envelope_days_in_month(year : Int, month : Int) -> Int {
 }
 
 ///|
-fn envelope_days_from_civil(year : Int, month : Int, day : Int) -> Int {
+fn envelope_days_from_civil(year : Int32, month : Int32, day : Int32) -> Int32 {
   let adjusted_year = year - (if month <= 2 { 1 } else { 0 })
   let era = adjusted_year / 400
   let year_of_era = adjusted_year - era * 400
@@ -403,7 +405,7 @@ fn envelope_days_from_civil(year : Int, month : Int, day : Int) -> Int {
 }
 
 ///|
-fn envelope_iso_to_timestamp(value : String) -> Int? {
+fn envelope_iso_to_timestamp(value : String) -> Int32? {
   guard value.length() >= 20 && value.has_suffix("Z") else { return None }
   guard value[4:5].to_owned() == "-" &&
     value[7:8].to_owned() == "-" &&
@@ -488,7 +490,7 @@ fn put_optional_double(
 fn put_optional_int(
   fields : Map[String, Json],
   name : String,
-  value : Int?,
+  value : Int32?,
 ) -> Unit {
   if value is Some(item) {
     fields[name] = Json::number(item.to_double())
@@ -666,7 +668,7 @@ fn optional_double_field(
 fn optional_int_field(
   fields : Map[String, Json],
   name : String,
-) -> (Bool, Int?) {
+) -> (Bool, Int32?) {
   match fields.get(name) {
     None => (true, None)
     Some(Number(value, ..)) if value == value.to_int().to_double() =>

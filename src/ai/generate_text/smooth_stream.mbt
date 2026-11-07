@@ -1,5 +1,6 @@
 ///|
 /// Controls how buffered text is split into smooth chunks.
+#derive(Debug, Eq)
 pub(all) enum SmoothChunking {
   /// Stream word by word (AI SDK default).
   SmoothWord
@@ -8,7 +9,7 @@ pub(all) enum SmoothChunking {
   /// Stream by a custom regular expression that must not match the empty
   /// string; the non-matching prefix is emitted together with the match.
   SmoothRegexPattern(pattern~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Stateful smoother for text and reasoning deltas, mirroring AI SDK's
@@ -31,7 +32,7 @@ pub struct SmoothTextTransformer {
 ///|
 /// Create a smoother for the requested chunking mode.
 pub fn SmoothTextTransformer::new(
-  chunking? : SmoothChunking = SmoothWord,
+  chunking~ : SmoothChunking = SmoothWord,
 ) -> SmoothTextTransformer raise {
   let pattern = match chunking {
     SmoothWord => Regex("[^[:space:]]+[[:space:]]+")

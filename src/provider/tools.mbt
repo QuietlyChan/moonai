@@ -3,6 +3,7 @@
 ///
 /// Function tools are executed by the caller. Provider tools use a stable
 /// `<provider>.<tool>` identifier and can be executed by the provider.
+#derive(Debug)
 pub(all) enum ToolDefinition {
   FunctionTool(
     name~ : String,
@@ -13,7 +14,7 @@ pub(all) enum ToolDefinition {
     provider_options~ : Map[String, Json]
   )
   ProviderTool(id~ : String, name~ : String, args~ : Json)
-} derive(Debug)
+}
 
 ///|
 /// Construct a function tool definition.
@@ -21,9 +22,9 @@ pub fn ToolDefinition::new(
   name : String,
   parameters : Json,
   description? : String,
-  input_examples? : Array[Json] = [],
+  input_examples~ : Array[Json] = [],
   strict? : Bool,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ToolDefinition {
   FunctionTool(
     name~,
@@ -40,7 +41,7 @@ pub fn ToolDefinition::new(
 pub fn ToolDefinition::provider(
   id~ : String,
   name~ : String,
-  args? : Json = Json::empty_object(),
+  args~ : Json = Json::empty_object(),
 ) -> ToolDefinition {
   ProviderTool(id~, name~, args~)
 }
@@ -82,6 +83,7 @@ pub fn ToolDefinition::description(self : ToolDefinition) -> String? {
 
 ///|
 /// One complete model-generated tool call.
+#derive(Debug, Eq)
 pub(all) struct ToolCall {
   id : String
   name : String
@@ -89,7 +91,7 @@ pub(all) struct ToolCall {
   provider_executed : Bool
   dynamic : Bool
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a complete tool call.
@@ -97,15 +99,16 @@ pub fn ToolCall::new(
   id~ : String,
   name~ : String,
   arguments~ : String,
-  provider_executed? : Bool = false,
-  dynamic? : Bool = false,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = false,
+  dynamic~ : Bool = false,
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> ToolCall {
   { id, name, arguments, provider_executed, dynamic, provider_metadata, }
 }
 
 ///|
 /// A result produced by a provider-executed tool.
+#derive(Debug, Eq)
 pub(all) struct ToolResult {
   tool_call_id : String
   tool_name : String
@@ -114,7 +117,7 @@ pub(all) struct ToolResult {
   preliminary : Bool
   dynamic : Bool
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a provider-executed tool result.
@@ -122,10 +125,10 @@ pub fn ToolResult::new(
   tool_call_id~ : String,
   tool_name~ : String,
   result~ : Json,
-  is_error? : Bool = false,
-  preliminary? : Bool = false,
-  dynamic? : Bool = false,
-  provider_metadata? : Map[String, Json] = Map([]),
+  is_error~ : Bool = false,
+  preliminary~ : Bool = false,
+  dynamic~ : Bool = false,
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> ToolResult {
   {
     tool_call_id,
@@ -140,24 +143,26 @@ pub fn ToolResult::new(
 
 ///|
 /// An approval request for a provider-executed tool call.
+#derive(Debug, Eq)
 pub(all) struct ToolApprovalRequest {
   approval_id : String
   tool_call_id : String
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a provider tool approval request.
 pub fn ToolApprovalRequest::new(
   approval_id~ : String,
   tool_call_id~ : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> ToolApprovalRequest {
   { approval_id, tool_call_id, provider_metadata, }
 }
 
 ///|
 /// Content embedded in a provider-facing tool result output.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelToolResultContentPart {
   LanguageModelToolText(text~ : String, provider_options~ : Map[String, Json])
   LanguageModelToolFileUrl(
@@ -179,10 +184,11 @@ pub(all) enum LanguageModelToolResultContentPart {
     provider_options~ : Map[String, Json]
   )
   LanguageModelToolCustom(provider_options~ : Map[String, Json])
-} derive(Debug, Eq)
+}
 
 ///|
 /// Standardized output shape of a provider-facing tool result.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelToolResultOutput {
   LanguageModelToolTextOutput(
     value~ : String,
@@ -208,35 +214,38 @@ pub(all) enum LanguageModelToolResultOutput {
     value~ : Array[LanguageModelToolResultContentPart],
     provider_options~ : Map[String, Json]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// A tool result carried in a provider-facing prompt.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelToolResult {
   tool_call_id : String
   tool_name : String
   output : LanguageModelToolResultOutput
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// A provider-executed tool approval request carried in assistant history.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelToolApprovalRequest {
   approval_id : String
   tool_call_id : String
   is_automatic : Bool
   signature : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// A tool approval response carried in a provider-facing prompt.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelToolApprovalResponse {
   approval_id : String
   approved : Bool
   reason : String?
   provider_executed : Bool
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a provider-facing text tool result.
@@ -244,7 +253,7 @@ pub fn LanguageModelToolResult::text(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelToolResult {
   {
     tool_call_id,
@@ -263,7 +272,7 @@ pub fn LanguageModelToolResult::json(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelToolResult {
   {
     tool_call_id,
@@ -282,7 +291,7 @@ pub fn LanguageModelToolResult::execution_denied(
   tool_call_id~ : String,
   tool_name~ : String,
   reason? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelToolResult {
   {
     tool_call_id,
@@ -301,7 +310,7 @@ pub fn LanguageModelToolResult::content(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Array[LanguageModelToolResultContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelToolResult {
   {
     tool_call_id,
@@ -320,7 +329,7 @@ pub fn LanguageModelToolResult::error_text(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelToolResult {
   {
     tool_call_id,
@@ -339,7 +348,7 @@ pub fn LanguageModelToolResult::error_json(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelToolResult {
   {
     tool_call_id,
@@ -358,8 +367,8 @@ pub fn LanguageModelToolApprovalResponse::new(
   approval_id~ : String,
   approved~ : Bool,
   reason? : String,
-  provider_executed? : Bool = false,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelToolApprovalResponse {
   {
     approval_id,

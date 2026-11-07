@@ -1,33 +1,36 @@
 ///|
 /// A document retained alongside its provider-produced relevance score.
+#derive(Debug, Eq)
 pub(all) enum RerankingDocument {
   TextDocument(String)
   ObjectDocument(Json)
-} derive(Debug, Eq)
+}
 
 ///|
 /// One normalized reranking result entry.
+#derive(Debug, Eq)
 pub(all) struct RerankItem {
-  original_index : Int
+  original_index : Int32
   score : Double
   document : RerankingDocument
-} derive(Debug, Eq)
+}
 
 ///|
 /// Result of a high-level reranking operation.
+#derive(Debug, Eq)
 pub(all) struct RerankResult {
   original_documents : RerankingModelV4Documents
   reranked_documents : RerankingModelV4Documents
   ranking : Array[RerankItem]
   response : ResponseMetadata
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Return a document at an original index.
 fn reranking_document_at(
   documents : RerankingModelV4Documents,
-  index : Int,
+  index : Int32,
 ) -> RerankingDocument? {
   if index < 0 {
     return None
@@ -97,10 +100,10 @@ pub async fn rerank(
   model : &RerankingModelV4,
   documents : RerankingModelV4Documents,
   query : String,
-  top_n? : Int,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  top_n? : Int32,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
   runtime_context? : Json,
   on_start? : async (RerankStartEvent) -> Unit,
@@ -179,7 +182,7 @@ pub async fn rerank(
     ),
   )
   let items : Array[RerankItem] = []
-  let seen : Map[Int, Bool] = Map([])
+  let seen : Map[Int32, Bool] = Map([])
   for entry in response.ranking {
     guard reranking_document_at(original_documents, entry.index)
       is Some(document) else {
@@ -241,10 +244,10 @@ pub async fn rerank_text(
   model : &RerankingModelV4,
   documents : Array[String],
   query : String,
-  top_n? : Int,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  top_n? : Int32,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
   runtime_context? : Json,
   on_start? : async (RerankStartEvent) -> Unit,
@@ -271,10 +274,10 @@ pub async fn rerankText(
   model : &RerankingModelV4,
   documents : Array[String],
   query : String,
-  top_n? : Int,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  top_n? : Int32,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
   runtime_context? : Json,
   on_start? : async (RerankStartEvent) -> Unit,

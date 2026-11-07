@@ -58,7 +58,7 @@ fn deepinfra_chat_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   id_generator~ : @provider_utils.IdGenerator,
 ) -> DeepInfraChatLanguageModel {

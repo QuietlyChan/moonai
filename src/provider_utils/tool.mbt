@@ -15,9 +15,9 @@ pub(all) struct ToolExecutionOptions {
 /// Construct tool execution options.
 pub fn ToolExecutionOptions::new(
   tool_call_id~ : String,
-  messages? : Array[ModelMessage] = [],
+  messages~ : Array[ModelMessage] = [],
   cancellation_token? : @provider.CancellationToken,
-  context? : Json = Json::empty_object(),
+  context~ : Json = Json::empty_object(),
   experimental_sandbox? : SandboxSession,
 ) -> ToolExecutionOptions {
   {
@@ -45,8 +45,8 @@ pub(all) struct ToolNeedsApprovalOptions {
 /// Construct tool-defined approval options.
 pub fn ToolNeedsApprovalOptions::new(
   tool_call_id~ : String,
-  messages? : Array[ModelMessage] = [],
-  context? : Json = Json::empty_object(),
+  messages~ : Array[ModelMessage] = [],
+  context~ : Json = Json::empty_object(),
 ) -> ToolNeedsApprovalOptions {
   { tool_call_id, messages: messages.copy(), context, }
 }
@@ -96,9 +96,9 @@ pub(all) struct ToolInputDeltaOptions {
 pub fn ToolInputDeltaOptions::new(
   input_text_delta~ : String,
   tool_call_id~ : String,
-  messages? : Array[ModelMessage] = [],
+  messages~ : Array[ModelMessage] = [],
   cancellation_token? : @provider.CancellationToken,
-  context? : Json = Json::empty_object(),
+  context~ : Json = Json::empty_object(),
   experimental_sandbox? : SandboxSession,
 ) -> ToolInputDeltaOptions {
   {
@@ -131,9 +131,9 @@ pub(all) struct ToolInputAvailableOptions {
 pub fn ToolInputAvailableOptions::new(
   input~ : Json,
   tool_call_id~ : String,
-  messages? : Array[ModelMessage] = [],
+  messages~ : Array[ModelMessage] = [],
   cancellation_token? : @provider.CancellationToken,
-  context? : Json = Json::empty_object(),
+  context~ : Json = Json::empty_object(),
   experimental_sandbox? : SandboxSession,
 ) -> ToolInputAvailableOptions {
   {
@@ -260,7 +260,7 @@ pub(all) struct ToolDescriptionOptions {
 ///|
 /// Construct dynamic tool-description options.
 pub fn ToolDescriptionOptions::new(
-  context? : Json = Json::empty_object(),
+  context~ : Json = Json::empty_object(),
   experimental_sandbox? : SandboxSession,
 ) -> ToolDescriptionOptions {
   { context, experimental_sandbox, }
@@ -310,10 +310,10 @@ pub fn Tool::function(
   description? : String,
   description_resolver? : ToolDescriptionFunction,
   output_schema? : Json,
-  input_examples? : Array[Json] = [],
+  input_examples~ : Array[Json] = [],
   strict? : Bool,
-  provider_options? : Map[String, Json] = Map([]),
-  metadata? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  metadata~ : Map[String, Json] = Map([]),
   execute? : ToolExecuteFunction,
   needs_approval? : ToolNeedsApproval,
   to_model_output? : ToolModelOutputFunction,
@@ -354,10 +354,10 @@ pub fn tool(
   description? : String,
   description_resolver? : ToolDescriptionFunction,
   output_schema? : Json,
-  input_examples? : Array[Json] = [],
+  input_examples~ : Array[Json] = [],
   strict? : Bool,
-  provider_options? : Map[String, Json] = Map([]),
-  metadata? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  metadata~ : Map[String, Json] = Map([]),
   execute? : ToolExecuteFunction,
   needs_approval? : ToolNeedsApproval,
   to_model_output? : ToolModelOutputFunction,
@@ -390,8 +390,8 @@ pub fn Tool::dynamic(
   description? : String,
   description_resolver? : ToolDescriptionFunction,
   output_schema? : Json,
-  provider_options? : Map[String, Json] = Map([]),
-  metadata? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  metadata~ : Map[String, Json] = Map([]),
   execute? : ToolExecuteFunction,
   needs_approval? : ToolNeedsApproval,
   to_model_output? : ToolModelOutputFunction,
@@ -423,8 +423,8 @@ pub fn dynamic_tool(
   description? : String,
   description_resolver? : ToolDescriptionFunction,
   output_schema? : Json,
-  provider_options? : Map[String, Json] = Map([]),
-  metadata? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  metadata~ : Map[String, Json] = Map([]),
   execute? : ToolExecuteFunction,
   needs_approval? : ToolNeedsApproval,
   to_model_output? : ToolModelOutputFunction,
@@ -455,8 +455,8 @@ pub fn dynamicTool(
   description? : String,
   description_resolver? : ToolDescriptionFunction,
   output_schema? : Json,
-  provider_options? : Map[String, Json] = Map([]),
-  metadata? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  metadata~ : Map[String, Json] = Map([]),
   execute? : ToolExecuteFunction,
   needs_approval? : ToolNeedsApproval,
   to_model_output? : ToolModelOutputFunction,
@@ -484,12 +484,12 @@ pub fn dynamicTool(
 /// Construct a provider-defined tool.
 pub fn Tool::provider(
   id~ : String,
-  args? : Json = Json::empty_object(),
+  args~ : Json = Json::empty_object(),
   input_schema? : Json,
   output_schema? : Json,
-  metadata? : Map[String, Json] = Map([]),
-  provider_executed? : Bool = true,
-  supports_deferred_results? : Bool = false,
+  metadata~ : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = true,
+  supports_deferred_results~ : Bool = false,
   execute? : ToolExecuteFunction,
   needs_approval? : ToolNeedsApproval,
   to_model_output? : ToolModelOutputFunction,
@@ -521,9 +521,9 @@ pub fn Tool::provider(
 pub fn Tool::from_tool_definition(
   definition : @provider.ToolDefinition,
   output_schema? : Json,
-  metadata? : Map[String, Json] = Map([]),
-  provider_executed? : Bool = false,
-  supports_deferred_results? : Bool = false,
+  metadata~ : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = false,
+  supports_deferred_results~ : Bool = false,
   execute? : ToolExecuteFunction,
   needs_approval? : ToolNeedsApproval,
   to_model_output? : ToolModelOutputFunction,
@@ -744,7 +744,7 @@ pub fn Tool::provider_options(self : Tool) -> Map[String, Json] {
 /// only the transport definition's description is replaced.
 pub fn Tool::resolve_description(
   self : Tool,
-  context? : Json = Json::empty_object(),
+  context~ : Json = Json::empty_object(),
   experimental_sandbox? : SandboxSession,
 ) -> Tool {
   guard self.description_callback is Some(resolve) else { return self }
@@ -777,7 +777,7 @@ pub fn Tool::resolve_description(
 /// AI SDK-style spelling for `resolve_description`.
 pub fn Tool::resolveDescription(
   self : Tool,
-  context? : Json = Json::empty_object(),
+  context~ : Json = Json::empty_object(),
   experimental_sandbox? : SandboxSession,
 ) -> Tool {
   self.resolve_description(context~, experimental_sandbox?)

@@ -4,17 +4,17 @@ pub struct ByteDanceProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
 /// Create a ByteDance ModelArk provider.
 pub fn create_byte_dance(
-  api_key? : String = "",
-  base_url? : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ByteDanceProvider {
   {
@@ -31,10 +31,10 @@ pub fn create_byte_dance(
 ///|
 /// AI SDK-style provider factory.
 pub fn createByteDance(
-  api_key? : String = "",
-  base_url? : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ByteDanceProvider {
   create_byte_dance(
@@ -118,10 +118,10 @@ pub fn ByteDanceProvider::videoModel(
 /// Direct Seedream model factory.
 pub fn byte_dance_image(
   model_id : ByteDanceImageModelId,
-  api_key? : String = "",
-  base_url? : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.ImageModelV4 {
   create_byte_dance(
@@ -137,10 +137,10 @@ pub fn byte_dance_image(
 /// Direct Seedance model factory.
 pub fn byte_dance_video(
   model_id : ByteDanceVideoModelId,
-  api_key? : String = "",
-  base_url? : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.VideoModelV4 {
   create_byte_dance(
@@ -156,10 +156,10 @@ pub fn byte_dance_video(
 /// AI SDK-style direct Seedream model factory.
 pub fn byteDanceImage(
   model_id : ByteDanceImageModelId,
-  api_key? : String = "",
-  base_url? : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.ImageModelV4 {
   byte_dance_image(
@@ -176,10 +176,10 @@ pub fn byteDanceImage(
 /// AI SDK-style direct Seedance model factory.
 pub fn byteDanceVideo(
   model_id : ByteDanceVideoModelId,
-  api_key? : String = "",
-  base_url? : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.VideoModelV4 {
   byte_dance_video(

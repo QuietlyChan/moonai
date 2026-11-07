@@ -2,9 +2,9 @@
 fn minimax_video(
   model_id : MiniMaxVideoModelId,
   api_key~ : String,
-  base_url? : String = "https://api.minimax.io",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  base_url~ : String = "https://api.minimax.io",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> MiniMaxVideoModel {
   minimax_video_value(
@@ -37,7 +37,7 @@ fn MiniMaxVideoModel::test_create_body(
   options : @provider.VideoCallOptions,
   provider_options : MiniMaxVideoModelOptions,
   warnings : Array[@provider.Warning],
-) -> (Json, Int, Array[String]) {
+) -> (Json, Int32, Array[String]) {
   self.create_v4_body(
     @provider.VideoModelV4CallOptions::from_video_call_options(options),
     provider_options,
@@ -419,7 +419,7 @@ async test "MiniMax video reports cancelled tasks with their id" {
 ///|
 priv struct MiniMaxVideoProtocolTransport {
   responses : Array[@provider_utils.HttpResponse]
-  mut next_response : Int
+  mut next_response : Int32
   requests : Array[@provider_utils.HttpRequest]
 }
 

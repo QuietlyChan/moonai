@@ -103,7 +103,7 @@ async test "MCP client initializes, lists tools, and executes converted tools" {
 priv struct MCPHttpFixtureTransport {
   requests : Array[@provider_utils.HttpRequest]
   responses : Array[@provider_utils.HttpResponse]
-  next : Ref[Int]
+  next : Ref[Int32]
 }
 
 ///|

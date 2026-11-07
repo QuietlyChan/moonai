@@ -13,7 +13,7 @@ async test "embed attributes runtime context through lifecycle events (#20583)" 
     provider_name="test.embed",
   )
   let started : Array[(String, String, String, Json)] = []
-  let ended : Array[(String, Int, Int)] = []
+  let ended : Array[(String, Int32, Int32)] = []
   let response = embed(
     model as &@provider.EmbeddingModelV4,
     "hello world",
@@ -56,7 +56,7 @@ async test "embedMany keeps the same runtime context contract (#20583)" {
     lifecycle_test_embedding_response(),
     provider_name="test.embed",
   )
-  let started : Array[(String, Int, Json)] = []
+  let started : Array[(String, Int32, Json)] = []
   let response = embed_many(
     model as &@provider.EmbeddingModelV4,
     ["one", "two"],
@@ -128,8 +128,8 @@ async test "rerank attributes runtime context through lifecycle events (#20583)"
     ),
     provider_name="test.rerank",
   )
-  let started : Array[(String, Json, Int, String)] = []
-  let ended : Array[(String, Int)] = []
+  let started : Array[(String, Json, Int32, String)] = []
+  let ended : Array[(String, Int32)] = []
   let result = rerank(
     model as &@provider.RerankingModelV4,
     @provider.RerankingModelV4Documents::TextDocuments(["a", "b"]),

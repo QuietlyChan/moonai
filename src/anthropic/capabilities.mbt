@@ -1,7 +1,7 @@
 ///|
 /// Request-shaping capabilities for one Anthropic model family.
 priv struct AnthropicModelCapabilities {
-  max_output_tokens : Int
+  max_output_tokens : Int32
   supports_structured_output : Bool
   supports_adaptive_thinking : Bool
   rejects_sampling_parameters : Bool
@@ -12,7 +12,7 @@ priv struct AnthropicModelCapabilities {
 
 ///|
 fn anthropic_capabilities(
-  max_output_tokens : Int,
+  max_output_tokens : Int32,
   supports_structured_output : Bool,
   supports_adaptive_thinking : Bool,
   rejects_sampling_parameters : Bool,

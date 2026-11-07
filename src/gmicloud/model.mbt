@@ -4,7 +4,7 @@ pub struct GmicloudProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
 }
@@ -13,10 +13,10 @@ pub struct GmicloudProvider {
 /// Create a GMI Cloud provider. The API key defaults to the
 /// `GMI_CLOUD_APIKEY` environment variable (matching GMI's own SDK package).
 pub fn create_gmicloud(
-  api_key? : String = "",
-  base_url? : String = "https://api.gmi-serving.com/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.gmi-serving.com/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> GmicloudProvider {
@@ -35,10 +35,10 @@ pub fn create_gmicloud(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createGmicloud(
-  api_key? : String = "",
-  base_url? : String = "https://api.gmi-serving.com/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.gmi-serving.com/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> GmicloudProvider {
@@ -175,10 +175,10 @@ pub impl @provider.ProviderV4 for GmicloudProvider with fn skills(_self) {
 /// Construct the default V4 GMI Cloud language model directly.
 pub fn gmicloud(
   model_id : GmicloudChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.gmi-serving.com/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.gmi-serving.com/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

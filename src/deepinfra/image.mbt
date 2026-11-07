@@ -6,7 +6,7 @@ struct DeepInfraImageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -16,7 +16,7 @@ fn deepinfra_image_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> DeepInfraImageModel {
   {
@@ -61,10 +61,10 @@ fn deepinfra_strip_data_uri_prefix(value : String) -> String {
 /// validate.
 fn deepinfra_image_request_body(
   prompt~ : String?,
-  n~ : Int,
+  n~ : Int32,
   aspect_ratio~ : String?,
   size~ : String?,
-  seed~ : Int?,
+  seed~ : Int32?,
   provider_options~ : Map[String, Json],
 ) -> Json {
   let fields : Map[String, Json] = Map([])
@@ -159,7 +159,7 @@ pub impl @provider.ImageModelV4 for DeepInfraImageModel with fn model_id(self) -
 ///|
 pub impl @provider.ImageModelV4 for DeepInfraImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 

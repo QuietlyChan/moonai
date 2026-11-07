@@ -67,7 +67,7 @@ fn moonshot_reasoning_plan(
   family~ : MoonshotAIModelFamily,
   model_id~ : String,
   requested_thinking~ : String?,
-  budget_tokens~ : Int?,
+  budget_tokens~ : Int32?,
   requested_effort~ : String?,
   reasoning_history_preserved~ : Bool,
   reasoning~ : @provider.LanguageModelV4ReasoningEffort,

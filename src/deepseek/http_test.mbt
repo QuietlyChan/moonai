@@ -1,16 +1,16 @@
 ///|
 priv struct DeepSeekMockStream {
-  status : Int
+  status : Int32
   response_headers : Map[String, String]
   chunks : Array[String]
-  next_chunk : Ref[Int]
+  next_chunk : Ref[Int32]
 }
 
 ///|
 fn DeepSeekMockStream::new(
   chunks : Array[String],
-  status? : Int = 200,
-  headers? : Map[String, String] = Map([]),
+  status~ : Int32 = 200,
+  headers~ : Map[String, String] = Map([]),
 ) -> DeepSeekMockStream {
   {
     status,
@@ -23,7 +23,7 @@ fn DeepSeekMockStream::new(
 ///|
 impl @provider_utils.HttpStreamResponse for DeepSeekMockStream with fn status_code(
   self,
-) -> Int {
+) -> Int32 {
   self.status
 }
 

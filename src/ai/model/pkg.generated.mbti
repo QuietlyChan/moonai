@@ -5,16 +5,17 @@ import {
   "QuietlyChan/moonai/ai/prompt",
   "QuietlyChan/moonai/provider",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
-pub fn add_tool_input_examples_middleware(prefix? : String, format? : (@provider.LanguageModelV4FunctionToolInputExample, Int) -> String, remove? : Bool) -> @provider.LanguageModelV4Middleware
+pub fn add_tool_input_examples_middleware(prefix? : String, format? : (@provider.LanguageModelV4FunctionToolInputExample, Int32) -> String, remove? : Bool) -> @provider.LanguageModelV4Middleware
 
 pub fn asLanguageModelV4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
 pub fn as_language_model_v4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
-pub fn default_embedding_settings_middleware(headers? : Map[String, String], provider_options? : Map[String, Json]) -> @provider.EmbeddingModelV4Middleware
+pub fn default_embedding_settings_middleware(headers? : Map[String, String], provider_options? : Map[String, @json.Json]) -> @provider.EmbeddingModelV4Middleware
 
 pub fn default_instructions_middleware(instructions~ : @prompt.Instructions) -> @provider.LanguageModelV4Middleware
 
@@ -95,13 +96,15 @@ pub fn wrap_language_model_v4(&@provider.LanguageModelV4, @provider.LanguageMode
 pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[@provider.LanguageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub suberror InvalidModelIdError {
   InvalidModelIdError(value~ : String)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror NoSuchModelError {
   NoSuchModelError(model_id~ : ModelId, model_type~ : ModelType)
-} derive(Eq, @debug.Debug)
+}
 pub fn NoSuchModelError::model_id(Self) -> ModelId
 pub fn NoSuchModelError::model_type(Self) -> ModelType
 
@@ -131,10 +134,11 @@ pub(all) struct ChatModelMiddlewareContext {
 pub async fn ChatModelMiddlewareContext::generate(Self) -> @provider.ChatResponse
 pub async fn ChatModelMiddlewareContext::stream(Self) -> @provider.ChatResponse
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ChatModelMiddlewareOperation {
   Generate
   Stream
-} derive(Eq, @debug.Debug)
+}
 
 pub(all) struct ChatModelTransformContext {
   operation : ChatModelMiddlewareOperation
@@ -162,10 +166,11 @@ pub(all) enum EmbeddingModelReference {
 pub fn EmbeddingModelReference::instance(&@provider.EmbeddingModelV4) -> Self
 pub fn EmbeddingModelReference::named(provider~ : String, model_id~ : String) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ExtractReasoningMode {
   ExtractMergeIntoText
   ExtractStrip
-} derive(Eq, @debug.Debug)
+}
 
 pub(all) enum ImageModelReference {
   Instance(&@provider.ImageModelV4)
@@ -179,14 +184,14 @@ pub(all) struct ImageWireModelMiddleware {
   transform_params : (async (@provider.ImageCallOptions, &@provider.ImageWireModel) -> @provider.ImageCallOptions)?
   provider : String?
   model_id : String?
-  max_images_per_call : Int?
+  max_images_per_call : Int32?
   override_provider : ((&@provider.ImageWireModel) -> String)?
   override_model_id : ((&@provider.ImageWireModel) -> String)?
-  override_max_images_per_call : ((&@provider.ImageWireModel) -> Int)?
+  override_max_images_per_call : ((&@provider.ImageWireModel) -> Int32)?
   wrap_generate : (async (ImageWireModelMiddlewareContext) -> @provider.ImageResponse)?
 }
 pub fn ImageWireModelMiddleware::apply_options(Self, @provider.ImageCallOptions) -> @provider.ImageCallOptions
-pub fn ImageWireModelMiddleware::new(transform_options? : (@provider.ImageCallOptions) -> @provider.ImageCallOptions, provider? : String, model_id? : String, max_images_per_call? : Int, transform_params? : async (@provider.ImageCallOptions, &@provider.ImageWireModel) -> @provider.ImageCallOptions, override_provider? : (&@provider.ImageWireModel) -> String, override_model_id? : (&@provider.ImageWireModel) -> String, override_max_images_per_call? : (&@provider.ImageWireModel) -> Int, wrap_generate? : async (ImageWireModelMiddlewareContext) -> @provider.ImageResponse) -> Self
+pub fn ImageWireModelMiddleware::new(transform_options? : (@provider.ImageCallOptions) -> @provider.ImageCallOptions, provider? : String, model_id? : String, max_images_per_call? : Int32, transform_params? : async (@provider.ImageCallOptions, &@provider.ImageWireModel) -> @provider.ImageCallOptions, override_provider? : (&@provider.ImageWireModel) -> String, override_model_id? : (&@provider.ImageWireModel) -> String, override_max_images_per_call? : (&@provider.ImageWireModel) -> Int32, wrap_generate? : async (ImageWireModelMiddlewareContext) -> @provider.ImageResponse) -> Self
 pub async fn ImageWireModelMiddleware::transform(Self, &@provider.ImageWireModel, @provider.ImageCallOptions) -> @provider.ImageCallOptions
 
 pub(all) struct ImageWireModelMiddlewareContext {
@@ -218,10 +223,11 @@ pub impl @provider.ImageWireModel for MiddlewareImageWireModel
 type MiddlewareLanguageModelV4
 pub impl @provider.LanguageModelV4 for MiddlewareLanguageModelV4
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ModelId {
   provider : String
   model_id : String
-} derive(Eq, @debug.Debug)
+}
 pub fn ModelId::key(Self) -> String
 pub fn ModelId::model_id(Self) -> String
 pub fn ModelId::new(provider~ : String, model_id~ : String) -> Self
@@ -283,6 +289,7 @@ pub fn ModelRegistry::with_speech_translation_model(Self, &@provider.SpeechTrans
 pub fn ModelRegistry::with_transcription_model(Self, &@provider.TranscriptionModelV4) -> Self
 pub fn ModelRegistry::with_video_model(Self, &@provider.VideoModelV4) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ModelType {
   Chat
   Completion
@@ -294,7 +301,7 @@ pub(all) enum ModelType {
   Transcription
   SpeechTranslation
   Realtime
-} derive(Eq, @debug.Debug)
+}
 
 pub(all) enum RealtimeModelReference {
   Instance(&@provider.RealtimeModelV4)

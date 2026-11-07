@@ -13,17 +13,18 @@ pub type AlibabaVideoModelId = String
 
 ///|
 /// Provider-specific Alibaba chat options.
+#derive(Debug, Eq)
 pub(all) struct AlibabaLanguageModelChatOptions {
   enable_thinking : Bool?
-  thinking_budget : Int?
+  thinking_budget : Int32?
   parallel_tool_calls : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct Alibaba chat options.
 pub fn AlibabaLanguageModelChatOptions::new(
   enable_thinking? : Bool,
-  thinking_budget? : Int,
+  thinking_budget? : Int32,
   parallel_tool_calls? : Bool,
 ) -> AlibabaLanguageModelChatOptions raise {
   if thinking_budget is Some(value) {
@@ -52,17 +53,18 @@ pub fn AlibabaLanguageModelChatOptions::to_provider_options(
 
 ///|
 /// Provider-specific Alibaba embedding options.
+#derive(Debug, Eq)
 pub(all) struct AlibabaEmbeddingModelOptions {
   text_type : String?
-  dimension : Int?
+  dimension : Int32?
   output_type : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct Alibaba embedding options.
 pub fn AlibabaEmbeddingModelOptions::new(
   text_type? : String,
-  dimension? : Int,
+  dimension? : Int32,
   output_type? : String,
 ) -> AlibabaEmbeddingModelOptions raise {
   if text_type is Some(value) {
@@ -100,6 +102,7 @@ pub fn AlibabaEmbeddingModelOptions::to_provider_options(
 
 ///|
 /// Provider-specific Alibaba video options.
+#derive(Debug, Eq)
 pub(all) struct AlibabaVideoModelOptions {
   negative_prompt : String?
   audio_url : String?
@@ -110,17 +113,18 @@ pub(all) struct AlibabaVideoModelOptions {
   reference_urls : Array[String]
   ratio : String?
   media : Array[AlibabaVideoMedia]
-  poll_interval_ms : Int?
-  poll_timeout_ms : Int?
-} derive(Debug, Eq)
+  poll_interval_ms : Int32?
+  poll_timeout_ms : Int32?
+}
 
 ///|
 /// A native DashScope wan2.7 media item.
+#derive(Debug, Eq)
 pub(all) struct AlibabaVideoMedia {
   media_type : String
   url : String
   reference_voice : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct and validate a DashScope wan2.7 media item.
@@ -148,11 +152,11 @@ pub fn AlibabaVideoModelOptions::new(
   shot_type? : String,
   watermark? : Bool,
   audio? : Bool,
-  reference_urls? : Array[String] = [],
+  reference_urls~ : Array[String] = [],
   ratio? : String,
-  media? : Array[AlibabaVideoMedia] = [],
-  poll_interval_ms? : Int,
-  poll_timeout_ms? : Int,
+  media~ : Array[AlibabaVideoMedia] = [],
+  poll_interval_ms? : Int32,
+  poll_timeout_ms? : Int32,
 ) -> AlibabaVideoModelOptions raise {
   if shot_type is Some(value) {
     guard value == "single" || value == "multi" else {

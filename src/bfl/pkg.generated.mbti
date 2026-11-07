@@ -7,17 +7,17 @@ import {
 }
 
 // Values
-pub const BFL_POLL_INTERVAL_MS : Int = 500
+pub const BFL_POLL_INTERVAL_MS : Int32 = 500
 
-pub const BFL_POLL_TIMEOUT_MS : Int = 60_000
+pub const BFL_POLL_TIMEOUT_MS : Int32 = 60_000
 
 pub const VERSION : String = "0.1.0"
 
-pub fn bfl(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+pub fn bfl(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, poll_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
 
-pub fn createBfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
+pub fn createBfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, poll_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
 
-pub fn create_bfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
+pub fn create_bfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, poll_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
 
 // Errors
 

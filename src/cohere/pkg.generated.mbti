@@ -7,15 +7,15 @@ import {
 }
 
 // Values
-pub const COHERE_MAX_EMBEDDINGS_PER_CALL : Int = 96
+pub const COHERE_MAX_EMBEDDINGS_PER_CALL : Int32 = 96
 
 pub const VERSION : String = "0.1.0"
 
-pub fn cohere(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn cohere(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
-pub fn createCohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
+pub fn createCohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
 
-pub fn create_cohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
+pub fn create_cohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
 
 // Errors
 

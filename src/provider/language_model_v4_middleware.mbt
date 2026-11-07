@@ -1,9 +1,10 @@
 ///|
 /// The language-model operation currently being transformed by middleware.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4MiddlewareOperation {
   Generate
   Stream
-} derive(Debug, Eq)
+}
 
 ///|
 /// Parameters and model identity visible to a V4 middleware transform.

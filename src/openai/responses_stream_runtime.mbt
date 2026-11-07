@@ -11,7 +11,7 @@ priv struct OpenAIResponsesStreamRuntime {
   /// Stable item id per output_index: OpenAI-compatible providers can rotate
   /// opaque item ids between events while output_index stays stable
   /// (AI SDK #18548).
-  mut item_ids_by_index : Map[Int, String]
+  mut item_ids_by_index : Map[Int32, String]
 }
 
 ///|
@@ -102,7 +102,7 @@ fn OpenAIResponsesStreamRuntime::rewrite_event_ids(
     Some(String(value)) => Some(value)
     _ => None
   }
-  let output_index : Int? = match fields.get("output_index") {
+  let output_index : Int32? = match fields.get("output_index") {
     Some(Number(value, ..)) => Some(value.to_int())
     _ => None
   }

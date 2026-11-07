@@ -1,7 +1,7 @@
 ///|
 priv struct OpenAIGptVersion {
-  major : Int
-  minor : Int?
+  major : Int32
+  minor : Int32?
   variant : String?
 }
 
@@ -16,7 +16,7 @@ priv struct OpenAILanguageModelCapabilities {
 }
 
 ///|
-fn parse_int_opt(value : StringView) -> Int? {
+fn parse_int_opt(value : StringView) -> Int32? {
   try @string.parse_int(value) catch {
     _ => None
   } noraise {
@@ -38,7 +38,7 @@ fn is_ascii_decimal(value : StringView) -> Bool {
 }
 
 ///|
-fn openai_o_series_version(model_id : String) -> Int? {
+fn openai_o_series_version(model_id : String) -> Int32? {
   guard model_id.strip_prefix("o") is Some(rest) else { return None }
   let parts = [ for part in rest.to_owned().split("-") => part ]
   guard parts.length() > 0 else { return None }

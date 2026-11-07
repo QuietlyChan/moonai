@@ -1,9 +1,10 @@
 ///|
 /// One permitted route to a high-level tool.
+#derive(Debug, Eq)
 pub(all) enum ToolCallerReference {
   DirectToolCaller
   NamedToolCaller(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a direct model-to-tool route.

@@ -1,5 +1,6 @@
 ///|
 /// Comparison operator used by OpenAI file-search metadata filters.
+#derive(Debug, Eq)
 pub(all) enum OpenAIFileSearchComparisonOperator {
   FileSearchEq
   FileSearchNe
@@ -9,7 +10,7 @@ pub(all) enum OpenAIFileSearchComparisonOperator {
   FileSearchLte
   FileSearchIn
   FileSearchNin
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIFileSearchComparisonOperator::wire_name(
@@ -29,6 +30,7 @@ fn OpenAIFileSearchComparisonOperator::wire_name(
 
 ///|
 /// Recursive OpenAI file-search metadata filter.
+#derive(Debug, Eq)
 pub(all) enum OpenAIFileSearchFilter {
   FileSearchComparison(
     key~ : String,
@@ -37,7 +39,7 @@ pub(all) enum OpenAIFileSearchFilter {
   )
   FileSearchAnd(filters~ : Array[OpenAIFileSearchFilter])
   FileSearchOr(filters~ : Array[OpenAIFileSearchFilter])
-} derive(Debug, Eq)
+}
 
 ///|
 fn openai_file_search_filter_value_is_valid(value : Json) -> Bool {
@@ -107,10 +109,11 @@ fn OpenAIFileSearchFilter::to_json(self : OpenAIFileSearchFilter) -> Json {
 
 ///|
 /// Ranking configuration for OpenAI file search.
+#derive(Debug, Eq)
 pub(all) struct OpenAIFileSearchRanking {
   ranker : String?
   score_threshold : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct and validate OpenAI file-search ranking options.
@@ -130,18 +133,19 @@ pub fn OpenAIFileSearchRanking::new(
 
 ///|
 /// Typed arguments for the OpenAI file-search provider tool.
+#derive(Debug, Eq)
 pub(all) struct OpenAIFileSearchOptions {
   vector_store_ids : Array[String]
-  max_num_results : Int?
+  max_num_results : Int32?
   ranking : OpenAIFileSearchRanking?
   filters : OpenAIFileSearchFilter?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct and validate typed OpenAI file-search arguments.
 pub fn OpenAIFileSearchOptions::new(
   vector_store_ids~ : Array[String],
-  max_num_results? : Int,
+  max_num_results? : Int32,
   ranking? : OpenAIFileSearchRanking,
   filters? : OpenAIFileSearchFilter,
 ) -> OpenAIFileSearchOptions raise {
@@ -207,11 +211,12 @@ pub fn OpenAIFileSearchOptions::to_args_json(
 
 ///|
 /// OpenAI web-search context size.
+#derive(Debug, Eq)
 pub(all) enum OpenAIWebSearchContextSize {
   WebSearchLow
   WebSearchMedium
   WebSearchHigh
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIWebSearchContextSize::wire_name(
@@ -226,12 +231,13 @@ fn OpenAIWebSearchContextSize::wire_name(
 
 ///|
 /// Approximate user location supplied to OpenAI web search.
+#derive(Debug, Eq)
 pub(all) struct OpenAIWebSearchUserLocation {
   country : String?
   city : String?
   region : String?
   timezone : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an approximate location for OpenAI web search.
@@ -271,10 +277,11 @@ fn OpenAIWebSearchUserLocation::to_json(
 
 ///|
 /// Domain filters for OpenAI web search.
+#derive(Debug, Eq)
 pub(all) struct OpenAIWebSearchFilters {
   allowed_domains : Array[String]?
   blocked_domains : Array[String]?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct and validate OpenAI web-search domain filters.
@@ -332,12 +339,13 @@ fn OpenAIWebSearchFilters::to_json(self : OpenAIWebSearchFilters) -> Json {
 
 ///|
 /// Typed arguments for the current OpenAI web-search tool.
+#derive(Debug, Eq)
 pub(all) struct OpenAIWebSearchOptions {
   external_web_access : Bool?
   filters : OpenAIWebSearchFilters?
   search_context_size : OpenAIWebSearchContextSize?
   user_location : OpenAIWebSearchUserLocation?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed arguments for the current OpenAI web-search tool.
@@ -377,10 +385,11 @@ pub fn OpenAIWebSearchOptions::to_args_json(
 
 ///|
 /// Typed arguments for the preview OpenAI web-search tool.
+#derive(Debug, Eq)
 pub(all) struct OpenAIWebSearchPreviewOptions {
   search_context_size : OpenAIWebSearchContextSize?
   user_location : OpenAIWebSearchUserLocation?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed arguments for the preview OpenAI web-search tool.
@@ -412,11 +421,12 @@ pub fn OpenAIWebSearchPreviewOptions::to_args_json(
 
 ///|
 /// Background handling for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageGenerationBackground {
   ImageBackgroundAuto
   ImageBackgroundOpaque
   ImageBackgroundTransparent
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageGenerationBackground::wire_name(
@@ -431,10 +441,11 @@ fn OpenAIImageGenerationBackground::wire_name(
 
 ///|
 /// Input-image fidelity for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageGenerationInputFidelity {
   ImageFidelityLow
   ImageFidelityHigh
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageGenerationInputFidelity::wire_name(
@@ -448,9 +459,10 @@ fn OpenAIImageGenerationInputFidelity::wire_name(
 
 ///|
 /// Moderation mode for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageGenerationModeration {
   ImageModerationAuto
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageGenerationModeration::wire_name(
@@ -463,11 +475,12 @@ fn OpenAIImageGenerationModeration::wire_name(
 
 ///|
 /// Output encoding for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageGenerationOutputFormat {
   ImageFormatPng
   ImageFormatJpeg
   ImageFormatWebp
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageGenerationOutputFormat::wire_name(
@@ -482,6 +495,7 @@ fn OpenAIImageGenerationOutputFormat::wire_name(
 
 ///|
 /// Quality level for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageGenerationQuality {
   ImageQualityAuto
   ImageQualityLow
@@ -489,7 +503,7 @@ pub(all) enum OpenAIImageGenerationQuality {
   ImageQualityHigh
   ImageQualityXHigh
   ImageQualityMax
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageGenerationQuality::wire_name(
@@ -508,12 +522,13 @@ fn OpenAIImageGenerationQuality::wire_name(
 
 ///|
 /// Canvas size for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageGenerationSize {
   ImageSizeAuto
   ImageSize1024x1024
   ImageSize1024x1536
   ImageSize1536x1024
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageGenerationSize::wire_name(
@@ -529,10 +544,11 @@ fn OpenAIImageGenerationSize::wire_name(
 
 ///|
 /// Optional file or data-URL mask used for image inpainting.
+#derive(Debug, Eq)
 pub(all) struct OpenAIImageGenerationMask {
   file_id : String?
   image_url : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an OpenAI image-generation mask.
@@ -561,18 +577,19 @@ fn OpenAIImageGenerationMask::to_json(self : OpenAIImageGenerationMask) -> Json 
 
 ///|
 /// Typed arguments for the OpenAI image-generation provider tool.
+#derive(Debug, Eq)
 pub(all) struct OpenAIImageGenerationOptions {
   background : OpenAIImageGenerationBackground?
   input_fidelity : OpenAIImageGenerationInputFidelity?
   input_image_mask : OpenAIImageGenerationMask?
   model : String?
   moderation : OpenAIImageGenerationModeration?
-  output_compression : Int?
+  output_compression : Int32?
   output_format : OpenAIImageGenerationOutputFormat?
-  partial_images : Int?
+  partial_images : Int32?
   quality : OpenAIImageGenerationQuality?
   size : OpenAIImageGenerationSize?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct and validate typed OpenAI image-generation arguments.
@@ -582,9 +599,9 @@ pub fn OpenAIImageGenerationOptions::new(
   input_image_mask? : OpenAIImageGenerationMask,
   model? : String,
   moderation? : OpenAIImageGenerationModeration,
-  output_compression? : Int,
+  output_compression? : Int32,
   output_format? : OpenAIImageGenerationOutputFormat,
-  partial_images? : Int,
+  partial_images? : Int32,
   quality? : OpenAIImageGenerationQuality,
   size? : OpenAIImageGenerationSize,
 ) -> OpenAIImageGenerationOptions raise {
@@ -655,10 +672,11 @@ pub fn OpenAIImageGenerationOptions::to_args_json(
 
 ///|
 /// OpenAI MCP tool allowlist configuration.
+#derive(Debug, Eq)
 pub(all) enum OpenAIMCPAllowedTools {
   MCPAllowedNames(Array[String])
   MCPAllowedFilter(read_only~ : Bool?, tool_names~ : Array[String]?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Restrict an MCP server to an explicit list of tool names.
@@ -700,11 +718,12 @@ fn OpenAIMCPAllowedTools::to_json(self : OpenAIMCPAllowedTools) -> Json {
 
 ///|
 /// OpenAI MCP approval policy.
+#derive(Debug, Eq)
 pub(all) enum OpenAIMCPApprovalPolicy {
   MCPApprovalAlways
   MCPApprovalNever
   MCPApprovalNeverFor(tool_names~ : Array[String]?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Require approval except for an optional list of MCP tool names.
@@ -736,6 +755,7 @@ fn OpenAIMCPApprovalPolicy::to_json(self : OpenAIMCPApprovalPolicy) -> Json {
 
 ///|
 /// Typed arguments for the OpenAI MCP provider tool.
+#derive(Debug, Eq)
 pub(all) struct OpenAIMCPOptions {
   server_label : String
   allowed_tools : OpenAIMCPAllowedTools?
@@ -745,7 +765,7 @@ pub(all) struct OpenAIMCPOptions {
   require_approval : OpenAIMCPApprovalPolicy?
   server_description : String?
   server_url : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct and validate typed OpenAI MCP arguments.
@@ -830,20 +850,22 @@ pub fn OpenAIMCPOptions::to_args_json(self : OpenAIMCPOptions) -> Json {
 
 ///|
 /// Grammar syntax supported by an OpenAI custom tool.
+#derive(Debug, Eq)
 pub(all) enum OpenAICustomToolGrammarSyntax {
   CustomGrammarRegex
   CustomGrammarLark
-} derive(Debug, Eq)
+}
 
 ///|
 /// Output format accepted from an OpenAI custom tool.
+#derive(Debug, Eq)
 pub(all) enum OpenAICustomToolFormat {
   CustomTextFormat
   CustomGrammarFormat(
     syntax~ : OpenAICustomToolGrammarSyntax,
     definition~ : String
   )
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAICustomToolFormat::to_json(self : OpenAICustomToolFormat) -> Json {
@@ -863,10 +885,11 @@ fn OpenAICustomToolFormat::to_json(self : OpenAICustomToolFormat) -> Json {
 
 ///|
 /// Typed arguments for an OpenAI custom provider tool.
+#derive(Debug, Eq)
 pub(all) struct OpenAICustomToolOptions {
   description : String?
   format : OpenAICustomToolFormat?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI custom-tool arguments.
@@ -898,10 +921,11 @@ pub fn OpenAICustomToolOptions::to_args_json(
 
 ///|
 /// Select whether OpenAI or the client executes tool search.
+#derive(Debug, Eq)
 pub(all) enum OpenAIToolSearchExecution {
   ToolSearchServer
   ToolSearchClient
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIToolSearchExecution::wire_name(
@@ -915,11 +939,12 @@ fn OpenAIToolSearchExecution::wire_name(
 
 ///|
 /// Typed arguments for the OpenAI tool-search provider tool.
+#derive(Debug, Eq)
 pub(all) struct OpenAIToolSearchOptions {
   execution : OpenAIToolSearchExecution?
   description : String?
   parameters : Json?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct and validate typed OpenAI tool-search arguments.

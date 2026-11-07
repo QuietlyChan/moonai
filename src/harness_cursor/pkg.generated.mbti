@@ -3,6 +3,7 @@ package "QuietlyChan/moonai/harness_cursor"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -12,11 +13,11 @@ pub fn cursor_builtin_tool(name~ : String) -> CursorBuiltinTool?
 
 pub fn cursor_builtin_tools() -> Array[CursorBuiltinTool]
 
-pub fn cursor_jwt_expires_at(access_token~ : String) -> Int? raise
+pub fn cursor_jwt_expires_at(access_token~ : String) -> Int32? raise
 
-pub fn cursor_token_expiring_soon(expires_at~ : Int, now~ : Int) -> Bool
+pub fn cursor_token_expiring_soon(expires_at~ : Int32, now~ : Int32) -> Bool
 
-pub fn parse_cursor_access_token(payload~ : Json) -> String?
+pub fn parse_cursor_access_token(payload~ : @json.Json) -> String?
 
 pub fn read_cursor_subscription(auth_json~ : String?, credential_store~ : String?) -> String?
 
@@ -27,19 +28,21 @@ pub fn should_resolve_cursor_native_subscription(ai_gateway_auth~ : Bool, has_di
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct CursorBuiltinTool {
   name : String
   native_name : String
   title : String
   kind : CursorToolKind
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum CursorToolKind {
   Bash
   Edit
   Readonly
   Other
-} derive(Eq, @debug.Debug)
+}
 
 // Type aliases
 

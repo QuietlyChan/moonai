@@ -4,7 +4,7 @@ pub struct ElevenLabsProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -12,10 +12,10 @@ pub struct ElevenLabsProvider {
 /// Create an ElevenLabs provider. The API key defaults to the
 /// `ELEVENLABS_API_KEY` environment variable.
 pub fn create_elevenlabs(
-  api_key? : String = "",
-  base_url? : String = "https://api.elevenlabs.io",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.elevenlabs.io",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ElevenLabsProvider {
   {
@@ -32,10 +32,10 @@ pub fn create_elevenlabs(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createElevenLabs(
-  api_key? : String = "",
-  base_url? : String = "https://api.elevenlabs.io",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.elevenlabs.io",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ElevenLabsProvider {
   create_elevenlabs(

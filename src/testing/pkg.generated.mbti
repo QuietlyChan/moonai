@@ -3,6 +3,7 @@ package "QuietlyChan/moonai/testing"
 
 import {
   "QuietlyChan/moonai/provider",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -30,15 +31,15 @@ pub struct MockEmbeddingModel {
 }
 pub fn MockEmbeddingModel::captured_batches(Self) -> Array[Array[String]]
 pub fn MockEmbeddingModel::captured_values(Self) -> Array[String]
-pub fn MockEmbeddingModel::new(@provider.EmbeddingBatchResponse, provider_name? : String, model_id? : String, max_embeddings_per_call? : Int, supports_parallel_calls? : Bool) -> Self
+pub fn MockEmbeddingModel::new(@provider.EmbeddingBatchResponse, provider_name? : String, model_id? : String, max_embeddings_per_call? : Int32, supports_parallel_calls? : Bool) -> Self
 pub impl @provider.EmbeddingModelV4 for MockEmbeddingModel
 pub impl @provider.EmbeddingWireModel for MockEmbeddingModel
 
 pub struct MockImageModel {
   // private fields
 }
-pub fn MockImageModel::captured_batch_sizes(Self) -> Array[Int]
-pub fn MockImageModel::new(@provider.ImageResponse, max_images_per_call? : Int, provider_name? : String, model_id? : String) -> Self
+pub fn MockImageModel::captured_batch_sizes(Self) -> Array[Int32]
+pub fn MockImageModel::new(@provider.ImageResponse, max_images_per_call? : Int32, provider_name? : String, model_id? : String) -> Self
 pub impl @provider.ImageModelV4 for MockImageModel
 pub impl @provider.ImageWireModel for MockImageModel
 
@@ -83,8 +84,8 @@ pub impl @provider.TranscriptionWireModel for MockTranscriptionModel
 pub struct MockVideoModel {
   // private fields
 }
-pub fn MockVideoModel::captured_batch_sizes(Self) -> Array[Int]
-pub fn MockVideoModel::new(@provider.VideoResponse, max_videos_per_call? : Int, provider_name? : String, model_id? : String) -> Self
+pub fn MockVideoModel::captured_batch_sizes(Self) -> Array[Int32]
+pub fn MockVideoModel::new(@provider.VideoResponse, max_videos_per_call? : Int32, provider_name? : String, model_id? : String) -> Self
 pub impl @provider.VideoModelV4 for MockVideoModel
 pub impl @provider.VideoWireModel for MockVideoModel
 

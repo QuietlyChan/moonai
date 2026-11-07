@@ -1,9 +1,10 @@
 ///|
 /// The operation currently being transformed by chat-model middleware.
+#derive(Debug, Eq)
 pub(all) enum ChatModelMiddlewareOperation {
   Generate
   Stream
-} derive(Debug, Eq)
+}
 
 ///|
 /// Parameters and model identity visible to an asynchronous chat middleware.
@@ -298,10 +299,10 @@ pub(all) struct ImageWireModelMiddleware {
   ) -> @provider.ImageCallOptions)?
   provider : String?
   model_id : String?
-  max_images_per_call : Int?
+  max_images_per_call : Int32?
   override_provider : ((&@provider.ImageWireModel) -> String)?
   override_model_id : ((&@provider.ImageWireModel) -> String)?
-  override_max_images_per_call : ((&@provider.ImageWireModel) -> Int)?
+  override_max_images_per_call : ((&@provider.ImageWireModel) -> Int32)?
   wrap_generate : (async (ImageWireModelMiddlewareContext) -> @provider.ImageResponse)?
 }
 
@@ -311,14 +312,14 @@ pub fn ImageWireModelMiddleware::new(
   transform_options? : (@provider.ImageCallOptions) -> @provider.ImageCallOptions,
   provider? : String,
   model_id? : String,
-  max_images_per_call? : Int,
+  max_images_per_call? : Int32,
   transform_params? : async (
     @provider.ImageCallOptions,
     &@provider.ImageWireModel,
   ) -> @provider.ImageCallOptions,
   override_provider? : (&@provider.ImageWireModel) -> String,
   override_model_id? : (&@provider.ImageWireModel) -> String,
-  override_max_images_per_call? : (&@provider.ImageWireModel) -> Int,
+  override_max_images_per_call? : (&@provider.ImageWireModel) -> Int32,
   wrap_generate? : async (ImageWireModelMiddlewareContext) -> @provider.ImageResponse,
 ) -> ImageWireModelMiddleware {
   {
@@ -440,7 +441,7 @@ pub impl @provider.ImageWireModel for MiddlewareImageWireModel with fn model_id(
 ///|
 pub impl @provider.ImageWireModel for MiddlewareImageWireModel with fn max_images_per_call(
   self,
-) -> Int {
+) -> Int32 {
   match self.middleware.max_images_per_call {
     Some(value) => value
     None =>

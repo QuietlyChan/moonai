@@ -5,7 +5,7 @@ priv struct ByteDanceVideoModel {
   base_url : String
   model_id_value : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -15,7 +15,7 @@ fn ByteDanceVideoModel::new(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> ByteDanceVideoModel {
   {
@@ -419,7 +419,7 @@ impl @provider.VideoModelV4 for ByteDanceVideoModel with fn model_id(self) {
 ///|
 impl @provider.VideoModelV4 for ByteDanceVideoModel with fn max_videos_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 

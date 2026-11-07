@@ -24,10 +24,11 @@ pub fn resolve_deep_agents_env(auth? : DeepAgentsAuthOptions, environment? : Map
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum DeepAgentsAuthOptions {
   DeepAgentsAnthropicAuth(api_key~ : String?, auth_token~ : String?, base_url~ : String?)
   DeepAgentsGatewayAuth(api_key~ : String?, base_url~ : String?)
-} derive(Eq, @debug.Debug)
+}
 
 pub struct DeepAgentsHarness {
   settings : DeepAgentsHarnessSettings
@@ -37,12 +38,12 @@ pub impl @harness.HarnessV1 for DeepAgentsHarness
 pub(all) struct DeepAgentsHarnessSettings {
   auth : DeepAgentsAuthOptions?
   model : String?
-  port : Int?
-  startup_timeout_ms : Int
-  recursion_limit : Int?
+  port : Int32?
+  startup_timeout_ms : Int32
+  recursion_limit : Int32?
   transport : @harness.HarnessV1BridgeTransportConfig?
 }
-pub fn DeepAgentsHarnessSettings::new(auth? : DeepAgentsAuthOptions, model? : String, port? : Int, startup_timeout_ms? : Int, recursion_limit? : Int, transport? : @harness.HarnessV1BridgeTransportConfig) -> Self
+pub fn DeepAgentsHarnessSettings::new(auth? : DeepAgentsAuthOptions, model? : String, port? : Int32, startup_timeout_ms? : Int32, recursion_limit? : Int32, transport? : @harness.HarnessV1BridgeTransportConfig) -> Self
 
 // Type aliases
 

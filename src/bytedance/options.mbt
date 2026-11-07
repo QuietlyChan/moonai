@@ -8,15 +8,16 @@ pub type ByteDanceVideoModelId = String
 
 ///|
 /// Typed Seedream image-generation options.
+#derive(Debug, Eq)
 pub(all) struct ByteDanceImageModelOptions {
   watermark : Bool?
   output_format : String?
   size : String?
   sequential_image_generation : String?
-  max_images : Int?
+  max_images : Int32?
   optimize_prompt_mode : String?
   extensions : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct validated Seedream image options.
@@ -25,9 +26,9 @@ pub fn ByteDanceImageModelOptions::new(
   output_format? : String,
   size? : String,
   sequential_image_generation? : String,
-  max_images? : Int,
+  max_images? : Int32,
   optimize_prompt_mode? : String,
-  extensions? : Map[String, Json] = Map([]),
+  extensions~ : Map[String, Json] = Map([]),
 ) -> ByteDanceImageModelOptions raise {
   if output_format is Some(value) {
     guard value == "png" || value == "jpeg" else {
@@ -87,6 +88,7 @@ pub fn ByteDanceImageModelOptions::to_provider_options(
 
 ///|
 /// Typed Seedance asynchronous video-generation options.
+#derive(Debug, Eq)
 pub(all) struct ByteDanceVideoModelOptions {
   watermark : Bool?
   generate_audio : Bool?
@@ -98,10 +100,10 @@ pub(all) struct ByteDanceVideoModelOptions {
   reference_images : Array[String]
   reference_videos : Array[String]
   reference_audio : Array[String]
-  poll_interval_ms : Int?
-  poll_timeout_ms : Int?
+  poll_interval_ms : Int32?
+  poll_timeout_ms : Int32?
   extensions : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct validated Seedance video options.
@@ -113,12 +115,12 @@ pub fn ByteDanceVideoModelOptions::new(
   service_tier? : String,
   draft? : Bool,
   last_frame_image? : String,
-  reference_images? : Array[String] = [],
-  reference_videos? : Array[String] = [],
-  reference_audio? : Array[String] = [],
-  poll_interval_ms? : Int,
-  poll_timeout_ms? : Int,
-  extensions? : Map[String, Json] = Map([]),
+  reference_images~ : Array[String] = [],
+  reference_videos~ : Array[String] = [],
+  reference_audio~ : Array[String] = [],
+  poll_interval_ms? : Int32,
+  poll_timeout_ms? : Int32,
+  extensions~ : Map[String, Json] = Map([]),
 ) -> ByteDanceVideoModelOptions raise {
   if service_tier is Some(value) {
     guard value == "default" || value == "flex" else {

@@ -7,7 +7,7 @@ struct CartesiaTranscriptionModel {
   model_id : String
   api_version : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -18,7 +18,7 @@ fn cartesia_transcription_value(
   base_url~ : String,
   api_version~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> CartesiaTranscriptionModel {
   {

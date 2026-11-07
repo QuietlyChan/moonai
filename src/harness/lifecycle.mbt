@@ -1,5 +1,6 @@
 ///|
 /// A built-in or host tool waiting for an approval decision.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1PendingToolApproval {
   approval_id : String
   tool_call_id : String
@@ -8,40 +9,43 @@ pub(all) struct HarnessV1PendingToolApproval {
   kind : String
   provider_executed : Bool
   native_name : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// A host tool call waiting for its result.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1PendingToolResult {
   tool_call_id : String
   tool_name : String
   input : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Opaque state for a session that can accept a future prompt.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1ResumeSessionState {
   harness_id : String
   specification_version : String
   data : Json
   continue_from : HarnessV1ContinueTurnState?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Opaque state for a suspended in-flight turn.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1ContinueTurnState {
   harness_id : String
   specification_version : String
   data : Json
   pending_tool_approvals : Array[HarnessV1PendingToolApproval]
   pending_tool_results : Array[HarnessV1PendingToolResult]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a resumable between-turn state value.
 pub fn HarnessV1ResumeSessionState::new(
   harness_id~ : String,
-  data? : Json = Json::empty_object(),
+  data~ : Json = Json::empty_object(),
   continue_from? : HarnessV1ContinueTurnState,
 ) -> HarnessV1ResumeSessionState {
   {
@@ -56,9 +60,9 @@ pub fn HarnessV1ResumeSessionState::new(
 /// Construct a resumable suspended-turn state value.
 pub fn HarnessV1ContinueTurnState::new(
   harness_id~ : String,
-  data? : Json = Json::empty_object(),
-  pending_tool_approvals? : Array[HarnessV1PendingToolApproval] = [],
-  pending_tool_results? : Array[HarnessV1PendingToolResult] = [],
+  data~ : Json = Json::empty_object(),
+  pending_tool_approvals~ : Array[HarnessV1PendingToolApproval] = [],
+  pending_tool_results~ : Array[HarnessV1PendingToolResult] = [],
 ) -> HarnessV1ContinueTurnState {
   {
     harness_id,

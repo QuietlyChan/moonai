@@ -5,56 +5,61 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createDeepSeek(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekProvider
+pub fn createDeepSeek(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekProvider
 
-pub fn create_deepseek(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekProvider
+pub fn create_deepseek(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> DeepSeekProvider
 
-pub fn deepSeek(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn deepSeek(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
-pub fn deepseek(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn deepseek(String, api_key? : String, base_url? : String, headers? : Map[String, String], supports_thinking? : Bool, supports_structured_outputs? : Bool, idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
-pub fn deepseek_files(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, streaming_http_transport? : &@provider_utils.StreamingBodyTransport) -> DeepSeekFiles
+pub fn deepseek_files(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, streaming_http_transport? : &@provider_utils.StreamingBodyTransport) -> DeepSeekFiles
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct DeepSeekErrorData {
   error : DeepSeekErrorDetail
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) struct DeepSeekErrorDetail {
   message : String
   error_type : String?
-  param : Json?
-  code : Json?
-} derive(Eq, @debug.Debug)
+  param : @json.Json?
+  code : @json.Json?
+}
 
 pub struct DeepSeekFiles {
   // private fields
 }
 pub impl @provider.FilesV4 for DeepSeekFiles
 
+#derive(Eq, @debug.Debug)
 pub(all) struct DeepSeekFilesOptions {
   expires_after : Double?
-} derive(Eq, @debug.Debug)
+}
 pub fn DeepSeekFilesOptions::new(expires_after? : Double) -> Self raise
-pub fn DeepSeekFilesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+pub fn DeepSeekFilesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct DeepSeekLanguageModelChatOptions {
   thinking_type : String?
   reasoning_effort : String?
   strict_json_schema : Bool
   logprobs : Bool?
-  top_logprobs : Int?
+  top_logprobs : Int32?
   user_id : String?
-} derive(Eq, @debug.Debug)
-pub fn DeepSeekLanguageModelChatOptions::new(thinking_type? : String, reasoning_effort? : String, strict_json_schema? : Bool, logprobs? : Bool, top_logprobs? : Int, user_id? : String) -> Self raise
-pub fn DeepSeekLanguageModelChatOptions::to_provider_options(Self) -> Map[String, Json]
+}
+pub fn DeepSeekLanguageModelChatOptions::new(thinking_type? : String, reasoning_effort? : String, strict_json_schema? : Bool, logprobs? : Bool, top_logprobs? : Int32, user_id? : String) -> Self raise
+pub fn DeepSeekLanguageModelChatOptions::to_provider_options(Self) -> Map[String, @json.Json]
 
 pub struct DeepSeekProvider {
   // private fields

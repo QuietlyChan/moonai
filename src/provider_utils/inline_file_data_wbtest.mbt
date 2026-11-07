@@ -1,7 +1,7 @@
 ///|
 priv struct ChunkStream {
   chunks : Array[Bytes]
-  mut index : Int
+  mut index : Int32
 }
 
 ///|

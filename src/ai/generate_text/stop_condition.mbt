@@ -5,13 +5,13 @@ pub type StopCondition = async (Array[GenerateTextStep]) -> Bool
 
 ///|
 /// Stop after exactly `step_count` completed steps.
-pub fn is_step_count(step_count : Int) -> StopCondition {
+pub fn is_step_count(step_count : Int32) -> StopCondition {
   steps => steps.length() == step_count
 }
 
 ///|
 /// AI SDK-style camel-case spelling.
-pub fn isStepCount(step_count : Int) -> StopCondition {
+pub fn isStepCount(step_count : Int32) -> StopCondition {
   is_step_count(step_count)
 }
 

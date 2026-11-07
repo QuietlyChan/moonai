@@ -1,9 +1,10 @@
 ///|
 /// One URL considered during high-level prompt conversion.
+#derive(Debug, Eq)
 pub(all) struct DownloadRequest {
   url : String
   is_url_supported_by_model : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a request passed to a custom prompt asset downloader.
@@ -16,10 +17,11 @@ pub fn DownloadRequest::new(
 
 ///|
 /// Binary data returned for one downloaded prompt asset.
+#derive(Debug, Eq)
 pub(all) struct DownloadedAsset {
   data : Bytes
   media_type : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a downloaded prompt asset.

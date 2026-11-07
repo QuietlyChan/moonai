@@ -1,14 +1,14 @@
 ///|
 priv struct ToolExecutionOutcome {
   result : GenerateTextToolResult
-  execution_ms : Int
+  execution_ms : Int32
 }
 
 ///|
 priv struct ExecutedClientTools {
   results : Array[GenerateTextToolResult]
-  completed_count : Int
-  execution_ms : Map[String, Int]
+  completed_count : Int32
+  execution_ms : Map[String, Int32]
 }
 
 ///|
@@ -148,7 +148,7 @@ async fn execute_client_tool_calls(
       _ => ()
     }
   }
-  let execution_ms : Map[String, Int] = Map([])
+  let execution_ms : Map[String, Int32] = Map([])
   for outcome in @async.all(tasks) {
     execution_ms[outcome.result.tool_call_id] = outcome.execution_ms
     results.push(outcome.result)

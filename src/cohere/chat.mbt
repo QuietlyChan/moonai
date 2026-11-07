@@ -7,7 +7,7 @@ struct CohereChatLanguageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   id_generator : @provider_utils.IdGenerator
   http_transport : &@provider_utils.HttpTransport
 }
@@ -18,7 +18,7 @@ fn cohere_chat_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   id_generator~ : @provider_utils.IdGenerator,
 ) -> CohereChatLanguageModel {

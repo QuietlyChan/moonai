@@ -1,7 +1,7 @@
 ///|
 priv struct OpenAIBatchMockTransport {
   responses : Array[String]
-  next : Ref[Int]
+  next : Ref[Int32]
   requests : Array[@provider_utils.HttpRequest]
 }
 

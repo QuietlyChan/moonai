@@ -1,30 +1,32 @@
 ///|
 /// HTTP methods used by provider transports.
+#derive(Debug, Eq)
 pub(all) enum HttpMethod {
   HttpGet
   HttpPost
   HttpDelete
-} derive(Debug, Eq)
+}
 
 ///|
 /// Runtime-independent provider HTTP request.
 ///
 /// The byte body allows JSON, multipart, and binary requests to share one
 /// transport boundary. GET requests use an empty body.
+#derive(Debug, Eq)
 pub(all) struct HttpRequest {
   meth : HttpMethod
   url : String
   headers : Map[String, String]
   body : Bytes
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a transport request.
 pub fn HttpRequest::new(
   meth~ : HttpMethod,
   url~ : String,
-  headers? : Map[String, String] = Map([]),
-  body? : Bytes = b"",
+  headers~ : Map[String, String] = Map([]),
+  body~ : Bytes = b"",
 ) -> HttpRequest {
   { meth, url, headers: copy_headers(headers), body, }
 }
@@ -33,7 +35,7 @@ pub fn HttpRequest::new(
 /// Construct a GET request.
 pub fn HttpRequest::get(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpGet, url~, headers~)
 }
@@ -42,7 +44,7 @@ pub fn HttpRequest::get(
 /// Construct a POST request.
 pub fn HttpRequest::post(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   body~ : Bytes,
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpPost, url~, headers~, body~)
@@ -52,7 +54,7 @@ pub fn HttpRequest::post(
 /// Construct a DELETE request without a body.
 pub fn HttpRequest::delete(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpDelete, url~, headers~)
 }
@@ -65,20 +67,21 @@ pub fn HttpRequest::body_text(self : HttpRequest) -> String raise {
 
 ///|
 /// Fully buffered response returned by `HttpTransport::fetch`.
+#derive(Debug, Eq)
 pub(all) struct HttpResponse {
-  status_code : Int
+  status_code : Int32
   reason : String
   headers : Map[String, String]
   body : Bytes
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a buffered transport response.
 pub fn HttpResponse::new(
-  status_code~ : Int,
+  status_code~ : Int32,
   body~ : Bytes,
-  reason? : String = "",
-  headers? : Map[String, String] = Map([]),
+  reason~ : String = "",
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpResponse {
   { status_code, reason, headers: copy_headers(headers), body, }
 }
@@ -86,10 +89,10 @@ pub fn HttpResponse::new(
 ///|
 /// Construct a UTF-8 text response.
 pub fn HttpResponse::text(
-  status_code~ : Int,
+  status_code~ : Int32,
   body~ : String,
-  reason? : String = "",
-  headers? : Map[String, String] = Map([]),
+  reason~ : String = "",
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpResponse {
   HttpResponse::new(status_code~, body=@utf8.encode(body), reason~, headers~)
 }
@@ -109,7 +112,7 @@ pub fn HttpResponse::body_text(self : HttpResponse) -> String raise {
 ///|
 /// Runtime-independent streaming HTTP response.
 pub(open) trait HttpStreamResponse {
-  fn status_code(Self) -> Int
+  fn status_code(Self) -> Int32
   fn reason(Self) -> String
   fn headers(Self) -> Map[String, String]
   async fn read_until(Self, String) -> String?
@@ -155,7 +158,7 @@ priv struct NativeHttpStreamResponse {
 }
 
 ///|
-impl HttpStreamResponse for NativeHttpStreamResponse with fn status_code(self) -> Int {
+impl HttpStreamResponse for NativeHttpStreamResponse with fn status_code(self) -> Int32 {
   self.response.code
 }
 

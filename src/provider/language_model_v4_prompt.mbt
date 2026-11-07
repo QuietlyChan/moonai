@@ -1,5 +1,6 @@
 ///|
 /// One role-specific V4 prompt message.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4Message {
   V4SystemMessage(content~ : String, provider_options~ : Map[String, Json])
   V4UserMessage(
@@ -14,16 +15,17 @@ pub(all) enum LanguageModelV4Message {
     content~ : Array[LanguageModelV4PromptPart],
     provider_options~ : Map[String, Json]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Prompt shape passed to a V4 language model.
 ///
 /// The wrapper keeps the ordered message array in a named struct because
 /// MoonBit does not allow methods on type aliases.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4Prompt {
   messages : Array[LanguageModelV4Message]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 prompt from ordered messages.

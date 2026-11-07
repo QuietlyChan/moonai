@@ -1,8 +1,9 @@
 ///|
 /// A JSON Schema validation failure with a JSONPath-like location.
+#derive(Debug)
 pub suberror JsonSchemaValidationError {
   JsonSchemaValidationError(path~ : String, message~ : String)
-} derive(Debug)
+}
 
 ///|
 fn schema_error(
@@ -22,12 +23,12 @@ fn schema_path_property(path : String, name : String) -> String {
 }
 
 ///|
-fn schema_path_index(path : String, index : Int) -> String {
+fn schema_path_index(path : String, index : Int32) -> String {
   path + "[" + index.to_string() + "]"
 }
 
 ///|
-fn schema_int_field(schema : Map[String, Json], name : String) -> Int? {
+fn schema_int_field(schema : Map[String, Json], name : String) -> Int32? {
   match schema.get(name) {
     Some(Number(value, ..)) => Some(value.to_int())
     _ => None

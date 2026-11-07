@@ -6,7 +6,7 @@ pub struct OpenAIRealtimeModel {
   priv model_id : String
   priv api_key : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn openai_realtime_model(
   model_id~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAIRealtimeModel {
   {
@@ -193,7 +193,7 @@ pub struct OpenAIRealtimeFactory {
   priv base_url : String
   priv api_key : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -203,7 +203,7 @@ fn openai_realtime_factory(
   base_url~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAIRealtimeFactory {
   {

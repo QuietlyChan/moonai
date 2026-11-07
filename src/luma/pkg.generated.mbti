@@ -7,17 +7,17 @@ import {
 }
 
 // Values
-pub const LUMA_MAX_POLL_ATTEMPTS : Int = 60
+pub const LUMA_MAX_POLL_ATTEMPTS : Int32 = 60
 
-pub const LUMA_POLL_INTERVAL_MS : Int = 3000
+pub const LUMA_POLL_INTERVAL_MS : Int32 = 3000
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createLuma(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, max_poll_attempts? : Int, http_transport? : &@provider_utils.HttpTransport) -> LumaProvider
+pub fn createLuma(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, max_poll_attempts? : Int32, http_transport? : &@provider_utils.HttpTransport) -> LumaProvider
 
-pub fn create_luma(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, max_poll_attempts? : Int, http_transport? : &@provider_utils.HttpTransport) -> LumaProvider
+pub fn create_luma(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, max_poll_attempts? : Int32, http_transport? : &@provider_utils.HttpTransport) -> LumaProvider
 
-pub fn luma(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, max_poll_attempts? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+pub fn luma(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, max_poll_attempts? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
 
 // Errors
 

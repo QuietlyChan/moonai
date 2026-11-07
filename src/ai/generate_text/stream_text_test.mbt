@@ -1,7 +1,7 @@
 ///|
 priv struct SequenceStreamLanguageModel {
   streams : Array[Array[@provider.LanguageModelV4StreamPart]]
-  call_count : Ref[Int]
+  call_count : Ref[Int32]
   captured_options : Ref[Array[@provider.LanguageModelV4CallOptions]]
   provider_name : String
   model_name : String
@@ -10,8 +10,8 @@ priv struct SequenceStreamLanguageModel {
 ///|
 fn SequenceStreamLanguageModel::new(
   streams : Array[Array[@provider.LanguageModelV4StreamPart]],
-  provider_name? : String = "test.stream-text",
-  model_name? : String = "sequence-stream-model",
+  provider_name~ : String = "test.stream-text",
+  model_name~ : String = "sequence-stream-model",
 ) -> SequenceStreamLanguageModel {
   {
     streams,
@@ -78,8 +78,8 @@ impl @provider.LanguageModelV4 for SequenceStreamLanguageModel with fn do_stream
 
 ///|
 fn stream_usage(
-  input_tokens : Int,
-  output_tokens : Int,
+  input_tokens : Int32,
+  output_tokens : Int32,
 ) -> @provider.LanguageModelV4Usage {
   @provider.LanguageModelV4Usage::from_usage(
     @provider.Usage::new(input_tokens~, output_tokens~),
@@ -88,8 +88,8 @@ fn stream_usage(
 
 ///|
 fn stream_finish(
-  input_tokens : Int,
-  output_tokens : Int,
+  input_tokens : Int32,
+  output_tokens : Int32,
   reason : @provider.LanguageModelV4UnifiedFinishReason,
 ) -> @provider.LanguageModelV4StreamPart {
   @provider.V4Finish(
@@ -104,7 +104,7 @@ fn stream_tool_call(
   id : String,
   name : String,
   input : String,
-  provider_executed? : Bool = false,
+  provider_executed~ : Bool = false,
 ) -> @provider.LanguageModelV4StreamPart {
   @provider.V4ToolCallReady({
     tool_call_id: id,
@@ -855,7 +855,7 @@ async test "stream_text executes a user-approved tool before streaming" {
       stream_finish(2, 1, @provider.V4FinishStop),
     ],
   ])
-  let execution_counts_at_events : Array[Int] = []
+  let execution_counts_at_events : Array[Int32] = []
   let second = stream_text(
     second_model as &@provider.LanguageModelV4,
     messages=history,

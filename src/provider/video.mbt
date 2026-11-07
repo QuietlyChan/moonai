@@ -1,9 +1,10 @@
 ///|
 /// A file that can be used as an image, video, or frame input to a video model.
+#derive(Debug, Eq)
 pub(all) enum VideoInput {
   Url(url~ : String, media_type~ : String?)
   Base64(data~ : String, media_type~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a URL-backed video input.
@@ -19,17 +20,19 @@ pub fn VideoInput::base64(data~ : String, media_type~ : String) -> VideoInput {
 
 ///|
 /// The semantic role of a frame image in a video request.
+#derive(Debug, Eq)
 pub(all) enum VideoFrameType {
   FirstFrame
   LastFrame
-} derive(Debug, Eq)
+}
 
 ///|
 /// A role-tagged frame image for first/last-frame generation.
+#derive(Debug, Eq)
 pub(all) struct VideoFrameImage {
   image : VideoInput
   frame_type : VideoFrameType
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a frame image descriptor.
@@ -43,18 +46,20 @@ pub fn VideoFrameImage::new(
 ///|
 /// Generated video payload. URLs are preferred because video providers usually
 /// return large objects outside the JSON response body.
+#derive(Debug, Eq)
 pub(all) enum GeneratedVideoData {
   Url(String)
   Base64(String)
   Binary(Bytes)
-} derive(Debug, Eq)
+}
 
 ///|
 /// One generated video and its media type.
+#derive(Debug, Eq)
 pub(all) struct GeneratedVideo {
   data : GeneratedVideoData
   media_type : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct one generated video.
@@ -67,14 +72,15 @@ pub fn GeneratedVideo::new(
 
 ///|
 /// Options passed to one provider video request.
+#derive(Debug)
 pub(all) struct VideoCallOptions {
   prompt : String
-  n : Int
+  n : Int32
   aspect_ratio : String?
   resolution : String?
   duration : Double?
-  fps : Int?
-  seed : Int?
+  fps : Int32?
+  seed : Int32?
   image : VideoInput?
   frame_images : Array[VideoFrameImage]
   input_references : Array[VideoInput]
@@ -83,25 +89,25 @@ pub(all) struct VideoCallOptions {
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct normalized video generation options.
 pub fn VideoCallOptions::new(
   prompt : String,
-  n? : Int = 1,
+  n~ : Int32 = 1,
   aspect_ratio? : String,
   resolution? : String,
   duration? : Double,
-  fps? : Int,
-  seed? : Int,
+  fps? : Int32,
+  seed? : Int32,
   image? : VideoInput,
-  frame_images? : Array[VideoFrameImage] = [],
-  input_references? : Array[VideoInput] = [],
+  frame_images~ : Array[VideoFrameImage] = [],
+  input_references~ : Array[VideoInput] = [],
   generate_audio? : Bool,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> VideoCallOptions {
   {
@@ -125,13 +131,14 @@ pub fn VideoCallOptions::new(
 
 ///|
 /// Result returned by a video generation call.
+#derive(Debug, Eq)
 pub(all) struct VideoResponse {
   videos : Array[GeneratedVideo]
   request : RequestMetadata?
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a video response without transport diagnostics.

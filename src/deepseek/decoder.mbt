@@ -1,17 +1,19 @@
 ///|
 /// Detail object returned by the DeepSeek API on failure.
+#derive(Debug, Eq)
 pub(all) struct DeepSeekErrorDetail {
   message : String
   error_type : String?
   param : Json?
   code : Json?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Structured DeepSeek API error data.
+#derive(Debug, Eq)
 pub(all) struct DeepSeekErrorData {
   error : DeepSeekErrorDetail
-} derive(Debug, Eq)
+}
 
 ///|
 /// Decode a standard DeepSeek error response.
@@ -339,7 +341,7 @@ fn DeepSeekStreamDecoder::close_text(
 fn DeepSeekStreamDecoder::apply_tool_delta(
   self : DeepSeekStreamDecoder,
   value : Json,
-  fallback_index : Int,
+  fallback_index : Int32,
   events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit raise {
   guard value is Object(_) else { return }

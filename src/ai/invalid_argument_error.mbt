@@ -5,9 +5,10 @@
 /// offending `parameter` and `value` next to the message. Kept separate from
 /// the provider-level `@provider.InvalidArgumentError`, whose field is
 /// `argument` and which stays reserved for provider-side diagnostics.
+#derive(Debug, Eq)
 pub(all) suberror InvalidArgumentError {
   InvalidArgumentError(parameter~ : String, value~ : Json, message~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Build an `InvalidArgumentError` with the upstream message shape

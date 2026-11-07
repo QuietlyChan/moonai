@@ -1,11 +1,12 @@
 ///|
 /// Raised when a provider registry cannot find a registered provider id.
+#derive(Debug, Eq)
 pub(all) suberror NoSuchProviderError {
   NoSuchProviderError(
     provider_id~ : String,
     available_provider_ids~ : Array[String]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Return the missing provider id.
@@ -29,16 +30,18 @@ pub fn NoSuchProviderError::available_provider_ids(
 ///|
 /// Raised when a registry model id does not contain a non-empty provider and
 /// model component separated by the configured separator.
+#derive(Debug, Eq)
 pub(all) suberror InvalidRegistryModelIdError {
   InvalidRegistryModelIdError(
     value~ : String,
     separator~ : String,
     model_type~ : @model.ModelType
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Raised when a provider exists but does not expose a provider-level service.
+#derive(Debug, Eq)
 pub(all) suberror NoSuchProviderCapabilityError {
   NoSuchProviderCapabilityError(provider_id~ : String, capability~ : String)
-} derive(Debug, Eq)
+}

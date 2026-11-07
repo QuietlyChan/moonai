@@ -759,7 +759,7 @@ async test "SSE transport does not retry after stream events are emitted" {
 
 ///|
 priv struct CompatibleNetworkFailureTransport {
-  calls : Ref[Int]
+  calls : Ref[Int32]
 }
 
 ///|

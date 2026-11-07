@@ -1,8 +1,9 @@
 ///|
 /// Citation settings for Anthropic's provider-executed web fetch tool.
+#derive(Debug, Eq)
 pub(all) struct AnthropicWebFetchCitations {
   enabled : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct web-fetch citation settings.
@@ -90,11 +91,11 @@ fn anthropic_json_string_array(values : Array[String]) -> Json {
 
 ///|
 fn anthropic_web_fetch_args(
-  max_uses : Int?,
+  max_uses : Int32?,
   allowed_domains : Array[String]?,
   blocked_domains : Array[String]?,
   citations : AnthropicWebFetchCitations?,
-  max_content_tokens : Int?,
+  max_content_tokens : Int32?,
 ) -> Json {
   let fields : Map[String, Json] = Map([])
   if max_uses is Some(value) {
@@ -118,11 +119,11 @@ fn anthropic_web_fetch_args(
 ///|
 fn anthropic_web_fetch_tool(
   id : String,
-  max_uses : Int?,
+  max_uses : Int32?,
   allowed_domains : Array[String]?,
   blocked_domains : Array[String]?,
   citations : AnthropicWebFetchCitations?,
-  max_content_tokens : Int?,
+  max_content_tokens : Int32?,
   on_input_start : @provider_utils.ToolInputStartFunction?,
   on_input_delta : @provider_utils.ToolInputDeltaFunction?,
   on_input_available : @provider_utils.ToolInputAvailableFunction?,
@@ -145,11 +146,11 @@ fn anthropic_web_fetch_tool(
 ///|
 /// Create Anthropic's 2025-09-10 provider-executed web fetch tool.
 pub fn web_fetch_20250910(
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   citations? : AnthropicWebFetchCitations,
-  max_content_tokens? : Int,
+  max_content_tokens? : Int32,
   on_input_start? : @provider_utils.ToolInputStartFunction,
   on_input_delta? : @provider_utils.ToolInputDeltaFunction,
   on_input_available? : @provider_utils.ToolInputAvailableFunction,
@@ -163,11 +164,11 @@ pub fn web_fetch_20250910(
 ///|
 /// Create Anthropic's current provider-executed web fetch tool.
 pub fn web_fetch_20260209(
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   citations? : AnthropicWebFetchCitations,
-  max_content_tokens? : Int,
+  max_content_tokens? : Int32,
   on_input_start? : @provider_utils.ToolInputStartFunction,
   on_input_delta? : @provider_utils.ToolInputDeltaFunction,
   on_input_available? : @provider_utils.ToolInputAvailableFunction,
@@ -181,11 +182,11 @@ pub fn web_fetch_20260209(
 ///|
 /// AI SDK-style camel-case spelling.
 pub fn webFetch_20250910(
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   citations? : AnthropicWebFetchCitations,
-  max_content_tokens? : Int,
+  max_content_tokens? : Int32,
   on_input_start? : @provider_utils.ToolInputStartFunction,
   on_input_delta? : @provider_utils.ToolInputDeltaFunction,
   on_input_available? : @provider_utils.ToolInputAvailableFunction,
@@ -205,11 +206,11 @@ pub fn webFetch_20250910(
 ///|
 /// AI SDK-style camel-case spelling.
 pub fn webFetch_20260209(
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   citations? : AnthropicWebFetchCitations,
-  max_content_tokens? : Int,
+  max_content_tokens? : Int32,
   on_input_start? : @provider_utils.ToolInputStartFunction,
   on_input_delta? : @provider_utils.ToolInputDeltaFunction,
   on_input_available? : @provider_utils.ToolInputAvailableFunction,

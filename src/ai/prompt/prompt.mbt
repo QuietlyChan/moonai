@@ -1,35 +1,39 @@
 ///|
 /// The two input shapes accepted by a high-level generation call.
+#derive(Debug)
 pub(all) enum PromptInput {
   Text(String)
   Messages(Array[@provider_utils.ModelMessage])
-} derive(Debug)
+}
 
 ///|
 /// System instructions accepted by high-level AI calls.
 ///
 /// This mirrors AI SDK's `Instructions` union without converting it into a
 /// provider prompt prematurely.
+#derive(Debug, Eq)
 pub(all) enum Instructions {
   InstructionText(String)
   InstructionMessage(@provider_utils.ModelMessage)
   InstructionMessages(Array[@provider_utils.ModelMessage])
-} derive(Debug, Eq)
+}
 
 ///|
 /// Provider-neutral high-level prompt definition.
+#derive(Debug)
 pub(all) struct Prompt {
   input : PromptInput
   instructions : Instructions?
   allow_system_in_messages : Bool
-} derive(Debug)
+}
 
 ///|
 /// Prompt after input-shape and role validation, before provider conversion.
+#derive(Debug)
 pub(all) struct StandardizedPrompt {
   instructions : Instructions?
   messages : Array[@provider_utils.ModelMessage]
-} derive(Debug)
+}
 
 ///|
 fn copy_model_messages(
@@ -121,7 +125,7 @@ fn normalize_instructions(
 pub fn Prompt::new(
   input : PromptInput,
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> Prompt raise {
   {
     input,
@@ -135,7 +139,7 @@ pub fn Prompt::new(
 pub fn Prompt::text(
   value : String,
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> Prompt raise {
   Prompt::new(
     PromptInput::Text(value),
@@ -149,7 +153,7 @@ pub fn Prompt::text(
 pub fn Prompt::messages(
   value : Array[@provider_utils.ModelMessage],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> Prompt raise {
   Prompt::new(
     PromptInput::Messages(copy_model_messages(value)),
@@ -207,7 +211,7 @@ pub fn standardize_prompt(
   prompt : String?,
   messages : Array[@provider_utils.ModelMessage],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> StandardizedPrompt raise {
   let input = match prompt {
     Some(value) => {
@@ -236,7 +240,7 @@ pub fn standardizePrompt(
   prompt : String?,
   messages : Array[@provider_utils.ModelMessage],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> StandardizedPrompt raise {
   standardize_prompt(prompt, messages, instructions?, allow_system_in_messages~)
 }

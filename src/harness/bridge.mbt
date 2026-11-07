@@ -24,7 +24,7 @@ pub struct CallbackHarnessV1BridgeConnection {
 pub fn CallbackHarnessV1BridgeConnection::new(
   send~ : async (String) -> Unit,
   receive~ : async () -> String?,
-  close? : () -> Unit = () => (),
+  close~ : () -> Unit = () => (),
 ) -> CallbackHarnessV1BridgeConnection {
   { send_callback: send, receive_callback: receive, close_callback: close, }
 }
@@ -53,6 +53,7 @@ pub impl HarnessV1BridgeConnection for CallbackHarnessV1BridgeConnection with fn
 
 ///|
 /// Bridge command accepted by all bridge-backed adapters.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1BridgeCommand {
   HarnessBridgeStart(
     prompt~ : String,
@@ -75,10 +76,10 @@ pub(all) enum HarnessV1BridgeCommand {
   HarnessBridgeUserMessage(String)
   HarnessBridgeAbort
   HarnessBridgeDestroy
-  HarnessBridgeResume(last_seen_event_id~ : Int)
+  HarnessBridgeResume(last_seen_event_id~ : Int32)
   HarnessBridgeStop
   HarnessBridgeSuspend
-} derive(Debug, Eq)
+}
 
 ///|
 /// Serialize a bridge command to its NDJSON payload.
@@ -181,34 +182,35 @@ pub async fn send_harness_v1_bridge_command(
 
 ///|
 /// One validated frame emitted by a harness bridge.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1BridgeOutboundFrame {
-  HarnessBridgeStreamPart(seq~ : Int?, part~ : HarnessV1StreamPart)
-  HarnessBridgeHello(state~ : String?, last_seq~ : Int?)
+  HarnessBridgeStreamPart(seq~ : Int32?, part~ : HarnessV1StreamPart)
+  HarnessBridgeHello(state~ : String?, last_seq~ : Int32?)
   HarnessBridgeStopped(data~ : Json)
   HarnessBridgeThread(thread_id~ : String)
   HarnessBridgeSandboxLog(
-    seq~ : Int?,
+    seq~ : Int32?,
     source~ : String,
     stream~ : String,
     line~ : String
   )
   HarnessBridgeDebugEvent(
-    seq~ : Int?,
+    seq~ : Int32?,
     level~ : HarnessV1DebugLevel,
     subsystem~ : String,
     message~ : String,
     attrs~ : Json?,
     error~ : Json?
   )
-  HarnessBridgeReady(port~ : Int)
-} derive(Debug, Eq)
+  HarnessBridgeReady(port~ : Int32)
+}
 
 ///|
 /// Runtime state maintained by a bridge session.
 pub struct HarnessV1BridgeState {
   priv connection : &HarnessV1BridgeConnection
-  priv last_seen_event_id : Ref[Int]
-  priv bridge_last_seq : Ref[Int]
+  priv last_seen_event_id : Ref[Int32]
+  priv bridge_last_seq : Ref[Int32]
   priv thread_id_value : Ref[String?]
   priv stop_data_value : Ref[Json?]
   priv lifecycle_state_value : Ref[String?]
@@ -221,7 +223,7 @@ pub struct HarnessV1BridgeState {
 /// Construct a bridge state holder.
 pub fn HarnessV1BridgeState::new(
   connection : &HarnessV1BridgeConnection,
-  last_seen_event_id? : Int = 0,
+  last_seen_event_id~ : Int32 = 0,
   diagnostic_reporter? : HarnessV1DiagnosticReporter,
   session_id? : String,
 ) -> HarnessV1BridgeState {
@@ -242,7 +244,7 @@ pub fn HarnessV1BridgeState::new(
 /// Return the highest bridge sequence observed by this state holder.
 pub fn HarnessV1BridgeState::last_seen_event_id(
   self : HarnessV1BridgeState,
-) -> Int {
+) -> Int32 {
   self.last_seen_event_id.val
 }
 
@@ -250,7 +252,7 @@ pub fn HarnessV1BridgeState::last_seen_event_id(
 /// Return the highest sequence announced by the remote bridge.
 pub fn HarnessV1BridgeState::remote_last_seq(
   self : HarnessV1BridgeState,
-) -> Int {
+) -> Int32 {
   self.bridge_last_seq.val
 }
 
@@ -556,7 +558,7 @@ fn json_optional_bool(fields : Map[String, Json], name : String) -> Bool {
 }
 
 ///|
-fn json_optional_int(fields : Map[String, Json], name : String) -> Int? {
+fn json_optional_int(fields : Map[String, Json], name : String) -> Int32? {
   match fields.get(name) {
     Some(Number(value, ..)) => Some(value.to_int())
     _ => None
@@ -798,7 +800,7 @@ pub async fn HarnessV1BridgeState::consume(
 ///|
 fn HarnessV1BridgeState::record_delivered_seq(
   self : HarnessV1BridgeState,
-  seq : Int?,
+  seq : Int32?,
 ) -> Unit {
   if seq is Some(value) {
     if value > self.last_seen_event_id.val {

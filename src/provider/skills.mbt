@@ -1,9 +1,10 @@
 ///|
 /// One file in an uploaded provider skill.
+#derive(Debug)
 pub(all) struct SkillsV4File {
   path : String
   data : UploadFileData
-} derive(Debug)
+}
 
 ///|
 /// Construct one skill file relative to the skill root.
@@ -16,24 +17,26 @@ pub fn SkillsV4File::new(
 
 ///|
 /// Provider-level options for uploading one skill bundle.
+#derive(Debug)
 pub(all) struct SkillsV4UploadSkillCallOptions {
   files : Array[SkillsV4File]
   display_title : String?
   provider_options : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// Construct one skill upload call.
 pub fn SkillsV4UploadSkillCallOptions::new(
   files~ : Array[SkillsV4File],
   display_title? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> SkillsV4UploadSkillCallOptions {
   { files, display_title, provider_options, }
 }
 
 ///|
 /// Result returned after a provider accepts a skill bundle.
+#derive(Debug, Eq)
 pub(all) struct SkillsV4UploadSkillResult {
   provider_reference : ProviderReference
   display_title : String?
@@ -42,7 +45,7 @@ pub(all) struct SkillsV4UploadSkillResult {
   latest_version : String?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a provider skill-upload result.
@@ -52,8 +55,8 @@ pub fn SkillsV4UploadSkillResult::new(
   name? : String,
   description? : String,
   latest_version? : String,
-  provider_metadata? : Map[String, Json] = Map([]),
-  warnings? : Array[Warning] = [],
+  provider_metadata~ : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
 ) -> SkillsV4UploadSkillResult {
   {
     provider_reference,

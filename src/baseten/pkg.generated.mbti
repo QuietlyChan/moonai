@@ -7,13 +7,13 @@ import {
 }
 
 // Values
-pub const MAX_EMBEDDINGS_PER_CALL : Int = 128
+pub const MAX_EMBEDDINGS_PER_CALL : Int32 = 128
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createBaseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
+pub fn createBaseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
 
-pub fn create_baseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
+pub fn create_baseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
 
 // Errors
 

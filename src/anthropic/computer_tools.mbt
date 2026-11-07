@@ -1,5 +1,5 @@
 ///|
-fn anthropic_coordinate_schema(length : Int) -> Json {
+fn anthropic_coordinate_schema(length : Int32) -> Json {
   {
     "type": "array",
     "items": { "type": "integer" },
@@ -87,9 +87,9 @@ fn anthropic_computer_20251124_input_schema() -> Json {
 
 ///|
 fn anthropic_computer_args(
-  display_width_px : Int,
-  display_height_px : Int,
-  display_number : Int?,
+  display_width_px : Int32,
+  display_height_px : Int32,
+  display_number : Int32?,
   enable_zoom : Bool?,
 ) -> Json {
   let fields : Map[String, Json] = Map([
@@ -109,9 +109,9 @@ fn anthropic_computer_args(
 fn anthropic_computer_tool(
   id : String,
   input_schema : Json,
-  display_width_px : Int,
-  display_height_px : Int,
-  display_number : Int?,
+  display_width_px : Int32,
+  display_height_px : Int32,
+  display_number : Int32?,
   enable_zoom : Bool?,
   output_schema : Json?,
   execute : @provider_utils.ToolExecuteFunction?,
@@ -140,9 +140,9 @@ fn anthropic_computer_tool(
 ///|
 /// Create Anthropic's 2024-10-22 application-executed computer tool.
 pub fn computer_20241022(
-  display_width_px~ : Int,
-  display_height_px~ : Int,
-  display_number? : Int,
+  display_width_px~ : Int32,
+  display_height_px~ : Int32,
+  display_number? : Int32,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
   needs_approval? : @provider_utils.ToolNeedsApproval,
@@ -171,9 +171,9 @@ pub fn computer_20241022(
 ///|
 /// Create Anthropic's 2025-01-24 application-executed computer tool.
 pub fn computer_20250124(
-  display_width_px~ : Int,
-  display_height_px~ : Int,
-  display_number? : Int,
+  display_width_px~ : Int32,
+  display_height_px~ : Int32,
+  display_number? : Int32,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
   needs_approval? : @provider_utils.ToolNeedsApproval,
@@ -202,9 +202,9 @@ pub fn computer_20250124(
 ///|
 /// Create Anthropic's current application-executed computer tool.
 pub fn computer_20251124(
-  display_width_px~ : Int,
-  display_height_px~ : Int,
-  display_number? : Int,
+  display_width_px~ : Int32,
+  display_height_px~ : Int32,
+  display_number? : Int32,
   enable_zoom? : Bool,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,

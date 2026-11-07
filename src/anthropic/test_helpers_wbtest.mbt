@@ -45,21 +45,21 @@ fn prepare_anthropic_request(
 fn encode_messages_request(
   model_id : String,
   options : @provider.ChatCallOptions,
-  provider_name? : String = "",
-  stream? : Bool = true,
+  provider_name~ : String = "",
+  stream~ : Bool = true,
 ) -> Json raise {
   prepare_anthropic_request(model_id, options, provider_name, stream).body
 }
 
 ///|
 fn AnthropicStreamDecoder::new(
-  include_raw_chunks? : Bool = false,
-  provider_name? : String = "",
-  mark_code_execution_dynamic? : Bool = false,
-  uses_json_response_tool? : Bool = false,
+  include_raw_chunks~ : Bool = false,
+  provider_name~ : String = "",
+  mark_code_execution_dynamic~ : Bool = false,
+  uses_json_response_tool~ : Bool = false,
   tool_name_mapping? : @provider_utils.ToolNameMapping,
   id_generator? : @provider_utils.IdGenerator,
-  citation_documents? : Array[AnthropicCitationDocument] = [],
+  citation_documents~ : Array[AnthropicCitationDocument] = [],
 ) -> AnthropicStreamDecoder {
   AnthropicStreamDecoder::new_with_metadata_policy(
     include_raw_chunks~,
@@ -79,12 +79,12 @@ fn AnthropicStreamDecoder::new(
 ///|
 fn decode_messages_response(
   json : Json,
-  provider_name? : String = "anthropic.messages",
-  mark_code_execution_dynamic? : Bool = false,
-  uses_json_response_tool? : Bool = false,
+  provider_name~ : String = "anthropic.messages",
+  mark_code_execution_dynamic~ : Bool = false,
+  uses_json_response_tool~ : Bool = false,
   tool_name_mapping? : @provider_utils.ToolNameMapping,
   id_generator? : @provider_utils.IdGenerator,
-  citation_documents? : Array[AnthropicCitationDocument] = [],
+  citation_documents~ : Array[AnthropicCitationDocument] = [],
 ) -> @provider.ChatResponse raise {
   let decoded = decode_messages_response_with_metadata(
     json,
