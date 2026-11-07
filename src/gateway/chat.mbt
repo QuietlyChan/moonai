@@ -8,7 +8,7 @@ struct GatewayLanguageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -18,7 +18,7 @@ fn gateway_chat_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> GatewayLanguageModel {
   {

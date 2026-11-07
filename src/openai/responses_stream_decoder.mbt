@@ -18,7 +18,7 @@ priv struct OpenAIResponsesHostedStreamDecoder {
   hosted_code_delta_seen : Array[Bool]
   hosted_ready : Array[Bool]
   hosted_tool_search_call_ids : Array[String]
-  mut hosted_tool_search_result_index : Int
+  mut hosted_tool_search_result_index : Int32
   mut response_output : Array[Json]
   mut has_response_output : Bool
 }
@@ -71,7 +71,7 @@ fn OpenAIResponsesHostedStreamDecoder::custom_tool_name(
 fn OpenAIResponsesHostedStreamDecoder::store_item(
   self : OpenAIResponsesHostedStreamDecoder,
   item : Json,
-  output_index : Int,
+  output_index : Int32,
 ) -> Unit {
   let index = if output_index < 0 { self.items.length() } else { output_index }
   while self.items.length() <= index {
@@ -84,7 +84,7 @@ fn OpenAIResponsesHostedStreamDecoder::store_item(
 fn OpenAIResponsesHostedStreamDecoder::find_hosted_item(
   self : OpenAIResponsesHostedStreamDecoder,
   item_id : String,
-) -> Int? {
+) -> Int32? {
   for index, value in self.hosted_item_ids {
     if value == item_id {
       return Some(index)
@@ -99,9 +99,9 @@ fn OpenAIResponsesHostedStreamDecoder::find_hosted_item(
 /// identified by their item id, so both forms are retained.
 fn OpenAIResponsesHostedStreamDecoder::ensure_hosted_item(
   self : OpenAIResponsesHostedStreamDecoder,
-  output_index : Int,
+  output_index : Int32,
   item_id : String,
-) -> Int {
+) -> Int32 {
   let index = if output_index >= 0 {
     output_index
   } else {
@@ -154,7 +154,7 @@ fn openai_hosted_call_id(item : Json) -> String {
 }
 
 ///|
-fn openai_hosted_output_index(json : Json) -> Int {
+fn openai_hosted_output_index(json : Json) -> Int32 {
   match json {
     { "output_index": Number(value, ..), .. } => value.to_int()
     _ => -1
@@ -213,7 +213,7 @@ fn OpenAIResponsesHostedStreamDecoder::emit_parts(
   emit_call : Bool,
   emit_result : Bool,
   emit_input_end : Bool,
-  emit_input_delta? : Bool = false,
+  emit_input_delta~ : Bool = false,
 ) -> Unit {
   for part in self.hosted_generated_parts(item) {
     match part {
@@ -256,7 +256,7 @@ fn OpenAIResponsesHostedStreamDecoder::emit_parts(
 fn OpenAIResponsesHostedStreamDecoder::added_events(
   self : OpenAIResponsesHostedStreamDecoder,
   item : Json,
-  output_index : Int,
+  output_index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
   let kind = openai_hosted_item_type(item)
@@ -407,7 +407,7 @@ fn OpenAIResponsesHostedStreamDecoder::added_events(
 fn OpenAIResponsesHostedStreamDecoder::done_events(
   self : OpenAIResponsesHostedStreamDecoder,
   item : Json,
-  output_index : Int,
+  output_index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
   let kind = openai_hosted_item_type(item)

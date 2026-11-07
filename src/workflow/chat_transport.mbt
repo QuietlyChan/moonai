@@ -11,11 +11,12 @@ pub struct WorkflowChatTransport {
 ///|
 /// The response of one transport send: the UI chunk stream plus the
 /// persisted snapshot to store alongside the chat.
+#derive(Debug)
 pub(all) struct WorkflowChatResponse {
   chunks : Array[Json]
   snapshot : Json
-  steps : Int
-} derive(Debug)
+  steps : Int32
+}
 
 ///|
 /// Wrap a workflow agent as a chat transport.
@@ -86,3 +87,6 @@ pub fn WorkflowChatTransport::reconnect_to_stream(
   chunks.push({ "type": "finish", "finishReason": "stop" })
   chunks
 }
+
+///|
+pub extend WorkflowChatResponse with Debug::{to_repr}

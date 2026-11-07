@@ -13,7 +13,6 @@ import {
   "QuietlyChan/moonai/ai",
   "moonbitlang/async",
   "moonbitlang/async/http",
-  "moonbitlang/async/io",
   "moonbitlang/async/socket",
 } for "test"
 

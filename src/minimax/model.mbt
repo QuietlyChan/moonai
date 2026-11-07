@@ -5,7 +5,7 @@ pub struct MiniMaxProvider {
   priv base_url : String
   priv video_base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
 }
@@ -24,11 +24,11 @@ fn load_minimax_api_key(
 ///|
 /// Create a MiniMax provider.
 pub fn create_minimax(
-  api_key? : String = "",
-  base_url? : String = "https://api.minimax.io/anthropic/v1",
-  video_base_url? : String = "https://api.minimax.io",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.minimax.io/anthropic/v1",
+  video_base_url~ : String = "https://api.minimax.io",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> MiniMaxProvider {
@@ -48,11 +48,11 @@ pub fn create_minimax(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createMiniMax(
-  api_key? : String = "",
-  base_url? : String = "https://api.minimax.io/anthropic/v1",
-  video_base_url? : String = "https://api.minimax.io",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.minimax.io/anthropic/v1",
+  video_base_url~ : String = "https://api.minimax.io",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> MiniMaxProvider {
@@ -153,10 +153,10 @@ pub fn MiniMaxProvider::videoModel(
 /// Construct the default V4 MiniMax language model directly.
 pub fn minimax(
   model_id : MiniMaxChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.minimax.io/anthropic/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.minimax.io/anthropic/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 raise {

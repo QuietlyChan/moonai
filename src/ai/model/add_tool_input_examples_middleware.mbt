@@ -2,7 +2,7 @@
 /// Default example formatter: the JSON-stringified example input.
 fn default_tool_example_format(
   example : @provider.LanguageModelV4FunctionToolInputExample,
-  _index : Int,
+  _index : Int32,
 ) -> String {
   example.input.stringify()
 }
@@ -15,9 +15,9 @@ fn default_tool_example_format(
 /// serialized into the description text and (by default) removed from the
 /// typed field.
 pub fn add_tool_input_examples_middleware(
-  prefix? : String = "Input Examples:",
-  format? : (@provider.LanguageModelV4FunctionToolInputExample, Int) -> String,
-  remove? : Bool = true,
+  prefix~ : String = "Input Examples:",
+  format? : (@provider.LanguageModelV4FunctionToolInputExample, Int32) -> String,
+  remove~ : Bool = true,
 ) -> @provider.LanguageModelV4Middleware {
   let format = match format {
     Some(value) => value

@@ -19,11 +19,13 @@ test "local caller late-binds and hides local-only callees" {
     ("code_mode", local_caller),
     ("getInventory", test_function_tool("inventory")),
   ])
-  let resolved = resolve_tool_caller_configuration(
+  let resolved = @tool.resolve_tool_caller_configuration(
     tools,
-    Some(Map([("getInventory", [ToolCallerReference::tool("code_mode")])])),
+    Some(
+      Map([("getInventory", [@tool.ToolCallerReference::tool("code_mode")])]),
+    ),
   )
-  let prepared = prepare_tools_for_tool_callers(tools, resolved)
+  let prepared = @tool.prepare_tools_for_tool_callers(tools, resolved)
   let model_tools = prepared.model_tools()
   assert_true(model_tools.get("code_mode") is Some(_))
   assert_true(model_tools.get("getInventory") is None)
@@ -48,21 +50,21 @@ test "provider caller prepares options and preserves direct access" {
     ("programmatic", provider_caller),
     ("getDemand", test_function_tool("demand")),
   ])
-  let resolved = resolve_tool_caller_configuration(
+  let resolved = @tool.resolve_tool_caller_configuration(
     tools,
     Some(
       Map([
         (
           "getDemand",
           [
-            ToolCallerReference::direct(),
-            ToolCallerReference::tool("programmatic"),
+            @tool.ToolCallerReference::direct(),
+            @tool.ToolCallerReference::tool("programmatic"),
           ],
         ),
       ]),
     ),
   )
-  let prepared = prepare_tools_for_tool_callers(tools, resolved)
+  let prepared = @tool.prepare_tools_for_tool_callers(tools, resolved)
   let demand = prepared.model_tools().get("getDemand").unwrap()
   assert_eq(
     demand.provider_options().get("test"),
@@ -74,9 +76,9 @@ test "provider caller prepares options and preserves direct access" {
 test "caller configuration rejects unknown tools and unregistered callers" {
   let tools = @provider_utils.tool_set([("plain", test_function_tool("plain"))])
   try
-    resolve_tool_caller_configuration(
+    @tool.resolve_tool_caller_configuration(
       tools,
-      Some(Map([("missing", [ToolCallerReference::direct()])])),
+      Some(Map([("missing", [@tool.ToolCallerReference::direct()])])),
     )
   catch {
     @provider.InvalidArgumentError(argument~, message~) => {
@@ -87,9 +89,9 @@ test "caller configuration rejects unknown tools and unregistered callers" {
     _ => fail("expected unknown tool error")
   }
   try
-    resolve_tool_caller_configuration(
+    @tool.resolve_tool_caller_configuration(
       tools,
-      Some(Map([("plain", [ToolCallerReference::tool("plain")])])),
+      Some(Map([("plain", [@tool.ToolCallerReference::tool("plain")])])),
     )
   catch {
     @provider.InvalidArgumentError(message~, ..) =>

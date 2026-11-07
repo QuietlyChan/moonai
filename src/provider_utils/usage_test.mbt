@@ -1,6 +1,6 @@
 ///|
 test "null language model usage leaves every counter unavailable" {
-  let usage = create_null_language_model_usage()
+  let usage = @provider_utils.create_null_language_model_usage()
   assert_eq(usage.input_tokens.total, None)
   assert_eq(usage.input_tokens.no_cache, None)
   assert_eq(usage.input_tokens.cache_read, None)
@@ -9,7 +9,7 @@ test "null language model usage leaves every counter unavailable" {
   assert_eq(usage.output_tokens.text, None)
   assert_eq(usage.output_tokens.reasoning, None)
   assert_eq(usage.raw, None)
-  assert_eq(createNullLanguageModelUsage(), usage)
+  assert_eq(@provider_utils.createNullLanguageModelUsage(), usage)
 }
 
 ///|
@@ -34,7 +34,7 @@ test "add language model usage sums known counters across steps" {
     output_tokens: { total: Some(6), text: Some(4), reasoning: Some(2), },
     raw: Some({ "step": 2 }),
   }
-  assert_eq(add_language_model_usage(first, second), {
+  assert_eq(@provider_utils.add_language_model_usage(first, second), {
     input_tokens: {
       total: Some(8),
       no_cache: Some(2),
@@ -45,7 +45,7 @@ test "add language model usage sums known counters across steps" {
     raw: None,
   })
   assert_eq(
-    add_language_model_usage(
+    @provider_utils.add_language_model_usage(
       @provider.LanguageModelV4Usage::unknown(),
       @provider.LanguageModelV4Usage::unknown(),
     ),

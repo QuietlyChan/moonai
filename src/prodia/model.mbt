@@ -4,7 +4,7 @@ pub struct ProdiaProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -12,10 +12,10 @@ pub struct ProdiaProvider {
 /// Create a Prodia provider. The API key defaults to the `PRODIA_TOKEN`
 /// environment variable.
 pub fn create_prodia(
-  api_key? : String = "",
-  base_url? : String = "https://inference.prodia.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 300_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://inference.prodia.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 300_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ProdiaProvider {
   {
@@ -32,10 +32,10 @@ pub fn create_prodia(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createProdia(
-  api_key? : String = "",
-  base_url? : String = "https://inference.prodia.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 300_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://inference.prodia.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 300_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ProdiaProvider {
   create_prodia(
@@ -215,10 +215,10 @@ pub impl @provider.ProviderV4 for ProdiaProvider with fn skills(_self) {
 /// Construct the default V4 Prodia image model directly.
 pub fn prodia(
   model_id : ProdiaImageModelId,
-  api_key? : String = "",
-  base_url? : String = "https://inference.prodia.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 300_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://inference.prodia.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 300_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.ImageModelV4 {
   create_prodia(
@@ -228,4 +228,15 @@ pub fn prodia(
     idle_timeout_ms~,
     http_transport?,
   ).image(model_id)
+}
+
+///|
+pub extend ProdiaProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
 }

@@ -3,8 +3,8 @@ priv struct OpenAIResponsesOptions {
   conversation : String?
   include_values : Array[String]
   instructions : String?
-  top_logprobs : Int?
-  max_tool_calls : Int?
+  top_logprobs : Int32?
+  max_tool_calls : Int32?
   metadata : Json?
   parallel_tool_calls : Bool?
   previous_response_id : String?
@@ -43,7 +43,7 @@ priv struct ParsedOpenAIResponsesOptions {
 /// Azure selects its own namespace and falls back to `openai`.
 fn resolve_official_openai_provider_options(
   provider_options : Map[String, Json],
-  reserved_fields? : Array[String] = [],
+  reserved_fields~ : Array[String] = [],
 ) -> @provider_utils.ProviderOptionsResolution {
   @provider_utils.resolve_provider_options(
     provider_options,
@@ -99,7 +99,7 @@ fn parse_openai_include(
 ///|
 fn parse_openai_logprobs(
   reader : @provider_utils.ProviderOptionsReader,
-) -> Int? {
+) -> Int32? {
   match reader.take_json("logprobs") {
     Some(True) => Some(20)
     Some(False) => None
@@ -264,11 +264,11 @@ fn parse_openai_responses_provider_options(
 priv struct OpenAIChatOptions {
   logit_bias : Json?
   logprobs : Bool
-  top_logprobs : Int?
+  top_logprobs : Int32?
   parallel_tool_calls : Bool?
   user : String?
   reasoning_effort : String?
-  max_completion_tokens : Int?
+  max_completion_tokens : Int32?
   store : Bool?
   metadata : Json?
   prediction : Json?
@@ -307,7 +307,7 @@ fn openai_chat_reserved_fields() -> Array[String] {
 ///|
 fn parse_openai_chat_logprobs(
   reader : @provider_utils.ProviderOptionsReader,
-) -> (Bool, Int?) {
+) -> (Bool, Int32?) {
   match reader.take_json("logprobs") {
     Some(True) => (true, Some(0))
     Some(False) => (false, None)
@@ -422,7 +422,7 @@ priv struct OpenAIImageOptions {
   background : String?
   moderation : String?
   output_format : String?
-  output_compression : Int?
+  output_compression : Int32?
   input_fidelity : String?
   user : String?
 }
@@ -490,7 +490,7 @@ fn parse_openai_image_provider_options(
 
 ///|
 priv struct OpenAIEmbeddingOptions {
-  dimensions : Int?
+  dimensions : Int32?
   user : String?
 }
 
@@ -522,7 +522,7 @@ fn parse_openai_embedding_provider_options(
 priv struct OpenAICompletionOptions {
   echo : Bool?
   logit_bias : Json?
-  logprobs : Int?
+  logprobs : Int32?
   suffix : String?
   user : String?
 }
@@ -536,7 +536,7 @@ priv struct ParsedOpenAICompletionOptions {
 ///|
 fn parse_openai_completion_logprobs(
   reader : @provider_utils.ProviderOptionsReader,
-) -> Int? {
+) -> Int32? {
   match reader.take_json("logprobs") {
     Some(True) => Some(0)
     Some(False) => None

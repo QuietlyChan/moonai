@@ -55,7 +55,7 @@ async test "Anthropic Skills uploads bundles and resolves latest version metadat
         max_connections=2,
       )
     }
-    let skills = create_anthropic(
+    let skills = @anthropic.create_anthropic(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -116,7 +116,7 @@ async test "Anthropic Skills omits an absent display title" {
         max_connections=1,
       )
     }
-    let skills = create_anthropic(
+    let skills = @anthropic.create_anthropic(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,

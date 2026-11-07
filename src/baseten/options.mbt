@@ -11,4 +11,4 @@ pub type BasetenEmbeddingModelId = String
 /// Baseten's per-request embedding input limit: larger batches are rejected
 /// with `413 batch size N > maximum allowed batch size 128`. `embed_many`
 /// splits larger inputs into chunks of this size.
-pub const MAX_EMBEDDINGS_PER_CALL : Int = 128
+pub const MAX_EMBEDDINGS_PER_CALL : Int32 = 128

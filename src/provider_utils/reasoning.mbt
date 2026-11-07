@@ -153,12 +153,12 @@ fn default_reasoning_budget_percentages() -> Map[String, Double] {
 /// handle those two states separately.
 pub fn map_reasoning_to_provider_budget(
   reasoning : @provider.ReasoningEffort,
-  max_output_tokens : Int,
-  max_reasoning_budget : Int,
+  max_output_tokens : Int32,
+  max_reasoning_budget : Int32,
   warnings : Array[@provider.Warning],
-  min_reasoning_budget? : Int = 1024,
+  min_reasoning_budget~ : Int32 = 1024,
   budget_percentages? : Map[String, Double],
-) -> Int? {
+) -> Int32? {
   let key = reasoning_key(reasoning)
   match reasoning {
     @provider.ProviderDefault | @provider.Disabled => None
@@ -193,12 +193,12 @@ pub fn map_reasoning_to_provider_budget(
 /// Camel-case alias matching the AI SDK utility name.
 pub fn mapReasoningToProviderBudget(
   reasoning : @provider.ReasoningEffort,
-  max_output_tokens : Int,
-  max_reasoning_budget : Int,
+  max_output_tokens : Int32,
+  max_reasoning_budget : Int32,
   warnings : Array[@provider.Warning],
-  min_reasoning_budget? : Int = 1024,
+  min_reasoning_budget~ : Int32 = 1024,
   budget_percentages? : Map[String, Double],
-) -> Int? {
+) -> Int32? {
   map_reasoning_to_provider_budget(
     reasoning,
     max_output_tokens,

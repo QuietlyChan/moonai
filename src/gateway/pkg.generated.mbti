@@ -7,26 +7,44 @@ import {
 }
 
 // Values
-pub const GATEWAY_MAX_EMBEDDINGS_PER_CALL : Int = 2048
+pub const GATEWAY_MAX_EMBEDDINGS_PER_CALL : Int32 = 2048
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createGateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
+pub fn createGateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
 
-pub fn create_gateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
+pub fn create_gateway(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> GatewayProvider
 
-pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.LanguageModelV4
+pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.LanguageModelV4
 
 // Errors
 
 // Types and methods
 type GatewayEmbeddingModel
+pub async fn GatewayEmbeddingModel::do_embed(Self, @provider.EmbeddingModelV4CallOptions) -> @provider.EmbeddingModelV4Result
+pub fn GatewayEmbeddingModel::max_embeddings_per_call(Self) -> Int32?
+pub fn GatewayEmbeddingModel::max_input_bytes_per_call(Self) -> Int64?
+pub fn GatewayEmbeddingModel::model_id(Self) -> String
+pub fn GatewayEmbeddingModel::provider(Self) -> String
+pub fn GatewayEmbeddingModel::specification_version(Self) -> String
+pub fn GatewayEmbeddingModel::supports_parallel_calls(Self) -> Bool
 pub impl @provider.EmbeddingModelV4 for GatewayEmbeddingModel
 
 type GatewayImageModel
+pub async fn GatewayImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn GatewayImageModel::max_images_per_call(Self) -> Int32?
+pub fn GatewayImageModel::model_id(Self) -> String
+pub fn GatewayImageModel::provider(Self) -> String
+pub fn GatewayImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for GatewayImageModel
 
 type GatewayLanguageModel
+pub async fn GatewayLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn GatewayLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn GatewayLanguageModel::model_id(Self) -> String
+pub fn GatewayLanguageModel::provider(Self) -> String
+pub fn GatewayLanguageModel::specification_version(Self) -> String
+pub fn GatewayLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for GatewayLanguageModel
 
 pub struct GatewayProvider {
@@ -37,6 +55,7 @@ pub fn GatewayProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GatewayProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GatewayProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GatewayProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GatewayProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn GatewayProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn GatewayProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn GatewayProvider::image_model(Self, String) -> &@provider.ImageModelV4
@@ -45,9 +64,17 @@ pub fn GatewayProvider::language_model(Self, String) -> &@provider.LanguageModel
 pub fn GatewayProvider::reranking(Self, String) -> &@provider.RerankingModelV4
 pub fn GatewayProvider::rerankingModel(Self, String) -> &@provider.RerankingModelV4
 pub fn GatewayProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4
+pub fn GatewayProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn GatewayProvider::specification_version(Self) -> String
+pub fn GatewayProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn GatewayProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for GatewayProvider
 
 type GatewayRerankingModel
+pub async fn GatewayRerankingModel::do_rerank(Self, @provider.RerankingModelV4CallOptions) -> @provider.RerankingModelV4Result
+pub fn GatewayRerankingModel::model_id(Self) -> String
+pub fn GatewayRerankingModel::provider(Self) -> String
+pub fn GatewayRerankingModel::specification_version(Self) -> String
 pub impl @provider.RerankingModelV4 for GatewayRerankingModel
 
 // Type aliases

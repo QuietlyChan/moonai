@@ -43,9 +43,9 @@ async test "chat model middleware transforms options and overrides identity" {
     model_id="base-model",
     supported_urls=[@provider.SupportedUrlRule::new("image/*", ["base"])],
   )
-  let wrapped = wrap_chat_model(
+  let wrapped = @model.wrap_chat_model(
     base,
-    ChatModelMiddleware::new(
+    @model.ChatModelMiddleware::new(
       transform_options=middleware_add_marker,
       provider="middleware",
       model_id="derived-model",
@@ -76,9 +76,9 @@ async test "chat model middleware applies the same transform to streaming" {
       @provider.Stop,
     ),
   )
-  let wrapped = wrap_chat_model(
+  let wrapped = @model.wrap_chat_model(
     base,
-    ChatModelMiddleware::new(transform_options=middleware_add_marker),
+    @model.ChatModelMiddleware::new(transform_options=middleware_add_marker),
   )
   let mut events = 0
   ignore(
@@ -104,9 +104,9 @@ async test "image model middleware overrides identity and limits" {
     provider_name="base-image",
     model_id="base-image-model",
   )
-  let wrapped = wrap_image_wire_model(
+  let wrapped = @model.wrap_image_wire_model(
     base,
-    ImageWireModelMiddleware::new(
+    @model.ImageWireModelMiddleware::new(
       provider="middleware-image",
       model_id="derived-image-model",
       max_images_per_call=4,
@@ -121,7 +121,7 @@ async test "image model middleware overrides identity and limits" {
 
 ///|
 async fn async_chat_transform(
-  context : ChatModelTransformContext,
+  context : @model.ChatModelTransformContext,
 ) -> @provider.ChatCallOptions {
   @async.pause()
   let options = context.params
@@ -149,7 +149,7 @@ async fn async_chat_transform(
 
 ///|
 async fn wrapped_chat_result(
-  _context : ChatModelMiddlewareContext,
+  _context : @model.ChatModelMiddlewareContext,
 ) -> @provider.ChatResponse {
   @async.pause()
   @provider.ChatResponse::new(
@@ -173,9 +173,9 @@ async test "chat middleware chains transforms in declaration order and wraps res
       @provider.Stop,
     ),
   )
-  let wrapped = wrap_chat_model_chain(base, [
-    ChatModelMiddleware::new(transform_params=async_chat_transform),
-    ChatModelMiddleware::new(wrap_generate=wrapped_chat_result),
+  let wrapped = @model.wrap_chat_model_chain(base, [
+    @model.ChatModelMiddleware::new(transform_params=async_chat_transform),
+    @model.ChatModelMiddleware::new(wrap_generate=wrapped_chat_result),
   ])
   let result = wrapped.generate(
     @provider.ChatCallOptions::new([
@@ -187,7 +187,7 @@ async test "chat middleware chains transforms in declaration order and wraps res
 
 ///|
 async fn passthrough_chat_stream(
-  context : ChatModelMiddlewareContext,
+  context : @model.ChatModelMiddlewareContext,
 ) -> @provider.ChatResponse {
   context.stream()
 }
@@ -205,9 +205,9 @@ async test "chat middleware stream wrapper delegates to the inner stream" {
     ),
   )
   let mut events = 0
-  let wrapped = wrap_chat_model(
+  let wrapped = @model.wrap_chat_model(
     base,
-    ChatModelMiddleware::new(wrap_stream=passthrough_chat_stream),
+    @model.ChatModelMiddleware::new(wrap_stream=passthrough_chat_stream),
   )
   ignore(
     wrapped.stream(
@@ -243,7 +243,7 @@ async fn async_image_transform(
 
 ///|
 async fn passthrough_image_result(
-  context : ImageWireModelMiddlewareContext,
+  context : @model.ImageWireModelMiddlewareContext,
 ) -> @provider.ImageResponse {
   context.generate()
 }
@@ -256,9 +256,9 @@ async test "image middleware chains async transforms and wraps generation" {
       @provider.Usage::zero(),
     ),
   )
-  let wrapped = wrap_image_wire_model_chain(base, [
-    ImageWireModelMiddleware::new(transform_params=async_image_transform),
-    ImageWireModelMiddleware::new(wrap_generate=passthrough_image_result),
+  let wrapped = @model.wrap_image_wire_model_chain(base, [
+    @model.ImageWireModelMiddleware::new(transform_params=async_image_transform),
+    @model.ImageWireModelMiddleware::new(wrap_generate=passthrough_image_result),
   ])
   ignore(wrapped.generate(@provider.ImageCallOptions::new("hello", n=1)))
   assert_eq(base.captured_batch_sizes(), [2])

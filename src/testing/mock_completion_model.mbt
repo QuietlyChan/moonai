@@ -13,8 +13,8 @@ pub struct MockCompletionModel {
 pub fn MockCompletionModel::new(
   events : Array[@provider.StreamEvent],
   result : @provider.CompletionResponse,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-completion-model",
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-completion-model",
 ) -> MockCompletionModel {
   { provider_name, model_id, events, result, captured_prompt: "", }
 }
@@ -61,4 +61,12 @@ pub impl @provider.CompletionModel for MockCompletionModel with fn stream(
     on_event(event)
   }
   self.result
+}
+
+///|
+pub extend MockCompletionModel with @QuietlyChan/moonai/provider.CompletionModel::{
+  provider,
+  generate,
+  stream,
+  model_id,
 }

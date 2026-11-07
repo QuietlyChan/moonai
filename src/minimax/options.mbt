@@ -8,16 +8,18 @@ pub type MiniMaxVideoModelId = String
 
 ///|
 /// MiniMax Anthropic-compatible thinking mode.
+#derive(Debug, Eq)
 pub(all) enum MiniMaxThinkingMode {
   AdaptiveThinking
   DisabledThinking
-} derive(Debug, Eq)
+}
 
 ///|
 /// Provider-specific options for MiniMax language models.
+#derive(Debug, Eq)
 pub(all) struct MiniMaxLanguageModelOptions {
   thinking : MiniMaxThinkingMode?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct MiniMax language-model options.
@@ -46,24 +48,25 @@ pub fn MiniMaxLanguageModelOptions::to_provider_options(
 
 ///|
 /// Provider-specific MiniMax video options.
+#derive(Debug, Eq)
 pub(all) struct MiniMaxVideoModelOptions {
   resolution : String?
   ratio : String?
   reference_audio_urls : Array[String]
   aigc_watermark : Bool?
-  poll_interval_ms : Int?
-  poll_timeout_ms : Int?
-} derive(Debug, Eq)
+  poll_interval_ms : Int32?
+  poll_timeout_ms : Int32?
+}
 
 ///|
 /// Construct and validate typed MiniMax video options.
 pub fn MiniMaxVideoModelOptions::new(
   resolution? : String,
   ratio? : String,
-  reference_audio_urls? : Array[String] = [],
+  reference_audio_urls~ : Array[String] = [],
   aigc_watermark? : Bool,
-  poll_interval_ms? : Int,
-  poll_timeout_ms? : Int,
+  poll_interval_ms? : Int32,
+  poll_timeout_ms? : Int32,
 ) -> MiniMaxVideoModelOptions raise {
   if resolution is Some(value) {
     guard value == "2K" else { fail("MiniMax video resolution must be 2K") }
@@ -178,3 +181,21 @@ fn parse_minimax_video_options(
   }
   (options, reader.diagnostics())
 }
+
+///|
+pub extend MiniMaxThinkingMode with Debug::{to_repr}
+
+///|
+pub extend MiniMaxThinkingMode with Eq::{not_equal, equal}
+
+///|
+pub extend MiniMaxLanguageModelOptions with Debug::{to_repr}
+
+///|
+pub extend MiniMaxLanguageModelOptions with Eq::{not_equal, equal}
+
+///|
+pub extend MiniMaxVideoModelOptions with Debug::{to_repr}
+
+///|
+pub extend MiniMaxVideoModelOptions with Eq::{not_equal, equal}

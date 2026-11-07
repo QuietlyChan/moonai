@@ -1,30 +1,32 @@
 ///|
 /// HTTP methods used by provider transports.
+#derive(Debug, Eq)
 pub(all) enum HttpMethod {
   HttpGet
   HttpPost
   HttpDelete
-} derive(Debug, Eq)
+}
 
 ///|
 /// Runtime-independent provider HTTP request.
 ///
 /// The byte body allows JSON, multipart, and binary requests to share one
 /// transport boundary. GET requests use an empty body.
+#derive(Debug, Eq)
 pub(all) struct HttpRequest {
   meth : HttpMethod
   url : String
   headers : Map[String, String]
   body : Bytes
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a transport request.
 pub fn HttpRequest::new(
   meth~ : HttpMethod,
   url~ : String,
-  headers? : Map[String, String] = Map([]),
-  body? : Bytes = b"",
+  headers~ : Map[String, String] = Map([]),
+  body~ : Bytes = b"",
 ) -> HttpRequest {
   { meth, url, headers: copy_headers(headers), body, }
 }
@@ -33,7 +35,7 @@ pub fn HttpRequest::new(
 /// Construct a GET request.
 pub fn HttpRequest::get(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpGet, url~, headers~)
 }
@@ -42,7 +44,7 @@ pub fn HttpRequest::get(
 /// Construct a POST request.
 pub fn HttpRequest::post(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   body~ : Bytes,
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpPost, url~, headers~, body~)
@@ -52,7 +54,7 @@ pub fn HttpRequest::post(
 /// Construct a DELETE request without a body.
 pub fn HttpRequest::delete(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpDelete, url~, headers~)
 }
@@ -65,20 +67,21 @@ pub fn HttpRequest::body_text(self : HttpRequest) -> String raise {
 
 ///|
 /// Fully buffered response returned by `HttpTransport::fetch`.
+#derive(Debug, Eq)
 pub(all) struct HttpResponse {
-  status_code : Int
+  status_code : Int32
   reason : String
   headers : Map[String, String]
   body : Bytes
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a buffered transport response.
 pub fn HttpResponse::new(
-  status_code~ : Int,
+  status_code~ : Int32,
   body~ : Bytes,
-  reason? : String = "",
-  headers? : Map[String, String] = Map([]),
+  reason~ : String = "",
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpResponse {
   { status_code, reason, headers: copy_headers(headers), body, }
 }
@@ -86,10 +89,10 @@ pub fn HttpResponse::new(
 ///|
 /// Construct a UTF-8 text response.
 pub fn HttpResponse::text(
-  status_code~ : Int,
+  status_code~ : Int32,
   body~ : String,
-  reason? : String = "",
-  headers? : Map[String, String] = Map([]),
+  reason~ : String = "",
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpResponse {
   HttpResponse::new(status_code~, body=@utf8.encode(body), reason~, headers~)
 }
@@ -109,7 +112,7 @@ pub fn HttpResponse::body_text(self : HttpResponse) -> String raise {
 ///|
 /// Runtime-independent streaming HTTP response.
 pub(open) trait HttpStreamResponse {
-  fn status_code(Self) -> Int
+  fn status_code(Self) -> Int32
   fn reason(Self) -> String
   fn headers(Self) -> Map[String, String]
   async fn read_until(Self, String) -> String?
@@ -149,13 +152,43 @@ pub(open) trait StreamingBodyTransport: HttpTransport {
 }
 
 ///|
+/// Convert provider header maps to the case-insensitive map used by
+/// `moonbitlang/async/http`.
+fn to_http_headers(
+  headers : Map[String, String],
+) -> Map[@http.CaseInsensitiveString, String] {
+  let result : Map[@http.CaseInsensitiveString, String] = Map([])
+  for entry in headers.iter2() {
+    let (key, value) = entry
+    result[@http.CaseInsensitiveString(key)] = value
+  }
+  result
+}
+
+///|
+/// Convert `moonbitlang/async/http` headers back to provider header maps.
+///
+/// Header names are normalized to lower case, matching the case-insensitive
+/// lookup behavior providers expect.
+fn from_http_headers(
+  headers : Map[@http.CaseInsensitiveString, String],
+) -> Map[String, String] {
+  let result : Map[String, String] = Map([])
+  for entry in headers.iter2() {
+    let (key, value) = entry
+    result[key.to_string().to_lower()] = value
+  }
+  result
+}
+
+///|
 priv struct NativeHttpStreamResponse {
   client : @http.Client
   response : @http.Response
 }
 
 ///|
-impl HttpStreamResponse for NativeHttpStreamResponse with fn status_code(self) -> Int {
+impl HttpStreamResponse for NativeHttpStreamResponse with fn status_code(self) -> Int32 {
   self.response.code
 }
 
@@ -169,7 +202,7 @@ impl HttpStreamResponse for NativeHttpStreamResponse with fn headers(self) -> Ma
   String,
   String,
 ] {
-  copy_headers(self.response.headers)
+  copy_headers(from_http_headers(self.response.headers))
 }
 
 ///|
@@ -203,16 +236,46 @@ pub fn NativeHttpTransport::new() -> NativeHttpTransport {
 ///|
 impl HttpTransport for NativeHttpTransport with fn fetch(_self, request) {
   let (response, body) = match request.meth {
-    HttpGet => @http.get(request.url, headers=request.headers)
-    HttpPost => @http.post(request.url, request.body, headers=request.headers)
+    HttpGet => @http.get(request.url, headers=to_http_headers(request.headers))
+    HttpPost =>
+      @http.post(
+        request.url,
+        request.body,
+        headers=to_http_headers(request.headers),
+      )
     HttpDelete => native_delete(request.url, request.headers)
   }
   HttpResponse::new(
     status_code=response.code,
     reason=response.reason,
-    headers=response.headers,
+    headers=from_http_headers(response.headers),
     body=body.binary(),
   )
+}
+
+///|
+/// Split an absolute HTTP(S) URL into the client origin and request path.
+fn absolute_url_parts(url : String) -> (String, String) raise {
+  let scheme = if url.has_prefix("https://") {
+    "https"
+  } else if url.has_prefix("http://") {
+    "http"
+  } else {
+    fail("URL must use http or https")
+  }
+  let authority = url_authority(url).unwrap_or_else(() => {
+    fail("URL must be absolute")
+  })
+  let origin = "\{scheme}://\{authority}"
+  let suffix = url[origin.length():].to_owned()
+  let path = if suffix == "" {
+    "/"
+  } else if suffix.has_prefix("?") {
+    "/" + suffix
+  } else {
+    suffix
+  }
+  (origin, path)
 }
 
 ///|
@@ -220,28 +283,10 @@ async fn native_delete(
   url : String,
   headers : Map[String, String],
 ) -> (@http.Response, &@io.Data) {
-  let scheme = if url.has_prefix("https://") {
-    "https"
-  } else if url.has_prefix("http://") {
-    "http"
-  } else {
-    fail("DELETE URL must use http or https")
-  }
-  let authority = url_authority(url).unwrap_or_else(() => {
-    fail("DELETE URL must be absolute")
-  })
-  let origin = "\{scheme}://\{authority}"
-  let suffix = url[origin.length():].to_owned()
-  let target = if suffix == "" {
-    "/"
-  } else if suffix.has_prefix("?") {
-    "/" + suffix
-  } else {
-    suffix
-  }
+  let (origin, target) = absolute_url_parts(url)
   let client = @http.Client(origin)
   defer client.close()
-  client.request(@http.Delete, target, extra_headers=headers)
+  client.request(@http.Delete, target, extra_headers=to_http_headers(headers))
   let response = client.end_request()
   let body = client.read_all()
   (response, body)
@@ -252,7 +297,10 @@ impl HttpTransport for NativeHttpTransport with fn fetch_stream(_self, request) 
   guard request.meth == HttpPost else {
     fail("native streaming transport currently supports POST requests only")
   }
-  let client = @http.post_stream(request.url, headers=request.headers)
+  let client = @http.post_stream(
+    request.url,
+    headers=to_http_headers(request.headers),
+  )
   // The response wrapper takes ownership on success; close only on failure.
   errdefer client.close()
   client.write(request.body)
@@ -274,11 +322,17 @@ impl StreamingBodyTransport for NativeHttpTransport with fn fetch_streaming_body
   guard meth == HttpPost else {
     fail("native streaming-body transport supports POST requests only")
   }
-  let content_headers = copy_headers(headers)
-  content_headers["Content-Length"] = content_length.to_string()
-  let client = @http.post_stream(url, headers=content_headers)
+  let (origin, path) = absolute_url_parts(url)
+  let client = @http.Client(origin, headers=to_http_headers(headers))
   // The response wrapper takes ownership on success; close only on failure.
   errdefer client.close()
+  client.request(
+    @http.Post,
+    path,
+    extra_headers=to_http_headers({
+      "Content-Length": content_length.to_string(),
+    }),
+  )
   client.write(prefix)
   for ;; {
     match body.read_chunk() {
@@ -291,7 +345,7 @@ impl StreamingBodyTransport for NativeHttpTransport with fn fetch_streaming_body
   HttpResponse::new(
     status_code=response.code,
     reason=response.reason,
-    headers=response.headers,
+    headers=from_http_headers(response.headers),
     body=client.read_all().binary(),
   )
 }
@@ -307,3 +361,21 @@ pub fn native_http_transport() -> &HttpTransport {
 pub fn native_streaming_body_transport() -> &StreamingBodyTransport {
   NativeHttpTransport::new()
 }
+
+///|
+pub extend HttpMethod with Debug::{to_repr}
+
+///|
+pub extend HttpMethod with Eq::{not_equal, equal}
+
+///|
+pub extend HttpRequest with Debug::{to_repr}
+
+///|
+pub extend HttpRequest with Eq::{not_equal, equal}
+
+///|
+pub extend HttpResponse with Debug::{to_repr}
+
+///|
+pub extend HttpResponse with Eq::{not_equal, equal}

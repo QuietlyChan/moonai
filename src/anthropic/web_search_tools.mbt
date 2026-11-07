@@ -1,11 +1,12 @@
 ///|
 /// Approximate user location sent to Anthropic web search.
+#derive(Debug, Eq)
 pub(all) struct AnthropicWebSearchUserLocation {
   city : String?
   region : String?
   country : String?
   timezone : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an approximate web-search location.
@@ -70,7 +71,7 @@ fn anthropic_web_search_output_schema() -> Json {
 
 ///|
 fn anthropic_web_search_args(
-  max_uses : Int?,
+  max_uses : Int32?,
   allowed_domains : Array[String]?,
   blocked_domains : Array[String]?,
   user_location : AnthropicWebSearchUserLocation?,
@@ -94,7 +95,7 @@ fn anthropic_web_search_args(
 ///|
 fn anthropic_web_search_tool(
   id : String,
-  max_uses : Int?,
+  max_uses : Int32?,
   allowed_domains : Array[String]?,
   blocked_domains : Array[String]?,
   user_location : AnthropicWebSearchUserLocation?,
@@ -120,7 +121,7 @@ fn anthropic_web_search_tool(
 ///|
 /// Create Anthropic's 2025-03-05 provider-executed web search tool.
 pub fn web_search_20250305(
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   user_location? : AnthropicWebSearchUserLocation,
@@ -137,7 +138,7 @@ pub fn web_search_20250305(
 ///|
 /// Create Anthropic's current provider-executed web search tool.
 pub fn web_search_20260209(
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   user_location? : AnthropicWebSearchUserLocation,
@@ -154,7 +155,7 @@ pub fn web_search_20260209(
 ///|
 /// AI SDK-style camel-case spelling.
 pub fn webSearch_20250305(
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   user_location? : AnthropicWebSearchUserLocation,
@@ -176,7 +177,7 @@ pub fn webSearch_20250305(
 ///|
 /// AI SDK-style camel-case spelling.
 pub fn webSearch_20260209(
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   user_location? : AnthropicWebSearchUserLocation,
@@ -194,3 +195,9 @@ pub fn webSearch_20260209(
     on_input_available?,
   )
 }
+
+///|
+pub extend AnthropicWebSearchUserLocation with Debug::{to_repr}
+
+///|
+pub extend AnthropicWebSearchUserLocation with Eq::{not_equal, equal}

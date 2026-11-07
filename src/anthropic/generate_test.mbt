@@ -23,7 +23,7 @@ async test "generateText uses the non-streaming Anthropic Messages endpoint" {
         max_connections=1,
       )
     }
-    let model = create_anthropic(
+    let model = @anthropic.create_anthropic(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       beta_features=["configured-beta"],
@@ -59,7 +59,7 @@ async test "Anthropic request URL builder receives the non-streaming flag" {
       )
     }
     let mut saw_non_streaming = false
-    let model = create_anthropic(
+    let model = @anthropic.create_anthropic(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -93,7 +93,7 @@ async test "Anthropic generate rejects a schema-invalid successful response" {
         max_connections=1,
       )
     }
-    let model = create_anthropic(
+    let model = @anthropic.create_anthropic(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,

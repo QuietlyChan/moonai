@@ -1,12 +1,12 @@
 ///|
 test "create_id_generator uses the requested random length" {
-  let generator = create_id_generator(size=10)
+  let generator = @provider_utils.create_id_generator(size=10)
   assert_eq(generator().length(), 10)
 }
 
 ///|
 test "create_id_generator adds a prefix and separator" {
-  let generator = create_id_generator(
+  let generator = @provider_utils.create_id_generator(
     prefix="tool",
     separator="_",
     size=8,
@@ -22,7 +22,13 @@ test "create_id_generator adds a prefix and separator" {
 
 ///|
 test "create_id_generator rejects a separator in the alphabet" {
-  try create_id_generator(prefix="tool", separator="a", alphabet="abc") catch {
+  try
+    @provider_utils.create_id_generator(
+      prefix="tool",
+      separator="a",
+      alphabet="abc",
+    )
+  catch {
     @provider.InvalidArgumentError(argument~, message~) => {
       assert_eq(argument, "separator")
       assert_true(message.contains("separator"))
@@ -34,13 +40,13 @@ test "create_id_generator rejects a separator in the alphabet" {
 
 ///|
 test "create_id_generator rejects invalid size and alphabet" {
-  try create_id_generator(size=-1) catch {
+  try @provider_utils.create_id_generator(size=-1) catch {
     @provider.InvalidArgumentError(argument="size", ..) => ()
     @provider.InvalidArgumentError(..) => fail("unexpected argument name")
   } noraise {
     _ => fail("expected an invalid size error")
   }
-  try create_id_generator(alphabet="") catch {
+  try @provider_utils.create_id_generator(alphabet="") catch {
     @provider.InvalidArgumentError(argument="alphabet", ..) => ()
     @provider.InvalidArgumentError(..) => fail("unexpected argument name")
   } noraise {
@@ -50,8 +56,8 @@ test "create_id_generator rejects invalid size and alphabet" {
 
 ///|
 test "generate_id produces distinct identifiers across calls" {
-  let first = generate_id()
-  let second = generate_id()
+  let first = @provider_utils.generate_id()
+  let second = @provider_utils.generate_id()
   assert_eq(first.length(), 16)
   assert_eq(second.length(), 16)
   assert_true(first != second)

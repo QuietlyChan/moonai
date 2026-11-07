@@ -62,3 +62,13 @@ pub impl @provider.ProviderV4 for OpenAICompatibleProvider with fn files(_self) 
 pub impl @provider.ProviderV4 for OpenAICompatibleProvider with fn skills(_self) {
   None
 }
+
+///|
+pub extend OpenAICompatibleProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  reranking_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

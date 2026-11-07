@@ -14,7 +14,7 @@ async test "ChatModel can be adapted to the V4 contract" {
     model_id="mock-model",
   )
   let chat_model = model as &@provider.ChatModel
-  let v4 = as_language_model_v4(chat_model)
+  let v4 = @model.as_language_model_v4(chat_model)
 
   assert_eq(v4.specification_version(), "v4")
   assert_eq(v4.provider(), "mock-provider")
@@ -51,7 +51,7 @@ async test "ChatModel V4 adapter folds legacy warnings into stream start" {
     ],
     expected,
   )
-  let v4 = as_language_model_v4(model as &@provider.ChatModel)
+  let v4 = @model.as_language_model_v4(model as &@provider.ChatModel)
   let events : Array[@provider.LanguageModelV4StreamPart] = []
   ignore(
     v4.do_stream(

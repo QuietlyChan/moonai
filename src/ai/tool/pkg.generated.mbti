@@ -25,11 +25,15 @@ pub struct PreparedToolsForToolCallers {
 pub fn PreparedToolsForToolCallers::execution_tools(Self) -> Map[String, @provider_utils.Tool]
 pub fn PreparedToolsForToolCallers::model_tools(Self) -> Map[String, @provider_utils.Tool]
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ToolCallerReference {
   DirectToolCaller
   NamedToolCaller(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn ToolCallerReference::direct() -> Self
+pub fn ToolCallerReference::equal(Self, Self) -> Bool
+pub fn ToolCallerReference::not_equal(Self, Self) -> Bool
+pub fn ToolCallerReference::to_repr(Self) -> @debug.Repr
 pub fn ToolCallerReference::tool(String) -> Self
 
 // Type aliases

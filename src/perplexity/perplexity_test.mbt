@@ -1,6 +1,6 @@
 ///|
 test "perplexity provider exposes chat and embedding models" {
-  let provider = create_perplexity(api_key="pplx-test")
+  let provider = @perplexity.create_perplexity(api_key="pplx-test")
   let chat = provider.chat("sonar-pro")
   assert_eq(chat.provider(), "perplexity")
   assert_eq(chat.model_id(), "sonar-pro")
@@ -13,7 +13,7 @@ test "perplexity provider exposes chat and embedding models" {
 
 ///|
 test "perplexity direct factory builds the same language model boundary" {
-  let model = perplexity("sonar", api_key="pplx-test")
+  let model = @perplexity.perplexity("sonar", api_key="pplx-test")
   assert_eq(model.provider(), "perplexity")
   assert_eq(model.model_id(), "sonar")
 }

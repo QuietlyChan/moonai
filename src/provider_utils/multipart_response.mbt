@@ -1,10 +1,11 @@
 ///|
 /// One part of a multipart response body: lowercased header names plus the
 /// raw body bytes between the header separator and the next boundary.
+#derive(Debug)
 pub(all) struct MultipartResponsePart {
   headers : Map[String, String]
   body : Bytes
-} derive(Debug)
+}
 
 ///|
 /// Extract the boundary token from a `multipart/*` content-type header.
@@ -37,7 +38,11 @@ pub fn multipart_boundary(content_type : String) -> String? {
 }
 
 ///|
-fn multipart_is_delimiter_at(data : Bytes, delimiter : Bytes, at : Int) -> Bool {
+fn multipart_is_delimiter_at(
+  data : Bytes,
+  delimiter : Bytes,
+  at : Int32,
+) -> Bool {
   guard at + delimiter.length() <= data.length() else { return false }
   for j = 0; j < delimiter.length(); j = j + 1 {
     if data[at + j] != delimiter[j] {
@@ -48,7 +53,7 @@ fn multipart_is_delimiter_at(data : Bytes, delimiter : Bytes, at : Int) -> Bool 
 }
 
 ///|
-fn multipart_copy(data : Bytes, start : Int, end : Int) -> Bytes {
+fn multipart_copy(data : Bytes, start : Int32, end : Int32) -> Bytes {
   let out = @buffer.Buffer()
   for i = start; i < end; i = i + 1 {
     out.write_byte(data[i])
@@ -80,7 +85,7 @@ pub fn parse_multipart_response(
   }
   let delimiter = @utf8.encode("--\{boundary}")
   // Locate every delimiter occurrence (`--boundary`).
-  let positions : Array[Int] = []
+  let positions : Array[Int32] = []
   let mut index = 0
   while index <= data.length() - delimiter.length() {
     if multipart_is_delimiter_at(data, delimiter, index) {
@@ -203,3 +208,6 @@ pub fn multipart_response_part_by_content_type_prefix(
   }
   None
 }
+
+///|
+pub extend MultipartResponsePart with Debug::{to_repr}

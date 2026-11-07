@@ -7,13 +7,13 @@ import {
 }
 
 // Values
-pub const MAX_EMBEDDINGS_PER_CALL : Int = 128
+pub const MAX_EMBEDDINGS_PER_CALL : Int32 = 128
 
 pub const VERSION : String = "0.1.0"
 
-pub fn createBaseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
+pub fn createBaseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
 
-pub fn create_baseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
+pub fn create_baseten(api_key? : String, base_url? : String, model_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> BasetenProvider
 
 // Errors
 
@@ -26,8 +26,15 @@ pub fn BasetenProvider::chatModel(Self, model_id? : String) -> &@provider.Langua
 pub fn BasetenProvider::embedding(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
 pub fn BasetenProvider::embeddingModel(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
 pub fn BasetenProvider::embedding_model(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
+pub fn BasetenProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn BasetenProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn BasetenProvider::languageModel(Self, model_id? : String) -> &@provider.LanguageModelV4 raise
 pub fn BasetenProvider::language_model(Self, model_id? : String) -> &@provider.LanguageModelV4 raise
+pub fn BasetenProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn BasetenProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn BasetenProvider::specification_version(Self) -> String
+pub fn BasetenProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn BasetenProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for BasetenProvider
 
 // Type aliases

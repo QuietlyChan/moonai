@@ -3,7 +3,6 @@ import {
   "QuietlyChan/moonai/provider_utils",
   "QuietlyChan/moonai/openai_compatible",
   "moonbitlang/core/env",
-  "moonbitlang/core/json",
   "moonbitlang/core/string",
 }
 
@@ -11,10 +10,12 @@ import {
   "QuietlyChan/moonai/ai",
   "moonbitlang/async",
   "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
 } for "test"
 
 import {
   "moonbitlang/async",
+  "moonbitlang/core/json",
 } for "wbtest"
 
 supported_targets = "+native"

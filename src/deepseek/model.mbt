@@ -7,7 +7,7 @@ pub struct DeepSeekProvider {
   priv headers : Map[String, String]
   priv supports_thinking : Bool
   priv supports_structured_outputs : Bool
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
 }
@@ -22,7 +22,7 @@ priv struct DeepSeekChatLanguageModel {
   headers : Map[String, String]
   supports_thinking : Bool
   supports_structured_outputs : Bool
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   id_generator : @provider_utils.IdGenerator
   http_transport : &@provider_utils.HttpTransport
 }
@@ -41,13 +41,13 @@ fn load_deepseek_api_key(
 ///|
 /// Create a DeepSeek provider.
 pub fn create_deepseek(
-  api_key? : String = "",
-  base_url? : String = "https://api.deepseek.com",
-  provider_name? : String = "deepseek",
-  headers? : Map[String, String] = Map([]),
-  supports_thinking? : Bool = true,
-  supports_structured_outputs? : Bool = false,
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.deepseek.com",
+  provider_name~ : String = "deepseek",
+  headers~ : Map[String, String] = Map([]),
+  supports_thinking~ : Bool = true,
+  supports_structured_outputs~ : Bool = false,
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> DeepSeekProvider {
@@ -69,13 +69,13 @@ pub fn create_deepseek(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createDeepSeek(
-  api_key? : String = "",
-  base_url? : String = "https://api.deepseek.com",
-  provider_name? : String = "deepseek",
-  headers? : Map[String, String] = Map([]),
-  supports_thinking? : Bool = true,
-  supports_structured_outputs? : Bool = false,
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.deepseek.com",
+  provider_name~ : String = "deepseek",
+  headers~ : Map[String, String] = Map([]),
+  supports_thinking~ : Bool = true,
+  supports_structured_outputs~ : Bool = false,
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> DeepSeekProvider {
@@ -169,12 +169,12 @@ fn DeepSeekChatLanguageModel::chat_url(
 /// Construct the default V4 DeepSeek language model directly.
 pub fn deepseek(
   model_id : DeepSeekChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.deepseek.com",
-  headers? : Map[String, String] = Map([]),
-  supports_thinking? : Bool = true,
-  supports_structured_outputs? : Bool = false,
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.deepseek.com",
+  headers~ : Map[String, String] = Map([]),
+  supports_thinking~ : Bool = true,
+  supports_structured_outputs~ : Bool = false,
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {
@@ -194,12 +194,12 @@ pub fn deepseek(
 /// Camel-case direct model factory matching AI SDK naming.
 pub fn deepSeek(
   model_id : DeepSeekChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.deepseek.com",
-  headers? : Map[String, String] = Map([]),
-  supports_thinking? : Bool = true,
-  supports_structured_outputs? : Bool = false,
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.deepseek.com",
+  headers~ : Map[String, String] = Map([]),
+  supports_thinking~ : Bool = true,
+  supports_structured_outputs~ : Bool = false,
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

@@ -18,7 +18,7 @@ async test "V4 high-level text generation uses the shared prompt layer" {
     model_id="mock-chat",
   )
   let model = @model.as_language_model_v4(mock as &@provider.ChatModel)
-  let result = generate_text(model, prompt="hello")
+  let result = @ai.generate_text(model, prompt="hello")
   assert_eq(result.finish_reason.unified, @provider.V4FinishStop)
   assert_eq(result.to_chat_response().text, "hello")
 }
@@ -49,7 +49,7 @@ async test "V4 high-level streaming preserves provider stream events" {
   let mut deltas = 0
   let mut starts = 0
   let mut finishes = 0
-  let result = stream_text(model, prompt="hello", on_event=event => {
+  let result = @ai.stream_text(model, prompt="hello", on_event=event => {
     match event {
       @provider.V4StreamStart(..) => starts = starts + 1
       @provider.V4TextDelta(..) => deltas = deltas + 1
@@ -112,7 +112,7 @@ async test "generate_text prepares caller-routed ToolSet before V4 model call" {
     ("getInventory", @provider_utils.Tool::function({ "type": "object" })),
     ("getDemand", @provider_utils.Tool::function({ "type": "object" })),
   ])
-  let _ = generate_text(
+  let _ = @ai.generate_text(
     model,
     prompt="route tools",
     tools~,

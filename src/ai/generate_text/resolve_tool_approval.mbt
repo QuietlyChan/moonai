@@ -57,8 +57,8 @@ priv struct ResolvedStepToolApprovals {
   requests : Array[GenerateTextToolApprovalRequestOutput]
   responses : Array[GenerateTextToolApprovalResponseOutput]
   blocked_tool_call_ids : Map[String, Bool]
-  denied_client_count : Int
-  provider_response_count : Int
+  denied_client_count : Int32
+  provider_response_count : Int32
 }
 
 ///|

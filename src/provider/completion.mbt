@@ -1,40 +1,41 @@
 ///|
 /// Options shared by OpenAI-style legacy `/completions` wire calls.
+#derive(Debug)
 pub(all) struct CompletionOptions {
   prompt : String
   suffix : String?
-  max_output_tokens : Int?
+  max_output_tokens : Int32?
   temperature : Double?
   top_p : Double?
   top_k : Double?
   frequency_penalty : Double?
   presence_penalty : Double?
-  seed : Int?
+  seed : Int32?
   stop_sequences : Array[String]
   include_raw_chunks : Bool
   headers : Map[String, String]
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct normalized completion options.
 pub fn CompletionOptions::new(
   prompt : String,
   suffix? : String,
-  max_output_tokens? : Int,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  include_raw_chunks~ : Bool = false,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> CompletionOptions {
   {
@@ -58,6 +59,7 @@ pub fn CompletionOptions::new(
 
 ///|
 /// Accumulated result returned by a completion model.
+#derive(Debug, Eq)
 pub(all) struct CompletionResponse {
   text : String
   usage : Usage
@@ -66,7 +68,7 @@ pub(all) struct CompletionResponse {
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a completion response without transport diagnostics.
@@ -123,3 +125,12 @@ pub fn CompletionResponse::with_transport(
     warnings: copy_warnings(self.warnings),
   }
 }
+
+///|
+pub extend CompletionOptions with Debug::{to_repr}
+
+///|
+pub extend CompletionResponse with Debug::{to_repr}
+
+///|
+pub extend CompletionResponse with Eq::{not_equal, equal}

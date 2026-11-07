@@ -7,7 +7,7 @@ struct GoogleImageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn google_image_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> GoogleImageModel {
   {
@@ -62,7 +62,7 @@ fn GoogleImageModel::image_headers(
 /// Build the generateContent body with the IMAGE response modality.
 fn google_image_request_body(
   prompt~ : String,
-  n~ : Int,
+  n~ : Int32,
   size~ : String?,
   aspect_ratio~ : String?,
   provider_options~ : Map[String, Json],
@@ -159,7 +159,7 @@ pub impl @provider.ImageModelV4 for GoogleImageModel with fn model_id(self) -> S
 ///|
 pub impl @provider.ImageModelV4 for GoogleImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   None
 }
 
@@ -219,4 +219,13 @@ pub impl @provider.ImageModelV4 for GoogleImageModel with fn do_generate(
       ),
     ),
   )
+}
+
+///|
+pub extend GoogleImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
 }

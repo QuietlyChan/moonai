@@ -1,5 +1,6 @@
 ///|
 /// Pi extended-thinking budget level.
+#derive(Debug, Eq)
 pub(all) enum PiThinkingLevel {
   PiThinkingOff
   PiThinkingMinimal
@@ -7,7 +8,7 @@ pub(all) enum PiThinkingLevel {
   PiThinkingMedium
   PiThinkingHigh
   PiThinkingXHigh
-} derive(Debug, Eq)
+}
 
 ///|
 /// Return the Pi wire spelling of a thinking level.
@@ -233,7 +234,7 @@ pub impl @harness.HarnessV1 for PiHarness with fn do_start(self, options) {
 ///|
 /// Create a Pi Harness V1 adapter.
 pub fn createPi(
-  settings? : PiHarnessSettings = PiHarnessSettings::new(),
+  settings~ : PiHarnessSettings = PiHarnessSettings::new(),
 ) -> PiHarness {
   { settings, }
 }
@@ -241,7 +242,7 @@ pub fn createPi(
 ///|
 /// Snake-case alias for `createPi`.
 pub fn create_pi(
-  settings? : PiHarnessSettings = PiHarnessSettings::new(),
+  settings~ : PiHarnessSettings = PiHarnessSettings::new(),
 ) -> PiHarness {
   createPi(settings~)
 }
@@ -249,3 +250,20 @@ pub fn create_pi(
 ///|
 /// Default Pi adapter instance.
 pub let pi : PiHarness = createPi()
+
+///|
+pub extend PiThinkingLevel with Debug::{to_repr}
+
+///|
+pub extend PiThinkingLevel with Eq::{not_equal, equal}
+
+///|
+pub extend PiHarness with @QuietlyChan/moonai/harness.HarnessV1::{
+  supports_builtin_tool_filtering,
+  specification_version,
+  do_start,
+  builtin_tools,
+  get_bootstrap,
+  harness_id,
+  supports_builtin_tool_approvals,
+}

@@ -1,6 +1,6 @@
 ///|
 test "mistral provider exposes chat, embedding, speech, transcription" {
-  let provider = create_mistral(api_key="sk-test")
+  let provider = @mistral.create_mistral(api_key="sk-test")
   let chat = provider.chat("mistral-large-latest")
   assert_eq(chat.provider(), "mistral.chat")
   assert_eq(chat.model_id(), "mistral-large-latest")
@@ -15,7 +15,7 @@ test "mistral provider exposes chat, embedding, speech, transcription" {
 
 ///|
 test "mistral direct factory builds the same language model boundary" {
-  let model = mistral("magistral-medium-latest", api_key="sk-test")
+  let model = @mistral.mistral("magistral-medium-latest", api_key="sk-test")
   assert_eq(model.provider(), "mistral.chat")
   assert_eq(model.model_id(), "magistral-medium-latest")
 }

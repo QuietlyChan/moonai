@@ -1,6 +1,6 @@
 ///|
 test "Open Responses supports native HTTP image URLs" {
-  let model = create_open_responses(
+  let model = @open_responses.create_open_responses(
     provider_name="test",
     url="https://example.com/v1/responses",
   ).language_model("test-model")

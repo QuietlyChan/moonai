@@ -147,7 +147,7 @@ fn zai_chat_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   id_generator~ : @provider_utils.IdGenerator,
 ) -> ZaiChatLanguageModel {
@@ -248,4 +248,14 @@ pub impl @provider.LanguageModelV4 for ZaiChatLanguageModel with fn do_stream(
     }
   }
   (self.base as &@provider.LanguageModelV4).do_stream(effective, wrapped)
+}
+
+///|
+pub extend ZaiChatLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
 }

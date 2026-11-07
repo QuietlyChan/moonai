@@ -1,12 +1,13 @@
 ///|
 /// Severity used by Harness V1 diagnostics.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1DebugLevel {
   HarnessDebugError
   HarnessDebugWarn
   HarnessDebugInfo
   HarnessDebugDebug
   HarnessDebugTrace
-} derive(Debug, Eq)
+}
 
 ///|
 /// Return the wire spelling of a diagnostic level.
@@ -37,14 +38,16 @@ pub fn HarnessV1DebugLevel::from_string(
 
 ///|
 /// Per-session diagnostics configuration supplied to an adapter.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1DebugConfig {
   enabled : Bool
   level : HarnessV1DebugLevel?
   subsystems : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 /// One normalized adapter diagnostic.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1Diagnostic {
   level : HarnessV1DebugLevel
   message : String
@@ -56,7 +59,7 @@ pub(all) struct HarnessV1Diagnostic {
   error : Json?
   session_id : String?
   timestamp : UInt64
-} derive(Debug, Eq)
+}
 
 ///|
 /// Callback used by adapters to report diagnostics to the host.
@@ -68,3 +71,21 @@ pub(all) struct HarnessV1Observability {
   debug : HarnessV1DebugConfig
   report : HarnessV1DiagnosticReporter
 }
+
+///|
+pub extend HarnessV1DebugLevel with Debug::{to_repr}
+
+///|
+pub extend HarnessV1DebugLevel with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1DebugConfig with Debug::{to_repr}
+
+///|
+pub extend HarnessV1DebugConfig with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1Diagnostic with Debug::{to_repr}
+
+///|
+pub extend HarnessV1Diagnostic with Eq::{not_equal, equal}

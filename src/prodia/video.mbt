@@ -8,7 +8,7 @@ struct ProdiaVideoModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -18,7 +18,7 @@ fn prodia_video_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> ProdiaVideoModel {
   {
@@ -76,7 +76,7 @@ pub impl @provider.VideoModelV4 for ProdiaVideoModel with fn model_id(self) -> S
 ///|
 pub impl @provider.VideoModelV4 for ProdiaVideoModel with fn max_videos_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 
@@ -244,4 +244,15 @@ pub impl @provider.VideoModelV4 for ProdiaVideoModel with fn do_generate(
       ),
     ),
   )
+}
+
+///|
+pub extend ProdiaVideoModel with @QuietlyChan/moonai/provider.VideoModelV4::{
+  do_generate,
+  do_status,
+  specification_version,
+  provider,
+  do_start,
+  model_id,
+  max_videos_per_call,
 }

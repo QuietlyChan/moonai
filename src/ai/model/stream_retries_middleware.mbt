@@ -10,7 +10,7 @@
 /// retry policy stays in charge of connection retries; this middleware
 /// adds the model-boundary layer on top.
 pub fn stream_retries_middleware(
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
 ) -> @provider.LanguageModelV4Middleware {
   @provider.LanguageModelV4Middleware::new(wrap_stream=async fn(
     context : @provider.LanguageModelV4MiddlewareContext,

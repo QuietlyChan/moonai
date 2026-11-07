@@ -94,7 +94,11 @@ fn gateway_unified_finish_reason(
 }
 
 ///|
-fn gateway_nested_int(value : Json?, outer~ : String, inner~ : String) -> Int? {
+fn gateway_nested_int(
+  value : Json?,
+  outer~ : String,
+  inner~ : String,
+) -> Int32? {
   match value {
     Some(Object(fields)) =>
       match fields.get(outer) {

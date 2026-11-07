@@ -29,39 +29,43 @@ pub fn mcpAppClientCapabilities() -> MCPClientCapabilities {
 
 ///|
 /// Normalized MCP App metadata attached to a tool.
+#derive(Debug, Eq)
 pub(all) struct MCPAppToolMeta {
   resource_uri : String?
   model_visible : Bool
   app_visible : Bool
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Content security policy requested by an MCP App resource.
+#derive(Debug, Eq)
 pub(all) struct MCPAppResourceCSP {
   connect_domains : Array[String]
   resource_domains : Array[String]
   frame_domains : Array[String]
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Host rendering metadata attached to an MCP App resource.
+#derive(Debug, Eq)
 pub(all) struct MCPAppResourceMeta {
   prefers_border : Bool?
   csp : MCPAppResourceCSP?
   permissions : Json?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// HTML and metadata needed to render one MCP App.
+#derive(Debug, Eq)
 pub(all) struct MCPAppResource {
   uri : String
   mime_type : String
   html : String
   meta : MCPAppResourceMeta?
-} derive(Debug, Eq)
+}
 
 ///|
 fn visibility_flags(value : Json?) -> (Bool, Bool) {
@@ -148,10 +152,11 @@ pub fn isMCPAppTool(tool : MCPTool) -> Bool {
 
 ///|
 /// Model-visible and app-visible tool definition pages.
+#derive(Debug, Eq)
 pub(all) struct SplitMCPAppToolsResult {
   model_visible : ListToolsResult
   app_visible : ListToolsResult
-} derive(Debug, Eq)
+}
 
 ///|
 /// Split tool definitions according to MCP Apps visibility metadata.
@@ -386,3 +391,33 @@ pub fn detect_mcp_app_resource_drift(
 pub fn detectMCPAppResourceDrift(current : String, baseline : String) -> Bool {
   detect_mcp_app_resource_drift(current, baseline)
 }
+
+///|
+pub extend MCPAppToolMeta with Debug::{to_repr}
+
+///|
+pub extend MCPAppToolMeta with Eq::{not_equal, equal}
+
+///|
+pub extend MCPAppResourceCSP with Debug::{to_repr}
+
+///|
+pub extend MCPAppResourceCSP with Eq::{not_equal, equal}
+
+///|
+pub extend MCPAppResourceMeta with Debug::{to_repr}
+
+///|
+pub extend MCPAppResourceMeta with Eq::{not_equal, equal}
+
+///|
+pub extend MCPAppResource with Debug::{to_repr}
+
+///|
+pub extend MCPAppResource with Eq::{not_equal, equal}
+
+///|
+pub extend SplitMCPAppToolsResult with Debug::{to_repr}
+
+///|
+pub extend SplitMCPAppToolsResult with Eq::{not_equal, equal}

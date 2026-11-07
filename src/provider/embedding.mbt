@@ -1,22 +1,23 @@
 ///|
 /// Options shared by provider-neutral embedding calls.
+#derive(Debug)
 pub(all) struct EmbeddingOptions {
-  dimensions : Int?
+  dimensions : Int32?
   user : String?
   headers : Map[String, String]
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct normalized embedding options.
 pub fn EmbeddingOptions::new(
-  dimensions? : Int,
+  dimensions? : Int32,
   user? : String,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> EmbeddingOptions {
   {
@@ -31,6 +32,7 @@ pub fn EmbeddingOptions::new(
 
 ///|
 /// Result returned by the model layer for one or more values.
+#derive(Debug, Eq)
 pub(all) struct EmbeddingBatchResponse {
   embeddings : Array[Array[Double]]
   usage : Usage
@@ -38,7 +40,7 @@ pub(all) struct EmbeddingBatchResponse {
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an embedding batch response without transport diagnostics.
@@ -94,6 +96,7 @@ pub fn EmbeddingBatchResponse::with_transport(
 
 ///|
 /// Result returned by the single-value `embed` helper.
+#derive(Debug, Eq)
 pub(all) struct EmbeddingResponse {
   embedding : Array[Double]
   usage : Usage
@@ -101,7 +104,7 @@ pub(all) struct EmbeddingResponse {
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a single embedding response without transport diagnostics.
@@ -118,3 +121,18 @@ pub fn EmbeddingResponse::new(
     warnings: [],
   }
 }
+
+///|
+pub extend EmbeddingOptions with Debug::{to_repr}
+
+///|
+pub extend EmbeddingBatchResponse with Debug::{to_repr}
+
+///|
+pub extend EmbeddingBatchResponse with Eq::{not_equal, equal}
+
+///|
+pub extend EmbeddingResponse with Debug::{to_repr}
+
+///|
+pub extend EmbeddingResponse with Eq::{not_equal, equal}

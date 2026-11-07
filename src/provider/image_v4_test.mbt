@@ -1,18 +1,18 @@
 ///|
 test "legacy image calls lift losslessly into V4 options" {
-  let v4 = ImageModelV4CallOptions::from_image_call_options(
-    ImageCallOptions::new(
+  let v4 = @provider.ImageModelV4CallOptions::from_image_call_options(
+    @provider.ImageCallOptions::new(
       "Edit",
       n=2,
       size="1024x1024",
       files=[
-        ImageFile::bytes(
+        @provider.ImageFile::bytes(
           data=b"image",
           media_type="image/png",
           filename="input.png",
         ),
       ],
-      mask=ImageFile::base64(
+      mask=@provider.ImageFile::base64(
         data="bWFzaw==",
         media_type="image/png",
         filename="mask.png",
@@ -38,8 +38,8 @@ test "legacy image calls lift losslessly into V4 options" {
 
 ///|
 test "empty legacy image file lists remain absent at the V4 boundary" {
-  let v4 = ImageModelV4CallOptions::from_image_call_options(
-    ImageCallOptions::new("Generate"),
+  let v4 = @provider.ImageModelV4CallOptions::from_image_call_options(
+    @provider.ImageCallOptions::new("Generate"),
   )
   assert_eq(v4.files, None)
   assert_eq(v4.mask, None)

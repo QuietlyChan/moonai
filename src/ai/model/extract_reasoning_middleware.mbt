@@ -1,12 +1,13 @@
 ///|
 /// Reasoning handling strategy for the extract-reasoning middleware.
+#derive(Debug, Eq)
 pub(all) enum ExtractReasoningMode {
   /// Re-emit reasoning events as text events so reasoning text lands in the
   /// visible output (models that only expose reasoning_content).
   ExtractMergeIntoText
   /// Strip reasoning events entirely.
   ExtractStrip
-} derive(Debug, Eq)
+}
 
 ///|
 /// Extract-reasoning middleware.
@@ -42,3 +43,9 @@ pub fn extract_reasoning_middleware(
     context.model.do_stream(context.params, converted_emit)
   })
 }
+
+///|
+pub extend ExtractReasoningMode with Debug::{to_repr}
+
+///|
+pub extend ExtractReasoningMode with Eq::{not_equal, equal}

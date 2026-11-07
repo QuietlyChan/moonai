@@ -11,8 +11,8 @@ pub struct MockSpeechModel {
 /// Construct a deterministic speech model.
 pub fn MockSpeechModel::new(
   result : @provider.SpeechResponse,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-speech-model",
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-speech-model",
 ) -> MockSpeechModel {
   { provider_name, model_id, result, captured_options: None, }
 }
@@ -86,10 +86,10 @@ pub struct MockTranscriptionModel {
 /// Construct a deterministic transcription model.
 pub fn MockTranscriptionModel::new(
   result : @provider.TranscriptionResponse,
-  stream_events? : Array[@provider.TranscriptionStreamEvent] = [],
+  stream_events~ : Array[@provider.TranscriptionStreamEvent] = [],
   stream_result? : @provider.TranscriptionResponse,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-transcription-model",
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-transcription-model",
 ) -> MockTranscriptionModel {
   {
     provider_name,
@@ -215,8 +215,8 @@ pub struct MockSpeechTranslationModel {
 pub fn MockSpeechTranslationModel::new(
   events : Array[@provider.SpeechTranslationStreamEvent],
   result : @provider.SpeechTranslationResponse,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-translation-model",
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-translation-model",
 ) -> MockSpeechTranslationModel {
   { provider_name, model_id, events, result, captured_target_language: None, }
 }
@@ -293,4 +293,45 @@ pub impl @provider.SpeechTranslationModelV4 for MockSpeechTranslationModel with 
     request?=self.result.request,
     response?=self.result.response,
   )
+}
+
+///|
+pub extend MockSpeechModel with @QuietlyChan/moonai/provider.SpeechWireModel::{
+  provider,
+  generate,
+  model_id,
+}
+
+///|
+pub extend MockSpeechModel with @QuietlyChan/moonai/provider.SpeechModelV4::{
+  do_generate,
+  specification_version,
+}
+
+///|
+pub extend MockTranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionWireModel::{
+  provider,
+  generate,
+  stream,
+  model_id,
+}
+
+///|
+pub extend MockTranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  do_stream,
+}
+
+///|
+pub extend MockSpeechTranslationModel with @QuietlyChan/moonai/provider.SpeechTranslationWireModel::{
+  provider,
+  stream,
+  model_id,
+}
+
+///|
+pub extend MockSpeechTranslationModel with @QuietlyChan/moonai/provider.SpeechTranslationModelV4::{
+  specification_version,
+  do_stream,
 }

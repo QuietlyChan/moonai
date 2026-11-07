@@ -5,60 +5,74 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createOpenAI(api_key? : String, base_url? : String, provider_name? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIProvider raise @provider.InvalidArgumentError
+pub fn createOpenAI(api_key? : String, base_url? : String, provider_name? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIProvider raise @provider.InvalidArgumentError
 
-pub fn create_openai(api_key? : String, base_url? : String, provider_name? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIProvider raise @provider.InvalidArgumentError
+pub fn create_openai(api_key? : String, base_url? : String, provider_name? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> OpenAIProvider raise @provider.InvalidArgumentError
 
-pub fn openai(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
+pub fn openai(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
 
-pub fn openai_chat(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
+pub fn openai_chat(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
 
-pub fn openai_completion(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
+pub fn openai_completion(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError
 
-pub fn openai_embedding(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.EmbeddingModelV4 raise @provider.InvalidArgumentError
+pub fn openai_embedding(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.EmbeddingModelV4 raise @provider.InvalidArgumentError
 
-pub fn openai_image(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4 raise @provider.InvalidArgumentError
+pub fn openai_image(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4 raise @provider.InvalidArgumentError
 
-pub fn openai_realtime(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> OpenAIRealtimeModel raise @provider.InvalidArgumentError
+pub fn openai_realtime(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> OpenAIRealtimeModel raise @provider.InvalidArgumentError
 
 pub fn openai_responses_language_model(OpenAIResponsesModel) -> &@provider.LanguageModelV4
 
-pub fn openai_speech(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.SpeechModelV4 raise @provider.InvalidArgumentError
+pub fn openai_speech(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.SpeechModelV4 raise @provider.InvalidArgumentError
 
-pub fn openai_speech_model(provider_name~ : String, base_url~ : String, model_id~ : String, api_key~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int, http_transport~ : &@provider_utils.HttpTransport) -> OpenAISpeechModel
+pub fn openai_speech_model(provider_name~ : String, base_url~ : String, model_id~ : String, api_key~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int32, http_transport~ : &@provider_utils.HttpTransport) -> OpenAISpeechModel
 
-pub fn openai_transcription(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport) -> &@provider.TranscriptionModelV4 raise @provider.InvalidArgumentError
+pub fn openai_transcription(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, websocket_connector? : &@provider_utils.WebSocketConnector, http_transport? : &@provider_utils.HttpTransport) -> &@provider.TranscriptionModelV4 raise @provider.InvalidArgumentError
 
-pub fn openai_transcription_model(provider_name~ : String, base_url~ : String, model_id~ : String, api_key~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int, http_transport~ : &@provider_utils.HttpTransport, websocket_connector~ : &@provider_utils.WebSocketConnector) -> OpenAITranscriptionModel
+pub fn openai_transcription_model(provider_name~ : String, base_url~ : String, model_id~ : String, api_key~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int32, http_transport~ : &@provider_utils.HttpTransport, websocket_connector~ : &@provider_utils.WebSocketConnector) -> OpenAITranscriptionModel
 
 pub fn openai_translation(String, api_key? : String, base_url? : String, organization? : String, project? : String, headers? : Map[String, String], websocket_connector? : &@provider_utils.WebSocketConnector) -> &@provider.SpeechTranslationModelV4 raise @provider.InvalidArgumentError
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIAllowedTools {
   tool_names : Array[String]
   mode : OpenAIAllowedToolsMode?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIAllowedTools::equal(Self, Self) -> Bool
 pub fn OpenAIAllowedTools::new(tool_names~ : Array[String], mode? : OpenAIAllowedToolsMode) -> Self raise
+pub fn OpenAIAllowedTools::not_equal(Self, Self) -> Bool
+pub fn OpenAIAllowedTools::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIAllowedToolsMode {
   OpenAIAllowedToolsAuto
   OpenAIAllowedToolsRequired
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIAllowedToolsMode::equal(Self, Self) -> Bool
+pub fn OpenAIAllowedToolsMode::not_equal(Self, Self) -> Bool
+pub fn OpenAIAllowedToolsMode::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAICodeInterpreterContainer {
   ExistingContainer(String)
   AutoContainer(file_ids~ : Array[String]?)
-} derive(Eq, @debug.Debug)
+}
 pub fn OpenAICodeInterpreterContainer::auto(file_ids? : Array[String]) -> Self
+pub fn OpenAICodeInterpreterContainer::equal(Self, Self) -> Bool
 pub fn OpenAICodeInterpreterContainer::existing(String) -> Self
+pub fn OpenAICodeInterpreterContainer::not_equal(Self, Self) -> Bool
+pub fn OpenAICodeInterpreterContainer::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIComputerAction {
   ComputerClick(button~ : OpenAIComputerButton, x~ : Double, y~ : Double, keys~ : Array[String]?)
   ComputerDoubleClick(x~ : Double, y~ : Double, keys~ : Array[String]?)
@@ -69,60 +83,96 @@ pub(all) enum OpenAIComputerAction {
   ComputerScroll(x~ : Double, y~ : Double, scroll_x~ : Double, scroll_y~ : Double, keys~ : Array[String]?)
   ComputerTypeText(String)
   ComputerWait
-} derive(Eq, @debug.Debug)
-pub fn OpenAIComputerAction::to_json(Self) -> Json
+}
+pub fn OpenAIComputerAction::equal(Self, Self) -> Bool
+pub fn OpenAIComputerAction::not_equal(Self, Self) -> Bool
+pub fn OpenAIComputerAction::to_json(Self) -> @json.Json
+pub fn OpenAIComputerAction::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIComputerButton {
   ComputerButtonLeft
   ComputerButtonRight
   ComputerButtonWheel
   ComputerButtonBack
   ComputerButtonForward
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIComputerButton::equal(Self, Self) -> Bool
+pub fn OpenAIComputerButton::not_equal(Self, Self) -> Bool
+pub fn OpenAIComputerButton::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIComputerPoint {
   x : Double
   y : Double
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIComputerPoint::equal(Self, Self) -> Bool
 pub fn OpenAIComputerPoint::new(x~ : Double, y~ : Double) -> Self
+pub fn OpenAIComputerPoint::not_equal(Self, Self) -> Bool
+pub fn OpenAIComputerPoint::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIComputerSafetyCheck {
   id : String
   code : String?
   message : String?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIComputerSafetyCheck::equal(Self, Self) -> Bool
 pub fn OpenAIComputerSafetyCheck::new(id~ : String, code? : String, message? : String) -> Self
-pub fn OpenAIComputerSafetyCheck::to_json(Self) -> Json
+pub fn OpenAIComputerSafetyCheck::not_equal(Self, Self) -> Bool
+pub fn OpenAIComputerSafetyCheck::to_json(Self) -> @json.Json
+pub fn OpenAIComputerSafetyCheck::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIContextManagement {
   OpenAIContextCompaction(compact_threshold~ : Double)
-} derive(Eq, @debug.Debug)
+}
 pub fn OpenAIContextManagement::compaction(compact_threshold~ : Double) -> Self raise
+pub fn OpenAIContextManagement::equal(Self, Self) -> Bool
+pub fn OpenAIContextManagement::not_equal(Self, Self) -> Bool
+pub fn OpenAIContextManagement::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAICustomToolFormat {
   CustomTextFormat
   CustomGrammarFormat(syntax~ : OpenAICustomToolGrammarSyntax, definition~ : String)
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAICustomToolFormat::equal(Self, Self) -> Bool
+pub fn OpenAICustomToolFormat::not_equal(Self, Self) -> Bool
+pub fn OpenAICustomToolFormat::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAICustomToolGrammarSyntax {
   CustomGrammarRegex
   CustomGrammarLark
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAICustomToolGrammarSyntax::equal(Self, Self) -> Bool
+pub fn OpenAICustomToolGrammarSyntax::not_equal(Self, Self) -> Bool
+pub fn OpenAICustomToolGrammarSyntax::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAICustomToolOptions {
   description : String?
   format : OpenAICustomToolFormat?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAICustomToolOptions::equal(Self, Self) -> Bool
 pub fn OpenAICustomToolOptions::new(description? : String, format? : OpenAICustomToolFormat) -> Self
-pub fn OpenAICustomToolOptions::to_args_json(Self) -> Json
+pub fn OpenAICustomToolOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAICustomToolOptions::to_args_json(Self) -> @json.Json
+pub fn OpenAICustomToolOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIEmbeddingModelOptions {
-  dimensions : Int?
+  dimensions : Int32?
   user : String?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIEmbeddingModelOptions::new(dimensions? : Int, user? : String) -> Self raise
-pub fn OpenAIEmbeddingModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+}
+pub fn OpenAIEmbeddingModelOptions::equal(Self, Self) -> Bool
+pub fn OpenAIEmbeddingModelOptions::new(dimensions? : Int32, user? : String) -> Self raise
+pub fn OpenAIEmbeddingModelOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIEmbeddingModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAIEmbeddingModelOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIFileSearchComparisonOperator {
   FileSearchEq
   FileSearchNe
@@ -132,87 +182,135 @@ pub(all) enum OpenAIFileSearchComparisonOperator {
   FileSearchLte
   FileSearchIn
   FileSearchNin
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIFileSearchComparisonOperator::equal(Self, Self) -> Bool
+pub fn OpenAIFileSearchComparisonOperator::not_equal(Self, Self) -> Bool
+pub fn OpenAIFileSearchComparisonOperator::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIFileSearchFilter {
-  FileSearchComparison(key~ : String, operator~ : OpenAIFileSearchComparisonOperator, value~ : Json)
+  FileSearchComparison(key~ : String, operator~ : OpenAIFileSearchComparisonOperator, value~ : @json.Json)
   FileSearchAnd(filters~ : Array[OpenAIFileSearchFilter])
   FileSearchOr(filters~ : Array[OpenAIFileSearchFilter])
-} derive(Eq, @debug.Debug)
+}
 pub fn OpenAIFileSearchFilter::all(Array[Self]) -> Self
 pub fn OpenAIFileSearchFilter::any(Array[Self]) -> Self
-pub fn OpenAIFileSearchFilter::comparison(key~ : String, operator~ : OpenAIFileSearchComparisonOperator, value~ : Json) -> Self raise
+pub fn OpenAIFileSearchFilter::comparison(key~ : String, operator~ : OpenAIFileSearchComparisonOperator, value~ : @json.Json) -> Self raise
+pub fn OpenAIFileSearchFilter::equal(Self, Self) -> Bool
+pub fn OpenAIFileSearchFilter::not_equal(Self, Self) -> Bool
+pub fn OpenAIFileSearchFilter::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIFileSearchOptions {
   vector_store_ids : Array[String]
-  max_num_results : Int?
+  max_num_results : Int32?
   ranking : OpenAIFileSearchRanking?
   filters : OpenAIFileSearchFilter?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIFileSearchOptions::new(vector_store_ids~ : Array[String], max_num_results? : Int, ranking? : OpenAIFileSearchRanking, filters? : OpenAIFileSearchFilter) -> Self raise
-pub fn OpenAIFileSearchOptions::to_args_json(Self) -> Json
+}
+pub fn OpenAIFileSearchOptions::equal(Self, Self) -> Bool
+pub fn OpenAIFileSearchOptions::new(vector_store_ids~ : Array[String], max_num_results? : Int32, ranking? : OpenAIFileSearchRanking, filters? : OpenAIFileSearchFilter) -> Self raise
+pub fn OpenAIFileSearchOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIFileSearchOptions::to_args_json(Self) -> @json.Json
+pub fn OpenAIFileSearchOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIFileSearchRanking {
   ranker : String?
   score_threshold : Double?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIFileSearchRanking::equal(Self, Self) -> Bool
 pub fn OpenAIFileSearchRanking::new(ranker? : String, score_threshold? : Double) -> Self raise
+pub fn OpenAIFileSearchRanking::not_equal(Self, Self) -> Bool
+pub fn OpenAIFileSearchRanking::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIFilesOptions {
   purpose : String?
   expires_after : Double?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIFilesOptions::equal(Self, Self) -> Bool
 pub fn OpenAIFilesOptions::new(purpose? : String, expires_after? : Double) -> Self
-pub fn OpenAIFilesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenAIFilesOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIFilesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAIFilesOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageBackground {
   OpenAIImageBackgroundTransparent
   OpenAIImageBackgroundOpaque
   OpenAIImageBackgroundAuto
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageBackground::equal(Self, Self) -> Bool
+pub fn OpenAIImageBackground::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageBackground::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationBackground {
   ImageBackgroundAuto
   ImageBackgroundOpaque
   ImageBackgroundTransparent
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageGenerationBackground::equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationBackground::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationBackground::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationInputFidelity {
   ImageFidelityLow
   ImageFidelityHigh
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageGenerationInputFidelity::equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationInputFidelity::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationInputFidelity::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageGenerationMask {
   file_id : String?
   image_url : String?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageGenerationMask::equal(Self, Self) -> Bool
 pub fn OpenAIImageGenerationMask::new(file_id? : String, image_url? : String) -> Self
+pub fn OpenAIImageGenerationMask::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationMask::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationModeration {
   ImageModerationAuto
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageGenerationModeration::equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationModeration::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationModeration::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageGenerationOptions {
   background : OpenAIImageGenerationBackground?
   input_fidelity : OpenAIImageGenerationInputFidelity?
   input_image_mask : OpenAIImageGenerationMask?
   model : String?
   moderation : OpenAIImageGenerationModeration?
-  output_compression : Int?
+  output_compression : Int32?
   output_format : OpenAIImageGenerationOutputFormat?
-  partial_images : Int?
+  partial_images : Int32?
   quality : OpenAIImageGenerationQuality?
   size : OpenAIImageGenerationSize?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIImageGenerationOptions::new(background? : OpenAIImageGenerationBackground, input_fidelity? : OpenAIImageGenerationInputFidelity, input_image_mask? : OpenAIImageGenerationMask, model? : String, moderation? : OpenAIImageGenerationModeration, output_compression? : Int, output_format? : OpenAIImageGenerationOutputFormat, partial_images? : Int, quality? : OpenAIImageGenerationQuality, size? : OpenAIImageGenerationSize) -> Self raise
-pub fn OpenAIImageGenerationOptions::to_args_json(Self) -> Json
+}
+pub fn OpenAIImageGenerationOptions::equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationOptions::new(background? : OpenAIImageGenerationBackground, input_fidelity? : OpenAIImageGenerationInputFidelity, input_image_mask? : OpenAIImageGenerationMask, model? : String, moderation? : OpenAIImageGenerationModeration, output_compression? : Int32, output_format? : OpenAIImageGenerationOutputFormat, partial_images? : Int32, quality? : OpenAIImageGenerationQuality, size? : OpenAIImageGenerationSize) -> Self raise
+pub fn OpenAIImageGenerationOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationOptions::to_args_json(Self) -> @json.Json
+pub fn OpenAIImageGenerationOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationOutputFormat {
   ImageFormatPng
   ImageFormatJpeg
   ImageFormatWebp
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageGenerationOutputFormat::equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationOutputFormat::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationOutputFormat::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationQuality {
   ImageQualityAuto
   ImageQualityLow
@@ -220,64 +318,96 @@ pub(all) enum OpenAIImageGenerationQuality {
   ImageQualityHigh
   ImageQualityXHigh
   ImageQualityMax
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageGenerationQuality::equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationQuality::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationQuality::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationSize {
   ImageSizeAuto
   ImageSize1024x1024
   ImageSize1024x1536
   ImageSize1536x1024
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageGenerationSize::equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationSize::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageGenerationSize::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageInputFidelity {
   OpenAIImageInputFidelityHigh
   OpenAIImageInputFidelityLow
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageInputFidelity::equal(Self, Self) -> Bool
+pub fn OpenAIImageInputFidelity::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageInputFidelity::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageModelEditOptions {
   quality : OpenAIImageQuality?
   background : OpenAIImageBackground?
   output_format : OpenAIImageOutputFormat?
-  output_compression : Int?
+  output_compression : Int32?
   user : String?
   input_fidelity : OpenAIImageInputFidelity?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIImageModelEditOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int, user? : String, input_fidelity? : OpenAIImageInputFidelity) -> Self raise
-pub fn OpenAIImageModelEditOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+}
+pub fn OpenAIImageModelEditOptions::equal(Self, Self) -> Bool
+pub fn OpenAIImageModelEditOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int32, user? : String, input_fidelity? : OpenAIImageInputFidelity) -> Self raise
+pub fn OpenAIImageModelEditOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageModelEditOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAIImageModelEditOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageModelGenerationOptions {
   quality : OpenAIImageQuality?
   background : OpenAIImageBackground?
   output_format : OpenAIImageOutputFormat?
-  output_compression : Int?
+  output_compression : Int32?
   user : String?
   style : OpenAIImageStyle?
   moderation : OpenAIImageModeration?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIImageModelGenerationOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int, user? : String, style? : OpenAIImageStyle, moderation? : OpenAIImageModeration) -> Self raise
-pub fn OpenAIImageModelGenerationOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+}
+pub fn OpenAIImageModelGenerationOptions::equal(Self, Self) -> Bool
+pub fn OpenAIImageModelGenerationOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int32, user? : String, style? : OpenAIImageStyle, moderation? : OpenAIImageModeration) -> Self raise
+pub fn OpenAIImageModelGenerationOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageModelGenerationOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAIImageModelGenerationOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageModelOptions {
   quality : OpenAIImageQuality?
   background : OpenAIImageBackground?
   output_format : OpenAIImageOutputFormat?
-  output_compression : Int?
+  output_compression : Int32?
   user : String?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIImageModelOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int, user? : String) -> Self raise
-pub fn OpenAIImageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+}
+pub fn OpenAIImageModelOptions::equal(Self, Self) -> Bool
+pub fn OpenAIImageModelOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int32, user? : String) -> Self raise
+pub fn OpenAIImageModelOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAIImageModelOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageModeration {
   OpenAIImageModerationAuto
   OpenAIImageModerationLow
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageModeration::equal(Self, Self) -> Bool
+pub fn OpenAIImageModeration::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageModeration::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageOutputFormat {
   OpenAIImageOutputPng
   OpenAIImageOutputJpeg
   OpenAIImageOutputWebp
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageOutputFormat::equal(Self, Self) -> Bool
+pub fn OpenAIImageOutputFormat::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageOutputFormat::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageQuality {
   OpenAIImageQualityStandard
   OpenAIImageQualityHd
@@ -287,23 +417,31 @@ pub(all) enum OpenAIImageQuality {
   OpenAIImageQualityXHigh
   OpenAIImageQualityMax
   OpenAIImageQualityAuto
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageQuality::equal(Self, Self) -> Bool
+pub fn OpenAIImageQuality::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageQuality::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageStyle {
   OpenAIImageStyleVivid
   OpenAIImageStyleNatural
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIImageStyle::equal(Self, Self) -> Bool
+pub fn OpenAIImageStyle::not_equal(Self, Self) -> Bool
+pub fn OpenAIImageStyle::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct OpenAILanguageModelChatOptions {
   logit_bias : Map[String, Double]?
   logprobs : OpenAILogprobs?
   parallel_tool_calls : Bool?
   user : String?
   reasoning_effort : String?
-  max_completion_tokens : Int?
+  max_completion_tokens : Int32?
   store : Bool?
   metadata : Map[String, String]?
-  prediction : Json?
+  prediction : @json.Json?
   service_tier : OpenAIServiceTier?
   strict_json_schema : Bool?
   text_verbosity : OpenAITextVerbosity?
@@ -313,27 +451,31 @@ pub(all) struct OpenAILanguageModelChatOptions {
   safety_identifier : String?
   system_message_mode : OpenAISystemMessageMode?
   force_reasoning : Bool?
-} derive(@debug.Debug)
-pub fn OpenAILanguageModelChatOptions::new(logit_bias? : Map[String, Double], logprobs? : OpenAILogprobs, parallel_tool_calls? : Bool, user? : String, reasoning_effort? : String, max_completion_tokens? : Int, store? : Bool, metadata? : Map[String, String], prediction? : Json, service_tier? : OpenAIServiceTier, strict_json_schema? : Bool, text_verbosity? : OpenAITextVerbosity, prompt_cache_key? : String, prompt_cache_options? : OpenAIPromptCacheOptions, prompt_cache_retention? : OpenAIPromptCacheRetention, safety_identifier? : String, system_message_mode? : OpenAISystemMessageMode, force_reasoning? : Bool) -> Self raise
-pub fn OpenAILanguageModelChatOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+}
+pub fn OpenAILanguageModelChatOptions::new(logit_bias? : Map[String, Double], logprobs? : OpenAILogprobs, parallel_tool_calls? : Bool, user? : String, reasoning_effort? : String, max_completion_tokens? : Int32, store? : Bool, metadata? : Map[String, String], prediction? : @json.Json, service_tier? : OpenAIServiceTier, strict_json_schema? : Bool, text_verbosity? : OpenAITextVerbosity, prompt_cache_key? : String, prompt_cache_options? : OpenAIPromptCacheOptions, prompt_cache_retention? : OpenAIPromptCacheRetention, safety_identifier? : String, system_message_mode? : OpenAISystemMessageMode, force_reasoning? : Bool) -> Self raise
+pub fn OpenAILanguageModelChatOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAILanguageModelChatOptions::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct OpenAILanguageModelCompletionOptions {
   echo : Bool?
   logit_bias : Map[String, Double]?
   suffix : String?
   user : String?
   logprobs : OpenAILogprobs?
-} derive(@debug.Debug)
+}
 pub fn OpenAILanguageModelCompletionOptions::new(echo? : Bool, logit_bias? : Map[String, Double], suffix? : String, user? : String, logprobs? : OpenAILogprobs) -> Self
-pub fn OpenAILanguageModelCompletionOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenAILanguageModelCompletionOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAILanguageModelCompletionOptions::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct OpenAILanguageModelResponsesOptions {
   conversation : String?
   include_values : Array[OpenAIResponsesInclude]?
   instructions : String?
   logprobs : OpenAILogprobs?
-  max_tool_calls : Int?
-  metadata : Json?
+  max_tool_calls : Int32?
+  metadata : @json.Json?
   parallel_tool_calls : Bool?
   previous_response_id : String?
   prompt_cache_key : String?
@@ -355,40 +497,58 @@ pub(all) struct OpenAILanguageModelResponsesOptions {
   force_reasoning : Bool?
   context_management : Array[OpenAIContextManagement]?
   allowed_tools : OpenAIAllowedTools?
-} derive(@debug.Debug)
-pub fn OpenAILanguageModelResponsesOptions::new(conversation? : String, include_values? : Array[OpenAIResponsesInclude], instructions? : String, logprobs? : OpenAILogprobs, max_tool_calls? : Int, metadata? : Json, parallel_tool_calls? : Bool, previous_response_id? : String, prompt_cache_key? : String, prompt_cache_options? : OpenAIPromptCacheOptions, prompt_cache_retention? : OpenAIPromptCacheRetention, reasoning_effort? : String, reasoning_mode? : OpenAIReasoningMode, reasoning_context? : OpenAIReasoningContext, reasoning_summary? : String, safety_identifier? : String, service_tier? : OpenAIServiceTier, store? : Bool, pass_through_unsupported_files? : Bool, strict_json_schema? : Bool, text_verbosity? : OpenAITextVerbosity, truncation? : OpenAITruncation, user? : String, system_message_mode? : OpenAISystemMessageMode, force_reasoning? : Bool, context_management? : Array[OpenAIContextManagement], allowed_tools? : OpenAIAllowedTools) -> Self raise
-pub fn OpenAILanguageModelResponsesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+}
+pub fn OpenAILanguageModelResponsesOptions::new(conversation? : String, include_values? : Array[OpenAIResponsesInclude], instructions? : String, logprobs? : OpenAILogprobs, max_tool_calls? : Int32, metadata? : @json.Json, parallel_tool_calls? : Bool, previous_response_id? : String, prompt_cache_key? : String, prompt_cache_options? : OpenAIPromptCacheOptions, prompt_cache_retention? : OpenAIPromptCacheRetention, reasoning_effort? : String, reasoning_mode? : OpenAIReasoningMode, reasoning_context? : OpenAIReasoningContext, reasoning_summary? : String, safety_identifier? : String, service_tier? : OpenAIServiceTier, store? : Bool, pass_through_unsupported_files? : Bool, strict_json_schema? : Bool, text_verbosity? : OpenAITextVerbosity, truncation? : OpenAITruncation, user? : String, system_message_mode? : OpenAISystemMessageMode, force_reasoning? : Bool, context_management? : Array[OpenAIContextManagement], allowed_tools? : OpenAIAllowedTools) -> Self raise
+pub fn OpenAILanguageModelResponsesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAILanguageModelResponsesOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAILocalShellSkill {
   name : String
   description : String
   path : String
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAILocalShellSkill::equal(Self, Self) -> Bool
 pub fn OpenAILocalShellSkill::new(name~ : String, description~ : String, path~ : String) -> Self
+pub fn OpenAILocalShellSkill::not_equal(Self, Self) -> Bool
+pub fn OpenAILocalShellSkill::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAILogprobs {
   OpenAILogprobsEnabled
   OpenAILogprobsDisabled
-  OpenAILogprobsTop(Int)
-} derive(Eq, @debug.Debug)
+  OpenAILogprobsTop(Int32)
+}
 pub fn OpenAILogprobs::disabled() -> Self
 pub fn OpenAILogprobs::enabled() -> Self
-pub fn OpenAILogprobs::top(Int) -> Self raise
+pub fn OpenAILogprobs::equal(Self, Self) -> Bool
+pub fn OpenAILogprobs::not_equal(Self, Self) -> Bool
+pub fn OpenAILogprobs::to_repr(Self) -> @debug.Repr
+pub fn OpenAILogprobs::top(Int32) -> Self raise
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIMCPAllowedTools {
   MCPAllowedNames(Array[String])
   MCPAllowedFilter(read_only~ : Bool?, tool_names~ : Array[String]?)
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIMCPAllowedTools::equal(Self, Self) -> Bool
 pub fn OpenAIMCPAllowedTools::filter(read_only? : Bool, tool_names? : Array[String]) -> Self
 pub fn OpenAIMCPAllowedTools::names(Array[String]) -> Self
+pub fn OpenAIMCPAllowedTools::not_equal(Self, Self) -> Bool
+pub fn OpenAIMCPAllowedTools::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIMCPApprovalPolicy {
   MCPApprovalAlways
   MCPApprovalNever
   MCPApprovalNeverFor(tool_names~ : Array[String]?)
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIMCPApprovalPolicy::equal(Self, Self) -> Bool
 pub fn OpenAIMCPApprovalPolicy::never_for(tool_names? : Array[String]) -> Self
+pub fn OpenAIMCPApprovalPolicy::not_equal(Self, Self) -> Bool
+pub fn OpenAIMCPApprovalPolicy::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIMCPOptions {
   server_label : String
   allowed_tools : OpenAIMCPAllowedTools?
@@ -398,29 +558,48 @@ pub(all) struct OpenAIMCPOptions {
   require_approval : OpenAIMCPApprovalPolicy?
   server_description : String?
   server_url : String?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIMCPOptions::equal(Self, Self) -> Bool
 pub fn OpenAIMCPOptions::new(server_label~ : String, allowed_tools? : OpenAIMCPAllowedTools, authorization? : String, connector_id? : String, headers? : Map[String, String], require_approval? : OpenAIMCPApprovalPolicy, server_description? : String, server_url? : String) -> Self raise
-pub fn OpenAIMCPOptions::to_args_json(Self) -> Json
+pub fn OpenAIMCPOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIMCPOptions::to_args_json(Self) -> @json.Json
+pub fn OpenAIMCPOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIPromptCacheMode {
   OpenAIPromptCacheImplicit
   OpenAIPromptCacheExplicit
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIPromptCacheMode::equal(Self, Self) -> Bool
+pub fn OpenAIPromptCacheMode::not_equal(Self, Self) -> Bool
+pub fn OpenAIPromptCacheMode::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIPromptCacheOptions {
   mode : OpenAIPromptCacheMode?
   ttl : OpenAIPromptCacheTtl?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIPromptCacheOptions::equal(Self, Self) -> Bool
 pub fn OpenAIPromptCacheOptions::new(mode? : OpenAIPromptCacheMode, ttl? : OpenAIPromptCacheTtl) -> Self
+pub fn OpenAIPromptCacheOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIPromptCacheOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIPromptCacheRetention {
   OpenAIPromptCacheInMemory
   OpenAIPromptCacheTwentyFourHours
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIPromptCacheRetention::equal(Self, Self) -> Bool
+pub fn OpenAIPromptCacheRetention::not_equal(Self, Self) -> Bool
+pub fn OpenAIPromptCacheRetention::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIPromptCacheTtl {
   OpenAIPromptCacheThirtyMinutes
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIPromptCacheTtl::equal(Self, Self) -> Bool
+pub fn OpenAIPromptCacheTtl::not_equal(Self, Self) -> Bool
+pub fn OpenAIPromptCacheTtl::to_repr(Self) -> @debug.Repr
 
 pub struct OpenAIProvider {
   // private fields
@@ -446,10 +625,12 @@ pub fn OpenAIProvider::language_model(Self, String) -> &@provider.LanguageModelV
 pub fn OpenAIProvider::realtime(Self, String) -> OpenAIRealtimeModel
 pub fn OpenAIProvider::realtimeModel(Self, String) -> OpenAIRealtimeModel
 pub fn OpenAIProvider::realtime_model(Self, String) -> OpenAIRealtimeModel
+pub fn OpenAIProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
 pub fn OpenAIProvider::responses(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::responsesModel(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::responses_model(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::skills(Self) -> &@provider.SkillsV4
+pub fn OpenAIProvider::specification_version(Self) -> String
 pub fn OpenAIProvider::speech(Self, String) -> &@provider.SpeechModelV4
 pub fn OpenAIProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
 pub fn OpenAIProvider::speechTranslationModel(Self, String) -> &@provider.SpeechTranslationModelV4
@@ -472,29 +653,52 @@ pub struct OpenAIRealtimeFactory {
 pub async fn OpenAIRealtimeFactory::getToken(Self, @provider.RealtimeFactoryTokenOptions) -> @provider.RealtimeClientSecretResult
 pub async fn OpenAIRealtimeFactory::get_token(Self, @provider.RealtimeFactoryTokenOptions) -> @provider.RealtimeClientSecretResult
 pub fn OpenAIRealtimeFactory::model(Self, String) -> OpenAIRealtimeModel
+pub fn OpenAIRealtimeFactory::provider(Self) -> String
 pub impl @provider.RealtimeFactoryV4 for OpenAIRealtimeFactory
 
 pub struct OpenAIRealtimeModel {
   // private fields
 }
+pub fn OpenAIRealtimeModel::build_session_config(Self, @provider.RealtimeSessionConfig) -> @json.Json
+pub async fn OpenAIRealtimeModel::do_create_client_secret(Self, @provider.RealtimeClientSecretOptions) -> @provider.RealtimeClientSecretResult
+pub fn OpenAIRealtimeModel::get_health_check_response(Self, @json.Json) -> @json.Json?
+pub fn OpenAIRealtimeModel::get_websocket_config(Self, String, String) -> @provider.RealtimeWebSocketConfig
+pub fn OpenAIRealtimeModel::model_id(Self) -> String
+pub fn OpenAIRealtimeModel::parse_server_event(Self, @json.Json) -> Array[@provider.RealtimeServerEvent]
+pub fn OpenAIRealtimeModel::provider(Self) -> String
+pub fn OpenAIRealtimeModel::serialize_client_event(Self, @provider.RealtimeClientEvent) -> @json.Json
+pub fn OpenAIRealtimeModel::specification_version(Self) -> String
 pub impl @provider.RealtimeModelV4 for OpenAIRealtimeModel
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIReasoningContext {
   OpenAIReasoningContextAuto
   OpenAIReasoningContextCurrentTurn
   OpenAIReasoningContextAllTurns
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIReasoningContext::equal(Self, Self) -> Bool
+pub fn OpenAIReasoningContext::not_equal(Self, Self) -> Bool
+pub fn OpenAIReasoningContext::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIReasoningMode {
   OpenAIReasoningStandard
   OpenAIReasoningPro
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIReasoningMode::equal(Self, Self) -> Bool
+pub fn OpenAIReasoningMode::not_equal(Self, Self) -> Bool
+pub fn OpenAIReasoningMode::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIResponsesCompactionMetadata {
   item_id : String
   encrypted_content : String?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIResponsesCompactionMetadata::equal(Self, Self) -> Bool
+pub fn OpenAIResponsesCompactionMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenAIResponsesCompactionMetadata::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIResponsesInclude {
   OpenAIIncludeReasoningEncryptedContent
   OpenAIIncludeFileSearchCallResults
@@ -504,20 +708,27 @@ pub(all) enum OpenAIResponsesInclude {
   OpenAIIncludeComputerCallOutputImageUrl
   OpenAIIncludeMessageInputImageImageUrl
   OpenAIIncludeMessageOutputTextLogprobs
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIResponsesInclude::equal(Self, Self) -> Bool
+pub fn OpenAIResponsesInclude::not_equal(Self, Self) -> Bool
+pub fn OpenAIResponsesInclude::to_repr(Self) -> @debug.Repr
 
 pub struct OpenAIResponsesLanguageModelV4 {
   model : OpenAIResponsesModel
 }
 pub fn OpenAIResponsesLanguageModelV4::new(OpenAIResponsesModel) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIResponsesMetadata {
   response_id : String?
-  logprobs : Array[Json]?
+  logprobs : Array[@json.Json]?
   service_tier : String?
   reasoning_context : String?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIResponsesMetadata::new(response_id? : String, logprobs? : Array[Json], service_tier? : String, reasoning_context? : String) -> Self
+}
+pub fn OpenAIResponsesMetadata::equal(Self, Self) -> Bool
+pub fn OpenAIResponsesMetadata::new(response_id? : String, logprobs? : Array[@json.Json], service_tier? : String, reasoning_context? : String) -> Self
+pub fn OpenAIResponsesMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenAIResponsesMetadata::to_repr(Self) -> @debug.Repr
 
 pub(all) struct OpenAIResponsesModel {
   provider_name : String
@@ -525,33 +736,50 @@ pub(all) struct OpenAIResponsesModel {
   api_key : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   id_generator : () -> String
   http_transport : &@provider_utils.HttpTransport
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIResponsesReasoningMetadata {
   item_id : String
   reasoning_encrypted_content : String?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIResponsesReasoningMetadata::equal(Self, Self) -> Bool
+pub fn OpenAIResponsesReasoningMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenAIResponsesReasoningMetadata::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIResponsesSourceDocumentMetadata {
-  ResponsesFileCitation(file_id~ : String, index~ : Int)
+  ResponsesFileCitation(file_id~ : String, index~ : Int32)
   ResponsesContainerFileCitation(file_id~ : String, container_id~ : String)
-  ResponsesFilePath(file_id~ : String, index~ : Int)
-} derive(Eq, @debug.Debug)
+  ResponsesFilePath(file_id~ : String, index~ : Int32)
+}
+pub fn OpenAIResponsesSourceDocumentMetadata::equal(Self, Self) -> Bool
+pub fn OpenAIResponsesSourceDocumentMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenAIResponsesSourceDocumentMetadata::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIResponsesTextMetadata {
   item_id : String
   phase : OpenAIResponsesTextPhase?
-  annotations : Array[Json]?
-} derive(Eq, @debug.Debug)
+  annotations : Array[@json.Json]?
+}
+pub fn OpenAIResponsesTextMetadata::equal(Self, Self) -> Bool
+pub fn OpenAIResponsesTextMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenAIResponsesTextMetadata::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIResponsesTextPhase {
   ResponsesTextCommentary
   ResponsesTextFinalAnswer
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIResponsesTextPhase::equal(Self, Self) -> Bool
+pub fn OpenAIResponsesTextPhase::not_equal(Self, Self) -> Bool
+pub fn OpenAIResponsesTextPhase::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIServiceTier {
   OpenAIServiceTierAuto
   OpenAIServiceTierFlex
@@ -559,44 +787,67 @@ pub(all) enum OpenAIServiceTier {
   OpenAIServiceTierFast
   OpenAIServiceTierUltrafast
   OpenAIServiceTierDefault
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIServiceTier::equal(Self, Self) -> Bool
+pub fn OpenAIServiceTier::not_equal(Self, Self) -> Bool
+pub fn OpenAIServiceTier::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIShellDomainSecret {
   domain : String
   name : String
   value : String
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIShellDomainSecret::equal(Self, Self) -> Bool
 pub fn OpenAIShellDomainSecret::new(domain~ : String, name~ : String, value~ : String) -> Self
+pub fn OpenAIShellDomainSecret::not_equal(Self, Self) -> Bool
+pub fn OpenAIShellDomainSecret::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIShellEnvironment {
   ShellContainerAuto(file_ids~ : Array[String]?, memory_limit~ : OpenAIShellMemoryLimit?, network_policy~ : OpenAIShellNetworkPolicy?, skills~ : Array[OpenAIShellSkill]?)
   ShellContainerReference(container_id~ : String)
   ShellLocal(skills~ : Array[OpenAILocalShellSkill]?)
-} derive(Eq, @debug.Debug)
+}
 pub fn OpenAIShellEnvironment::container_auto(file_ids? : Array[String], memory_limit? : OpenAIShellMemoryLimit, network_policy? : OpenAIShellNetworkPolicy, skills? : Array[OpenAIShellSkill]) -> Self
 pub fn OpenAIShellEnvironment::container_reference(String) -> Self
+pub fn OpenAIShellEnvironment::equal(Self, Self) -> Bool
 pub fn OpenAIShellEnvironment::local_environment(skills? : Array[OpenAILocalShellSkill]) -> Self
+pub fn OpenAIShellEnvironment::not_equal(Self, Self) -> Bool
+pub fn OpenAIShellEnvironment::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIShellMemoryLimit {
   Memory1G
   Memory4G
   Memory16G
   Memory64G
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIShellMemoryLimit::equal(Self, Self) -> Bool
+pub fn OpenAIShellMemoryLimit::not_equal(Self, Self) -> Bool
+pub fn OpenAIShellMemoryLimit::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIShellNetworkPolicy {
   ShellNetworkDisabled
   ShellNetworkAllowlist(allowed_domains~ : Array[String], domain_secrets~ : Array[OpenAIShellDomainSecret]?)
-} derive(Eq, @debug.Debug)
+}
 pub fn OpenAIShellNetworkPolicy::allowlist(Array[String], domain_secrets? : Array[OpenAIShellDomainSecret]) -> Self
 pub fn OpenAIShellNetworkPolicy::disabled() -> Self
+pub fn OpenAIShellNetworkPolicy::equal(Self, Self) -> Bool
+pub fn OpenAIShellNetworkPolicy::not_equal(Self, Self) -> Bool
+pub fn OpenAIShellNetworkPolicy::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIShellSkill {
   ShellSkillReference(provider_reference~ : @provider.ProviderReference, version~ : String?)
   ShellInlineSkill(name~ : String, description~ : String, data~ : String)
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIShellSkill::equal(Self, Self) -> Bool
 pub fn OpenAIShellSkill::inline(name~ : String, description~ : String, data~ : String) -> Self
+pub fn OpenAIShellSkill::not_equal(Self, Self) -> Bool
 pub fn OpenAIShellSkill::reference(@provider.ProviderReference, version? : String) -> Self
+pub fn OpenAIShellSkill::to_repr(Self) -> @debug.Repr
 
 pub(all) struct OpenAISpeechModel {
   provider_name : String
@@ -604,84 +855,120 @@ pub(all) struct OpenAISpeechModel {
   model_id : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
+pub async fn OpenAISpeechModel::do_generate(Self, @provider.SpeechModelV4CallOptions) -> @provider.SpeechModelV4Result
+pub fn OpenAISpeechModel::model_id(Self) -> String
+pub fn OpenAISpeechModel::provider(Self) -> String
+pub fn OpenAISpeechModel::specification_version(Self) -> String
 pub impl @provider.SpeechModelV4 for OpenAISpeechModel
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAISpeechModelOptions {
   instructions : String?
   speed : Double?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAISpeechModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAISpeechModelOptions::new(instructions? : String, speed? : Double) -> Self raise
-pub fn OpenAISpeechModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenAISpeechModelOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAISpeechModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAISpeechModelOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAISystemMessageMode {
   OpenAISystemMessageSystem
   OpenAISystemMessageDeveloper
   OpenAISystemMessageRemove
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAISystemMessageMode::equal(Self, Self) -> Bool
+pub fn OpenAISystemMessageMode::not_equal(Self, Self) -> Bool
+pub fn OpenAISystemMessageMode::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAITextVerbosity {
   OpenAITextVerbosityLow
   OpenAITextVerbosityMedium
   OpenAITextVerbosityHigh
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAITextVerbosity::equal(Self, Self) -> Bool
+pub fn OpenAITextVerbosity::not_equal(Self, Self) -> Bool
+pub fn OpenAITextVerbosity::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIToolCaller {
   Direct
   Programmatic
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIToolCaller::equal(Self, Self) -> Bool
+pub fn OpenAIToolCaller::not_equal(Self, Self) -> Bool
+pub fn OpenAIToolCaller::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIToolNamespace {
   name : String
   description : String
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIToolNamespace::equal(Self, Self) -> Bool
 pub fn OpenAIToolNamespace::new(name~ : String, description~ : String) -> Self
+pub fn OpenAIToolNamespace::not_equal(Self, Self) -> Bool
+pub fn OpenAIToolNamespace::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIToolOptions {
   allowed_callers : Array[OpenAIToolCaller]?
   defer_loading : Bool?
-  output_schema : Json?
+  output_schema : @json.Json?
   tool_namespace : OpenAIToolNamespace?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIToolOptions::new(allowed_callers? : Array[OpenAIToolCaller], defer_loading? : Bool, output_schema? : Json, tool_namespace? : OpenAIToolNamespace) -> Self
-pub fn OpenAIToolOptions::to_provider_options(Self) -> Map[String, Json]
+}
+pub fn OpenAIToolOptions::equal(Self, Self) -> Bool
+pub fn OpenAIToolOptions::new(allowed_callers? : Array[OpenAIToolCaller], defer_loading? : Bool, output_schema? : @json.Json, tool_namespace? : OpenAIToolNamespace) -> Self
+pub fn OpenAIToolOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIToolOptions::to_provider_options(Self) -> Map[String, @json.Json]
+pub fn OpenAIToolOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIToolSearchExecution {
   ToolSearchServer
   ToolSearchClient
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIToolSearchExecution::equal(Self, Self) -> Bool
+pub fn OpenAIToolSearchExecution::not_equal(Self, Self) -> Bool
+pub fn OpenAIToolSearchExecution::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIToolSearchOptions {
   execution : OpenAIToolSearchExecution?
   description : String?
-  parameters : Json?
-} derive(Eq, @debug.Debug)
-pub fn OpenAIToolSearchOptions::new(execution? : OpenAIToolSearchExecution, description? : String, parameters? : Json) -> Self raise
-pub fn OpenAIToolSearchOptions::to_args_json(Self) -> Json
+  parameters : @json.Json?
+}
+pub fn OpenAIToolSearchOptions::equal(Self, Self) -> Bool
+pub fn OpenAIToolSearchOptions::new(execution? : OpenAIToolSearchExecution, description? : String, parameters? : @json.Json) -> Self raise
+pub fn OpenAIToolSearchOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIToolSearchOptions::to_args_json(Self) -> @json.Json
+pub fn OpenAIToolSearchOptions::to_repr(Self) -> @debug.Repr
 
 pub struct OpenAITools {
 }
-pub fn OpenAITools::applyPatch(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
-pub fn OpenAITools::apply_patch(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::applyPatch(Self, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::apply_patch(Self, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::codeInterpreter(Self, container? : OpenAICodeInterpreterContainer, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::code_interpreter(Self, container? : OpenAICodeInterpreterContainer, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
-pub fn OpenAITools::computer(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
-pub fn OpenAITools::customTool(Self, options? : OpenAICustomToolOptions, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
-pub fn OpenAITools::custom_tool(Self, options? : OpenAICustomToolOptions, output_schema? : Json, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::computer(Self, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::customTool(Self, options? : OpenAICustomToolOptions, output_schema? : @json.Json, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::custom_tool(Self, options? : OpenAICustomToolOptions, output_schema? : @json.Json, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::fileSearch(Self, OpenAIFileSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::file_search(Self, OpenAIFileSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::imageGeneration(Self, options? : OpenAIImageGenerationOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::image_generation(Self, options? : OpenAIImageGenerationOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
-pub fn OpenAITools::localShell(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
-pub fn OpenAITools::local_shell(Self, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::localShell(Self, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::local_shell(Self, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::mcp(Self, OpenAIMCPOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::programmaticToolCalling(Self) -> @provider_utils.Tool
 pub fn OpenAITools::programmatic_tool_calling(Self) -> @provider_utils.Tool
-pub fn OpenAITools::shell(Self, environment? : OpenAIShellEnvironment, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
-pub fn OpenAITools::toolSearch(Self, options? : OpenAIToolSearchOptions, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
-pub fn OpenAITools::tool_search(Self, options? : OpenAIToolSearchOptions, execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::shell(Self, environment? : OpenAIShellEnvironment, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::toolSearch(Self, options? : OpenAIToolSearchOptions, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn OpenAITools::tool_search(Self, options? : OpenAIToolSearchOptions, execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::webSearch(Self, options? : OpenAIWebSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::webSearchPreview(Self, options? : OpenAIWebSearchPreviewOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 pub fn OpenAITools::web_search(Self, options? : OpenAIWebSearchOptions, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
@@ -693,12 +980,18 @@ pub(all) struct OpenAITranscriptionModel {
   model_id : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
   websocket_connector : &@provider_utils.WebSocketConnector
 }
+pub async fn OpenAITranscriptionModel::do_generate(Self, @provider.TranscriptionModelV4CallOptions) -> @provider.TranscriptionModelV4Result
+pub async fn OpenAITranscriptionModel::do_stream(Self, @provider.TranscriptionModelV4StreamOptions, async (@provider.TranscriptionModelV4StreamPart) -> Unit) -> @provider.TranscriptionModelV4StreamResult
+pub fn OpenAITranscriptionModel::model_id(Self) -> String
+pub fn OpenAITranscriptionModel::provider(Self) -> String
+pub fn OpenAITranscriptionModel::specification_version(Self) -> String
 pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAITranscriptionModelOptions {
   include_values : Array[String]?
   language : String?
@@ -706,111 +999,176 @@ pub(all) struct OpenAITranscriptionModelOptions {
   temperature : Double?
   timestamp_granularities : Array[OpenAITranscriptionTimestampGranularity]?
   streaming : OpenAITranscriptionStreamingOptions?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAITranscriptionModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAITranscriptionModelOptions::new(include_values? : Array[String], language? : String, prompt? : String, temperature? : Double, timestamp_granularities? : Array[OpenAITranscriptionTimestampGranularity], streaming? : OpenAITranscriptionStreamingOptions) -> Self raise
-pub fn OpenAITranscriptionModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenAITranscriptionModelOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAITranscriptionModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAITranscriptionModelOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAITranscriptionStreamingDelay {
   OpenAITranscriptionDelayMinimal
   OpenAITranscriptionDelayLow
   OpenAITranscriptionDelayMedium
   OpenAITranscriptionDelayHigh
   OpenAITranscriptionDelayXHigh
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAITranscriptionStreamingDelay::equal(Self, Self) -> Bool
+pub fn OpenAITranscriptionStreamingDelay::not_equal(Self, Self) -> Bool
+pub fn OpenAITranscriptionStreamingDelay::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAITranscriptionStreamingOptions {
   delay : OpenAITranscriptionStreamingDelay?
   include_values : Array[String]?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAITranscriptionStreamingOptions::equal(Self, Self) -> Bool
 pub fn OpenAITranscriptionStreamingOptions::new(delay? : OpenAITranscriptionStreamingDelay, include_values? : Array[String]) -> Self
+pub fn OpenAITranscriptionStreamingOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAITranscriptionStreamingOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAITranscriptionTimestampGranularity {
   OpenAITranscriptionWord
   OpenAITranscriptionSegment
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAITranscriptionTimestampGranularity::equal(Self, Self) -> Bool
+pub fn OpenAITranscriptionTimestampGranularity::not_equal(Self, Self) -> Bool
+pub fn OpenAITranscriptionTimestampGranularity::to_repr(Self) -> @debug.Repr
 
 pub struct OpenAITranslationModel {
   // private fields
 }
+pub async fn OpenAITranslationModel::do_stream(Self, @provider.SpeechTranslationModelV4StreamOptions, async (@provider.SpeechTranslationModelV4StreamPart) -> Unit) -> @provider.SpeechTranslationModelV4StreamResult
 pub fn OpenAITranslationModel::model_id(Self) -> String
 pub fn OpenAITranslationModel::provider(Self) -> String
+pub fn OpenAITranslationModel::specification_version(Self) -> String
 pub impl @provider.SpeechTranslationModelV4 for OpenAITranslationModel
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAITranslationModelOptions {
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAITranslationModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAITranslationModelOptions::new() -> Self
-pub fn OpenAITranslationModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenAITranslationModelOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAITranslationModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenAITranslationModelOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAITruncation {
   OpenAITruncationAuto
   OpenAITruncationDisabled
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAITruncation::equal(Self, Self) -> Bool
+pub fn OpenAITruncation::not_equal(Self, Self) -> Bool
+pub fn OpenAITruncation::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenAIWebSearchContextSize {
   WebSearchLow
   WebSearchMedium
   WebSearchHigh
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIWebSearchContextSize::equal(Self, Self) -> Bool
+pub fn OpenAIWebSearchContextSize::not_equal(Self, Self) -> Bool
+pub fn OpenAIWebSearchContextSize::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIWebSearchFilters {
   allowed_domains : Array[String]?
   blocked_domains : Array[String]?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIWebSearchFilters::equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchFilters::new(allowed_domains? : Array[String], blocked_domains? : Array[String]) -> Self raise
+pub fn OpenAIWebSearchFilters::not_equal(Self, Self) -> Bool
+pub fn OpenAIWebSearchFilters::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIWebSearchOptions {
   external_web_access : Bool?
   filters : OpenAIWebSearchFilters?
   search_context_size : OpenAIWebSearchContextSize?
   user_location : OpenAIWebSearchUserLocation?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIWebSearchOptions::equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchOptions::new(external_web_access? : Bool, filters? : OpenAIWebSearchFilters, search_context_size? : OpenAIWebSearchContextSize, user_location? : OpenAIWebSearchUserLocation) -> Self
-pub fn OpenAIWebSearchOptions::to_args_json(Self) -> Json
+pub fn OpenAIWebSearchOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIWebSearchOptions::to_args_json(Self) -> @json.Json
+pub fn OpenAIWebSearchOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIWebSearchPreviewOptions {
   search_context_size : OpenAIWebSearchContextSize?
   user_location : OpenAIWebSearchUserLocation?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIWebSearchPreviewOptions::equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchPreviewOptions::new(search_context_size? : OpenAIWebSearchContextSize, user_location? : OpenAIWebSearchUserLocation) -> Self
-pub fn OpenAIWebSearchPreviewOptions::to_args_json(Self) -> Json
+pub fn OpenAIWebSearchPreviewOptions::not_equal(Self, Self) -> Bool
+pub fn OpenAIWebSearchPreviewOptions::to_args_json(Self) -> @json.Json
+pub fn OpenAIWebSearchPreviewOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenAIWebSearchUserLocation {
   country : String?
   city : String?
   region : String?
   timezone : String?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenAIWebSearchUserLocation::equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchUserLocation::new(country? : String, city? : String, region? : String, timezone? : String) -> Self
+pub fn OpenAIWebSearchUserLocation::not_equal(Self, Self) -> Bool
+pub fn OpenAIWebSearchUserLocation::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesCompactionProviderMetadata {
   openai : OpenAIResponsesCompactionMetadata
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenaiResponsesCompactionProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesCompactionProviderMetadata::new(item_id~ : String, encrypted_content? : String) -> Self
-pub fn OpenaiResponsesCompactionProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenaiResponsesCompactionProviderMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenaiResponsesCompactionProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenaiResponsesCompactionProviderMetadata::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesProviderMetadata {
   openai : OpenAIResponsesMetadata
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenaiResponsesProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesProviderMetadata::new(openai~ : OpenAIResponsesMetadata) -> Self
-pub fn OpenaiResponsesProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenaiResponsesProviderMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenaiResponsesProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenaiResponsesProviderMetadata::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesReasoningProviderMetadata {
   openai : OpenAIResponsesReasoningMetadata
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenaiResponsesReasoningProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesReasoningProviderMetadata::new(item_id~ : String, reasoning_encrypted_content? : String) -> Self
-pub fn OpenaiResponsesReasoningProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenaiResponsesReasoningProviderMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenaiResponsesReasoningProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenaiResponsesReasoningProviderMetadata::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesSourceDocumentProviderMetadata {
   openai : OpenAIResponsesSourceDocumentMetadata
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenaiResponsesSourceDocumentProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesSourceDocumentProviderMetadata::new(openai~ : OpenAIResponsesSourceDocumentMetadata) -> Self
-pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenaiResponsesSourceDocumentProviderMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesTextProviderMetadata {
   openai : OpenAIResponsesTextMetadata
-} derive(Eq, @debug.Debug)
-pub fn OpenaiResponsesTextProviderMetadata::new(item_id~ : String, phase? : OpenAIResponsesTextPhase, annotations? : Array[Json]) -> Self
-pub fn OpenaiResponsesTextProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, Json]
+}
+pub fn OpenaiResponsesTextProviderMetadata::equal(Self, Self) -> Bool
+pub fn OpenaiResponsesTextProviderMetadata::new(item_id~ : String, phase? : OpenAIResponsesTextPhase, annotations? : Array[@json.Json]) -> Self
+pub fn OpenaiResponsesTextProviderMetadata::not_equal(Self, Self) -> Bool
+pub fn OpenaiResponsesTextProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenaiResponsesTextProviderMetadata::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type OpenAITranslationModelId = String

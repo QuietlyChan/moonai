@@ -4,7 +4,7 @@ async test "OpenAI embedding rejects a direct call above its batch limit" {
   for index = 0; index < 2049; index = index + 1 {
     values.push("value-{index}")
   }
-  let model = create_openai(api_key="unused").embedding(
+  let model = @openai.create_openai(api_key="unused").embedding(
     "text-embedding-3-small",
   )
   try model.do_embed(@provider.EmbeddingModelV4CallOptions::new(values)) catch {

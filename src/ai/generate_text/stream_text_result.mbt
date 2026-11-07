@@ -6,6 +6,7 @@
 /// results, warnings, messages, and usage are aggregated across all steps;
 /// request, response, finish reason, and provider metadata come from the final
 /// step.
+#derive(Debug)
 pub(all) struct StreamTextResult {
   content : Array[GenerateTextContent]
   tool_calls : Array[GenerateTextToolCall]
@@ -24,7 +25,7 @@ pub(all) struct StreamTextResult {
   provider_metadata : Map[String, Json]
   steps : Array[GenerateTextStep]
   final_step : GenerateTextStep
-} derive(Debug)
+}
 
 ///|
 fn create_stream_text_result(
@@ -79,3 +80,6 @@ pub fn StreamTextResult::to_chat_response(
 ) -> @provider.ChatResponse {
   self.final_step.provider_result.to_chat_response()
 }
+
+///|
+pub extend StreamTextResult with Debug::{to_repr}

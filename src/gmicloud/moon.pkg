@@ -5,8 +5,4 @@ import {
   "moonbitlang/core/json",
 }
 
-import {
-  "QuietlyChan/moonai/provider",
-} for "test"
-
 supported_targets = "+native"

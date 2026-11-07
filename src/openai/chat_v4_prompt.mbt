@@ -33,7 +33,7 @@ fn openai_v4_chat_file_part(
   media_type : String,
   filename : String?,
   provider_options : Map[String, Json],
-  index : Int,
+  index : Int32,
 ) -> Json raise {
   let content : Json = match data {
     @provider.V4FileReference(reference) =>
@@ -119,7 +119,7 @@ fn openai_v4_chat_file_part(
 ///|
 fn openai_v4_chat_user_part(
   part : @provider.LanguageModelV4PromptPart,
-  index : Int,
+  index : Int32,
 ) -> Json raise {
   let options = openai_v4_prompt_part_options(part)
   match part {

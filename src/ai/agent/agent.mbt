@@ -27,7 +27,7 @@ pub(all) struct AgentCallOptions {
 /// Construct agent call options.
 pub fn AgentCallOptions::new(
   prompt? : String,
-  messages? : Array[@provider_utils.ModelMessage] = [],
+  messages~ : Array[@provider_utils.ModelMessage] = [],
   runtime_context? : Json,
   tools_context? : Map[String, Json],
   cancellation_token? : @provider.CancellationToken,

@@ -12,7 +12,7 @@ pub type ToolOrder = Array[String]
 /// call. Message arrays are isolated from the workflow's mutable state.
 pub(all) struct PrepareStepOptions {
   steps : Array[GenerateTextStep]
-  step_number : Int
+  step_number : Int32
   model : &@provider.LanguageModelV4
   instructions : @prompt.Instructions?
   initial_instructions : @prompt.Instructions?
@@ -40,13 +40,13 @@ pub(all) struct PrepareStepResult {
   tools_context : Map[String, Json]?
   experimental_sandbox : @provider_utils.SandboxSession?
   provider_options : Map[String, Json]?
-  max_output_tokens : Int?
+  max_output_tokens : Int32?
   temperature : Double?
   top_p : Double?
   top_k : Double?
   frequency_penalty : Double?
   presence_penalty : Double?
-  seed : Int?
+  seed : Int32?
   stop_sequences : Array[String]?
   reasoning_effort : @provider.ReasoningEffort?
 }
@@ -65,13 +65,13 @@ pub fn PrepareStepResult::new(
   tools_context? : Map[String, Json],
   experimental_sandbox? : @provider_utils.SandboxSession,
   provider_options? : Map[String, Json],
-  max_output_tokens? : Int,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
+  seed? : Int32,
   stop_sequences? : Array[String],
   reasoning_effort? : @provider.ReasoningEffort,
 ) -> PrepareStepResult {

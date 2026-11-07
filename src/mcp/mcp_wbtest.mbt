@@ -1,7 +1,4 @@
 ///|
-extend HttpMCPTransport with MCPTransport::{start, send, close}
-
-///|
 test "JSON-RPC validation distinguishes requests, notifications, and errors" {
   assert_eq(
     validate_json_rpc_message({
@@ -103,7 +100,7 @@ async test "MCP client initializes, lists tools, and executes converted tools" {
 priv struct MCPHttpFixtureTransport {
   requests : Array[@provider_utils.HttpRequest]
   responses : Array[@provider_utils.HttpResponse]
-  next : Ref[Int]
+  next : Ref[Int32]
 }
 
 ///|

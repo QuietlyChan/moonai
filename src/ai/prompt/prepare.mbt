@@ -3,30 +3,31 @@
 ///
 /// This mirrors AI SDK's prompt-layer call settings. Provider-neutral prompt
 /// content is added later when constructing `ChatCallOptions`.
+#derive(Debug)
 pub(all) struct LanguageModelCallOptions {
-  max_output_tokens : Int?
+  max_output_tokens : Int32?
   temperature : Double?
   top_p : Double?
   top_k : Double?
   presence_penalty : Double?
   frequency_penalty : Double?
   stop_sequences : Array[String]
-  seed : Int?
+  seed : Int32?
   reasoning_effort : @provider.ReasoningEffort
-} derive(Debug)
+}
 
 ///|
 /// Construct model-facing generation controls before validation.
 pub fn LanguageModelCallOptions::new(
-  max_output_tokens? : Int,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   presence_penalty? : Double,
   frequency_penalty? : Double,
-  stop_sequences? : Array[String] = [],
-  seed? : Int,
-  reasoning_effort? : @provider.ReasoningEffort = @provider.ProviderDefault,
+  stop_sequences~ : Array[String] = [],
+  seed? : Int32,
+  reasoning_effort~ : @provider.ReasoningEffort = @provider.ProviderDefault,
 ) -> LanguageModelCallOptions {
   {
     max_output_tokens,
@@ -80,13 +81,13 @@ pub async fn prepare_chat_call_options(
   tool_choice : @provider.ToolChoice,
   response_format : @provider.ResponseFormat,
   reasoning_effort : @provider.ReasoningEffort,
-  max_output_tokens : Int?,
+  max_output_tokens : Int32?,
   temperature : Double?,
   top_p : Double?,
   top_k : Double?,
   frequency_penalty : Double?,
   presence_penalty : Double?,
-  seed : Int?,
+  seed : Int32?,
   stop_sequences : Array[String],
   include_raw_chunks : Bool,
   headers : Map[String, String],
@@ -154,13 +155,13 @@ pub async fn prepare_language_model_v4_call_options(
   tool_choice : @provider.ToolChoice,
   response_format : @provider.ResponseFormat,
   reasoning_effort : @provider.ReasoningEffort,
-  max_output_tokens : Int?,
+  max_output_tokens : Int32?,
   temperature : Double?,
   top_p : Double?,
   top_k : Double?,
   frequency_penalty : Double?,
   presence_penalty : Double?,
-  seed : Int?,
+  seed : Int32?,
   stop_sequences : Array[String],
   include_raw_chunks : Bool,
   headers : Map[String, String],
@@ -229,13 +230,13 @@ pub async fn prepareLanguageModelV4CallOptions(
   tool_choice : @provider.ToolChoice,
   response_format : @provider.ResponseFormat,
   reasoning_effort : @provider.ReasoningEffort,
-  max_output_tokens : Int?,
+  max_output_tokens : Int32?,
   temperature : Double?,
   top_p : Double?,
   top_k : Double?,
   frequency_penalty : Double?,
   presence_penalty : Double?,
-  seed : Int?,
+  seed : Int32?,
   stop_sequences : Array[String],
   include_raw_chunks : Bool,
   headers : Map[String, String],
@@ -259,3 +260,6 @@ pub fn prepareLanguageModelCallOptions(
 ) -> LanguageModelCallOptions raise {
   prepare_language_model_call_options(options)
 }
+
+///|
+pub extend LanguageModelCallOptions with Debug::{to_repr}

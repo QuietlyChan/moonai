@@ -7,19 +7,19 @@ struct AssemblyAITranscriptionModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
-  poll_interval_ms : Int
-  poll_timeout_ms : Int
+  idle_timeout_ms : Int32
+  poll_interval_ms : Int32
+  poll_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
 /// Default polling interval for transcript status checks.
-pub const ASSEMBLYAI_POLL_INTERVAL_MS : Int = 3000
+pub const ASSEMBLYAI_POLL_INTERVAL_MS : Int32 = 3000
 
 ///|
 /// Default maximum time to wait for a transcript to finish.
-pub const ASSEMBLYAI_POLL_TIMEOUT_MS : Int = 600_000
+pub const ASSEMBLYAI_POLL_TIMEOUT_MS : Int32 = 600_000
 
 ///|
 fn assemblyai_transcription_value(
@@ -27,9 +27,9 @@ fn assemblyai_transcription_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
-  poll_interval_ms~ : Int,
-  poll_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
+  poll_interval_ms~ : Int32,
+  poll_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> AssemblyAITranscriptionModel {
   {
@@ -234,4 +234,13 @@ pub impl @provider.TranscriptionModelV4 for AssemblyAITranscriptionModel with fn
   raise @provider.UnsupportedFunctionalityError(
     functionality="AssemblyAI realtime streaming",
   )
+}
+
+///|
+pub extend AssemblyAITranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  do_stream,
+  model_id,
 }

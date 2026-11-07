@@ -36,7 +36,7 @@ async test "workflow harness bridge folds a prompt turn into a step result" {
     model_id="model-1",
     permission_mode=@harness.HarnessAllowReads,
   )
-  let bridge = WorkflowHarnessBridge::new(
+  let bridge = @workflow.WorkflowHarnessBridge::new(
     session=session as &@harness.HarnessV1Session,
   )
   let result = bridge.run_prompt_turn(prompt="fix the bug")

@@ -50,10 +50,10 @@ fn prepare_deepseek_request(
 fn encode_deepseek_chat_request(
   model_id : String,
   options : @provider.ChatCallOptions,
-  stream? : Bool = false,
-  provider_name? : String = "deepseek.chat",
-  supports_thinking? : Bool = true,
-  supports_structured_outputs? : Bool = false,
+  stream~ : Bool = false,
+  provider_name~ : String = "deepseek.chat",
+  supports_thinking~ : Bool = true,
+  supports_structured_outputs~ : Bool = false,
 ) -> Json raise {
   prepare_deepseek_request(
     model_id, options, provider_name, stream, supports_thinking, supports_structured_outputs,

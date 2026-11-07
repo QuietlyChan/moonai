@@ -1,6 +1,6 @@
 ///|
 test "togetherai provider exposes chat, completion, embedding, image, reranking" {
-  let provider = create_togetherai(api_key="sk-test")
+  let provider = @togetherai.create_togetherai(api_key="sk-test")
   let chat = provider.chat("meta-llama/Llama-3.3-70B-Instruct-Turbo")
   assert_eq(chat.provider(), "togetherai.chat")
   assert_eq(chat.model_id(), "meta-llama/Llama-3.3-70B-Instruct-Turbo")
@@ -18,11 +18,13 @@ test "togetherai provider exposes chat, completion, embedding, image, reranking"
 ///|
 test "togetherai structured output support follows the upstream whitelist" {
   assert_false(
-    get_model_structured_output_support(
+    @togetherai.get_model_structured_output_support(
       "meta-llama/Llama-3.3-70B-Instruct-Turbo",
     ),
   )
   assert_true(
-    get_model_structured_output_support("deepseek-ai/DeepSeek-V4-Flash-0731"),
+    @togetherai.get_model_structured_output_support(
+      "deepseek-ai/DeepSeek-V4-Flash-0731",
+    ),
   )
 }

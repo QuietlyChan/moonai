@@ -1,12 +1,12 @@
 ///|
 test "OpenAI-compatible URL capabilities default empty and can be injected" {
-  let default_model = openai_compatible(
+  let default_model = @openai_compatible.openai_compatible(
     provider_name="custom",
     base_url="https://example.com/v1",
     model_id="model",
   )
   assert_eq(default_model.supported_urls().length(), 0)
-  let configured_model = openai_compatible(
+  let configured_model = @openai_compatible.openai_compatible(
     provider_name="custom",
     base_url="https://example.com/v1",
     model_id="model",

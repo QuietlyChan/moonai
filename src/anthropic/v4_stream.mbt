@@ -1,5 +1,5 @@
 ///|
-fn anthropic_stream_index(json : Json?) -> Int? {
+fn anthropic_stream_index(json : Json?) -> Int32? {
   match json {
     Some({ "index": Number(index, ..), .. }) => Some(index.to_int())
     _ => None

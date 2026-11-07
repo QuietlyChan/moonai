@@ -3,26 +3,28 @@
 ///
 /// The data variant mirrors AI SDK's `Uint8Array | string` payload without
 /// forcing callers to Base64 encode raw bytes before reaching a provider.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4FileData {
   V4FileData(String)
   V4FileBytes(Bytes)
   V4FileUrl(String)
   V4FileReference(ProviderReference)
   V4FileText(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A tool call carried in V4 prompt history.
 ///
 /// Prompt tool input is structured JSON. Generated V4 tool calls keep their
 /// string input separately because provider responses arrive incrementally.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4ToolCallPart {
   tool_call_id : String
   tool_name : String
   input : Json
   provider_executed : Bool
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 prompt tool call.
@@ -30,8 +32,8 @@ pub fn LanguageModelV4ToolCallPart::new(
   tool_call_id~ : String,
   tool_name~ : String,
   input~ : Json,
-  provider_executed? : Bool = false,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolCallPart {
   {
     tool_call_id,
@@ -44,6 +46,7 @@ pub fn LanguageModelV4ToolCallPart::new(
 
 ///|
 /// Content embedded in a V4 prompt tool-result output.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4ToolResultContentPart {
   V4ToolResultTextContent(text~ : String, provider_options~ : Map[String, Json])
   V4ToolResultFileContent(
@@ -53,13 +56,13 @@ pub(all) enum LanguageModelV4ToolResultContentPart {
     provider_options~ : Map[String, Json]
   )
   V4ToolResultCustomContent(provider_options~ : Map[String, Json])
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct text content embedded in a V4 tool result.
 pub fn LanguageModelV4ToolResultContentPart::text(
   text : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultContentPart {
   V4ToolResultTextContent(
     text~,
@@ -73,7 +76,7 @@ pub fn LanguageModelV4ToolResultContentPart::file(
   data~ : LanguageModelV4FileData,
   media_type~ : String,
   filename? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultContentPart {
   V4ToolResultFileContent(
     data~,
@@ -86,7 +89,7 @@ pub fn LanguageModelV4ToolResultContentPart::file(
 ///|
 /// Construct provider-specific content embedded in a V4 tool result.
 pub fn LanguageModelV4ToolResultContentPart::custom(
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultContentPart {
   V4ToolResultCustomContent(
     provider_options=copy_provider_metadata(provider_options),
@@ -95,6 +98,7 @@ pub fn LanguageModelV4ToolResultContentPart::custom(
 
 ///|
 /// Standardized output shape of a V4 prompt tool result.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4ToolResultOutput {
   V4ToolResultTextOutput(value~ : String, provider_options~ : Map[String, Json])
   V4ToolResultJsonOutput(value~ : Json, provider_options~ : Map[String, Json])
@@ -108,16 +112,17 @@ pub(all) enum LanguageModelV4ToolResultOutput {
     value~ : Array[LanguageModelV4ToolResultContentPart],
     provider_options~ : Map[String, Json]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// A tool result carried in V4 prompt history.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4ToolResultPart {
   tool_call_id : String
   tool_name : String
   output : LanguageModelV4ToolResultOutput
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 text tool result.
@@ -125,7 +130,7 @@ pub fn LanguageModelV4ToolResultPart::text(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -145,7 +150,7 @@ pub fn LanguageModelV4ToolResultPart::json(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -165,7 +170,7 @@ pub fn LanguageModelV4ToolResultPart::execution_denied(
   tool_call_id~ : String,
   tool_name~ : String,
   reason? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -185,7 +190,7 @@ pub fn LanguageModelV4ToolResultPart::content(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Array[LanguageModelV4ToolResultContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -205,7 +210,7 @@ pub fn LanguageModelV4ToolResultPart::error_text(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -225,7 +230,7 @@ pub fn LanguageModelV4ToolResultPart::error_json(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -241,12 +246,13 @@ pub fn LanguageModelV4ToolResultPart::error_json(
 
 ///|
 /// A provider-executed tool approval response carried in V4 prompt history.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4ToolApprovalResponsePart {
   approval_id : String
   approved : Bool
   reason : String?
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 tool approval response.
@@ -254,7 +260,7 @@ pub fn LanguageModelV4ToolApprovalResponsePart::new(
   approval_id~ : String,
   approved~ : Bool,
   reason? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolApprovalResponsePart {
   {
     approval_id,
@@ -266,6 +272,7 @@ pub fn LanguageModelV4ToolApprovalResponsePart::new(
 
 ///|
 /// Standardized content part used by V4 prompt messages.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4PromptPart {
   V4PromptText(text~ : String, provider_options~ : Map[String, Json])
   V4PromptReasoning(text~ : String, provider_options~ : Map[String, Json])
@@ -284,7 +291,7 @@ pub(all) enum LanguageModelV4PromptPart {
   V4PromptToolCall(LanguageModelV4ToolCallPart)
   V4PromptToolResult(LanguageModelV4ToolResultPart)
   V4PromptToolApprovalResponse(LanguageModelV4ToolApprovalResponsePart)
-} derive(Debug, Eq)
+}
 
 ///|
 fn legacy_tool_input(arguments : String) -> Json {
@@ -548,3 +555,45 @@ fn LanguageModelV4ToolApprovalResponsePart::to_legacy(
     provider_options=copy_provider_metadata(self.provider_options),
   )
 }
+
+///|
+pub extend LanguageModelV4FileData with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4FileData with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4ToolCallPart with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ToolCallPart with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4ToolResultContentPart with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ToolResultContentPart with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4ToolResultOutput with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ToolResultOutput with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4ToolResultPart with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ToolResultPart with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4ToolApprovalResponsePart with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ToolApprovalResponsePart with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4PromptPart with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4PromptPart with Eq::{not_equal, equal}

@@ -1,6 +1,6 @@
 ///|
 test "language model response metadata normalizes common provider fields" {
-  let metadata = create_language_model_response_metadata(
+  let metadata = @provider_utils.create_language_model_response_metadata(
     id="response-1",
     model="model-1",
     created=1_700_000_000,
@@ -15,6 +15,6 @@ test "language model response metadata normalizes common provider fields" {
 
 ///|
 test "language model response metadata preserves missing fields" {
-  let metadata = createLanguageModelResponseMetadata()
+  let metadata = @provider_utils.createLanguageModelResponseMetadata()
   assert_true(metadata.is_empty())
 }

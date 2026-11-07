@@ -26,10 +26,10 @@ pub(all) struct ToolLoopAgentSettings {
   stop_when : Array[@generate_text.StopCondition]?
   instructions : @prompt.Instructions?
   allow_system_in_messages : Bool
-  max_output_tokens : Int?
+  max_output_tokens : Int32?
   temperature : Double?
   top_p : Double?
-  seed : Int?
+  seed : Int32?
   stop_sequences : Array[String]
   response_format : @provider.ResponseFormat
   reasoning_effort : @provider.ReasoningEffort
@@ -49,26 +49,26 @@ pub(all) struct ToolLoopAgentSettings {
 pub fn ToolLoopAgentSettings::new(
   model~ : &@provider.LanguageModelV4,
   id? : String,
-  tools? : @provider_utils.ToolSet = Map([]),
-  tool_choice? : @provider.ToolChoice = @provider.Auto,
+  tools~ : @provider_utils.ToolSet = Map([]),
+  tool_choice~ : @provider.ToolChoice = @provider.Auto,
   stop_when? : Array[@generate_text.StopCondition],
   instructions? : @prompt.Instructions,
-  allow_system_in_messages? : Bool = false,
-  max_output_tokens? : Int,
+  allow_system_in_messages~ : Bool = false,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  response_format? : @provider.ResponseFormat = @provider.Text,
-  reasoning_effort? : @provider.ReasoningEffort = @provider.ProviderDefault,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  runtime_context? : Json = Json::empty_object(),
-  tools_context? : Map[String, Json] = Map([]),
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  response_format~ : @provider.ResponseFormat = @provider.Text,
+  reasoning_effort~ : @provider.ReasoningEffort = @provider.ProviderDefault,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  runtime_context~ : Json = Json::empty_object(),
+  tools_context~ : Map[String, Json] = Map([]),
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   experimental_sandbox? : @provider_utils.SandboxSession,
   experimental_download? : @prompt.DownloadFunction,
-  prepare_call? : ((AgentCallDraft) -> AgentCallDraft)? = None,
+  prepare_call~ : ((AgentCallDraft) -> AgentCallDraft)? = None,
 ) -> ToolLoopAgentSettings {
   {
     id,
@@ -243,3 +243,6 @@ pub impl Agent for ToolLoopAgent with fn stream(
     cancellation_token?=options.cancellation_token,
   )
 }
+
+///|
+pub extend ToolLoopAgent with Agent::{id, generate, stream, version, tools}

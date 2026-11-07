@@ -5,7 +5,7 @@ priv struct OpenAISkills {
   base_url : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -15,7 +15,7 @@ fn openai_skills(
   base_url~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAISkills {
   {

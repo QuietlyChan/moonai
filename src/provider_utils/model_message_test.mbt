@@ -3,16 +3,16 @@ test "model messages are distinct from provider language-model messages" {
   let options : Map[String, Json] = {
     "openai": { "cacheControl": { "type": "ephemeral" } },
   }
-  let message = ModelMessage::user_parts(
+  let message = @provider_utils.ModelMessage::user_parts(
     [
-      ModelContentPart::image_url("https://example.com/image.png").with_provider_options(
-        options,
-      ),
+      @provider_utils.ModelContentPart::image_url(
+        "https://example.com/image.png",
+      ).with_provider_options(options),
     ],
     provider_options=options,
   )
   let copy = message.copy()
-  copy.parts.push(ModelContentPart::text("later"))
+  copy.parts.push(@provider_utils.ModelContentPart::text("later"))
   assert_eq(message.parts.length(), 1)
   assert_eq(copy.parts.length(), 2)
   assert_true(message.provider_options.get("openai") is Some(_))
@@ -21,8 +21,10 @@ test "model messages are distinct from provider language-model messages" {
 
 ///|
 test "assistant model tool calls keep structured JSON input" {
-  let message = ModelMessage::assistant("", tool_calls=[
-    ModelToolCall::new(id="call-1", name="weather", input={ "city": "Shanghai" }),
+  let message = @provider_utils.ModelMessage::assistant("", tool_calls=[
+    @provider_utils.ModelToolCall::new(id="call-1", name="weather", input={
+      "city": "Shanghai",
+    }),
   ])
   assert_eq(message.tool_calls.length(), 1)
   assert_eq(message.tool_calls[0].input, { "city": "Shanghai" })
@@ -30,19 +32,19 @@ test "assistant model tool calls keep structured JSON input" {
 
 ///|
 test "model messages preserve tool result and approval content" {
-  let result = ModelToolResult::json(
+  let result = @provider_utils.ModelToolResult::json(
     tool_call_id="call-1",
     tool_name="weather",
     value={ "temperature": 18 },
   )
-  let approval = ModelToolApprovalResponse::new(
+  let approval = @provider_utils.ModelToolApprovalResponse::new(
     approval_id="approval-1",
     approved=true,
     provider_executed=true,
   )
-  let message = ModelMessage::tool_content([
-    ModelContentPart::tool_result(result),
-    ModelContentPart::tool_approval_response(approval),
+  let message = @provider_utils.ModelMessage::tool_content([
+    @provider_utils.ModelContentPart::tool_result(result),
+    @provider_utils.ModelContentPart::tool_approval_response(approval),
   ])
   assert_eq(message.parts.length(), 2)
   assert_true(message.parts[0] is ModelToolResultPart(_))

@@ -6,7 +6,7 @@ priv struct AlibabaVideoModel {
   api_key : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn alibaba_video_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> AlibabaVideoModel {
   {
@@ -242,7 +242,7 @@ fn alibaba_video_result(
 ///|
 fn alibaba_video_response_metadata(
   model_id : String,
-  created_at : Int,
+  created_at : Int32,
   response : @provider.ResponseMetadata,
 ) -> @provider.ResponseMetadata {
   @provider.merge_response_metadata(
@@ -254,7 +254,7 @@ fn alibaba_video_response_metadata(
 ///|
 fn alibaba_video_timeout(
   provider_name : String,
-  timeout_ms : Int,
+  timeout_ms : Int32,
 ) -> @provider.ProviderTimeoutError {
   @provider.ProviderTimeoutError(
     provider=provider_name,
@@ -313,7 +313,7 @@ fn alibaba_video_url(json : Json) -> String raise {
 }
 
 ///|
-fn alibaba_video_should_warn_fps(fps : Int?) -> Bool {
+fn alibaba_video_should_warn_fps(fps : Int32?) -> Bool {
   match fps {
     Some(value) => value != 0
     None => false

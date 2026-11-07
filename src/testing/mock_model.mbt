@@ -15,9 +15,9 @@ pub struct MockChatModel {
 pub fn MockChatModel::new(
   events : Array[@provider.StreamEvent],
   result : @provider.ChatResponse,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-model",
-  supported_urls? : Array[@provider.SupportedUrlRule] = [],
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-model",
+  supported_urls~ : Array[@provider.SupportedUrlRule] = [],
 ) -> MockChatModel {
   {
     provider_name,
@@ -88,4 +88,13 @@ pub impl @provider.ChatModel for MockChatModel with fn stream(
     on_event(event)
   }
   self.result
+}
+
+///|
+pub extend MockChatModel with @QuietlyChan/moonai/provider.ChatModel::{
+  provider,
+  supported_urls,
+  generate,
+  stream,
+  model_id,
 }

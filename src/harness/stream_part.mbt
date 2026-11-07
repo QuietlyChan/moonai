@@ -1,10 +1,11 @@
 ///|
 /// Workspace mutation surfaced by a coding-agent runtime.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1FileChangeKind {
   HarnessFileCreate
   HarnessFileModify
   HarnessFileDelete
-} derive(Debug, Eq)
+}
 
 ///|
 /// Return the bridge spelling of a file mutation.
@@ -33,10 +34,11 @@ pub fn HarnessV1FileChangeKind::from_string(
 
 ///|
 /// Reason an underlying runtime compacted its context.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1CompactionTrigger {
   HarnessManualCompaction
   HarnessAutomaticCompaction
-} derive(Debug, Eq)
+}
 
 ///|
 /// Return the bridge spelling of a compaction trigger.
@@ -67,6 +69,7 @@ pub fn HarnessV1CompactionTrigger::from_string(
 /// Tool calls, approvals, results, usage, and finish reasons reuse the
 /// provider V4 primitives so high-level workflows do not need a second model
 /// vocabulary.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1StreamPart {
   HarnessStreamStart(
     warnings~ : Array[HarnessV1CallWarning],
@@ -124,13 +127,13 @@ pub(all) enum HarnessV1StreamPart {
   HarnessCompaction(
     trigger~ : HarnessV1CompactionTrigger,
     summary~ : String,
-    tokens_before~ : Int?,
-    tokens_after~ : Int?,
+    tokens_before~ : Int32?,
+    tokens_after~ : Int32?,
     harness_metadata~ : HarnessV1Metadata
   )
   HarnessStreamError(error~ : Json)
   HarnessRaw(raw_value~ : Json)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Convert a harness event to the provider V4 stream vocabulary when the
@@ -228,3 +231,21 @@ pub fn HarnessV1StreamPart::to_provider_stream_part(
       None
   }
 }
+
+///|
+pub extend HarnessV1FileChangeKind with Debug::{to_repr}
+
+///|
+pub extend HarnessV1FileChangeKind with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1CompactionTrigger with Debug::{to_repr}
+
+///|
+pub extend HarnessV1CompactionTrigger with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1StreamPart with Debug::{to_repr}
+
+///|
+pub extend HarnessV1StreamPart with Eq::{not_equal, equal}

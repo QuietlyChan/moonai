@@ -55,7 +55,7 @@ fn perplexity_map_finish_reason(
 fn perplexity_response_metadata(value : Json) -> @provider.ResponseMetadata {
   let mut id : String? = None
   let mut model_id : String? = None
-  let mut created_at : Int? = None
+  let mut created_at : Int32? = None
   if value is Object(fields) {
     match fields.get("id") {
       Some(String(text)) => id = Some(text)

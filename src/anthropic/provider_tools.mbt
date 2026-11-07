@@ -27,7 +27,7 @@ pub fn AnthropicProvider::tools(_self : AnthropicProvider) -> AnthropicTools {
 pub fn AnthropicTools::advisor_20260301(
   _self : AnthropicTools,
   model~ : String,
-  max_uses? : Int,
+  max_uses? : Int32,
   caching? : AnthropicAdvisorCaching,
   on_input_start? : @provider_utils.ToolInputStartFunction,
   on_input_delta? : @provider_utils.ToolInputDeltaFunction,
@@ -49,7 +49,7 @@ pub fn AnthropicTools::bash_20241022(
   _self : AnthropicTools,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
-  disable_default_execute? : Bool = false,
+  disable_default_execute~ : Bool = false,
   needs_approval? : @provider_utils.ToolNeedsApproval,
   to_model_output? : @provider_utils.ToolModelOutputFunction,
   on_input_start? : @provider_utils.ToolInputStartFunction,
@@ -74,7 +74,7 @@ pub fn AnthropicTools::bash_20250124(
   _self : AnthropicTools,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
-  disable_default_execute? : Bool = false,
+  disable_default_execute~ : Bool = false,
   needs_approval? : @provider_utils.ToolNeedsApproval,
   to_model_output? : @provider_utils.ToolModelOutputFunction,
   on_input_start? : @provider_utils.ToolInputStartFunction,
@@ -130,9 +130,9 @@ pub fn AnthropicTools::codeExecution_20260120(
 /// Create Anthropic's 2024-10-22 computer tool.
 pub fn AnthropicTools::computer_20241022(
   _self : AnthropicTools,
-  display_width_px~ : Int,
-  display_height_px~ : Int,
-  display_number? : Int,
+  display_width_px~ : Int32,
+  display_height_px~ : Int32,
+  display_number? : Int32,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
   needs_approval? : @provider_utils.ToolNeedsApproval,
@@ -159,9 +159,9 @@ pub fn AnthropicTools::computer_20241022(
 /// Create Anthropic's 2025-01-24 computer tool.
 pub fn AnthropicTools::computer_20250124(
   _self : AnthropicTools,
-  display_width_px~ : Int,
-  display_height_px~ : Int,
-  display_number? : Int,
+  display_width_px~ : Int32,
+  display_height_px~ : Int32,
+  display_number? : Int32,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
   needs_approval? : @provider_utils.ToolNeedsApproval,
@@ -188,9 +188,9 @@ pub fn AnthropicTools::computer_20250124(
 /// Create Anthropic's current computer tool.
 pub fn AnthropicTools::computer_20251124(
   _self : AnthropicTools,
-  display_width_px~ : Int,
-  display_height_px~ : Int,
-  display_number? : Int,
+  display_width_px~ : Int32,
+  display_height_px~ : Int32,
+  display_number? : Int32,
   enable_zoom? : Bool,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
@@ -311,7 +311,7 @@ pub fn AnthropicTools::textEditor_20250429(
 /// Create Anthropic's current text-editor tool.
 pub fn AnthropicTools::textEditor_20250728(
   _self : AnthropicTools,
-  max_characters? : Int,
+  max_characters? : Int32,
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
   needs_approval? : @provider_utils.ToolNeedsApproval,
@@ -336,11 +336,11 @@ pub fn AnthropicTools::textEditor_20250728(
 /// Create Anthropic's 2025-09-10 web-fetch tool.
 pub fn AnthropicTools::webFetch_20250910(
   _self : AnthropicTools,
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   citations? : AnthropicWebFetchCitations,
-  max_content_tokens? : Int,
+  max_content_tokens? : Int32,
   on_input_start? : @provider_utils.ToolInputStartFunction,
   on_input_delta? : @provider_utils.ToolInputDeltaFunction,
   on_input_available? : @provider_utils.ToolInputAvailableFunction,
@@ -361,11 +361,11 @@ pub fn AnthropicTools::webFetch_20250910(
 /// Create Anthropic's current web-fetch tool.
 pub fn AnthropicTools::webFetch_20260209(
   _self : AnthropicTools,
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   citations? : AnthropicWebFetchCitations,
-  max_content_tokens? : Int,
+  max_content_tokens? : Int32,
   on_input_start? : @provider_utils.ToolInputStartFunction,
   on_input_delta? : @provider_utils.ToolInputDeltaFunction,
   on_input_available? : @provider_utils.ToolInputAvailableFunction,
@@ -386,7 +386,7 @@ pub fn AnthropicTools::webFetch_20260209(
 /// Create Anthropic's 2025-03-05 web-search tool.
 pub fn AnthropicTools::webSearch_20250305(
   _self : AnthropicTools,
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   user_location? : AnthropicWebSearchUserLocation,
@@ -409,7 +409,7 @@ pub fn AnthropicTools::webSearch_20250305(
 /// Create Anthropic's current web-search tool.
 pub fn AnthropicTools::webSearch_20260209(
   _self : AnthropicTools,
-  max_uses? : Int,
+  max_uses? : Int32,
   allowed_domains? : Array[String],
   blocked_domains? : Array[String],
   user_location? : AnthropicWebSearchUserLocation,

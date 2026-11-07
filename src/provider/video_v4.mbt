@@ -4,6 +4,7 @@
 /// `provider_options` is kept on the file because the AI SDK V4 contract allows
 /// providers to attach options to individual input parts. Protocol adapters
 /// that do not support per-file options may ignore the map at their wire edge.
+#derive(Debug, Eq)
 pub(all) enum VideoModelV4File {
   VideoV4Data(
     data~ : String,
@@ -20,14 +21,14 @@ pub(all) enum VideoModelV4File {
     media_type~ : String?,
     provider_options~ : Map[String, Json]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an inline Base64 video input.
 pub fn VideoModelV4File::base64(
   data~ : String,
   media_type~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> VideoModelV4File {
   VideoV4Data(data~, media_type~, provider_options~)
 }
@@ -37,7 +38,7 @@ pub fn VideoModelV4File::base64(
 pub fn VideoModelV4File::bytes(
   data~ : Bytes,
   media_type~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> VideoModelV4File {
   VideoV4Bytes(data~, media_type~, provider_options~)
 }
@@ -47,24 +48,26 @@ pub fn VideoModelV4File::bytes(
 pub fn VideoModelV4File::url(
   url : String,
   media_type? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> VideoModelV4File {
   VideoV4Url(url~, media_type~, provider_options~)
 }
 
 ///|
 /// The semantic role of a first/last frame input.
+#derive(Debug, Eq)
 pub(all) enum VideoModelV4FrameType {
   VideoV4FirstFrame
   VideoV4LastFrame
-} derive(Debug, Eq)
+}
 
 ///|
 /// A frame image paired with its semantic role.
+#derive(Debug, Eq)
 pub(all) struct VideoModelV4FrameImage {
   image : VideoModelV4File
   frame_type : VideoModelV4FrameType
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a role-tagged frame image.
@@ -93,14 +96,15 @@ pub fn VideoModelV4FrameImage::last(
 
 ///|
 /// Provider-neutral options passed to `VideoModelV4::do_generate`.
+#derive(Debug)
 pub(all) struct VideoModelV4CallOptions {
   prompt : String?
-  n : Int
+  n : Int32
   aspect_ratio : String?
   resolution : String?
   duration : Double?
-  fps : Int?
-  seed : Int?
+  fps : Int32?
+  seed : Int32?
   image : VideoModelV4File?
   frame_images : Array[VideoModelV4FrameImage]?
   input_references : Array[VideoModelV4File]?
@@ -110,7 +114,7 @@ pub(all) struct VideoModelV4CallOptions {
   headers : Map[String, String]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct V4 video generation options.
@@ -120,20 +124,20 @@ pub(all) struct VideoModelV4CallOptions {
 /// endpoint when generation completes.
 pub fn VideoModelV4CallOptions::new(
   prompt? : String,
-  n? : Int = 1,
+  n~ : Int32 = 1,
   aspect_ratio? : String,
   resolution? : String,
   duration? : Double,
-  fps? : Int,
-  seed? : Int,
+  fps? : Int32,
+  seed? : Int32,
   image? : VideoModelV4File,
   frame_images? : Array[VideoModelV4FrameImage],
   input_references? : Array[VideoModelV4File],
   generate_audio? : Bool,
   webhook_url? : String,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> VideoModelV4CallOptions {
   {
@@ -158,28 +162,30 @@ pub fn VideoModelV4CallOptions::new(
 
 ///|
 /// Generated video data returned by a V4 provider.
+#derive(Debug, Eq)
 pub(all) enum VideoModelV4VideoData {
   VideoV4Url(url~ : String, media_type~ : String)
   VideoV4Base64(data~ : String, media_type~ : String)
   VideoV4Binary(data~ : Bytes, media_type~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Result of one V4 video model call.
+#derive(Debug, Eq)
 pub(all) struct VideoModelV4Result {
   videos : Array[VideoModelV4VideoData]
   warnings : Array[Warning]
   provider_metadata : Map[String, Json]
   request : RequestMetadata?
   response : ResponseMetadata?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 result.
 pub fn VideoModelV4Result::new(
   videos : Array[VideoModelV4VideoData],
-  warnings? : Array[Warning] = [],
-  provider_metadata? : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
+  provider_metadata~ : Map[String, Json] = Map([]),
   request? : RequestMetadata,
   response? : ResponseMetadata,
 ) -> VideoModelV4Result {
@@ -368,7 +374,7 @@ pub(open) trait VideoModelV4 {
   fn specification_version(Self) -> String
   fn provider(Self) -> String
   fn model_id(Self) -> String
-  fn max_videos_per_call(Self) -> Int?
+  fn max_videos_per_call(Self) -> Int32?
   async fn do_generate(Self, VideoModelV4CallOptions) -> VideoModelV4Result
   async fn do_start(Self, VideoModelV4CallOptions) -> VideoModelV4OperationStartResult
   async fn do_status(Self, VideoModelV4OperationStatusCallOptions) -> VideoModelV4OperationStatusResult
@@ -376,30 +382,32 @@ pub(open) trait VideoModelV4 {
 
 ///|
 /// Unified state of a provider-side asynchronous video operation.
+#derive(Debug, Eq)
 pub(all) enum VideoModelV4OperationState {
   OperationSubmitted
   OperationRunning
   OperationSucceeded
   OperationFailed
-} derive(Debug, Eq)
+}
 
 ///|
 /// Call options for polling one asynchronous video operation.
+#derive(Debug)
 pub(all) struct VideoModelV4OperationStatusCallOptions {
   operation_id : String
   provider_options : Map[String, Json]
   headers : Map[String, String]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct one operation-status call.
 pub fn VideoModelV4OperationStatusCallOptions::new(
   operation_id~ : String,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> VideoModelV4OperationStatusCallOptions {
   { operation_id, provider_options, headers, retry_policy, cancellation_token, }
@@ -411,20 +419,21 @@ pub fn VideoModelV4OperationStatusCallOptions::new(
 /// `operation_id` is the provider task identifier; pass it to `do_status`
 /// to poll the operation, or keep it to let an external webhook receiver
 /// observe completion out of band.
+#derive(Debug)
 pub(all) struct VideoModelV4OperationStartResult {
   operation_id : String
   state : VideoModelV4OperationState
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug)
+}
 
 ///|
 /// Construct one operation-start result.
 pub fn VideoModelV4OperationStartResult::new(
   operation_id~ : String,
-  state? : VideoModelV4OperationState = OperationSubmitted,
-  provider_metadata? : Map[String, Json] = Map([]),
-  warnings? : Array[Warning] = [],
+  state~ : VideoModelV4OperationState = OperationSubmitted,
+  provider_metadata~ : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
 ) -> VideoModelV4OperationStartResult {
   {
     operation_id,
@@ -437,13 +446,14 @@ pub fn VideoModelV4OperationStartResult::new(
 ///|
 /// Result of polling one asynchronous video operation. The generated video
 /// is present only once the state reaches `OperationSucceeded`.
+#derive(Debug)
 pub(all) struct VideoModelV4OperationStatusResult {
   operation_id : String
   state : VideoModelV4OperationState
   result : VideoModelV4Result?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug)
+}
 
 ///|
 /// Construct one operation-status result.
@@ -451,8 +461,8 @@ pub fn VideoModelV4OperationStatusResult::new(
   operation_id~ : String,
   state~ : VideoModelV4OperationState,
   result? : VideoModelV4Result,
-  provider_metadata? : Map[String, Json] = Map([]),
-  warnings? : Array[Warning] = [],
+  provider_metadata~ : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
 ) -> VideoModelV4OperationStatusResult {
   {
     operation_id,
@@ -462,3 +472,51 @@ pub fn VideoModelV4OperationStatusResult::new(
     warnings: copy_warnings(warnings),
   }
 }
+
+///|
+pub extend VideoModelV4File with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4File with Eq::{not_equal, equal}
+
+///|
+pub extend VideoModelV4FrameType with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4FrameType with Eq::{not_equal, equal}
+
+///|
+pub extend VideoModelV4FrameImage with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4FrameImage with Eq::{not_equal, equal}
+
+///|
+pub extend VideoModelV4CallOptions with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4VideoData with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4VideoData with Eq::{not_equal, equal}
+
+///|
+pub extend VideoModelV4Result with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4Result with Eq::{not_equal, equal}
+
+///|
+pub extend VideoModelV4OperationState with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4OperationState with Eq::{not_equal, equal}
+
+///|
+pub extend VideoModelV4OperationStatusCallOptions with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4OperationStartResult with Debug::{to_repr}
+
+///|
+pub extend VideoModelV4OperationStatusResult with Debug::{to_repr}

@@ -1,9 +1,10 @@
 ///|
 /// The language-model operation currently being transformed by middleware.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4MiddlewareOperation {
   Generate
   Stream
-} derive(Debug, Eq)
+}
 
 ///|
 /// Parameters and model identity visible to a V4 middleware transform.
@@ -98,3 +99,9 @@ pub async fn LanguageModelV4Middleware::transform(
     None => params
   }
 }
+
+///|
+pub extend LanguageModelV4MiddlewareOperation with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4MiddlewareOperation with Eq::{not_equal, equal}

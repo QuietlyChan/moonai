@@ -38,7 +38,7 @@ pub(open) trait ChatModel {
 pub(open) trait EmbeddingWireModel {
   fn provider(Self) -> String
   fn model_id(Self) -> String
-  fn max_embeddings_per_call(Self) -> Int
+  fn max_embeddings_per_call(Self) -> Int32
   /// Whether separate embedding batches may be in flight at the same time.
   ///
   /// Providers that serialize or rate-limit embedding requests should return
@@ -74,7 +74,7 @@ pub(open) trait CompletionModel {
 pub(open) trait ImageWireModel {
   fn provider(Self) -> String
   fn model_id(Self) -> String
-  fn max_images_per_call(Self) -> Int
+  fn max_images_per_call(Self) -> Int32
   async fn generate(Self, ImageCallOptions) -> ImageResponse
 }
 
@@ -86,7 +86,7 @@ pub(open) trait ImageWireModel {
 pub(open) trait VideoWireModel {
   fn provider(Self) -> String
   fn model_id(Self) -> String
-  fn max_videos_per_call(Self) -> Int
+  fn max_videos_per_call(Self) -> Int32
   async fn generate(Self, VideoCallOptions) -> VideoResponse
 }
 

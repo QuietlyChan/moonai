@@ -91,7 +91,7 @@ fn openai_responses_v4_inline_data(
 fn openai_responses_v4_user_part(
   part : @provider.LanguageModelV4PromptPart,
   pass_through_unsupported_files : Bool,
-  index : Int,
+  index : Int32,
   provider_name : String,
 ) -> Json raise {
   let provider_options = openai_v4_prompt_part_options(part)
@@ -451,7 +451,7 @@ fn openai_responses_v4_function_call_wire(
 fn openai_responses_v4_tool_result_content_part(
   part : @provider.LanguageModelV4ToolResultContentPart,
   pass_through_unsupported_files : Bool,
-  index : Int,
+  index : Int32,
   provider_name : String,
   warnings : Array[@provider.Warning],
 ) -> Json? raise {
@@ -1138,7 +1138,7 @@ fn convert_v4_prompt_to_openai_responses(
   capabilities : OpenAIResponsesToolCapabilities,
 ) -> Array[Json] raise {
   let input : Array[Json] = []
-  let reasoning_item_indices : Map[String, Int] = Map([])
+  let reasoning_item_indices : Map[String, Int32] = Map([])
   let reasoning_references : Map[String, Bool] = Map([])
   let reasoning_items_with_encrypted_content : Map[String, Bool] = Map([])
   let provider_executed_tool_calls : Map[String, Bool] = Map([])

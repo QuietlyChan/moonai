@@ -3,10 +3,11 @@
 ///
 /// The string form is encoded as UTF-8. The bytes form preserves the exact
 /// key material, matching the AI SDK's `string | Uint8Array` option.
+#derive(Debug, Eq)
 pub(all) enum ToolApprovalSecret {
   ToolApprovalSecretString(String)
   ToolApprovalSecretBytes(Bytes)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a tool approval secret from UTF-8 text.
@@ -29,7 +30,7 @@ fn ToolApprovalSecret::to_bytes(self : ToolApprovalSecret) -> Bytes {
 }
 
 ///|
-fn compare_canonical_json_keys(left : String, right : String) -> Int {
+fn compare_canonical_json_keys(left : String, right : String) -> Int32 {
   let shared_length = if left.length() < right.length() {
     left.length()
   } else {
@@ -309,3 +310,9 @@ fn validate_tool_approval_signature(
     )
   }
 }
+
+///|
+pub extend ToolApprovalSecret with Debug::{to_repr}
+
+///|
+pub extend ToolApprovalSecret with Eq::{not_equal, equal}

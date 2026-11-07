@@ -4,11 +4,12 @@ pub const HARNESS_V1_SPECIFICATION_VERSION : String = "harness-v1"
 
 ///|
 /// Baseline permission mode for adapter-native built-in tools.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1PermissionMode {
   HarnessAllowReads
   HarnessAllowEdits
   HarnessAllowAll
-} derive(Debug, Eq)
+}
 
 ///|
 /// Encode a permission mode for bridge messages.
@@ -37,14 +38,16 @@ pub fn HarnessV1PermissionMode::from_string(
 
 ///|
 /// How a built-in tool is used by a coding agent.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1BuiltinToolUseKind {
   HarnessReadonlyTool
   HarnessEditTool
   HarnessBashTool
-} derive(Debug, Eq)
+}
 
 ///|
 /// Cross-harness vocabulary for familiar runtime tools.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1BuiltinToolName {
   HarnessRead
   HarnessWrite
@@ -53,7 +56,7 @@ pub(all) enum HarnessV1BuiltinToolName {
   HarnessGrep
   HarnessGlob
   HarnessWebSearch
-} derive(Debug, Eq)
+}
 
 ///|
 /// Return the wire spelling of a common built-in tool.
@@ -159,11 +162,12 @@ pub fn commonTool(
 
 ///|
 /// A host-defined tool advertised to a harness runtime.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1ToolSpec {
   name : String
   description : String?
   input_schema : Json?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a harness tool specification.
@@ -177,10 +181,11 @@ pub fn HarnessV1ToolSpec::new(
 
 ///|
 /// A single fresh prompt for a harness turn.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1Prompt {
   HarnessTextPrompt(String)
   HarnessUserMessage(@provider_utils.ModelMessage)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a text prompt.
@@ -231,19 +236,21 @@ fn harness_prompt_part_to_text(
 
 ///|
 /// One additional text file belonging to a harness skill.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1SkillFile {
   path : String
   content : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// A self-contained instruction bundle for a coding-agent runtime.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1Skill {
   name : String
   description : String
   content : String
   files : Array[HarnessV1SkillFile]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a harness skill.
@@ -251,33 +258,36 @@ pub fn HarnessV1Skill::new(
   name~ : String,
   description~ : String,
   content~ : String,
-  files? : Array[HarnessV1SkillFile] = [],
+  files~ : Array[HarnessV1SkillFile] = [],
 ) -> HarnessV1Skill {
   { name, description, content, files, }
 }
 
 ///|
 /// One file included in an adapter bootstrap recipe.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1BootstrapFile {
   path : String
   content : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// One sequential command in an adapter bootstrap recipe.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1BootstrapCommand {
   command : String
   working_directory : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Files and commands needed to install a harness bridge.
+#derive(Debug, Eq)
 pub(all) struct HarnessV1Bootstrap {
   harness_id : String
   bootstrap_dir : String
   files : Array[HarnessV1BootstrapFile]
   commands : Array[HarnessV1BootstrapCommand]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Stable identity of a bootstrap recipe.
@@ -314,10 +324,11 @@ pub fn HarnessV1Bootstrap::identity(self : HarnessV1Bootstrap) -> String {
 
 ///|
 /// Adapter-native built-in tool filtering policy.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1BuiltinToolFiltering {
   HarnessAllowTools(Array[String])
   HarnessDenyTools(Array[String])
-} derive(Debug, Eq)
+}
 
 ///|
 /// Whether a built-in tool remains active under the filtering policy.
@@ -361,12 +372,85 @@ pub fn getHarnessV1BuiltinToolFilteringDenialReason(
 
 ///|
 /// Non-fatal warning emitted by a harness call.
+#derive(Debug, Eq)
 pub(all) enum HarnessV1CallWarning {
   HarnessUnsupportedSetting(setting~ : String, details~ : String?)
   HarnessUnsupportedTool(tool~ : String, details~ : String?)
   HarnessOtherWarning(message~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Adapter-namespaced metadata attached to stream parts.
 pub type HarnessV1Metadata = Map[String, Json]
+
+///|
+pub extend HarnessV1PermissionMode with Debug::{to_repr}
+
+///|
+pub extend HarnessV1PermissionMode with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1BuiltinToolUseKind with Debug::{to_repr}
+
+///|
+pub extend HarnessV1BuiltinToolUseKind with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1BuiltinToolName with Debug::{to_repr}
+
+///|
+pub extend HarnessV1BuiltinToolName with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1ToolSpec with Debug::{to_repr}
+
+///|
+pub extend HarnessV1ToolSpec with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1Prompt with Debug::{to_repr}
+
+///|
+pub extend HarnessV1Prompt with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1SkillFile with Debug::{to_repr}
+
+///|
+pub extend HarnessV1SkillFile with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1Skill with Debug::{to_repr}
+
+///|
+pub extend HarnessV1Skill with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1BootstrapFile with Debug::{to_repr}
+
+///|
+pub extend HarnessV1BootstrapFile with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1BootstrapCommand with Debug::{to_repr}
+
+///|
+pub extend HarnessV1BootstrapCommand with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1Bootstrap with Debug::{to_repr}
+
+///|
+pub extend HarnessV1Bootstrap with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1BuiltinToolFiltering with Debug::{to_repr}
+
+///|
+pub extend HarnessV1BuiltinToolFiltering with Eq::{not_equal, equal}
+
+///|
+pub extend HarnessV1CallWarning with Debug::{to_repr}
+
+///|
+pub extend HarnessV1CallWarning with Eq::{not_equal, equal}

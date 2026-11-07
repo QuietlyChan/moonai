@@ -9,19 +9,32 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createMistral(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MistralProvider
+pub fn createMistral(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MistralProvider
 
-pub fn create_mistral(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MistralProvider
+pub fn create_mistral(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MistralProvider
 
-pub fn mistral(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn mistral(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
 // Errors
 
 // Types and methods
 type MistralChatLanguageModel
+pub async fn MistralChatLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn MistralChatLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn MistralChatLanguageModel::model_id(Self) -> String
+pub fn MistralChatLanguageModel::provider(Self) -> String
+pub fn MistralChatLanguageModel::specification_version(Self) -> String
+pub fn MistralChatLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for MistralChatLanguageModel
 
 type MistralEmbeddingModel
+pub async fn MistralEmbeddingModel::do_embed(Self, @provider.EmbeddingModelV4CallOptions) -> @provider.EmbeddingModelV4Result
+pub fn MistralEmbeddingModel::max_embeddings_per_call(Self) -> Int32?
+pub fn MistralEmbeddingModel::max_input_bytes_per_call(Self) -> Int64?
+pub fn MistralEmbeddingModel::model_id(Self) -> String
+pub fn MistralEmbeddingModel::provider(Self) -> String
+pub fn MistralEmbeddingModel::specification_version(Self) -> String
+pub fn MistralEmbeddingModel::supports_parallel_calls(Self) -> Bool
 pub impl @provider.EmbeddingModelV4 for MistralEmbeddingModel
 
 pub struct MistralProvider {
@@ -32,8 +45,13 @@ pub fn MistralProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn MistralProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn MistralProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn MistralProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn MistralProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn MistralProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn MistralProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn MistralProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn MistralProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn MistralProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn MistralProvider::specification_version(Self) -> String
 pub fn MistralProvider::speech(Self, String) -> &@provider.SpeechModelV4
 pub fn MistralProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
 pub fn MistralProvider::speech_model(Self, String) -> &@provider.SpeechModelV4

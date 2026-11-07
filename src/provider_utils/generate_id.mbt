@@ -19,9 +19,9 @@ const DEFAULT_ID_ALPHABET : String = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef
 /// This is the MoonBit counterpart of AI SDK's `createIdGenerator`.
 pub fn create_id_generator(
   prefix? : String,
-  separator? : String = "-",
-  size? : Int = 16,
-  alphabet? : String = DEFAULT_ID_ALPHABET,
+  separator~ : String = "-",
+  size~ : Int32 = 16,
+  alphabet~ : String = DEFAULT_ID_ALPHABET,
 ) -> IdGenerator raise @provider.InvalidArgumentError {
   guard size >= 0 else {
     raise @provider.InvalidArgumentError(
@@ -44,7 +44,7 @@ pub fn create_id_generator(
       )
     _ => ()
   }
-  let random = @random.Rand::new()
+  let random = @random.Rand()
   let generator : IdGenerator = () => {
     let result = StringBuilder(size_hint=size)
     for _ in 0..<size {
@@ -73,9 +73,9 @@ pub fn generate_id() -> String {
 /// AI SDK-style camel-case spelling for `create_id_generator`.
 pub fn createIdGenerator(
   prefix? : String,
-  separator? : String = "-",
-  size? : Int = 16,
-  alphabet? : String = DEFAULT_ID_ALPHABET,
+  separator~ : String = "-",
+  size~ : Int32 = 16,
+  alphabet~ : String = DEFAULT_ID_ALPHABET,
 ) -> IdGenerator raise @provider.InvalidArgumentError {
   create_id_generator(prefix?, separator~, size~, alphabet~)
 }
@@ -89,7 +89,7 @@ pub fn generateId() -> String {
 ///|
 fn make_default_id_generator() -> IdGenerator {
   let alphabet_chars = DEFAULT_ID_ALPHABET.to_array()
-  let random = @random.Rand::new()
+  let random = @random.Rand()
   () => {
     let result = StringBuilder(size_hint=16)
     for _ in 0..<16 {

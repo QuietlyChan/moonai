@@ -6,7 +6,7 @@
 /// moment, but transports them through that same namespaced boundary.
 fn embedding_provider_options(
   model : &@provider.EmbeddingModelV4,
-  dimensions : Int?,
+  dimensions : Int32?,
   user : String?,
   options : Map[String, Json],
 ) -> Map[String, Json] {
@@ -46,11 +46,11 @@ fn embedding_provider_options(
 pub async fn embed(
   model : &@provider.EmbeddingModelV4,
   value : String,
-  dimensions? : Int,
+  dimensions? : Int32,
   user? : String,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
   runtime_context? : Json,
   on_start? : async (EmbedStartEvent) -> Unit,
@@ -126,13 +126,13 @@ pub async fn embed(
 pub async fn embed_many(
   model : &@provider.EmbeddingModelV4,
   values : Array[String],
-  dimensions? : Int,
+  dimensions? : Int32,
   user? : String,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
-  max_parallel_calls? : Int,
+  max_parallel_calls? : Int32,
   runtime_context? : Json,
   on_start? : async (EmbedStartEvent) -> Unit,
   on_end? : async (EmbedEndEvent) -> Unit,
@@ -197,7 +197,7 @@ pub async fn embed_many(
   let warnings : Array[Warning] = []
   let mut offset = 0
   while offset < batches.length() {
-    let tasks : Array[async () -> (Int, @provider.EmbeddingModelV4Result)] = []
+    let tasks : Array[async () -> (Int32, @provider.EmbeddingModelV4Result)] = []
     let mut next_offset = offset
     while next_offset < batches.length() &&
           tasks.length() < batch_parallel_limit {
@@ -285,13 +285,13 @@ pub async fn embed_many(
 pub async fn embedMany(
   model : &@provider.EmbeddingModelV4,
   values : Array[String],
-  dimensions? : Int,
+  dimensions? : Int32,
   user? : String,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
-  max_parallel_calls? : Int,
+  max_parallel_calls? : Int32,
   runtime_context? : Json,
   on_start? : async (EmbedStartEvent) -> Unit,
   on_end? : async (EmbedEndEvent) -> Unit,
@@ -321,7 +321,7 @@ pub async fn embedMany(
 /// reject it with its own diagnostics.
 fn split_embedding_batches(
   values : Array[String],
-  max_embeddings_per_call : Int,
+  max_embeddings_per_call : Int32,
   max_input_bytes_per_call : Int64?,
 ) -> Array[Array[String]] raise {
   if max_input_bytes_per_call is Some(limit) {

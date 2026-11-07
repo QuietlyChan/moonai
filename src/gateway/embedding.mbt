@@ -7,13 +7,13 @@ struct GatewayEmbeddingModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
 /// The gateway's per-request embedding input limit.
-pub const GATEWAY_MAX_EMBEDDINGS_PER_CALL : Int = 2048
+pub const GATEWAY_MAX_EMBEDDINGS_PER_CALL : Int32 = 2048
 
 ///|
 fn gateway_embedding_value(
@@ -21,7 +21,7 @@ fn gateway_embedding_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> GatewayEmbeddingModel {
   {
@@ -56,7 +56,7 @@ fn GatewayEmbeddingModel::embedding_headers(
 /// Decode the embedding response: embeddings array, token usage, warnings.
 fn gateway_decode_embedding_response(
   value : Json,
-) -> (Array[Array[Double]], Int?) raise {
+) -> (Array[Array[Double]], Int32?) raise {
   // Adapt the pure built-in parser to the fallible transport hook contract.
   @provider.check_cancellation(None)
   match value {
@@ -112,7 +112,7 @@ pub impl @provider.EmbeddingModelV4 for GatewayEmbeddingModel with fn model_id(
 ///|
 pub impl @provider.EmbeddingModelV4 for GatewayEmbeddingModel with fn max_embeddings_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(GATEWAY_MAX_EMBEDDINGS_PER_CALL)
 }
 
@@ -184,4 +184,15 @@ pub impl @provider.EmbeddingModelV4 for GatewayEmbeddingModel with fn do_embed(
     request=response.request,
     response=response.response,
   )
+}
+
+///|
+pub extend GatewayEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  provider,
+  max_embeddings_per_call,
+  supports_parallel_calls,
+  max_input_bytes_per_call,
+  model_id,
 }

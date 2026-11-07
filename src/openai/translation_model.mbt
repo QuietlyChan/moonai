@@ -7,7 +7,8 @@ pub type OpenAITranslationModelId = String
 ///
 /// The upstream API currently exposes an empty options schema. Keeping the
 /// type public gives callers a stable extension point when OpenAI adds fields.
-pub(all) struct OpenAITranslationModelOptions {} derive(Debug, Eq)
+#derive(Debug, Eq)
+pub(all) struct OpenAITranslationModelOptions {}
 
 ///|
 /// Construct the current empty OpenAI translation options value.
@@ -19,7 +20,7 @@ pub fn OpenAITranslationModelOptions::new() -> OpenAITranslationModelOptions {
 /// Convert translation options to the OpenAI provider namespace.
 pub fn OpenAITranslationModelOptions::to_provider_options(
   _self : OpenAITranslationModelOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   openai_typed_namespace(provider_name, Map([]))
 }
@@ -239,7 +240,7 @@ async fn send_openai_translation_audio(
 }
 
 ///|
-fn openai_translation_close_error(code : Int?, reason : String?) -> String {
+fn openai_translation_close_error(code : Int32?, reason : String?) -> String {
   let code_text = match code {
     Some(value) => value.to_string()
     None => "unknown"
@@ -455,4 +456,16 @@ pub impl @provider.SpeechTranslationModelV4 for OpenAITranslationModel with fn d
     request?=response.request,
     response?=response.response,
   )
+}
+
+///|
+pub extend OpenAITranslationModelOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAITranslationModelOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAITranslationModel with @QuietlyChan/moonai/provider.SpeechTranslationModelV4::{
+  specification_version,
+  do_stream,
 }

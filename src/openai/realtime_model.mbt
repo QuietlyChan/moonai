@@ -6,7 +6,7 @@ pub struct OpenAIRealtimeModel {
   priv model_id : String
   priv api_key : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn openai_realtime_model(
   model_id~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAIRealtimeModel {
   {
@@ -193,7 +193,7 @@ pub struct OpenAIRealtimeFactory {
   priv base_url : String
   priv api_key : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -203,7 +203,7 @@ fn openai_realtime_factory(
   base_url~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAIRealtimeFactory {
   {
@@ -284,4 +284,22 @@ pub impl @provider.RealtimeFactoryV4 for OpenAIRealtimeFactory with fn get_token
   options,
 ) -> @provider.RealtimeModelV4ClientSecretResult {
   self.get_token(options)
+}
+
+///|
+pub extend OpenAIRealtimeModel with @QuietlyChan/moonai/provider.RealtimeModelV4::{
+  specification_version,
+  provider,
+  get_health_check_response,
+  get_websocket_config,
+  do_create_client_secret,
+  serialize_client_event,
+  build_session_config,
+  parse_server_event,
+  model_id,
+}
+
+///|
+pub extend OpenAIRealtimeFactory with @QuietlyChan/moonai/provider.RealtimeFactoryV4::{
+  provider,
 }

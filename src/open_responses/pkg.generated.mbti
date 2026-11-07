@@ -6,36 +6,53 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createOpenResponses(name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int, id_generator? : () -> String, http_transport? : &@provider_utils.HttpTransport) -> OpenResponsesProvider
+pub fn createOpenResponses(name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, id_generator? : () -> String, http_transport? : &@provider_utils.HttpTransport) -> OpenResponsesProvider
 
-pub fn create_open_responses(provider_name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int, id_generator? : () -> String, http_transport? : &@provider_utils.HttpTransport, extensions? : @protocol.OpenResponsesExtensionRegistry) -> OpenResponsesProvider
+pub fn create_open_responses(provider_name~ : String, url~ : String, api_key? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, id_generator? : () -> String, http_transport? : &@provider_utils.HttpTransport, extensions? : @protocol.OpenResponsesExtensionRegistry) -> OpenResponsesProvider
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenResponsesLanguageModelOptions {
   reasoning_summary : OpenResponsesReasoningSummary?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenResponsesLanguageModelOptions::equal(Self, Self) -> Bool
 pub fn OpenResponsesLanguageModelOptions::new(reasoning_summary? : OpenResponsesReasoningSummary) -> Self
-pub fn OpenResponsesLanguageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, Json]
+pub fn OpenResponsesLanguageModelOptions::not_equal(Self, Self) -> Bool
+pub fn OpenResponsesLanguageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+pub fn OpenResponsesLanguageModelOptions::to_repr(Self) -> @debug.Repr
 
 pub struct OpenResponsesProvider {
   // private fields
 }
+pub fn OpenResponsesProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn OpenResponsesProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn OpenResponsesProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn OpenResponsesProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenResponsesProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenResponsesProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn OpenResponsesProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn OpenResponsesProvider::specification_version(Self) -> String
+pub fn OpenResponsesProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn OpenResponsesProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for OpenResponsesProvider
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenResponsesReasoningSummary {
   ReasoningSummaryConcise
   ReasoningSummaryDetailed
   ReasoningSummaryAuto
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenResponsesReasoningSummary::equal(Self, Self) -> Bool
+pub fn OpenResponsesReasoningSummary::not_equal(Self, Self) -> Bool
+pub fn OpenResponsesReasoningSummary::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

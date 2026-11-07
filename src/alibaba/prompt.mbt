@@ -3,9 +3,10 @@
 ///
 /// Alibaba currently documents `ephemeral`, while the open string keeps the
 /// type forward-compatible with provider additions, matching AI SDK.
+#derive(Debug, Eq)
 pub(all) struct AlibabaCacheControl {
   cache_type : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a typed Alibaba cache-control marker.
@@ -40,7 +41,7 @@ fn alibaba_cache_control(options : Map[String, Json]) -> Json? {
 ///|
 fn record_alibaba_cache_control(
   value : Json?,
-  count : Ref[Int],
+  count : Ref[Int32],
   warnings : Array[@provider.Warning],
 ) -> Json? {
   guard value is Some(cache_control) else { return None }
@@ -69,3 +70,9 @@ fn alibaba_text_block(text : String, cache_control : Json?) -> Json {
     ),
   )
 }
+
+///|
+pub extend AlibabaCacheControl with Debug::{to_repr}
+
+///|
+pub extend AlibabaCacheControl with Eq::{not_equal, equal}

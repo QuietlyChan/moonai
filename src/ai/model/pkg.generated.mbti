@@ -5,16 +5,17 @@ import {
   "QuietlyChan/moonai/ai/prompt",
   "QuietlyChan/moonai/provider",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
-pub fn add_tool_input_examples_middleware(prefix? : String, format? : (@provider.LanguageModelV4FunctionToolInputExample, Int) -> String, remove? : Bool) -> @provider.LanguageModelV4Middleware
+pub fn add_tool_input_examples_middleware(prefix? : String, format? : (@provider.LanguageModelV4FunctionToolInputExample, Int32) -> String, remove? : Bool) -> @provider.LanguageModelV4Middleware
 
 pub fn asLanguageModelV4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
 pub fn as_language_model_v4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
-pub fn default_embedding_settings_middleware(headers? : Map[String, String], provider_options? : Map[String, Json]) -> @provider.EmbeddingModelV4Middleware
+pub fn default_embedding_settings_middleware(headers? : Map[String, String], provider_options? : Map[String, @json.Json]) -> @provider.EmbeddingModelV4Middleware
 
 pub fn default_instructions_middleware(instructions~ : @prompt.Instructions) -> @provider.LanguageModelV4Middleware
 
@@ -95,15 +96,23 @@ pub fn wrap_language_model_v4(&@provider.LanguageModelV4, @provider.LanguageMode
 pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[@provider.LanguageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub suberror InvalidModelIdError {
   InvalidModelIdError(value~ : String)
-} derive(Eq, @debug.Debug)
+}
+pub fn InvalidModelIdError::equal(Self, Self) -> Bool
+pub fn InvalidModelIdError::not_equal(Self, Self) -> Bool
+pub fn InvalidModelIdError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror NoSuchModelError {
   NoSuchModelError(model_id~ : ModelId, model_type~ : ModelType)
-} derive(Eq, @debug.Debug)
+}
+pub fn NoSuchModelError::equal(Self, Self) -> Bool
 pub fn NoSuchModelError::model_id(Self) -> ModelId
 pub fn NoSuchModelError::model_type(Self) -> ModelType
+pub fn NoSuchModelError::not_equal(Self, Self) -> Bool
+pub fn NoSuchModelError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) struct ChatModelMiddleware {
@@ -131,10 +140,14 @@ pub(all) struct ChatModelMiddlewareContext {
 pub async fn ChatModelMiddlewareContext::generate(Self) -> @provider.ChatResponse
 pub async fn ChatModelMiddlewareContext::stream(Self) -> @provider.ChatResponse
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ChatModelMiddlewareOperation {
   Generate
   Stream
-} derive(Eq, @debug.Debug)
+}
+pub fn ChatModelMiddlewareOperation::equal(Self, Self) -> Bool
+pub fn ChatModelMiddlewareOperation::not_equal(Self, Self) -> Bool
+pub fn ChatModelMiddlewareOperation::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ChatModelTransformContext {
   operation : ChatModelMiddlewareOperation
@@ -145,7 +158,13 @@ pub(all) struct ChatModelTransformContext {
 pub struct ChatModelV4Adapter {
   model : &@provider.ChatModel
 }
+pub async fn ChatModelV4Adapter::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn ChatModelV4Adapter::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn ChatModelV4Adapter::model_id(Self) -> String
 pub fn ChatModelV4Adapter::new(&@provider.ChatModel) -> Self
+pub fn ChatModelV4Adapter::provider(Self) -> String
+pub fn ChatModelV4Adapter::specification_version(Self) -> String
+pub fn ChatModelV4Adapter::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for ChatModelV4Adapter
 
 pub(all) enum CompletionModelReference {
@@ -162,10 +181,14 @@ pub(all) enum EmbeddingModelReference {
 pub fn EmbeddingModelReference::instance(&@provider.EmbeddingModelV4) -> Self
 pub fn EmbeddingModelReference::named(provider~ : String, model_id~ : String) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ExtractReasoningMode {
   ExtractMergeIntoText
   ExtractStrip
-} derive(Eq, @debug.Debug)
+}
+pub fn ExtractReasoningMode::equal(Self, Self) -> Bool
+pub fn ExtractReasoningMode::not_equal(Self, Self) -> Bool
+pub fn ExtractReasoningMode::to_repr(Self) -> @debug.Repr
 
 pub(all) enum ImageModelReference {
   Instance(&@provider.ImageModelV4)
@@ -179,14 +202,14 @@ pub(all) struct ImageWireModelMiddleware {
   transform_params : (async (@provider.ImageCallOptions, &@provider.ImageWireModel) -> @provider.ImageCallOptions)?
   provider : String?
   model_id : String?
-  max_images_per_call : Int?
+  max_images_per_call : Int32?
   override_provider : ((&@provider.ImageWireModel) -> String)?
   override_model_id : ((&@provider.ImageWireModel) -> String)?
-  override_max_images_per_call : ((&@provider.ImageWireModel) -> Int)?
+  override_max_images_per_call : ((&@provider.ImageWireModel) -> Int32)?
   wrap_generate : (async (ImageWireModelMiddlewareContext) -> @provider.ImageResponse)?
 }
 pub fn ImageWireModelMiddleware::apply_options(Self, @provider.ImageCallOptions) -> @provider.ImageCallOptions
-pub fn ImageWireModelMiddleware::new(transform_options? : (@provider.ImageCallOptions) -> @provider.ImageCallOptions, provider? : String, model_id? : String, max_images_per_call? : Int, transform_params? : async (@provider.ImageCallOptions, &@provider.ImageWireModel) -> @provider.ImageCallOptions, override_provider? : (&@provider.ImageWireModel) -> String, override_model_id? : (&@provider.ImageWireModel) -> String, override_max_images_per_call? : (&@provider.ImageWireModel) -> Int, wrap_generate? : async (ImageWireModelMiddlewareContext) -> @provider.ImageResponse) -> Self
+pub fn ImageWireModelMiddleware::new(transform_options? : (@provider.ImageCallOptions) -> @provider.ImageCallOptions, provider? : String, model_id? : String, max_images_per_call? : Int32, transform_params? : async (@provider.ImageCallOptions, &@provider.ImageWireModel) -> @provider.ImageCallOptions, override_provider? : (&@provider.ImageWireModel) -> String, override_model_id? : (&@provider.ImageWireModel) -> String, override_max_images_per_call? : (&@provider.ImageWireModel) -> Int32, wrap_generate? : async (ImageWireModelMiddlewareContext) -> @provider.ImageResponse) -> Self
 pub async fn ImageWireModelMiddleware::transform(Self, &@provider.ImageWireModel, @provider.ImageCallOptions) -> @provider.ImageCallOptions
 
 pub(all) struct ImageWireModelMiddlewareContext {
@@ -204,29 +227,60 @@ pub fn LanguageModelV4Reference::instance(&@provider.LanguageModelV4) -> Self
 pub fn LanguageModelV4Reference::named(provider~ : String, model_id~ : String) -> Self
 
 type MiddlewareChatModel
+pub async fn MiddlewareChatModel::generate(Self, @provider.ChatCallOptions) -> @provider.ChatResponse
+pub fn MiddlewareChatModel::model_id(Self) -> String
+pub fn MiddlewareChatModel::provider(Self) -> String
+pub async fn MiddlewareChatModel::stream(Self, @provider.ChatCallOptions, async (@provider.StreamEvent) -> Unit) -> @provider.ChatResponse
+pub fn MiddlewareChatModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.ChatModel for MiddlewareChatModel
 
 type MiddlewareEmbeddingModelV4
+pub async fn MiddlewareEmbeddingModelV4::do_embed(Self, @provider.EmbeddingModelV4CallOptions) -> @provider.EmbeddingModelV4Result
+pub fn MiddlewareEmbeddingModelV4::max_embeddings_per_call(Self) -> Int32?
+pub fn MiddlewareEmbeddingModelV4::max_input_bytes_per_call(Self) -> Int64?
+pub fn MiddlewareEmbeddingModelV4::model_id(Self) -> String
+pub fn MiddlewareEmbeddingModelV4::provider(Self) -> String
+pub fn MiddlewareEmbeddingModelV4::specification_version(Self) -> String
+pub fn MiddlewareEmbeddingModelV4::supports_parallel_calls(Self) -> Bool
 pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4
 
 type MiddlewareImageModelV4
+pub async fn MiddlewareImageModelV4::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn MiddlewareImageModelV4::max_images_per_call(Self) -> Int32?
+pub fn MiddlewareImageModelV4::model_id(Self) -> String
+pub fn MiddlewareImageModelV4::provider(Self) -> String
+pub fn MiddlewareImageModelV4::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for MiddlewareImageModelV4
 
 type MiddlewareImageWireModel
+pub async fn MiddlewareImageWireModel::generate(Self, @provider.ImageCallOptions) -> @provider.ImageResponse
+pub fn MiddlewareImageWireModel::max_images_per_call(Self) -> Int32
+pub fn MiddlewareImageWireModel::model_id(Self) -> String
+pub fn MiddlewareImageWireModel::provider(Self) -> String
 pub impl @provider.ImageWireModel for MiddlewareImageWireModel
 
 type MiddlewareLanguageModelV4
+pub async fn MiddlewareLanguageModelV4::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn MiddlewareLanguageModelV4::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn MiddlewareLanguageModelV4::model_id(Self) -> String
+pub fn MiddlewareLanguageModelV4::provider(Self) -> String
+pub fn MiddlewareLanguageModelV4::specification_version(Self) -> String
+pub fn MiddlewareLanguageModelV4::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for MiddlewareLanguageModelV4
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ModelId {
   provider : String
   model_id : String
-} derive(Eq, @debug.Debug)
+}
+pub fn ModelId::equal(Self, Self) -> Bool
 pub fn ModelId::key(Self) -> String
 pub fn ModelId::model_id(Self) -> String
 pub fn ModelId::new(provider~ : String, model_id~ : String) -> Self
+pub fn ModelId::not_equal(Self, Self) -> Bool
 pub fn ModelId::parse(String) -> Self?
 pub fn ModelId::provider(Self) -> String
+pub fn ModelId::to_repr(Self) -> @debug.Repr
 
 pub struct ModelRegistry {
   // private fields
@@ -283,6 +337,7 @@ pub fn ModelRegistry::with_speech_translation_model(Self, &@provider.SpeechTrans
 pub fn ModelRegistry::with_transcription_model(Self, &@provider.TranscriptionModelV4) -> Self
 pub fn ModelRegistry::with_video_model(Self, &@provider.VideoModelV4) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ModelType {
   Chat
   Completion
@@ -294,7 +349,10 @@ pub(all) enum ModelType {
   Transcription
   SpeechTranslation
   Realtime
-} derive(Eq, @debug.Debug)
+}
+pub fn ModelType::equal(Self, Self) -> Bool
+pub fn ModelType::not_equal(Self, Self) -> Bool
+pub fn ModelType::to_repr(Self) -> @debug.Repr
 
 pub(all) enum RealtimeModelReference {
   Instance(&@provider.RealtimeModelV4)

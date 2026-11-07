@@ -1,9 +1,10 @@
 ///|
 /// Inline audio accepted by a transcription model.
+#derive(Debug, Eq)
 pub(all) enum TranscriptionAudio {
   TranscriptionAudioBytes(Bytes)
   TranscriptionAudioBase64(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct raw-byte transcription input.
@@ -19,11 +20,12 @@ pub fn TranscriptionAudio::base64(data : String) -> TranscriptionAudio {
 
 ///|
 /// One timed transcription segment.
+#derive(Debug, Eq)
 pub(all) struct TranscriptionSegment {
   text : String
   start_second : Double
   end_second : Double
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a timed transcription segment.
@@ -37,6 +39,7 @@ pub fn TranscriptionSegment::new(
 
 ///|
 /// Provider-neutral options for transcribing one audio payload.
+#derive(Debug)
 pub(all) struct TranscriptionCallOptions {
   audio : TranscriptionAudio
   media_type : String
@@ -44,16 +47,16 @@ pub(all) struct TranscriptionCallOptions {
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct one transcription call.
 pub fn TranscriptionCallOptions::new(
   audio~ : TranscriptionAudio,
   media_type~ : String,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> TranscriptionCallOptions {
   {
@@ -82,9 +85,9 @@ pub struct TranscriptionStreamOptions {
 pub fn TranscriptionStreamOptions::new(
   audio~ : &AudioStream,
   input_audio_format~ : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
   cancellation_token? : CancellationToken,
 ) -> TranscriptionStreamOptions {
   {
@@ -99,6 +102,7 @@ pub fn TranscriptionStreamOptions::new(
 
 ///|
 /// Provider-neutral events emitted during live transcription.
+#derive(Debug, Eq)
 pub(all) enum TranscriptionStreamEvent {
   TranscriptionStreamStart(warnings~ : Array[Warning])
   TranscriptionDelta(
@@ -111,7 +115,7 @@ pub(all) enum TranscriptionStreamEvent {
     text~ : String,
     start_second~ : Double?,
     duration_seconds~ : Double?,
-    channel_index~ : Int?,
+    channel_index~ : Int32?,
     provider_metadata~ : Map[String, Json]
   )
   TranscriptionFinal(
@@ -119,7 +123,7 @@ pub(all) enum TranscriptionStreamEvent {
     text~ : String,
     start_second~ : Double?,
     end_second~ : Double?,
-    channel_index~ : Int?,
+    channel_index~ : Int32?,
     provider_metadata~ : Map[String, Json]
   )
   TranscriptionResponseMetadata(ResponseMetadata)
@@ -132,10 +136,11 @@ pub(all) enum TranscriptionStreamEvent {
   )
   TranscriptionRaw(Json)
   TranscriptionStreamError(StreamErrorInfo)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Complete transcription returned by a provider.
+#derive(Debug, Eq)
 pub(all) struct TranscriptionResponse {
   text : String
   segments : Array[TranscriptionSegment]
@@ -145,13 +150,13 @@ pub(all) struct TranscriptionResponse {
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a transcription response without transport diagnostics.
 pub fn TranscriptionResponse::new(
   text~ : String,
-  segments? : Array[TranscriptionSegment] = [],
+  segments~ : Array[TranscriptionSegment] = [],
   language? : String,
   duration_seconds? : Double,
 ) -> TranscriptionResponse {
@@ -206,3 +211,30 @@ pub fn TranscriptionResponse::with_transport(
     warnings: copy_warnings(self.warnings),
   }
 }
+
+///|
+pub extend TranscriptionAudio with Debug::{to_repr}
+
+///|
+pub extend TranscriptionAudio with Eq::{not_equal, equal}
+
+///|
+pub extend TranscriptionSegment with Debug::{to_repr}
+
+///|
+pub extend TranscriptionSegment with Eq::{not_equal, equal}
+
+///|
+pub extend TranscriptionCallOptions with Debug::{to_repr}
+
+///|
+pub extend TranscriptionStreamEvent with Debug::{to_repr}
+
+///|
+pub extend TranscriptionStreamEvent with Eq::{not_equal, equal}
+
+///|
+pub extend TranscriptionResponse with Debug::{to_repr}
+
+///|
+pub extend TranscriptionResponse with Eq::{not_equal, equal}

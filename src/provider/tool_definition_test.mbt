@@ -1,11 +1,11 @@
 ///|
 test "function tools preserve optional description and strict settings" {
-  let omitted = ToolDefinition::new("lookup", { "type": "object" })
+  let omitted = @provider.ToolDefinition::new("lookup", { "type": "object" })
   assert_eq(omitted.description(), None)
   assert_eq(omitted.strict_setting(), None)
   assert_eq(omitted.strict(), false)
 
-  let explicit_false = ToolDefinition::new(
+  let explicit_false = @provider.ToolDefinition::new(
     "lookup",
     { "type": "object" },
     strict=false,

@@ -1,9 +1,10 @@
 ///|
 /// A parsed structured output together with its normalized model response.
+#derive(Debug)
 pub(all) struct ObjectResponse {
   object : Json
   response : GenerateTextResult
-} derive(Debug)
+}
 
 ///|
 /// A schema validation failure raised by the high-level structured-output API.
@@ -11,21 +12,24 @@ pub(all) struct ObjectResponse {
 /// `provider_utils` owns the draft-independent validator. This error keeps
 /// the public `ai` boundary independent from that implementation package and
 /// gives callers a stable path/message pair for diagnostics.
+#derive(Debug, Eq)
 pub suberror ObjectValidationError {
   ObjectValidationError(path~ : String, message~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// The reason a structured-output call could not produce a validated object.
+#derive(Debug, Eq)
 pub(all) enum ObjectGenerationFailure {
   EmptyResponse
   InvalidJson(message~ : String)
   SchemaMismatch(path~ : String, message~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Raised when a model does not return a JSON value matching the requested
 /// schema. The raw response is retained so callers can inspect or repair it.
+#derive(Debug)
 pub suberror NoObjectGeneratedError {
   NoObjectGeneratedError(
     message~ : String,
@@ -33,15 +37,16 @@ pub suberror NoObjectGeneratedError {
     response~ : GenerateTextResult,
     failure~ : ObjectGenerationFailure
   )
-} derive(Debug)
+}
 
 ///|
 /// Raised when a streamed structured-output call could not produce a
 /// validated object. Streaming produces a stream result rather than a full
 /// generate result, so the failure carries diagnostics without the response.
+#derive(Debug, Eq)
 pub suberror StreamObjectFailedError {
   StreamObjectFailedError(message~ : String, text~ : String?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Validate a JSON value against a structured-output schema.
@@ -72,24 +77,24 @@ pub async fn generate_object(
   model : &@provider.LanguageModelV4,
   schema : Json,
   prompt? : String,
-  messages? : Array[ModelMessage] = [],
+  messages~ : Array[ModelMessage] = [],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
   name? : String,
   description? : String,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
-  max_output_tokens? : Int,
+  reasoning_effort~ : ReasoningEffort = ProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
   experimental_download? : DownloadFunction,
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ObjectResponse {
   let response = generate_text(
@@ -154,24 +159,24 @@ pub async fn generateObject(
   model : &@provider.LanguageModelV4,
   schema : Json,
   prompt? : String,
-  messages? : Array[ModelMessage] = [],
+  messages~ : Array[ModelMessage] = [],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
   name? : String,
   description? : String,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
-  max_output_tokens? : Int,
+  reasoning_effort~ : ReasoningEffort = ProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
   experimental_download? : DownloadFunction,
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ObjectResponse {
   generate_object(
@@ -202,12 +207,13 @@ pub async fn generateObject(
 
 ///|
 /// One streamed partial-object snapshot delivered by `stream_object`.
+#derive(Debug, Eq)
 pub(all) enum StreamObjectPart {
   /// A partial object parsed from the text accumulated so far.
   PartialObject(object~ : Json)
   /// The final, schema-validated object.
   FinalObject(object~ : Json)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Stream a structured JSON object constrained by a JSON Schema.
@@ -220,12 +226,13 @@ pub(all) enum StreamObjectPart {
 ///|
 /// Final response of a `stream_object` call: the schema-validated object
 /// together with the complete text and provider diagnostics.
+#derive(Debug)
 pub(all) struct StreamObjectResponse {
   object : Json
   text : String
   provider_result : @provider.LanguageModelV4GenerateResult
   warnings : Array[Warning]
-} derive(Debug)
+}
 
 ///|
 /// Stream a structured JSON object constrained by a JSON Schema.
@@ -233,25 +240,25 @@ pub async fn stream_object(
   model : &@provider.LanguageModelV4,
   schema : Json,
   prompt? : String,
-  messages? : Array[ModelMessage] = [],
+  messages~ : Array[ModelMessage] = [],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
   name? : String,
   description? : String,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
-  max_output_tokens? : Int,
+  reasoning_effort~ : ReasoningEffort = ProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
   experimental_download? : DownloadFunction,
-  on_partial? : async (Json) -> Unit = _ => (),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  on_partial~ : async (Json) -> Unit = _ => (),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> StreamObjectResponse {
   let text_buffer = Ref("")
@@ -331,25 +338,25 @@ pub async fn streamObject(
   model : &@provider.LanguageModelV4,
   schema : Json,
   prompt? : String,
-  messages? : Array[ModelMessage] = [],
+  messages~ : Array[ModelMessage] = [],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
   name? : String,
   description? : String,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
-  max_output_tokens? : Int,
+  reasoning_effort~ : ReasoningEffort = ProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
   experimental_download? : DownloadFunction,
-  on_partial? : async (Json) -> Unit = _ => (),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  on_partial~ : async (Json) -> Unit = _ => (),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> StreamObjectResponse {
   stream_object(
@@ -378,3 +385,36 @@ pub async fn streamObject(
     cancellation_token?,
   )
 }
+
+///|
+pub extend ObjectResponse with Debug::{to_repr}
+
+///|
+pub extend ObjectValidationError with Debug::{to_repr}
+
+///|
+pub extend ObjectValidationError with Eq::{not_equal, equal}
+
+///|
+pub extend ObjectGenerationFailure with Debug::{to_repr}
+
+///|
+pub extend ObjectGenerationFailure with Eq::{not_equal, equal}
+
+///|
+pub extend NoObjectGeneratedError with Debug::{to_repr}
+
+///|
+pub extend StreamObjectFailedError with Debug::{to_repr}
+
+///|
+pub extend StreamObjectFailedError with Eq::{not_equal, equal}
+
+///|
+pub extend StreamObjectPart with Debug::{to_repr}
+
+///|
+pub extend StreamObjectPart with Eq::{not_equal, equal}
+
+///|
+pub extend StreamObjectResponse with Debug::{to_repr}

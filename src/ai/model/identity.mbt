@@ -4,10 +4,11 @@
 /// Provider traits describe how a model is called; this value describes which
 /// model is selected. Registries and middleware can therefore share identity
 /// logic without depending on a provider wire protocol.
+#derive(Debug, Eq)
 pub(all) struct ModelId {
   provider : String
   model_id : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a model identity.
@@ -57,9 +58,10 @@ pub fn ModelId::parse(value : String) -> ModelId? {
 
 ///|
 /// Parse a registry key and raise when it is not provider-qualified.
+#derive(Debug, Eq)
 pub suberror InvalidModelIdError {
   InvalidModelIdError(value~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Parse a canonical model key with a typed validation error.
@@ -76,6 +78,7 @@ pub fn parse_model_id(value : String) -> ModelId raise InvalidModelIdError {
 /// AI SDK reports the requested model type in `NoSuchModelError`; retaining it
 /// is particularly important when one provider uses the same model id for
 /// several modalities.
+#derive(Debug, Eq)
 pub(all) enum ModelType {
   Chat
   Completion
@@ -87,14 +90,15 @@ pub(all) enum ModelType {
   Transcription
   SpeechTranslation
   Realtime
-} derive(Debug, Eq)
+}
 
 ///|
 /// Raised when a registry cannot resolve the requested model identity and
 /// contract.
+#derive(Debug, Eq)
 pub(all) suberror NoSuchModelError {
   NoSuchModelError(model_id~ : ModelId, model_type~ : ModelType)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Return the missing model identity.
@@ -177,3 +181,27 @@ pub fn model_id_of_speech_translation(
 pub fn model_id_of_realtime(model : &@provider.RealtimeModelV4) -> ModelId {
   ModelId::new(provider=model.provider(), model_id=model.model_id())
 }
+
+///|
+pub extend ModelId with Debug::{to_repr}
+
+///|
+pub extend ModelId with Eq::{not_equal, equal}
+
+///|
+pub extend InvalidModelIdError with Debug::{to_repr}
+
+///|
+pub extend InvalidModelIdError with Eq::{not_equal, equal}
+
+///|
+pub extend ModelType with Debug::{to_repr}
+
+///|
+pub extend ModelType with Eq::{not_equal, equal}
+
+///|
+pub extend NoSuchModelError with Debug::{to_repr}
+
+///|
+pub extend NoSuchModelError with Eq::{not_equal, equal}

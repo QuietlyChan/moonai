@@ -10,7 +10,7 @@ test "provider-executed tool factory attaches shared schemas and semantics" {
     "properties": { "answer": { "type": "string" } },
     "required": ["answer"],
   }
-  let tool = create_provider_executed_tool_factory(
+  let tool = @provider_utils.create_provider_executed_tool_factory(
     id="test.search",
     input_schema~,
     output_schema~,
@@ -32,7 +32,7 @@ test "provider-executed tool factory attaches shared schemas and semantics" {
 
 ///|
 test "provider-executed tool factory defaults to immediate empty arguments" {
-  let tool = createProviderExecutedToolFactory(
+  let tool = @provider_utils.createProviderExecutedToolFactory(
     id="test.clock",
     input_schema={ "type": "object" },
     output_schema={ "type": "string" },
@@ -48,7 +48,7 @@ test "provider-executed tool factory defaults to immediate empty arguments" {
 ///|
 async test "provider-executed tool factory forwards input lifecycle callbacks" {
   let events : Array[String] = []
-  let tool = create_provider_executed_tool_factory(
+  let tool = @provider_utils.create_provider_executed_tool_factory(
     id="test.search",
     input_schema={ "type": "object" },
     output_schema={ "type": "object" },
@@ -59,12 +59,17 @@ async test "provider-executed tool factory forwards input lifecycle callbacks" {
       events.push("available:" + options.input.stringify())
     },
   )
-  tool.invoke_input_start(ToolExecutionOptions::new(tool_call_id="call-1"))
+  tool.invoke_input_start(
+    @provider_utils.ToolExecutionOptions::new(tool_call_id="call-1"),
+  )
   tool.invoke_input_delta(
-    ToolInputDeltaOptions::new(input_text_delta="{}", tool_call_id="call-1"),
+    @provider_utils.ToolInputDeltaOptions::new(
+      input_text_delta="{}",
+      tool_call_id="call-1",
+    ),
   )
   tool.invoke_input_available(
-    ToolInputAvailableOptions::new(
+    @provider_utils.ToolInputAvailableOptions::new(
       input=Json::empty_object(),
       tool_call_id="call-1",
     ),

@@ -20,7 +20,7 @@ pub(all) struct EmbeddingModelV4Middleware {
   transform_params : (async (EmbeddingModelV4CallOptions, &EmbeddingModelV4) -> EmbeddingModelV4CallOptions)?
   override_provider : ((&EmbeddingModelV4) -> String)?
   override_model_id : ((&EmbeddingModelV4) -> String)?
-  override_max_embeddings_per_call : ((&EmbeddingModelV4) -> Int?)?
+  override_max_embeddings_per_call : ((&EmbeddingModelV4) -> Int32?)?
   override_supports_parallel_calls : ((&EmbeddingModelV4) -> Bool)?
   wrap_embed : (async (EmbeddingModelV4MiddlewareContext) -> EmbeddingModelV4Result)?
 }
@@ -31,7 +31,7 @@ pub fn EmbeddingModelV4Middleware::new(
   transform_params? : async (EmbeddingModelV4CallOptions, &EmbeddingModelV4) -> EmbeddingModelV4CallOptions,
   override_provider? : (&EmbeddingModelV4) -> String,
   override_model_id? : (&EmbeddingModelV4) -> String,
-  override_max_embeddings_per_call? : (&EmbeddingModelV4) -> Int?,
+  override_max_embeddings_per_call? : (&EmbeddingModelV4) -> Int32?,
   override_supports_parallel_calls? : (&EmbeddingModelV4) -> Bool,
   wrap_embed? : async (EmbeddingModelV4MiddlewareContext) -> EmbeddingModelV4Result,
 ) -> EmbeddingModelV4Middleware {

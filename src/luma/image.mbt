@@ -7,9 +7,9 @@ struct LumaImageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
-  poll_interval_ms : Int
-  max_poll_attempts : Int
+  idle_timeout_ms : Int32
+  poll_interval_ms : Int32
+  max_poll_attempts : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -19,9 +19,9 @@ fn luma_image_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
-  poll_interval_ms~ : Int,
-  max_poll_attempts~ : Int,
+  idle_timeout_ms~ : Int32,
+  poll_interval_ms~ : Int32,
+  max_poll_attempts~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> LumaImageModel {
   {
@@ -128,7 +128,7 @@ pub impl @provider.ImageModelV4 for LumaImageModel with fn model_id(self) -> Str
 ///|
 pub impl @provider.ImageModelV4 for LumaImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 
@@ -266,4 +266,13 @@ fn luma_error_to_message(json : Json) -> String? raise {
     { "error": { "message": String(message), .. }, .. } => Some(message)
     _ => None
   }
+}
+
+///|
+pub extend LumaImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
 }

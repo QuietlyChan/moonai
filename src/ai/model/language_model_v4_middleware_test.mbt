@@ -34,8 +34,8 @@ async test "V4 middleware overrides identity and delegates generation" {
     provider_name="base",
     model_id="base-model",
   )
-  let model = as_language_model_v4(base)
-  let wrapped = wrap_language_model_v4(
+  let model = @model.as_language_model_v4(base)
+  let wrapped = @model.wrap_language_model_v4(
     model,
     @provider.LanguageModelV4Middleware::new(
       wrap_generate=passthrough_v4_generate,
@@ -68,8 +68,8 @@ async test "V4 middleware delegates streaming callbacks" {
       @provider.Stop,
     ),
   )
-  let model = as_language_model_v4(base)
-  let wrapped = wrap_language_model_v4(
+  let model = @model.as_language_model_v4(base)
+  let wrapped = @model.wrap_language_model_v4(
     model,
     @provider.LanguageModelV4Middleware::new(wrap_stream=passthrough_v4_stream),
   )
@@ -100,8 +100,8 @@ async test "V4 middleware transforms both operations" {
       @provider.Stop,
     ),
   )
-  let model = as_language_model_v4(base)
-  let wrapped = wrap_language_model_v4(
+  let model = @model.as_language_model_v4(base)
+  let wrapped = @model.wrap_language_model_v4(
     model,
     @provider.LanguageModelV4Middleware::new(
       transform_params=count_v4_transform,
@@ -127,8 +127,8 @@ async test "V4 middleware chain keeps the first wrapper outermost" {
       @provider.Stop,
     ),
   )
-  let model = as_language_model_v4(base)
-  let wrapped = wrap_language_model_v4_chain(model, [
+  let model = @model.as_language_model_v4(base)
+  let wrapped = @model.wrap_language_model_v4_chain(model, [
     @provider.LanguageModelV4Middleware::new(override_provider=_ => "outer"),
     @provider.LanguageModelV4Middleware::new(override_model_id=_ => {
       "inner-model"

@@ -3,7 +3,6 @@ import {
   "QuietlyChan/moonai/ai/prompt",
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
-  "moonbitlang/core/json",
 }
 
 import {

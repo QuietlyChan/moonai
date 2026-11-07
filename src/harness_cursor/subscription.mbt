@@ -39,7 +39,7 @@ pub fn parse_cursor_access_token(payload~ : Json) -> String? {
 ///|
 /// Extract the JWT `exp` claim (epoch seconds) from an access token. Returns
 /// None when the token is not a decodable JWT with a numeric exp.
-pub fn cursor_jwt_expires_at(access_token~ : String) -> Int? raise {
+pub fn cursor_jwt_expires_at(access_token~ : String) -> Int32? raise {
   let segments = access_token.split(".").to_array()
   guard segments.length() >= 2 else { return None }
   let payload_segment = segments[1].to_owned()
@@ -65,7 +65,7 @@ pub fn cursor_jwt_expires_at(access_token~ : String) -> Int? raise {
 ///|
 /// Whether a token expiring at `expires_at` (epoch seconds) is within five
 /// minutes of expiry relative to `now`.
-pub fn cursor_token_expiring_soon(expires_at~ : Int, now~ : Int) -> Bool {
+pub fn cursor_token_expiring_soon(expires_at~ : Int32, now~ : Int32) -> Bool {
   expires_at - now < 300
 }
 

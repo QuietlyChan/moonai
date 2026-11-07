@@ -13,13 +13,14 @@ pub const GROK_SUBSCRIPTION_BASE_URL : String = "https://cli-chat-proxy.grok.com
 ///|
 /// A selected Grok OAuth credential record: the access token (`key`), its
 /// refresh token, and the normalized epoch-millis expiry.
+#derive(Debug, Eq)
 pub(all) struct GrokOAuthRecord {
   scope : String
   issuer : String
   key : String
   refresh_token : String
   expires_at : Int64
-} derive(Debug, Eq)
+}
 
 ///|
 /// Normalize an expires_at value: epoch seconds are scaled to millis;
@@ -64,7 +65,7 @@ pub fn grok_normalize_expires_at(value : Json) -> Int64? {
 
 ///|
 /// Days since 1970-01-01 for a civil date (Howard Hinnant's algorithm).
-fn grok_days_from_civil(year : Int, month : Int, day : Int) -> Int {
+fn grok_days_from_civil(year : Int32, month : Int32, day : Int32) -> Int32 {
   let y = if month <= 2 { year - 1 } else { year }
   let era = (if y >= 0 { y } else { y - 399 }) / 400
   let yoe = y - era * 400
@@ -76,7 +77,7 @@ fn grok_days_from_civil(year : Int, month : Int, day : Int) -> Int {
 
 ///|
 /// Find the start index of the final "::" separator in a scope key.
-fn grok_last_separator(scope : String) -> Int {
+fn grok_last_separator(scope : String) -> Int32 {
   let mut index = scope.length() - 2
   while index > 0 {
     if scope[index] == ':' && scope[index + 1] == ':' {
@@ -140,3 +141,9 @@ pub fn should_resolve_grok_native_subscription(
 ) -> Bool {
   !ai_gateway_auth && !has_direct_credential
 }
+
+///|
+pub extend GrokOAuthRecord with Debug::{to_repr}
+
+///|
+pub extend GrokOAuthRecord with Eq::{not_equal, equal}

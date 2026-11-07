@@ -2,6 +2,7 @@
 /// Event passed to the `on_start` callback of embed and embedMany
 /// operations, emitted before the embedding model is called
 /// (AI SDK #20583).
+#derive(Debug)
 pub(all) struct EmbedStartEvent {
   /// User-defined runtime context for span attribution.
   runtime_context : Json
@@ -16,16 +17,17 @@ pub(all) struct EmbedStartEvent {
   /// The value(s) being embedded.
   values : Array[String]
   /// Maximum retry count configured for the request.
-  max_retries : Int
+  max_retries : Int32
   /// Additional HTTP headers sent with the request.
   headers : Map[String, String]
   /// Additional provider-specific options.
   provider_options : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// Event passed to the `on_end` callback of embed and embedMany operations,
 /// emitted after the embedding model returns (AI SDK #20583).
+#derive(Debug)
 pub(all) struct EmbedEndEvent {
   runtime_context : Json
   call_id : String
@@ -42,11 +44,12 @@ pub(all) struct EmbedEndEvent {
   warnings : Array[Warning]
   /// Provider-specific metadata from the response.
   provider_metadata : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// Event passed to the `on_start` callback of rerank operations, emitted
 /// before the reranking model is called (AI SDK #20583).
+#derive(Debug)
 pub(all) struct RerankStartEvent {
   runtime_context : Json
   call_id : String
@@ -56,15 +59,16 @@ pub(all) struct RerankStartEvent {
   /// The documents being reranked (text entries as strings).
   documents : Array[Json]
   query : String
-  top_n : Int?
-  max_retries : Int
+  top_n : Int32?
+  max_retries : Int32
   headers : Map[String, String]
   provider_options : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// Event passed to the `on_end` callback of rerank operations, emitted
 /// after the reranking model returns (AI SDK #20583).
+#derive(Debug)
 pub(all) struct RerankEndEvent {
   runtime_context : Json
   call_id : String
@@ -77,7 +81,7 @@ pub(all) struct RerankEndEvent {
   ranking : Array[RerankItem]
   warnings : Array[Warning]
   provider_metadata : Map[String, Json]
-} derive(Debug)
+}
 
 ///|
 /// Convert documents to the homogeneous JSON representation used by
@@ -93,3 +97,15 @@ fn rerank_event_documents(
     @provider.RerankingModelV4Documents::ObjectDocuments(values) => values
   }
 }
+
+///|
+pub extend EmbedStartEvent with Debug::{to_repr}
+
+///|
+pub extend EmbedEndEvent with Debug::{to_repr}
+
+///|
+pub extend RerankStartEvent with Debug::{to_repr}
+
+///|
+pub extend RerankEndEvent with Debug::{to_repr}

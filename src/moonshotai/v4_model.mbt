@@ -13,7 +13,7 @@ priv struct MoonshotAIChatLanguageModel {
   headers : Map[String, String]
   include_usage : Bool
   supports_structured_outputs : Bool
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   id_generator : @provider_utils.IdGenerator
   http_transport : &@provider_utils.HttpTransport
 }
@@ -27,7 +27,7 @@ fn MoonshotAIChatLanguageModel::new(
   headers~ : Map[String, String],
   include_usage~ : Bool,
   supports_structured_outputs~ : Bool,
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   id_generator~ : @provider_utils.IdGenerator,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> MoonshotAIChatLanguageModel {

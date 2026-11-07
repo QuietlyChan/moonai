@@ -3,7 +3,7 @@
 pub struct MockEmbeddingModel {
   priv provider_name : String
   priv model_id : String
-  priv max_embeddings : Int
+  priv max_embeddings : Int32
   priv supports_parallel : Bool
   priv result : @provider.EmbeddingBatchResponse
   priv captured_values : Array[String]
@@ -14,10 +14,10 @@ pub struct MockEmbeddingModel {
 /// Construct a deterministic embedding model.
 pub fn MockEmbeddingModel::new(
   result : @provider.EmbeddingBatchResponse,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-embedding-model",
-  max_embeddings_per_call? : Int = 2048,
-  supports_parallel_calls? : Bool = false,
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-embedding-model",
+  max_embeddings_per_call~ : Int32 = 2048,
+  supports_parallel_calls~ : Bool = false,
 ) -> MockEmbeddingModel {
   {
     provider_name,
@@ -65,7 +65,7 @@ pub impl @provider.EmbeddingWireModel for MockEmbeddingModel with fn model_id(
 ///|
 pub impl @provider.EmbeddingWireModel for MockEmbeddingModel with fn max_embeddings_per_call(
   self,
-) -> Int {
+) -> Int32 {
   self.max_embeddings
 }
 
@@ -143,7 +143,7 @@ pub impl @provider.EmbeddingModelV4 for MockEmbeddingModel with fn model_id(
 ///|
 pub impl @provider.EmbeddingModelV4 for MockEmbeddingModel with fn max_embeddings_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   Some(self.max_embeddings)
 }
 
@@ -170,4 +170,20 @@ pub impl @provider.EmbeddingModelV4 for MockEmbeddingModel with fn do_embed(
   @provider.EmbeddingModelV4Result::from_batch_response(
     self.embed_values_for_v4(options.values, legacy_options),
   )
+}
+
+///|
+pub extend MockEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingWireModel::{
+  provider,
+  max_embeddings_per_call,
+  embed,
+  supports_parallel_calls,
+  model_id,
+}
+
+///|
+pub extend MockEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  max_input_bytes_per_call,
 }

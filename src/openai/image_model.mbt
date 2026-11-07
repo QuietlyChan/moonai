@@ -6,9 +6,9 @@ priv struct OpenAIImageModel {
   model_id : String
   api_key : String
   headers : Map[String, String]
-  max_images : Int
+  max_images : Int32
   include_response_format : Bool
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
   download_transport : &@provider_utils.HttpTransport?
 }
@@ -20,9 +20,9 @@ fn openai_image_model(
   model_id~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  max_images_per_call~ : Int,
+  max_images_per_call~ : Int32,
   include_response_format~ : Bool,
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   download_transport? : &@provider_utils.HttpTransport,
 ) -> OpenAIImageModel {
@@ -79,7 +79,7 @@ fn append_openai_image_string(
 fn append_openai_image_int(
   fields : Map[String, Json],
   key : String,
-  value : Int?,
+  value : Int32?,
 ) -> Unit {
   if value is Some(item) {
     fields[key] = Json::number(item.to_double())
@@ -90,7 +90,7 @@ fn append_openai_image_int(
 fn openai_image_generation_body(
   model_id : String,
   prompt : String?,
-  n : Int,
+  n : Int32,
   size : String?,
   provider_options : OpenAIImageOptions,
   include_response_format : Bool,
@@ -135,7 +135,7 @@ fn append_openai_form_text(
 fn append_openai_form_int(
   fields : Array[@provider_utils.MultipartField],
   name : String,
-  value : Int?,
+  value : Int32?,
 ) -> Unit {
   if value is Some(item) {
     fields.push(
@@ -301,9 +301,9 @@ fn openai_generated_image(json : Json) -> @provider.GeneratedImage raise {
 fn openai_distributed_image_token_detail(
   json : Json,
   field : String,
-  index : Int,
-  total : Int,
-) -> Int? {
+  index : Int32,
+  total : Int32,
+) -> Int32? {
   guard total > 0 else { return None }
   let value = match json {
     { "usage": Object(usage), .. } =>
@@ -493,7 +493,7 @@ impl @provider.ImageModelV4 for OpenAIImageModel with fn model_id(self) -> Strin
 ///|
 impl @provider.ImageModelV4 for OpenAIImageModel with fn max_images_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   Some(self.max_images)
 }
 

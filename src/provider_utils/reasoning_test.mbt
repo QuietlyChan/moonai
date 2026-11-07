@@ -2,13 +2,18 @@
 test "reasoning budget follows AI SDK percentages and clamps bounds" {
   let warnings : Array[@provider.Warning] = []
   assert_eq(
-    map_reasoning_to_provider_budget(@provider.Medium, 64_000, 64_000, warnings),
+    @provider_utils.map_reasoning_to_provider_budget(
+      @provider.Medium,
+      64_000,
+      64_000,
+      warnings,
+    ),
     Some(19_200),
   )
   assert_eq(warnings, [])
 
   assert_eq(
-    map_reasoning_to_provider_budget(
+    @provider_utils.map_reasoning_to_provider_budget(
       @provider.Minimal,
       10_000,
       10_000,
@@ -17,18 +22,23 @@ test "reasoning budget follows AI SDK percentages and clamps bounds" {
     Some(1_024),
   )
   assert_eq(
-    map_reasoning_to_provider_budget(@provider.XHigh, 64_000, 50_000, warnings),
+    @provider_utils.map_reasoning_to_provider_budget(
+      @provider.XHigh,
+      64_000,
+      50_000,
+      warnings,
+    ),
     Some(50_000),
   )
 }
 
 ///|
 test "reasoning utility distinguishes default and disabled" {
-  assert_false(is_custom_reasoning(@provider.ProviderDefault))
-  assert_true(is_custom_reasoning(@provider.Disabled))
+  assert_false(@provider_utils.is_custom_reasoning(@provider.ProviderDefault))
+  assert_true(@provider_utils.is_custom_reasoning(@provider.Disabled))
   let warnings : Array[@provider.Warning] = []
   assert_eq(
-    map_reasoning_to_provider_budget(
+    @provider_utils.map_reasoning_to_provider_budget(
       @provider.Disabled,
       16_384,
       16_384,
@@ -49,15 +59,23 @@ test "assistant reasoning utility prefers content parts over legacy field" {
     ],
     reasoning_content="legacy",
   )
-  assert_eq(assistant_reasoning_content(from_part), Some("first second"))
+  assert_eq(
+    @provider_utils.assistant_reasoning_content(from_part),
+    Some("first second"),
+  )
 
   let from_legacy = @provider.LanguageModelMessage::assistant(
     "answer",
     reasoning_content="legacy",
   )
-  assert_eq(assistant_reasoning_content(from_legacy), Some("legacy"))
   assert_eq(
-    assistant_reasoning_content(@provider.LanguageModelMessage::user("hello")),
+    @provider_utils.assistant_reasoning_content(from_legacy),
+    Some("legacy"),
+  )
+  assert_eq(
+    @provider_utils.assistant_reasoning_content(
+      @provider.LanguageModelMessage::user("hello"),
+    ),
     None,
   )
 }
@@ -65,7 +83,7 @@ test "assistant reasoning utility prefers content parts over legacy field" {
 ///|
 test "reasoning effort utility reports compatibility and unsupported levels" {
   let warnings : Array[@provider.Warning] = []
-  let mapped = map_reasoning_to_provider_effort(
+  let mapped = @provider_utils.map_reasoning_to_provider_effort(
     @provider.XHigh,
     { "xhigh": "max" },
     warnings,
@@ -79,7 +97,7 @@ test "reasoning effort utility reports compatibility and unsupported levels" {
     ),
   )
 
-  let missing = map_reasoning_to_provider_effort(
+  let missing = @provider_utils.map_reasoning_to_provider_effort(
     @provider.High,
     { "low": "low" },
     warnings,
@@ -97,7 +115,7 @@ test "tool approval-only message is identified for Chat Completions adapters" {
   let approval_only = @provider.LanguageModelMessage::tool_content([
     @provider.LanguageModelContentPart::tool_approval_response(approval),
   ])
-  assert_true(is_tool_approval_only_message(approval_only))
+  assert_true(@provider_utils.is_tool_approval_only_message(approval_only))
   let result = @provider.LanguageModelToolResult::text(
     tool_call_id="call-1",
     tool_name="lookup",
@@ -107,5 +125,5 @@ test "tool approval-only message is identified for Chat Completions adapters" {
     @provider.LanguageModelContentPart::tool_result(result),
     @provider.LanguageModelContentPart::tool_approval_response(approval),
   ])
-  assert_false(is_tool_approval_only_message(mixed))
+  assert_false(@provider_utils.is_tool_approval_only_message(mixed))
 }

@@ -101,7 +101,7 @@ pub impl @provider.ImageModelV4 for MiddlewareImageModelV4 with fn model_id(
 ///|
 pub impl @provider.ImageModelV4 for MiddlewareImageModelV4 with fn max_images_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   match self.middleware.override_max_images_per_call {
     Some(resolve) => resolve(self.model)
     None => self.model.max_images_per_call()
@@ -126,4 +126,13 @@ pub impl @provider.ImageModelV4 for MiddlewareImageModelV4 with fn do_generate(
     Some(wrap) => wrap(context)
     None => do_generate()
   }
+}
+
+///|
+pub extend MiddlewareImageModelV4 with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
 }

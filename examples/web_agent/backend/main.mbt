@@ -14,16 +14,30 @@ fn response_headers(content_type : String) -> Map[String, String] {
 }
 
 ///|
+fn http_headers(
+  headers : Map[String, String],
+) -> Map[@http.CaseInsensitiveString, String] {
+  let result : Map[@http.CaseInsensitiveString, String] = Map([])
+  for entry in headers.iter2() {
+    let (key, value) = entry
+    result[@http.CaseInsensitiveString(key)] = value
+  }
+  result
+}
+
+///|
 async fn send_json(
   conn : @http.ServerConnection,
-  code : Int,
+  code : Int32,
   reason : String,
   value : Json,
 ) -> Unit {
   conn.send_response(
     code,
     reason,
-    extra_headers=response_headers("application/json; charset=utf-8"),
+    extra_headers=http_headers(
+      response_headers("application/json; charset=utf-8"),
+    ),
   )
   conn.write(value.stringify())
   conn.end_response()
@@ -32,7 +46,7 @@ async fn send_json(
 ///|
 async fn send_error(
   conn : @http.ServerConnection,
-  code : Int,
+  code : Int32,
   reason : String,
   message : String,
 ) -> Unit {
@@ -43,7 +57,7 @@ async fn send_error(
 async fn send_options(conn : @http.ServerConnection) -> Unit {
   let headers = response_headers("text/plain; charset=utf-8")
   headers["Content-Length"] = "0"
-  conn.send_response(204, "No Content", extra_headers=headers)
+  conn.send_response(204, "No Content", extra_headers=http_headers(headers))
   conn.end_response()
 }
 
@@ -128,7 +142,7 @@ fn ui_message_limit(
   messages : Array[Json],
   trigger : String,
   message_id : String?,
-) -> Int raise {
+) -> Int32 raise {
   guard trigger == "submit-message" || trigger == "regenerate-message" else {
     fail("Trigger must be submit-message or regenerate-message.")
   }
@@ -403,7 +417,9 @@ async fn handle_chat_stream(
   conn.send_response(
     200,
     "OK",
-    extra_headers=response_headers("application/x-ndjson; charset=utf-8"),
+    extra_headers=http_headers(
+      response_headers("application/x-ndjson; charset=utf-8"),
+    ),
   )
   write_ndjson(conn, {
     "type": "metadata",
@@ -588,7 +604,7 @@ async fn handle_use_chat(
   headers["Connection"] = "keep-alive"
   headers["X-Accel-Buffering"] = "no"
   headers["x-vercel-ai-ui-message-stream"] = "v1"
-  conn.send_response(200, "OK", extra_headers=headers)
+  conn.send_response(200, "OK", extra_headers=http_headers(headers))
   write_sse(conn, {
     "type": "start",
     "messageId": use_chat_message_id(request),
@@ -679,7 +695,7 @@ async fn serve_frontend(
   }
   let headers = response_headers(content_type)
   headers["Cache-Control"] = "no-cache"
-  conn.send_response(200, "OK", extra_headers=headers)
+  conn.send_response(200, "OK", extra_headers=http_headers(headers))
   conn.write(content)
   conn.end_response()
 }
@@ -716,7 +732,7 @@ async fn handle_request(
     (@http.Get, "/favicon.ico") => {
       let headers = response_headers("image/x-icon")
       headers["Content-Length"] = "0"
-      conn.send_response(204, "No Content", extra_headers=headers)
+      conn.send_response(204, "No Content", extra_headers=http_headers(headers))
       conn.end_response()
     }
     (@http.Get, _) | (@http.Post, _) =>
@@ -726,7 +742,7 @@ async fn handle_request(
 }
 
 ///|
-fn configured_port() -> Int {
+fn configured_port() -> Int32 {
   match @env.get_env_var("MOONAI_PORT") {
     Some(value) => @string.parse_int(value) catch { _ => 8080 }
     None => 8080

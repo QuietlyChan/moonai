@@ -6,13 +6,13 @@ struct GoogleEmbeddingModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
 /// Google's per-request embedding input limit.
-pub const GOOGLE_MAX_EMBEDDINGS_PER_CALL : Int = 100
+pub const GOOGLE_MAX_EMBEDDINGS_PER_CALL : Int32 = 100
 
 ///|
 fn google_embedding_value(
@@ -20,7 +20,7 @@ fn google_embedding_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> GoogleEmbeddingModel {
   {
@@ -37,7 +37,7 @@ fn google_embedding_value(
 ///|
 fn decode_google_embedding_response(
   value : Json,
-) -> (Array[Array[Double]], Int?) raise {
+) -> (Array[Array[Double]], Int32?) raise {
   match value {
     { "embedding": { "values": Array(components), .. }, .. } => {
       let embedding : Array[Double] = []
@@ -47,7 +47,7 @@ fn decode_google_embedding_response(
           _ => fail("google embedding has non-numeric component")
         }
       }
-      let mut tokens : Int? = None
+      let mut tokens : Int32? = None
       match value {
         {
           "usageMetadata": { "totalBillableCharacters": Number(count, ..), .. },
@@ -85,7 +85,7 @@ pub impl @provider.EmbeddingModelV4 for GoogleEmbeddingModel with fn model_id(
 ///|
 pub impl @provider.EmbeddingModelV4 for GoogleEmbeddingModel with fn max_embeddings_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(GOOGLE_MAX_EMBEDDINGS_PER_CALL)
 }
 
@@ -180,4 +180,15 @@ pub impl @provider.EmbeddingModelV4 for GoogleEmbeddingModel with fn do_embed(
     request=response.request,
     response=response.response,
   )
+}
+
+///|
+pub extend GoogleEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  provider,
+  max_embeddings_per_call,
+  supports_parallel_calls,
+  max_input_bytes_per_call,
+  model_id,
 }

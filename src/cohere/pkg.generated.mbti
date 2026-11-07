@@ -7,23 +7,36 @@ import {
 }
 
 // Values
-pub const COHERE_MAX_EMBEDDINGS_PER_CALL : Int = 96
+pub const COHERE_MAX_EMBEDDINGS_PER_CALL : Int32 = 96
 
 pub const VERSION : String = "0.1.0"
 
-pub fn cohere(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn cohere(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
-pub fn createCohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
+pub fn createCohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
 
-pub fn create_cohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
+pub fn create_cohere(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> CohereProvider
 
 // Errors
 
 // Types and methods
 type CohereChatLanguageModel
+pub async fn CohereChatLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn CohereChatLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn CohereChatLanguageModel::model_id(Self) -> String
+pub fn CohereChatLanguageModel::provider(Self) -> String
+pub fn CohereChatLanguageModel::specification_version(Self) -> String
+pub fn CohereChatLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for CohereChatLanguageModel
 
 type CohereEmbeddingModel
+pub async fn CohereEmbeddingModel::do_embed(Self, @provider.EmbeddingModelV4CallOptions) -> @provider.EmbeddingModelV4Result
+pub fn CohereEmbeddingModel::max_embeddings_per_call(Self) -> Int32?
+pub fn CohereEmbeddingModel::max_input_bytes_per_call(Self) -> Int64?
+pub fn CohereEmbeddingModel::model_id(Self) -> String
+pub fn CohereEmbeddingModel::provider(Self) -> String
+pub fn CohereEmbeddingModel::specification_version(Self) -> String
+pub fn CohereEmbeddingModel::supports_parallel_calls(Self) -> Bool
 pub impl @provider.EmbeddingModelV4 for CohereEmbeddingModel
 
 pub struct CohereProvider {
@@ -33,14 +46,24 @@ pub fn CohereProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn CohereProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn CohereProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn CohereProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn CohereProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn CohereProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn CohereProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn CohereProvider::language_model(Self, String) -> &@provider.LanguageModelV4
 pub fn CohereProvider::reranking(Self, String) -> &@provider.RerankingModelV4
 pub fn CohereProvider::rerankingModel(Self, String) -> &@provider.RerankingModelV4
 pub fn CohereProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4
+pub fn CohereProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn CohereProvider::specification_version(Self) -> String
+pub fn CohereProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn CohereProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for CohereProvider
 
 type CohereRerankingModel
+pub async fn CohereRerankingModel::do_rerank(Self, @provider.RerankingModelV4CallOptions) -> @provider.RerankingModelV4Result
+pub fn CohereRerankingModel::model_id(Self) -> String
+pub fn CohereRerankingModel::provider(Self) -> String
+pub fn CohereRerankingModel::specification_version(Self) -> String
 pub impl @provider.RerankingModelV4 for CohereRerankingModel
 
 // Type aliases

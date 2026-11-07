@@ -1,5 +1,5 @@
 ///|
-fn paint_extension() -> OpenResponsesExtension {
+fn paint_extension() -> @protocol.OpenResponsesExtension {
   {
     id: "acme.paint",
     tool_type: Some("acme:canvas"),
@@ -51,7 +51,7 @@ fn paint_extension() -> OpenResponsesExtension {
 test "extension registry validates pairs and namespaces" {
   // Missing decode_item with item_types fails.
   let outcome = try {
-    let _ = create_open_responses_extension_registry(extensions=[
+    let _ = @protocol.create_open_responses_extension_registry(extensions=[
       {
         id: "acme.paint",
         tool_type: None,
@@ -71,7 +71,7 @@ test "extension registry validates pairs and namespaces" {
   assert_true(outcome is Some(_))
   // Event types must share the extension id namespace.
   let outcome2 = try {
-    let _ = create_open_responses_extension_registry(extensions=[
+    let _ = @protocol.create_open_responses_extension_registry(extensions=[
       {
         id: "acme.paint",
         tool_type: None,
@@ -90,7 +90,7 @@ test "extension registry validates pairs and namespaces" {
   }
   assert_true(outcome2 is Some(_))
   // A well-formed registry resolves lookups.
-  let registry = create_open_responses_extension_registry(extensions=[
+  let registry = @protocol.create_open_responses_extension_registry(extensions=[
     paint_extension(),
   ])
   assert_true(registry.provider_tool_extension("acme.paint") is Some(_))
@@ -100,10 +100,10 @@ test "extension registry validates pairs and namespaces" {
 
 ///|
 test "stream decoder routes namespaced extension events" {
-  let registry = create_open_responses_extension_registry(extensions=[
+  let registry = @protocol.create_open_responses_extension_registry(extensions=[
     paint_extension(),
   ])
-  let decoder = OpenResponsesStreamDecoder::new(extensions=registry)
+  let decoder = @protocol.OpenResponsesStreamDecoder::new(extensions=registry)
   decoder.feed_line(
     "data: {\"type\":\"acme:stroke.delta\",\"sequence_number\":1,\"delta\":\"drip\"}",
   )

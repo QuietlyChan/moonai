@@ -10,7 +10,7 @@ priv struct OpenAIBatch {
   base_url : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
   files : OpenAIFiles
 }
@@ -21,7 +21,7 @@ fn openai_batch(
   base_url~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAIBatch {
   {

@@ -193,3 +193,13 @@ pub impl @provider.LanguageModelV4 for MiddlewareLanguageModelV4 with fn do_stre
     None => do_stream()
   }
 }
+
+///|
+pub extend MiddlewareLanguageModelV4 with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

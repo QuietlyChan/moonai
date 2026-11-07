@@ -30,7 +30,7 @@ async test "workflow agent runs a turn, validates output, and persists the snaps
       id="research-agent",
     ),
   )
-  let workflow = WorkflowAgent::new(agent=inner as &@agent.Agent, output={
+  let workflow = @workflow.WorkflowAgent::new(agent=inner as &@agent.Agent, output={
     schema: {
       "type": "object",
       "properties": { "answer": { "type": "string" } },
@@ -51,7 +51,9 @@ async test "workflow agent runs a turn, validates output, and persists the snaps
   assert_eq(result.snapshot.agent_id, Some("research-agent"))
   assert_eq(workflow.messages().length(), 2)
   // Snapshot survives a JSON roundtrip.
-  let restored = workflow_snapshot_from_json(value=workflow.snapshot())
+  let restored = @workflow.workflow_snapshot_from_json(
+    value=workflow.snapshot(),
+  )
   assert_eq(restored.messages.length(), 2)
   assert_eq(restored.messages[1].content, "{\"answer\":\"Moon it is\"}")
 }
@@ -76,7 +78,7 @@ async test "workflow agent restore resumes from a persisted snapshot" {
       id="resume-agent",
     ),
   )
-  let workflow = WorkflowAgent::new(agent=inner as &@agent.Agent)
+  let workflow = @workflow.WorkflowAgent::new(agent=inner as &@agent.Agent)
   workflow.restore(snapshot={
     agent_id: Some("resume-agent"),
     messages: [

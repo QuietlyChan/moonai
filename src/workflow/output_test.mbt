@@ -1,6 +1,6 @@
 ///|
 test "workflow output validation accepts schema-conformant text" {
-  let spec : WorkflowOutputSpecification = {
+  let spec : @workflow.WorkflowOutputSpecification = {
     schema: {
       "type": "object",
       "properties": { "answer": { "type": "string" } },
@@ -8,7 +8,7 @@ test "workflow output validation accepts schema-conformant text" {
     },
     name: Some("answer-spec"),
   }
-  let value = validate_workflow_output(
+  let value = @workflow.validate_workflow_output(
     spec~,
     text="{\"answer\":\"Moon it is\"}",
   )
@@ -17,7 +17,7 @@ test "workflow output validation accepts schema-conformant text" {
 
 ///|
 test "workflow output validation rejects malformed json and schema drift" {
-  let spec : WorkflowOutputSpecification = {
+  let spec : @workflow.WorkflowOutputSpecification = {
     schema: {
       "type": "object",
       "properties": { "answer": { "type": "string" } },
@@ -25,7 +25,7 @@ test "workflow output validation rejects malformed json and schema drift" {
     },
     name: None,
   }
-  try validate_workflow_output(spec~, text="not json") catch {
+  try @workflow.validate_workflow_output(spec~, text="not json") catch {
     WorkflowOutputValidationError(message~, text~) => {
       assert_true(message.contains("not valid JSON"))
       assert_eq(text, "not json")
@@ -33,7 +33,7 @@ test "workflow output validation rejects malformed json and schema drift" {
   } noraise {
     _ => fail("expected malformed json rejection")
   }
-  try validate_workflow_output(spec~, text="{\"wrong\":1}") catch {
+  try @workflow.validate_workflow_output(spec~, text="{\"wrong\":1}") catch {
     WorkflowOutputValidationError(message~, ..) =>
       assert_true(message.contains("schema validation"))
   } noraise {

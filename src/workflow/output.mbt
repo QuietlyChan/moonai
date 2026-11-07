@@ -2,17 +2,19 @@
 /// A structured-output specification attached to a workflow agent. When
 /// present, the final model text is parsed as JSON and validated against the
 /// schema before the run result is returned.
+#derive(Debug)
 pub(all) struct WorkflowOutputSpecification {
   schema : Json
   name : String?
-} derive(Debug)
+}
 
 ///|
 /// The final model text failed to parse or did not match the output schema.
 /// The raw text is retained for diagnostics or repair.
+#derive(Debug, Eq)
 pub suberror WorkflowOutputValidationError {
   WorkflowOutputValidationError(message~ : String, text~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Validate a workflow run's final text against the output specification and
@@ -39,3 +41,12 @@ pub fn validate_workflow_output(
   }
   value
 }
+
+///|
+pub extend WorkflowOutputSpecification with Debug::{to_repr}
+
+///|
+pub extend WorkflowOutputValidationError with Debug::{to_repr}
+
+///|
+pub extend WorkflowOutputValidationError with Eq::{not_equal, equal}

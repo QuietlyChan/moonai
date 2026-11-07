@@ -28,7 +28,7 @@ pub fn json_string_field(json : Json, field : String) -> String? {
 
 ///|
 /// Read an integer-valued number field from a JSON object.
-pub fn json_int_field_opt(json : Json, field : String) -> Int? {
+pub fn json_int_field_opt(json : Json, field : String) -> Int32? {
   match json {
     Object(object) =>
       match object.get(field) {
@@ -41,7 +41,11 @@ pub fn json_int_field_opt(json : Json, field : String) -> Int? {
 
 ///|
 /// Read an integer-valued number field or return the supplied default.
-pub fn json_int_field(json : Json, field : String, default? : Int = 0) -> Int {
+pub fn json_int_field(
+  json : Json,
+  field : String,
+  default~ : Int32 = 0,
+) -> Int32 {
   json_int_field_opt(json, field).unwrap_or(default)
 }
 

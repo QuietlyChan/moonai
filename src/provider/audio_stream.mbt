@@ -1,15 +1,16 @@
 ///|
 /// Audio format shared by streaming audio providers.
+#derive(Debug, Eq)
 pub(all) struct AudioFormat {
   media_type : String
-  sample_rate : Int?
-} derive(Debug, Eq)
+  sample_rate : Int32?
+}
 
 ///|
 /// Construct an audio format such as `audio/pcm` at 24 kHz.
 pub fn AudioFormat::new(
   media_type~ : String,
-  sample_rate? : Int,
+  sample_rate? : Int32,
 ) -> AudioFormat {
   { media_type, sample_rate, }
 }
@@ -17,10 +18,11 @@ pub fn AudioFormat::new(
 ///|
 /// One source-audio chunk. Base64 chunks are already encoded and byte chunks
 /// are encoded by the provider adapter when required by its wire protocol.
+#derive(Debug, Eq)
 pub(all) enum AudioChunk {
   AudioBytes(Bytes)
   AudioBase64(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a raw-byte source-audio chunk.
@@ -45,7 +47,7 @@ pub(open) trait AudioStream {
 ///|
 priv struct ChunkAudioStream {
   chunks : Array[AudioChunk]
-  index : Ref[Int]
+  index : Ref[Int32]
   cancelled : Ref[Bool]
 }
 
@@ -74,7 +76,7 @@ pub fn audio_chunks(chunks : Array[AudioChunk]) -> &AudioStream {
 ///|
 priv struct ReaderAudioStream {
   reader : &@io.Reader
-  max_chunk_size : Int
+  max_chunk_size : Int32
   cancelled : Ref[Bool]
 }
 
@@ -98,10 +100,22 @@ impl AudioStream for ReaderAudioStream with fn cancel(self) {
 /// Adapt any async byte reader to a live audio stream.
 pub fn audio_reader(
   reader : &@io.Reader,
-  max_chunk_size? : Int = 65_536,
+  max_chunk_size~ : Int32 = 65_536,
 ) -> &AudioStream raise {
   guard max_chunk_size > 0 else {
     fail("audio stream max_chunk_size must be greater than zero")
   }
   ReaderAudioStream::{ reader, max_chunk_size, cancelled: Ref(false), }
 }
+
+///|
+pub extend AudioFormat with Debug::{to_repr}
+
+///|
+pub extend AudioFormat with Eq::{not_equal, equal}
+
+///|
+pub extend AudioChunk with Debug::{to_repr}
+
+///|
+pub extend AudioChunk with Eq::{not_equal, equal}

@@ -7,7 +7,7 @@ priv struct OpenAIChatModel {
   model_id : String
   headers : Map[String, String]
   include_usage : Bool
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   id_generator : @provider_utils.IdGenerator
   http_transport : &@provider_utils.HttpTransport
 }

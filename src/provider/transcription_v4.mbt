@@ -1,5 +1,6 @@
 ///|
 /// Versioned options for one buffered transcription call.
+#derive(Debug)
 pub(all) struct TranscriptionModelV4CallOptions {
   audio : TranscriptionAudio
   media_type : String
@@ -7,16 +8,16 @@ pub(all) struct TranscriptionModelV4CallOptions {
   headers : Map[String, String]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct V4 buffered transcription options.
 pub fn TranscriptionModelV4CallOptions::new(
   audio~ : TranscriptionAudio,
   media_type~ : String,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> TranscriptionModelV4CallOptions {
   {
@@ -61,6 +62,7 @@ pub fn TranscriptionModelV4CallOptions::to_transcription_call_options(
 
 ///|
 /// Lossless V4 transcription result.
+#derive(Debug, Eq)
 pub(all) struct TranscriptionModelV4Result {
   text : String
   segments : Array[TranscriptionSegment]
@@ -70,19 +72,19 @@ pub(all) struct TranscriptionModelV4Result {
   request : RequestMetadata?
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 transcription result.
 pub fn TranscriptionModelV4Result::new(
   text~ : String,
-  segments? : Array[TranscriptionSegment] = [],
+  segments~ : Array[TranscriptionSegment] = [],
   language? : String,
   duration_in_seconds? : Double,
-  warnings? : Array[Warning] = [],
+  warnings~ : Array[Warning] = [],
   request? : RequestMetadata,
   response? : ResponseMetadata,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> TranscriptionModelV4Result {
   {
     text,
@@ -147,9 +149,9 @@ pub(all) struct TranscriptionModelV4StreamOptions {
 pub fn TranscriptionModelV4StreamOptions::new(
   audio~ : &AudioStream,
   input_audio_format~ : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
   cancellation_token? : CancellationToken,
 ) -> TranscriptionModelV4StreamOptions {
   {
@@ -194,6 +196,7 @@ pub fn TranscriptionModelV4StreamOptions::to_transcription_stream_options(
 
 ///|
 /// Normalized parts emitted by a V4 transcription stream.
+#derive(Debug, Eq)
 pub(all) enum TranscriptionModelV4StreamPart {
   TranscriptionV4StreamStart(warnings~ : Array[Warning])
   TranscriptionV4TranscriptDelta(
@@ -206,7 +209,7 @@ pub(all) enum TranscriptionModelV4StreamPart {
     text~ : String,
     start_second~ : Double?,
     duration_in_seconds~ : Double?,
-    channel_index~ : Int?,
+    channel_index~ : Int32?,
     provider_metadata~ : Map[String, Json]
   )
   TranscriptionV4TranscriptFinal(
@@ -214,7 +217,7 @@ pub(all) enum TranscriptionModelV4StreamPart {
     text~ : String,
     start_second~ : Double?,
     end_second~ : Double?,
-    channel_index~ : Int?,
+    channel_index~ : Int32?,
     provider_metadata~ : Map[String, Json]
   )
   TranscriptionV4ResponseMetadata(ResponseMetadata)
@@ -227,7 +230,7 @@ pub(all) enum TranscriptionModelV4StreamPart {
   )
   TranscriptionV4Raw(Json)
   TranscriptionV4Error(StreamErrorInfo)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Convert an old wire stream event to the V4 stream vocabulary.
@@ -355,10 +358,11 @@ pub fn TranscriptionModelV4StreamPart::to_stream_event(
 
 ///|
 /// Metadata returned after a V4 live transcription call.
+#derive(Debug, Eq)
 pub(all) struct TranscriptionModelV4StreamResult {
   request : RequestMetadata?
   response : ResponseMetadata?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 transcription stream result.
@@ -382,3 +386,24 @@ pub(open) trait TranscriptionModelV4 {
     async (TranscriptionModelV4StreamPart) -> Unit,
   ) -> TranscriptionModelV4StreamResult
 }
+
+///|
+pub extend TranscriptionModelV4CallOptions with Debug::{to_repr}
+
+///|
+pub extend TranscriptionModelV4Result with Debug::{to_repr}
+
+///|
+pub extend TranscriptionModelV4Result with Eq::{not_equal, equal}
+
+///|
+pub extend TranscriptionModelV4StreamPart with Debug::{to_repr}
+
+///|
+pub extend TranscriptionModelV4StreamPart with Eq::{not_equal, equal}
+
+///|
+pub extend TranscriptionModelV4StreamResult with Debug::{to_repr}
+
+///|
+pub extend TranscriptionModelV4StreamResult with Eq::{not_equal, equal}

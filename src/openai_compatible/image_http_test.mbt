@@ -31,7 +31,7 @@ async test "generateImage batches OpenAI-compatible image requests" {
         max_connections=2,
       )
     }
-    let model = openai_compatible_image(
+    let model = @openai_compatible.openai_compatible_image(
       provider_name="local-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="image-model",
@@ -90,7 +90,7 @@ async test "OpenAI-compatible image edits use multipart files and mask" {
         max_connections=1,
       )
     }
-    let model = openai_compatible_image(
+    let model = @openai_compatible.openai_compatible_image(
       provider_name="local-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="image-model",
@@ -154,7 +154,7 @@ async test "OpenAI-compatible image edits download URL-backed files" {
       )
     }
     let base_url = "http://127.0.0.1:\{server.addr.port()}"
-    let model = openai_compatible_image(
+    let model = @openai_compatible.openai_compatible_image(
       provider_name="local-test",
       base_url="\{base_url}/v1",
       model_id="image-model",

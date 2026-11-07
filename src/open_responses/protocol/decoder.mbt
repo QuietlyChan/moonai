@@ -1,8 +1,8 @@
 ///|
 enum ResponsesContentRef {
-  ResponsesText(Int)
-  ResponsesReasoning(Int)
-  ResponsesTool(Int)
+  ResponsesText(Int32)
+  ResponsesReasoning(Int32)
+  ResponsesTool(Int32)
 }
 
 ///|
@@ -57,21 +57,21 @@ pub struct OpenResponsesStreamDecoder {
 ///|
 /// Create an empty Open Responses stream decoder.
 pub fn OpenResponsesStreamDecoder::new(
-  include_raw_chunks? : Bool = false,
-  progressive_tool_calls? : Bool = false,
-  emit_failed_error? : Bool = false,
-  split_reasoning_summary_parts? : Bool = false,
-  provider_name? : String = "",
+  include_raw_chunks~ : Bool = false,
+  progressive_tool_calls~ : Bool = false,
+  emit_failed_error~ : Bool = false,
+  split_reasoning_summary_parts~ : Bool = false,
+  provider_name~ : String = "",
   id_generator? : @provider_utils.IdGenerator,
-  observe_json? : (Json) -> Unit = ignore_responses_json,
+  observe_json~ : (Json) -> Unit = ignore_responses_json,
   validate_json? : (Json) -> Unit raise,
-  observe_events? : (Json) -> Array[@provider.StreamEvent] = empty_responses_events,
-  build_provider_metadata? : () -> Map[String, Json] = empty_responses_metadata,
-  build_content? : () -> Array[@provider.GeneratedContent] = empty_responses_content,
-  use_built_content? : Bool = false,
-  has_extra_tool_calls? : () -> Bool = no_extra_responses_tool_calls,
-  build_tool_metadata? : (String, Json) -> Map[String, Json] = empty_responses_tool_metadata,
-  convert_v4_usage? : (Json?) -> @provider.LanguageModelV4Usage = @provider.LanguageModelV4Usage::from_token_usage_json,
+  observe_events~ : (Json) -> Array[@provider.StreamEvent] = empty_responses_events,
+  build_provider_metadata~ : () -> Map[String, Json] = empty_responses_metadata,
+  build_content~ : () -> Array[@provider.GeneratedContent] = empty_responses_content,
+  use_built_content~ : Bool = false,
+  has_extra_tool_calls~ : () -> Bool = no_extra_responses_tool_calls,
+  build_tool_metadata~ : (String, Json) -> Map[String, Json] = empty_responses_tool_metadata,
+  convert_v4_usage~ : (Json?) -> @provider.LanguageModelV4Usage = @provider.LanguageModelV4Usage::from_token_usage_json,
   extensions? : OpenResponsesExtensionRegistry,
 ) -> OpenResponsesStreamDecoder {
   {
@@ -207,7 +207,7 @@ fn OpenResponsesStreamDecoder::record_json(
 }
 
 ///|
-fn find_id(values : Array[String], id : String) -> Int? {
+fn find_id(values : Array[String], id : String) -> Int32? {
   for index, value in values {
     if value == id {
       return Some(index)
@@ -252,7 +252,7 @@ fn OpenResponsesStreamDecoder::start_text(
   self : OpenResponsesStreamDecoder,
   id : String,
   events : Array[@provider.StreamEvent],
-) -> Int {
+) -> Int32 {
   match find_id(self.text_ids, id) {
     Some(index) => index
     None => {
@@ -284,7 +284,7 @@ fn OpenResponsesStreamDecoder::start_reasoning(
   self : OpenResponsesStreamDecoder,
   id : String,
   events : Array[@provider.StreamEvent],
-) -> Int {
+) -> Int32 {
   match find_id(self.reasoning_ids, id) {
     Some(index) => index
     None => {
@@ -317,7 +317,7 @@ fn OpenResponsesStreamDecoder::finish_reasoning(
 fn OpenResponsesStreamDecoder::ensure_tool(
   self : OpenResponsesStreamDecoder,
   item_id : String,
-) -> Int {
+) -> Int32 {
   match find_id(self.tool_item_ids, item_id) {
     Some(index) => index
     None => {
@@ -339,7 +339,7 @@ fn OpenResponsesStreamDecoder::ensure_tool(
 fn OpenResponsesStreamDecoder::update_tool_from_item(
   self : OpenResponsesStreamDecoder,
   item : Json,
-) -> Int {
+) -> Int32 {
   let item_id = @provider_utils.json_string_field(item, "id").unwrap_or(
     "tool-item-0",
   )
@@ -364,7 +364,7 @@ fn OpenResponsesStreamDecoder::update_tool_from_item(
 ///|
 fn OpenResponsesStreamDecoder::tool_id(
   self : OpenResponsesStreamDecoder,
-  index : Int,
+  index : Int32,
 ) -> String {
   self.tool_stream_id(index)
 }
@@ -372,7 +372,7 @@ fn OpenResponsesStreamDecoder::tool_id(
 ///|
 fn OpenResponsesStreamDecoder::tool_stream_id(
   self : OpenResponsesStreamDecoder,
-  index : Int,
+  index : Int32,
 ) -> String {
   if self.tool_stream_ids[index] == "" {
     self.tool_stream_ids[index] = if self.tool_call_ids[index] != "" {
@@ -392,7 +392,7 @@ fn OpenResponsesStreamDecoder::tool_stream_id(
 ///|
 fn OpenResponsesStreamDecoder::start_tool(
   self : OpenResponsesStreamDecoder,
-  index : Int,
+  index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
   if !self.tool_started[index] {
@@ -411,7 +411,7 @@ fn OpenResponsesStreamDecoder::start_tool(
 ///|
 fn OpenResponsesStreamDecoder::emit_complete_tool_arguments_if_unseen(
   self : OpenResponsesStreamDecoder,
-  index : Int,
+  index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
   let arguments = self.tool_arguments[index]
@@ -426,7 +426,7 @@ fn OpenResponsesStreamDecoder::emit_complete_tool_arguments_if_unseen(
 ///|
 fn OpenResponsesStreamDecoder::finish_tool(
   self : OpenResponsesStreamDecoder,
-  index : Int,
+  index : Int32,
   events : Array[@provider.StreamEvent],
 ) -> Unit {
   if self.tool_ready[index] {

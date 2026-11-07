@@ -40,12 +40,12 @@ async test "DeepSeek Files uploads user_data images and returns a reference" {
         max_connections=1,
       )
     }
-    let provider = createDeepSeek(
+    let provider = @deepseek.createDeepSeek(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}",
       idle_timeout_ms=2_000,
     )
-    let files = DeepSeekProvider::files(provider)
+    let files = @deepseek.DeepSeekProvider::files(provider)
     assert_eq(files.specification_version(), "v4")
     assert_eq(files.provider(), "deepseek.files")
     let result = @ai.upload_file(
@@ -53,7 +53,7 @@ async test "DeepSeek Files uploads user_data images and returns a reference" {
       data=@provider.UploadFileData::bytes(b"PNGDATA!"),
       media_type="image/png",
       filename="photo.png",
-      provider_options=DeepSeekFilesOptions::new(expires_after=7200.0).to_provider_options(),
+      provider_options=@deepseek.DeepSeekFilesOptions::new(expires_after=7200.0).to_provider_options(),
     )
     assert_eq(result.provider_reference.get("deepseek"), Some("file-abc123"))
     assert_eq(result.filename, Some("photo.png"))

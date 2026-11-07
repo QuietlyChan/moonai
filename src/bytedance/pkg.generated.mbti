@@ -5,22 +5,23 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn byteDanceImage(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+pub fn byteDanceImage(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
 
-pub fn byteDanceVideo(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.VideoModelV4
+pub fn byteDanceVideo(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.VideoModelV4
 
-pub fn byte_dance_image(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+pub fn byte_dance_image(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
 
-pub fn byte_dance_video(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.VideoModelV4
+pub fn byte_dance_video(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.VideoModelV4
 
-pub fn createByteDance(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ByteDanceProvider
+pub fn createByteDance(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> ByteDanceProvider
 
-pub fn create_byte_dance(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ByteDanceProvider
+pub fn create_byte_dance(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> ByteDanceProvider
 
 // Errors
 
@@ -28,30 +29,49 @@ pub fn create_byte_dance(api_key? : String, base_url? : String, headers? : Map[S
 pub struct ByteDanceImageModel {
   // private fields
 }
-pub fn ByteDanceImageModel::new(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> Self
+pub async fn ByteDanceImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn ByteDanceImageModel::max_images_per_call(Self) -> Int32?
+pub fn ByteDanceImageModel::model_id(Self) -> String
+pub fn ByteDanceImageModel::new(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> Self
+pub fn ByteDanceImageModel::provider(Self) -> String
+pub fn ByteDanceImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for ByteDanceImageModel
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ByteDanceImageModelOptions {
   watermark : Bool?
   output_format : String?
   size : String?
   sequential_image_generation : String?
-  max_images : Int?
+  max_images : Int32?
   optimize_prompt_mode : String?
-  extensions : Map[String, Json]
-} derive(Eq, @debug.Debug)
-pub fn ByteDanceImageModelOptions::new(watermark? : Bool, output_format? : String, size? : String, sequential_image_generation? : String, max_images? : Int, optimize_prompt_mode? : String, extensions? : Map[String, Json]) -> Self raise
-pub fn ByteDanceImageModelOptions::to_provider_options(Self) -> Map[String, Json]
+  extensions : Map[String, @json.Json]
+}
+pub fn ByteDanceImageModelOptions::equal(Self, Self) -> Bool
+pub fn ByteDanceImageModelOptions::new(watermark? : Bool, output_format? : String, size? : String, sequential_image_generation? : String, max_images? : Int32, optimize_prompt_mode? : String, extensions? : Map[String, @json.Json]) -> Self raise
+pub fn ByteDanceImageModelOptions::not_equal(Self, Self) -> Bool
+pub fn ByteDanceImageModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
+pub fn ByteDanceImageModelOptions::to_repr(Self) -> @debug.Repr
 
 pub struct ByteDanceProvider {
   // private fields
 }
+pub fn ByteDanceProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn ByteDanceProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn ByteDanceProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn ByteDanceProvider::imageModel(Self, String) -> &@provider.ImageModelV4
+pub fn ByteDanceProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
+pub fn ByteDanceProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn ByteDanceProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn ByteDanceProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn ByteDanceProvider::specification_version(Self) -> String
+pub fn ByteDanceProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn ByteDanceProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub fn ByteDanceProvider::video(Self, String) -> &@provider.VideoModelV4
 pub fn ByteDanceProvider::videoModel(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for ByteDanceProvider
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ByteDanceVideoModelOptions {
   watermark : Bool?
   generate_audio : Bool?
@@ -63,12 +83,15 @@ pub(all) struct ByteDanceVideoModelOptions {
   reference_images : Array[String]
   reference_videos : Array[String]
   reference_audio : Array[String]
-  poll_interval_ms : Int?
-  poll_timeout_ms : Int?
-  extensions : Map[String, Json]
-} derive(Eq, @debug.Debug)
-pub fn ByteDanceVideoModelOptions::new(watermark? : Bool, generate_audio? : Bool, camera_fixed? : Bool, return_last_frame? : Bool, service_tier? : String, draft? : Bool, last_frame_image? : String, reference_images? : Array[String], reference_videos? : Array[String], reference_audio? : Array[String], poll_interval_ms? : Int, poll_timeout_ms? : Int, extensions? : Map[String, Json]) -> Self raise
-pub fn ByteDanceVideoModelOptions::to_provider_options(Self) -> Map[String, Json]
+  poll_interval_ms : Int32?
+  poll_timeout_ms : Int32?
+  extensions : Map[String, @json.Json]
+}
+pub fn ByteDanceVideoModelOptions::equal(Self, Self) -> Bool
+pub fn ByteDanceVideoModelOptions::new(watermark? : Bool, generate_audio? : Bool, camera_fixed? : Bool, return_last_frame? : Bool, service_tier? : String, draft? : Bool, last_frame_image? : String, reference_images? : Array[String], reference_videos? : Array[String], reference_audio? : Array[String], poll_interval_ms? : Int32, poll_timeout_ms? : Int32, extensions? : Map[String, @json.Json]) -> Self raise
+pub fn ByteDanceVideoModelOptions::not_equal(Self, Self) -> Bool
+pub fn ByteDanceVideoModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
+pub fn ByteDanceVideoModelOptions::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type ByteDanceImageModelId = String

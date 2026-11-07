@@ -1,19 +1,21 @@
 ///|
 /// A workflow run failed structurally (bad snapshot payload, failed output
 /// validation, harness turn failure).
+#derive(Debug, Eq)
 pub suberror WorkflowError {
   WorkflowError(message~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Serializable snapshot of a workflow run: the conversation so far plus the
 /// completed step count. Persisting the JSON restores the run (resume) with
 /// full history intact.
+#derive(Debug)
 pub(all) struct WorkflowSessionSnapshot {
   agent_id : String?
   messages : Array[@provider_utils.ModelMessage]
-  steps : Int
-} derive(Debug)
+  steps : Int32
+}
 
 ///|
 fn workflow_message_to_json(message : @provider_utils.ModelMessage) -> Json {
@@ -170,3 +172,12 @@ pub fn workflow_snapshot_from_json(
   }
   { agent_id, messages, steps, }
 }
+
+///|
+pub extend WorkflowError with Debug::{to_repr}
+
+///|
+pub extend WorkflowError with Eq::{not_equal, equal}
+
+///|
+pub extend WorkflowSessionSnapshot with Debug::{to_repr}

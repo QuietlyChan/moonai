@@ -9,16 +9,22 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createZai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> ZaiProvider
+pub fn createZai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> ZaiProvider
 
-pub fn create_zai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> ZaiProvider
+pub fn create_zai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> ZaiProvider
 
-pub fn zai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn zai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
 // Errors
 
 // Types and methods
 type ZaiChatLanguageModel
+pub async fn ZaiChatLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn ZaiChatLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn ZaiChatLanguageModel::model_id(Self) -> String
+pub fn ZaiChatLanguageModel::provider(Self) -> String
+pub fn ZaiChatLanguageModel::specification_version(Self) -> String
+pub fn ZaiChatLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for ZaiChatLanguageModel
 
 pub struct ZaiProvider {
@@ -26,8 +32,16 @@ pub struct ZaiProvider {
 }
 pub fn ZaiProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn ZaiProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn ZaiProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn ZaiProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn ZaiProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn ZaiProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn ZaiProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn ZaiProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn ZaiProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn ZaiProvider::specification_version(Self) -> String
+pub fn ZaiProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn ZaiProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for ZaiProvider
 
 // Type aliases

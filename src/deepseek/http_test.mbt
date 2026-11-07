@@ -1,16 +1,16 @@
 ///|
 priv struct DeepSeekMockStream {
-  status : Int
+  status : Int32
   response_headers : Map[String, String]
   chunks : Array[String]
-  next_chunk : Ref[Int]
+  next_chunk : Ref[Int32]
 }
 
 ///|
 fn DeepSeekMockStream::new(
   chunks : Array[String],
-  status? : Int = 200,
-  headers? : Map[String, String] = Map([]),
+  status~ : Int32 = 200,
+  headers~ : Map[String, String] = Map([]),
 ) -> DeepSeekMockStream {
   {
     status,
@@ -23,7 +23,7 @@ fn DeepSeekMockStream::new(
 ///|
 impl @provider_utils.HttpStreamResponse for DeepSeekMockStream with fn status_code(
   self,
-) -> Int {
+) -> Int32 {
   self.status
 }
 
@@ -231,7 +231,7 @@ async test "DeepSeek drives a JSON request and preserves diagnostics" {
     ),
     DeepSeekMockStream::new([]),
   )
-  let model = deepseek(
+  let model = @deepseek.deepseek(
     "deepseek-chat",
     api_key="test-key",
     base_url="https://deepseek.test",
@@ -291,7 +291,7 @@ async test "DeepSeek API errors retain structured HTTP diagnostics" {
     ),
     DeepSeekMockStream::new([]),
   )
-  let model = deepseek(
+  let model = @deepseek.deepseek(
     "deepseek-chat",
     api_key="bad-key",
     base_url="https://deepseek.test",
@@ -339,7 +339,7 @@ async test "DeepSeek SSE keeps reasoning, text, and tool transitions ordered" {
       "x-request-id": "ds-stream-request",
     }),
   )
-  let model = deepseek(
+  let model = @deepseek.deepseek(
     "deepseek-chat",
     api_key="test-key",
     base_url="https://deepseek.test",

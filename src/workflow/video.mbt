@@ -2,9 +2,10 @@
 /// Workflow-safe reference to the environment variable that contains the
 /// secret used to sign and verify tool approvals (upstream
 /// `WorkflowToolApprovalSecret`).
+#derive(Debug, Eq)
 pub(all) struct WorkflowToolApprovalSecret {
   environment_variable : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Resolve the workflow tool approval secret from its environment variable.
@@ -31,8 +32,8 @@ pub async fn workflow_generate_video(
   model~ : &@provider.VideoModelV4,
   options~ : @provider.VideoModelV4CallOptions,
   step_id~ : String,
-  poll_interval_ms? : Int = 5000,
-  poll_timeout_ms? : Int = 600_000,
+  poll_interval_ms~ : Int32 = 5000,
+  poll_timeout_ms~ : Int32 = 600_000,
 ) -> @provider.VideoModelV4Result {
   let headers = @provider_utils.copy_headers(options.headers)
   let mut has_idempotency_key = false
@@ -72,3 +73,9 @@ pub async fn workflow_generate_video(
     }
   }
 }
+
+///|
+pub extend WorkflowToolApprovalSecret with Debug::{to_repr}
+
+///|
+pub extend WorkflowToolApprovalSecret with Eq::{not_equal, equal}

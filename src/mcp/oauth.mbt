@@ -1,29 +1,32 @@
 ///|
 /// OAuth 2.1 tokens used by MCP transports.
+#derive(Debug, Eq)
 pub(all) struct OAuthTokens {
   access_token : String
   id_token : String?
   token_type : String
-  expires_in : Int?
+  expires_in : Int32?
   scope : String?
   refresh_token : String?
   authorization_server : String?
   token_endpoint : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// OAuth dynamic client registration result.
+#derive(Debug, Eq)
 pub(all) struct OAuthClientInformation {
   client_id : String
   client_secret : String?
-  client_id_issued_at : Int?
-  client_secret_expires_at : Int?
+  client_id_issued_at : Int32?
+  client_secret_expires_at : Int32?
   authorization_server : String?
   token_endpoint : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// OAuth client metadata. Extension fields are retained in `raw`.
+#derive(Debug, Eq)
 pub(all) struct OAuthClientMetadata {
   redirect_uris : Array[String]
   token_endpoint_auth_method : String?
@@ -32,17 +35,19 @@ pub(all) struct OAuthClientMetadata {
   client_name : String?
   scope : String?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Authorization server URLs pinned to stored credentials.
+#derive(Debug, Eq)
 pub(all) struct OAuthAuthorizationServerInformation {
   authorization_server_url : String
   token_endpoint : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// OAuth authorization server discovery metadata.
+#derive(Debug, Eq)
 pub(all) struct OAuthAuthorizationServerMetadata {
   issuer : String
   authorization_endpoint : String
@@ -53,30 +58,33 @@ pub(all) struct OAuthAuthorizationServerMetadata {
   code_challenge_methods_supported : Array[String]
   token_endpoint_auth_methods_supported : Array[String]
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// OAuth protected-resource metadata for an MCP server.
+#derive(Debug, Eq)
 pub(all) struct OAuthProtectedResourceMetadata {
   resource : String
   authorization_servers : Array[String]
   scopes_supported : Array[String]
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Result of starting or completing an MCP OAuth flow.
+#derive(Debug, Eq)
 pub(all) enum AuthResult {
   Authorized
   Redirect
-} derive(Debug, Eq)
+}
 
 ///|
 /// URL and verifier generated for an OAuth authorization redirect.
+#derive(Debug, Eq)
 pub(all) struct OAuthAuthorizationStart {
   authorization_url : String
   code_verifier : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Storage and interaction boundary used by the OAuth flow.
@@ -370,7 +378,7 @@ pub fn buildDiscoveryUrls(authorization_server_url : String) -> Array[String] {
 /// Discover and validate OAuth authorization server metadata.
 pub async fn discover_authorization_server_metadata(
   authorization_server_url~ : String,
-  protocol_version? : String = LATEST_PROTOCOL_VERSION,
+  protocol_version~ : String = LATEST_PROTOCOL_VERSION,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> OAuthAuthorizationServerMetadata? {
   let transport = http_transport.unwrap_or(
@@ -410,7 +418,7 @@ pub async fn discover_authorization_server_metadata(
 /// AI SDK-style spelling for `discover_authorization_server_metadata`.
 pub async fn discoverAuthorizationServerMetadata(
   authorization_server_url~ : String,
-  protocol_version? : String = LATEST_PROTOCOL_VERSION,
+  protocol_version~ : String = LATEST_PROTOCOL_VERSION,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> OAuthAuthorizationServerMetadata? {
   discover_authorization_server_metadata(
@@ -432,7 +440,7 @@ fn oauth_unreserved(byte : Byte) -> Bool {
 }
 
 ///|
-fn oauth_hex(value : Int) -> Char {
+fn oauth_hex(value : Int32) -> Char {
   if value < 10 {
     (b'0' + value.to_byte()).to_char()
   } else {
@@ -606,3 +614,51 @@ pub fn check_resource_allowed(
     "/"
   requested.has_prefix(configured)
 }
+
+///|
+pub extend OAuthTokens with Debug::{to_repr}
+
+///|
+pub extend OAuthTokens with Eq::{not_equal, equal}
+
+///|
+pub extend OAuthClientInformation with Debug::{to_repr}
+
+///|
+pub extend OAuthClientInformation with Eq::{not_equal, equal}
+
+///|
+pub extend OAuthClientMetadata with Debug::{to_repr}
+
+///|
+pub extend OAuthClientMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OAuthAuthorizationServerInformation with Debug::{to_repr}
+
+///|
+pub extend OAuthAuthorizationServerInformation with Eq::{not_equal, equal}
+
+///|
+pub extend OAuthAuthorizationServerMetadata with Debug::{to_repr}
+
+///|
+pub extend OAuthAuthorizationServerMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OAuthProtectedResourceMetadata with Debug::{to_repr}
+
+///|
+pub extend OAuthProtectedResourceMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend AuthResult with Debug::{to_repr}
+
+///|
+pub extend AuthResult with Eq::{not_equal, equal}
+
+///|
+pub extend OAuthAuthorizationStart with Debug::{to_repr}
+
+///|
+pub extend OAuthAuthorizationStart with Eq::{not_equal, equal}
