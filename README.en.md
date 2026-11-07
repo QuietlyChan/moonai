@@ -5,8 +5,11 @@
 [![CI](https://github.com/QuietlyChan/moonai/actions/workflows/ci.yml/badge.svg)](https://github.com/QuietlyChan/moonai/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![MoonBit](https://img.shields.io/badge/MoonBit-native-F5A623.svg)](https://www.moonbitlang.com/)
+[![Demo](https://img.shields.io/badge/demo-online-e08a1e.svg)](https://quietlychan.github.io/moonai/)
 
 A unified, provider-neutral AI SDK for MoonBit.
+
+Landing page and interactive demo: <https://quietlychan.github.io/moonai/>
 
 `moonai` brings the standard-layer design of
 [Vercel AI SDK 7](https://ai-sdk.dev/) to MoonBit: one model interface,
