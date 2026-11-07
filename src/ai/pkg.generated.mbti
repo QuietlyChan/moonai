@@ -215,40 +215,30 @@ pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[@provider.
 pub(all) suberror InvalidArgumentError {
   InvalidArgumentError(parameter~ : String, value~ : @json.Json, message~ : String)
 }
-#deprecated
 pub fn InvalidArgumentError::equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidArgumentError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidArgumentError::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub suberror NoObjectGeneratedError {
   NoObjectGeneratedError(message~ : String, text~ : String?, response~ : @generate_text.GenerateTextResult, failure~ : ObjectGenerationFailure)
 }
-#deprecated
 pub fn NoObjectGeneratedError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub suberror ObjectValidationError {
   ObjectValidationError(path~ : String, message~ : String)
 }
-#deprecated
 pub fn ObjectValidationError::equal(Self, Self) -> Bool
-#deprecated
 pub fn ObjectValidationError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ObjectValidationError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub suberror StreamObjectFailedError {
   StreamObjectFailedError(message~ : String, text~ : String?)
 }
-#deprecated
 pub fn StreamObjectFailedError::equal(Self, Self) -> Bool
-#deprecated
 pub fn StreamObjectFailedError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn StreamObjectFailedError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
@@ -265,7 +255,6 @@ pub(all) struct EmbedEndEvent {
   warnings : Array[@provider.Warning]
   provider_metadata : Map[String, @json.Json]
 }
-#deprecated
 pub fn EmbedEndEvent::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -280,7 +269,6 @@ pub(all) struct EmbedStartEvent {
   headers : Map[String, String]
   provider_options : Map[String, @json.Json]
 }
-#deprecated
 pub fn EmbedStartEvent::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -289,11 +277,8 @@ pub(all) enum ObjectGenerationFailure {
   InvalidJson(message~ : String)
   SchemaMismatch(path~ : String, message~ : String)
 }
-#deprecated
 pub fn ObjectGenerationFailure::equal(Self, Self) -> Bool
-#deprecated
 pub fn ObjectGenerationFailure::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ObjectGenerationFailure::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -301,7 +286,6 @@ pub(all) struct ObjectResponse {
   object : @json.Json
   response : @generate_text.GenerateTextResult
 }
-#deprecated
 pub fn ObjectResponse::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -317,7 +301,6 @@ pub(all) struct RerankEndEvent {
   warnings : Array[@provider.Warning]
   provider_metadata : Map[String, @json.Json]
 }
-#deprecated
 pub fn RerankEndEvent::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -326,11 +309,8 @@ pub(all) struct RerankItem {
   score : Double
   document : RerankingDocument
 }
-#deprecated
 pub fn RerankItem::equal(Self, Self) -> Bool
-#deprecated
 pub fn RerankItem::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn RerankItem::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -341,11 +321,8 @@ pub(all) struct RerankResult {
   response : @provider.ResponseMetadata
   provider_metadata : Map[String, @json.Json]
 }
-#deprecated
 pub fn RerankResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn RerankResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn RerankResult::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -362,7 +339,6 @@ pub(all) struct RerankStartEvent {
   headers : Map[String, String]
   provider_options : Map[String, @json.Json]
 }
-#deprecated
 pub fn RerankStartEvent::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -370,11 +346,8 @@ pub(all) enum RerankingDocument {
   TextDocument(String)
   ObjectDocument(@json.Json)
 }
-#deprecated
 pub fn RerankingDocument::equal(Self, Self) -> Bool
-#deprecated
 pub fn RerankingDocument::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn RerankingDocument::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -382,11 +355,8 @@ pub(all) enum StreamObjectPart {
   PartialObject(object~ : @json.Json)
   FinalObject(object~ : @json.Json)
 }
-#deprecated
 pub fn StreamObjectPart::equal(Self, Self) -> Bool
-#deprecated
 pub fn StreamObjectPart::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn StreamObjectPart::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -396,7 +366,6 @@ pub(all) struct StreamObjectResponse {
   provider_result : @provider.LanguageModelV4GenerateResult
   warnings : Array[@provider.Warning]
 }
-#deprecated
 pub fn StreamObjectResponse::to_repr(Self) -> @debug.Repr
 
 // Type aliases

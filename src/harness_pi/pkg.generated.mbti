@@ -31,11 +31,8 @@ pub(all) enum PiAuthOptions {
   PiGatewayAuth(api_key~ : String?, base_url~ : String?)
   PiCustomEnv(Map[String, String])
 }
-#deprecated
 pub fn PiAuthOptions::equal(Self, Self) -> Bool
-#deprecated
 pub fn PiAuthOptions::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn PiAuthOptions::to_repr(Self) -> @debug.Repr
 
 pub struct PiHarness {
@@ -68,11 +65,8 @@ pub(all) enum PiThinkingLevel {
   PiThinkingHigh
   PiThinkingXHigh
 }
-#deprecated
 pub fn PiThinkingLevel::equal(Self, Self) -> Bool
-#deprecated
 pub fn PiThinkingLevel::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn PiThinkingLevel::to_repr(Self) -> @debug.Repr
 pub fn PiThinkingLevel::to_string(Self) -> String
 

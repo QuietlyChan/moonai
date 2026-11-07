@@ -36,55 +36,40 @@ pub async fn stream_text(&@provider.LanguageModelV4, prompt? : String, messages?
 pub(all) suberror InvalidToolApprovalError {
   InvalidToolApprovalError(approval_id~ : String)
 }
-#deprecated
 pub fn InvalidToolApprovalError::equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidToolApprovalError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidToolApprovalError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub suberror InvalidToolApprovalSignatureError {
   InvalidToolApprovalSignatureError(approval_id~ : String, tool_call_id~ : String, reason~ : String)
 }
-#deprecated
 pub fn InvalidToolApprovalSignatureError::equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidToolApprovalSignatureError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidToolApprovalSignatureError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror InvalidToolInputError {
   InvalidToolInputError(tool_call_id~ : String, tool_name~ : String, input~ : String, message~ : String)
 }
-#deprecated
 pub fn InvalidToolInputError::equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidToolInputError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidToolInputError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror NoSuchToolError {
   NoSuchToolError(tool_name~ : String, available_tools~ : Array[String])
 }
-#deprecated
 pub fn NoSuchToolError::equal(Self, Self) -> Bool
-#deprecated
 pub fn NoSuchToolError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn NoSuchToolError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror ToolCallNotFoundForApprovalError {
   ToolCallNotFoundForApprovalError(tool_call_id~ : String, approval_id~ : String)
 }
-#deprecated
 pub fn ToolCallNotFoundForApprovalError::equal(Self, Self) -> Bool
-#deprecated
 pub fn ToolCallNotFoundForApprovalError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ToolCallNotFoundForApprovalError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
@@ -101,11 +86,8 @@ pub(all) enum GenerateTextContent {
   GenerateTextToolCall(GenerateTextToolCall)
   GenerateTextToolResult(GenerateTextToolResult)
 }
-#deprecated
 pub fn GenerateTextContent::equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextContent::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextContent::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -132,7 +114,6 @@ pub fn GenerateTextResult::provider_result(Self) -> @provider.LanguageModelV4Gen
 pub fn GenerateTextResult::reasoning(Self) -> String
 pub fn GenerateTextResult::text(Self) -> String
 pub fn GenerateTextResult::to_chat_response(Self) -> @provider.ChatResponse
-#deprecated
 pub fn GenerateTextResult::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -161,7 +142,6 @@ pub(all) struct GenerateTextStep {
 }
 pub fn GenerateTextStep::reasoning(Self) -> String
 pub fn GenerateTextStep::text(Self) -> String
-#deprecated
 pub fn GenerateTextStep::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -172,11 +152,8 @@ pub(all) struct GenerateTextStepPerformance {
   effective_output_tokens_per_second : Double?
   effective_total_tokens_per_second : Double?
 }
-#deprecated
 pub fn GenerateTextStepPerformance::equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextStepPerformance::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextStepPerformance::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -188,11 +165,8 @@ pub(all) struct GenerateTextToolApprovalRequestOutput {
   request_reason : String?
   provider_metadata : Map[String, @json.Json]
 }
-#deprecated
 pub fn GenerateTextToolApprovalRequestOutput::equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextToolApprovalRequestOutput::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextToolApprovalRequestOutput::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -203,11 +177,8 @@ pub(all) struct GenerateTextToolApprovalResponseOutput {
   reason : String?
   provider_executed : Bool
 }
-#deprecated
 pub fn GenerateTextToolApprovalResponseOutput::equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextToolApprovalResponseOutput::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextToolApprovalResponseOutput::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -222,11 +193,8 @@ pub(all) struct GenerateTextToolCall {
   error : String?
   provider_metadata : Map[String, @json.Json]
 }
-#deprecated
 pub fn GenerateTextToolCall::equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextToolCall::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextToolCall::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -241,11 +209,8 @@ pub(all) struct GenerateTextToolResult {
   dynamic : Bool
   provider_metadata : Map[String, @json.Json]
 }
-#deprecated
 pub fn GenerateTextToolResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextToolResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn GenerateTextToolResult::to_repr(Self) -> @debug.Repr
 
 pub(all) struct GenericToolApprovalOptions {
@@ -267,7 +232,6 @@ pub fn OutputSpec::array_elements(@json.Json) -> Array[@json.Json]
 pub fn OutputSpec::object(schema~ : @json.Json, name? : String, description? : String) -> Self
 pub fn OutputSpec::response_format(Self, strict_json_schema~ : Bool) -> @provider.ResponseFormat
 pub fn OutputSpec::text() -> Self
-#deprecated
 pub fn OutputSpec::to_repr(Self) -> @debug.Repr
 
 pub(all) struct PrepareStepOptions {
@@ -320,11 +284,8 @@ pub(all) enum SmoothChunking {
   SmoothLine
   SmoothRegexPattern(pattern~ : String)
 }
-#deprecated
 pub fn SmoothChunking::equal(Self, Self) -> Bool
-#deprecated
 pub fn SmoothChunking::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn SmoothChunking::to_repr(Self) -> @debug.Repr
 
 pub struct SmoothTextTransformer {
@@ -358,7 +319,6 @@ pub fn StreamTextResult::provider_result(Self) -> @provider.LanguageModelV4Gener
 pub fn StreamTextResult::reasoning(Self) -> String
 pub fn StreamTextResult::text(Self) -> String
 pub fn StreamTextResult::to_chat_response(Self) -> @provider.ChatResponse
-#deprecated
 pub fn StreamTextResult::to_repr(Self) -> @debug.Repr
 
 pub(all) enum ToolApprovalConfiguration {
@@ -381,12 +341,9 @@ pub(all) enum ToolApprovalSecret {
   ToolApprovalSecretBytes(Bytes)
 }
 pub fn ToolApprovalSecret::bytes(Bytes) -> Self
-#deprecated
 pub fn ToolApprovalSecret::equal(Self, Self) -> Bool
-#deprecated
 pub fn ToolApprovalSecret::not_equal(Self, Self) -> Bool
 pub fn ToolApprovalSecret::string(String) -> Self
-#deprecated
 pub fn ToolApprovalSecret::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -398,12 +355,9 @@ pub(all) enum ToolApprovalStatus {
 }
 pub fn ToolApprovalStatus::approved(reason? : String) -> Self
 pub fn ToolApprovalStatus::denied(reason? : String) -> Self
-#deprecated
 pub fn ToolApprovalStatus::equal(Self, Self) -> Bool
 pub fn ToolApprovalStatus::not_applicable() -> Self
-#deprecated
 pub fn ToolApprovalStatus::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ToolApprovalStatus::to_repr(Self) -> @debug.Repr
 pub fn ToolApprovalStatus::user_approval(reason? : String) -> Self
 

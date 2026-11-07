@@ -393,41 +393,31 @@ pub fn detectMCPAppResourceDrift(current : String, baseline : String) -> Bool {
 }
 
 ///|
-#deprecated
 pub extend MCPAppToolMeta with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MCPAppToolMeta with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend MCPAppResourceCSP with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MCPAppResourceCSP with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend MCPAppResourceMeta with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MCPAppResourceMeta with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend MCPAppResource with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MCPAppResource with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend SplitMCPAppToolsResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SplitMCPAppToolsResult with Eq::{not_equal, equal}

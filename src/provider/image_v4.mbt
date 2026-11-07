@@ -243,29 +243,22 @@ pub(open) trait ImageModelV4 {
 }
 
 ///|
-#deprecated
 pub extend ImageModelV4File with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ImageModelV4File with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ImageModelV4CallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ImageModelV4Usage with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ImageModelV4Usage with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ImageModelV4Result with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ImageModelV4Result with Eq::{not_equal, equal}

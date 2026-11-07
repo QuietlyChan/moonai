@@ -99,17 +99,13 @@ fn rerank_event_documents(
 }
 
 ///|
-#deprecated
 pub extend EmbedStartEvent with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend EmbedEndEvent with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend RerankStartEvent with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend RerankEndEvent with Debug::{to_repr}

@@ -225,9 +225,7 @@ pub fn prepareToolsForToolCallers(
 }
 
 ///|
-#deprecated
 pub extend ToolCallerReference with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ToolCallerReference with Eq::{not_equal, equal}

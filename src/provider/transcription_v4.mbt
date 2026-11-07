@@ -388,29 +388,22 @@ pub(open) trait TranscriptionModelV4 {
 }
 
 ///|
-#deprecated
 pub extend TranscriptionModelV4CallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend TranscriptionModelV4Result with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend TranscriptionModelV4Result with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend TranscriptionModelV4StreamPart with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend TranscriptionModelV4StreamPart with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend TranscriptionModelV4StreamResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend TranscriptionModelV4StreamResult with Eq::{not_equal, equal}

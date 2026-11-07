@@ -35,11 +35,8 @@ pub(all) struct CursorBuiltinTool {
   title : String
   kind : CursorToolKind
 }
-#deprecated
 pub fn CursorBuiltinTool::equal(Self, Self) -> Bool
-#deprecated
 pub fn CursorBuiltinTool::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn CursorBuiltinTool::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -49,11 +46,8 @@ pub(all) enum CursorToolKind {
   Readonly
   Other
 }
-#deprecated
 pub fn CursorToolKind::equal(Self, Self) -> Bool
-#deprecated
 pub fn CursorToolKind::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn CursorToolKind::to_repr(Self) -> @debug.Repr
 
 // Type aliases

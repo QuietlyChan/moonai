@@ -185,25 +185,19 @@ pub fn LanguageModelV4Usage::to_usage(self : LanguageModelV4Usage) -> Usage {
 }
 
 ///|
-#deprecated
 pub extend LanguageModelV4InputTokens with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4InputTokens with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4OutputTokens with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4OutputTokens with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Usage with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Usage with Eq::{not_equal, equal}

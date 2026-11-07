@@ -100,24 +100,18 @@ pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[@provider.
 pub suberror InvalidModelIdError {
   InvalidModelIdError(value~ : String)
 }
-#deprecated
 pub fn InvalidModelIdError::equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidModelIdError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn InvalidModelIdError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror NoSuchModelError {
   NoSuchModelError(model_id~ : ModelId, model_type~ : ModelType)
 }
-#deprecated
 pub fn NoSuchModelError::equal(Self, Self) -> Bool
 pub fn NoSuchModelError::model_id(Self) -> ModelId
 pub fn NoSuchModelError::model_type(Self) -> ModelType
-#deprecated
 pub fn NoSuchModelError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn NoSuchModelError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
@@ -151,11 +145,8 @@ pub(all) enum ChatModelMiddlewareOperation {
   Generate
   Stream
 }
-#deprecated
 pub fn ChatModelMiddlewareOperation::equal(Self, Self) -> Bool
-#deprecated
 pub fn ChatModelMiddlewareOperation::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ChatModelMiddlewareOperation::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ChatModelTransformContext {
@@ -195,11 +186,8 @@ pub(all) enum ExtractReasoningMode {
   ExtractMergeIntoText
   ExtractStrip
 }
-#deprecated
 pub fn ExtractReasoningMode::equal(Self, Self) -> Bool
-#deprecated
 pub fn ExtractReasoningMode::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ExtractReasoningMode::to_repr(Self) -> @debug.Repr
 
 pub(all) enum ImageModelReference {
@@ -285,16 +273,13 @@ pub(all) struct ModelId {
   provider : String
   model_id : String
 }
-#deprecated
 pub fn ModelId::equal(Self, Self) -> Bool
 pub fn ModelId::key(Self) -> String
 pub fn ModelId::model_id(Self) -> String
 pub fn ModelId::new(provider~ : String, model_id~ : String) -> Self
-#deprecated
 pub fn ModelId::not_equal(Self, Self) -> Bool
 pub fn ModelId::parse(String) -> Self?
 pub fn ModelId::provider(Self) -> String
-#deprecated
 pub fn ModelId::to_repr(Self) -> @debug.Repr
 
 pub struct ModelRegistry {
@@ -365,11 +350,8 @@ pub(all) enum ModelType {
   SpeechTranslation
   Realtime
 }
-#deprecated
 pub fn ModelType::equal(Self, Self) -> Bool
-#deprecated
 pub fn ModelType::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ModelType::to_repr(Self) -> @debug.Repr
 
 pub(all) enum RealtimeModelReference {

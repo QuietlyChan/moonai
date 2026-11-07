@@ -906,17 +906,13 @@ fn deepseek_response_extras_metadata(
 }
 
 ///|
-#deprecated
 pub extend DeepSeekErrorDetail with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend DeepSeekErrorDetail with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend DeepSeekErrorData with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend DeepSeekErrorData with Eq::{not_equal, equal}

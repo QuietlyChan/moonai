@@ -455,33 +455,25 @@ pub fn plan_multipart_streaming(
 }
 
 ///|
-#deprecated
 pub extend MultipartValue with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MultipartValue with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend MultipartField with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MultipartField with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend MultipartFormData with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MultipartFormData with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ResolvedImageFile with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ResolvedImageFile with Eq::{not_equal, equal}

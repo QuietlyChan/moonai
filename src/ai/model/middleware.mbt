@@ -473,11 +473,9 @@ pub impl @provider.ImageWireModel for MiddlewareImageWireModel with fn generate(
 }
 
 ///|
-#deprecated
 pub extend ChatModelMiddlewareOperation with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ChatModelMiddlewareOperation with Eq::{not_equal, equal}
 
 ///|

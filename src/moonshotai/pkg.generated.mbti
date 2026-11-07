@@ -47,13 +47,10 @@ pub(all) struct MoonshotAILanguageModelOptions {
   prompt_cache_key : String?
   safety_identifier : String?
 }
-#deprecated
 pub fn MoonshotAILanguageModelOptions::equal(Self, Self) -> Bool
 pub fn MoonshotAILanguageModelOptions::new(strict_json_schema? : Bool, logprobs? : Bool, top_logprobs? : Int32, reasoning_effort? : String, prediction? : @json.Json, thinking_type? : String, thinking_budget_tokens? : Int32, reasoning_history? : String, prompt_cache_key? : String, safety_identifier? : String) -> Self raise
-#deprecated
 pub fn MoonshotAILanguageModelOptions::not_equal(Self, Self) -> Bool
 pub fn MoonshotAILanguageModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
-#deprecated
 pub fn MoonshotAILanguageModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -65,11 +62,8 @@ pub(all) enum MoonshotAIModelFamily {
   MoonshotV1
   Unknown
 }
-#deprecated
 pub fn MoonshotAIModelFamily::equal(Self, Self) -> Bool
-#deprecated
 pub fn MoonshotAIModelFamily::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MoonshotAIModelFamily::to_repr(Self) -> @debug.Repr
 
 pub struct MoonshotAIProvider {
@@ -94,11 +88,8 @@ pub impl @provider.ProviderV4 for MoonshotAIProvider
 pub(all) struct MoonshotErrorData {
   error : MoonshotErrorDetail
 }
-#deprecated
 pub fn MoonshotErrorData::equal(Self, Self) -> Bool
-#deprecated
 pub fn MoonshotErrorData::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MoonshotErrorData::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -107,11 +98,8 @@ pub(all) struct MoonshotErrorDetail {
   error_type : String?
   code : String?
 }
-#deprecated
 pub fn MoonshotErrorDetail::equal(Self, Self) -> Bool
-#deprecated
 pub fn MoonshotErrorDetail::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MoonshotErrorDetail::to_repr(Self) -> @debug.Repr
 
 // Type aliases

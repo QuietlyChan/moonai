@@ -474,65 +474,49 @@ pub fn VideoModelV4OperationStatusResult::new(
 }
 
 ///|
-#deprecated
 pub extend VideoModelV4File with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4File with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend VideoModelV4FrameType with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4FrameType with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend VideoModelV4FrameImage with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4FrameImage with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend VideoModelV4CallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4VideoData with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4VideoData with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend VideoModelV4Result with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4Result with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend VideoModelV4OperationState with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4OperationState with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend VideoModelV4OperationStatusCallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4OperationStartResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend VideoModelV4OperationStatusResult with Debug::{to_repr}

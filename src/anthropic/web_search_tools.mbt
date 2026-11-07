@@ -197,9 +197,7 @@ pub fn webSearch_20260209(
 }
 
 ///|
-#deprecated
 pub extend AnthropicWebSearchUserLocation with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicWebSearchUserLocation with Eq::{not_equal, equal}

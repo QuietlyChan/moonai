@@ -166,9 +166,7 @@ pub fn native_websocket_connector() -> &WebSocketConnector {
 }
 
 ///|
-#deprecated
 pub extend WebSocketReceive with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend WebSocketReceive with Eq::{not_equal, equal}

@@ -119,9 +119,7 @@ pub fn get_plaintext_copilot_token(
 }
 
 ///|
-#deprecated
 pub extend GitHubCopilotAccount with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GitHubCopilotAccount with Eq::{not_equal, equal}

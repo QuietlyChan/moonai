@@ -705,9 +705,7 @@ fn sanitize_download_headers(
 }
 
 ///|
-#deprecated
 pub extend DownloadError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend DownloadError with Eq::{not_equal, equal}

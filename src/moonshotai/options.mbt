@@ -292,17 +292,13 @@ fn parse_moonshot_options(
 }
 
 ///|
-#deprecated
 pub extend MoonshotAIModelFamily with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MoonshotAIModelFamily with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend MoonshotAILanguageModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MoonshotAILanguageModelOptions with Eq::{not_equal, equal}

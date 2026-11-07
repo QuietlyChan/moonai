@@ -98,5 +98,4 @@ pub fn OutputSpec::array_elements(value : Json) -> Array[Json] {
 }
 
 ///|
-#deprecated
 pub extend OutputSpec with Debug::{to_repr}

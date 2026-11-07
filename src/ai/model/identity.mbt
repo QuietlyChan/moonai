@@ -183,33 +183,25 @@ pub fn model_id_of_realtime(model : &@provider.RealtimeModelV4) -> ModelId {
 }
 
 ///|
-#deprecated
 pub extend ModelId with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelId with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend InvalidModelIdError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend InvalidModelIdError with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelType with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelType with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend NoSuchModelError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend NoSuchModelError with Eq::{not_equal, equal}

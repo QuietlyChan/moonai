@@ -113,9 +113,7 @@ pub fn ToolApprovalConfiguration::per_tool(
 }
 
 ///|
-#deprecated
 pub extend ToolApprovalStatus with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ToolApprovalStatus with Eq::{not_equal, equal}

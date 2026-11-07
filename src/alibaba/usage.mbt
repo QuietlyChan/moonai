@@ -205,25 +205,19 @@ fn convert_alibaba_chat_usage(usage : Json?) -> @provider.LanguageModelV4Usage {
 }
 
 ///|
-#deprecated
 pub extend AlibabaPromptTokensDetails with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AlibabaPromptTokensDetails with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AlibabaCompletionTokensDetails with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AlibabaCompletionTokensDetails with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AlibabaUsage with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AlibabaUsage with Eq::{not_equal, equal}

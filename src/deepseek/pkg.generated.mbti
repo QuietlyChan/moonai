@@ -28,11 +28,8 @@ pub fn deepseek_files(api_key? : String, base_url? : String, provider_name? : St
 pub(all) struct DeepSeekErrorData {
   error : DeepSeekErrorDetail
 }
-#deprecated
 pub fn DeepSeekErrorData::equal(Self, Self) -> Bool
-#deprecated
 pub fn DeepSeekErrorData::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn DeepSeekErrorData::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -42,11 +39,8 @@ pub(all) struct DeepSeekErrorDetail {
   param : @json.Json?
   code : @json.Json?
 }
-#deprecated
 pub fn DeepSeekErrorDetail::equal(Self, Self) -> Bool
-#deprecated
 pub fn DeepSeekErrorDetail::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn DeepSeekErrorDetail::to_repr(Self) -> @debug.Repr
 
 pub struct DeepSeekFiles {
@@ -64,13 +58,10 @@ pub impl @provider.FilesV4 for DeepSeekFiles
 pub(all) struct DeepSeekFilesOptions {
   expires_after : Double?
 }
-#deprecated
 pub fn DeepSeekFilesOptions::equal(Self, Self) -> Bool
 pub fn DeepSeekFilesOptions::new(expires_after? : Double) -> Self raise
-#deprecated
 pub fn DeepSeekFilesOptions::not_equal(Self, Self) -> Bool
 pub fn DeepSeekFilesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
-#deprecated
 pub fn DeepSeekFilesOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -82,13 +73,10 @@ pub(all) struct DeepSeekLanguageModelChatOptions {
   top_logprobs : Int32?
   user_id : String?
 }
-#deprecated
 pub fn DeepSeekLanguageModelChatOptions::equal(Self, Self) -> Bool
 pub fn DeepSeekLanguageModelChatOptions::new(thinking_type? : String, reasoning_effort? : String, strict_json_schema? : Bool, logprobs? : Bool, top_logprobs? : Int32, user_id? : String) -> Self raise
-#deprecated
 pub fn DeepSeekLanguageModelChatOptions::not_equal(Self, Self) -> Bool
 pub fn DeepSeekLanguageModelChatOptions::to_provider_options(Self) -> Map[String, @json.Json]
-#deprecated
 pub fn DeepSeekLanguageModelChatOptions::to_repr(Self) -> @debug.Repr
 
 pub struct DeepSeekProvider {

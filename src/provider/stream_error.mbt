@@ -17,9 +17,7 @@ pub fn StreamErrorInfo::new(message : String, data? : Json) -> StreamErrorInfo {
 }
 
 ///|
-#deprecated
 pub extend StreamErrorInfo with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend StreamErrorInfo with Eq::{not_equal, equal}

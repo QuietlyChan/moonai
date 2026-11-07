@@ -78,9 +78,7 @@ pub fn resolveDeepAgentsEnv(
 }
 
 ///|
-#deprecated
 pub extend DeepAgentsAuthOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend DeepAgentsAuthOptions with Eq::{not_equal, equal}

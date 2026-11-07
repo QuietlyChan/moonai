@@ -255,91 +255,69 @@ pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_provider_metadata(
 }
 
 ///|
-#deprecated
 pub extend OpenAIResponsesMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesProviderMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesProviderMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesReasoningMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesReasoningMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesReasoningProviderMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesReasoningProviderMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesCompactionMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesCompactionMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesCompactionProviderMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesCompactionProviderMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesTextPhase with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesTextPhase with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesTextMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesTextMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesTextProviderMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesTextProviderMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesSourceDocumentMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIResponsesSourceDocumentMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesSourceDocumentProviderMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenaiResponsesSourceDocumentProviderMetadata with Eq::{
   not_equal,
   equal,

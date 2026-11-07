@@ -210,5 +210,4 @@ pub fn multipart_response_part_by_content_type_prefix(
 }
 
 ///|
-#deprecated
 pub extend MultipartResponsePart with Debug::{to_repr}

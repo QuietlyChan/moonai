@@ -320,33 +320,25 @@ fn decode_openai_computer_safety_check(
 }
 
 ///|
-#deprecated
 pub extend OpenAIComputerButton with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIComputerButton with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIComputerPoint with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIComputerPoint with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIComputerAction with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIComputerAction with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIComputerSafetyCheck with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIComputerSafetyCheck with Eq::{not_equal, equal}

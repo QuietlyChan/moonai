@@ -228,9 +228,7 @@ pub fn webFetch_20260209(
 }
 
 ///|
-#deprecated
 pub extend AnthropicWebFetchCitations with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicWebFetchCitations with Eq::{not_equal, equal}

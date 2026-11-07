@@ -391,17 +391,13 @@ pub fn StreamingToolCallTracker::calls(
 }
 
 ///|
-#deprecated
 pub extend StreamingToolCallDelta with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend StreamingToolCallDelta with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend StreamingToolCallTypeValidation with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend StreamingToolCallTypeValidation with Eq::{not_equal, equal}

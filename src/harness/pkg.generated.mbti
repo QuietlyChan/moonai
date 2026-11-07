@@ -60,23 +60,17 @@ pub fn validate_harness_v1_lifecycle_state(String, String, String) -> Unit raise
 pub(all) suberror HarnessCapabilityUnsupportedError {
   HarnessCapabilityUnsupportedError(message~ : String, harness_id~ : String?, cause~ : String?)
 }
-#deprecated
 pub fn HarnessCapabilityUnsupportedError::equal(Self, Self) -> Bool
 pub fn HarnessCapabilityUnsupportedError::new(message~ : String, harness_id? : String, cause? : String) -> Self
-#deprecated
 pub fn HarnessCapabilityUnsupportedError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessCapabilityUnsupportedError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror HarnessError {
   HarnessError(message~ : String, cause~ : String?)
 }
-#deprecated
 pub fn HarnessError::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
@@ -107,11 +101,8 @@ pub(all) enum HarnessInstructions {
   Text(String)
   SystemMessage(@provider_utils.ModelMessage)
 }
-#deprecated
 pub fn HarnessInstructions::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessInstructions::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessInstructions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -121,12 +112,9 @@ pub(all) struct HarnessV1Bootstrap {
   files : Array[HarnessV1BootstrapFile]
   commands : Array[HarnessV1BootstrapCommand]
 }
-#deprecated
 pub fn HarnessV1Bootstrap::equal(Self, Self) -> Bool
 pub fn HarnessV1Bootstrap::identity(Self) -> String
-#deprecated
 pub fn HarnessV1Bootstrap::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1Bootstrap::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -134,11 +122,8 @@ pub(all) struct HarnessV1BootstrapCommand {
   command : String
   working_directory : String?
 }
-#deprecated
 pub fn HarnessV1BootstrapCommand::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BootstrapCommand::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BootstrapCommand::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -146,11 +131,8 @@ pub(all) struct HarnessV1BootstrapFile {
   path : String
   content : String
 }
-#deprecated
 pub fn HarnessV1BootstrapFile::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BootstrapFile::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BootstrapFile::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -165,12 +147,9 @@ pub(all) enum HarnessV1BridgeCommand {
   HarnessBridgeStop
   HarnessBridgeSuspend
 }
-#deprecated
 pub fn HarnessV1BridgeCommand::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BridgeCommand::not_equal(Self, Self) -> Bool
 pub fn HarnessV1BridgeCommand::to_json(Self) -> @json.Json
-#deprecated
 pub fn HarnessV1BridgeCommand::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -183,11 +162,8 @@ pub(all) enum HarnessV1BridgeOutboundFrame {
   HarnessBridgeDebugEvent(seq~ : Int32?, level~ : HarnessV1DebugLevel, subsystem~ : String, message~ : String, attrs~ : @json.Json?, error~ : @json.Json?)
   HarnessBridgeReady(port~ : Int32)
 }
-#deprecated
 pub fn HarnessV1BridgeOutboundFrame::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BridgeOutboundFrame::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BridgeOutboundFrame::to_repr(Self) -> @debug.Repr
 
 pub struct HarnessV1BridgeSession {
@@ -243,11 +219,8 @@ pub(all) enum HarnessV1BuiltinToolFiltering {
   HarnessAllowTools(Array[String])
   HarnessDenyTools(Array[String])
 }
-#deprecated
 pub fn HarnessV1BuiltinToolFiltering::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BuiltinToolFiltering::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BuiltinToolFiltering::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -260,11 +233,8 @@ pub(all) enum HarnessV1BuiltinToolName {
   HarnessGlob
   HarnessWebSearch
 }
-#deprecated
 pub fn HarnessV1BuiltinToolName::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BuiltinToolName::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BuiltinToolName::to_repr(Self) -> @debug.Repr
 pub fn HarnessV1BuiltinToolName::to_string(Self) -> String
 
@@ -274,11 +244,8 @@ pub(all) enum HarnessV1BuiltinToolUseKind {
   HarnessEditTool
   HarnessBashTool
 }
-#deprecated
 pub fn HarnessV1BuiltinToolUseKind::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BuiltinToolUseKind::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1BuiltinToolUseKind::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -287,11 +254,8 @@ pub(all) enum HarnessV1CallWarning {
   HarnessUnsupportedTool(tool~ : String, details~ : String?)
   HarnessOtherWarning(message~ : String)
 }
-#deprecated
 pub fn HarnessV1CallWarning::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1CallWarning::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1CallWarning::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -299,12 +263,9 @@ pub(all) enum HarnessV1CompactionTrigger {
   HarnessManualCompaction
   HarnessAutomaticCompaction
 }
-#deprecated
 pub fn HarnessV1CompactionTrigger::equal(Self, Self) -> Bool
 pub fn HarnessV1CompactionTrigger::from_string(String) -> Self raise HarnessError
-#deprecated
 pub fn HarnessV1CompactionTrigger::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1CompactionTrigger::to_repr(Self) -> @debug.Repr
 pub fn HarnessV1CompactionTrigger::to_string(Self) -> String
 
@@ -323,12 +284,9 @@ pub(all) struct HarnessV1ContinueTurnState {
   pending_tool_approvals : Array[HarnessV1PendingToolApproval]
   pending_tool_results : Array[HarnessV1PendingToolResult]
 }
-#deprecated
 pub fn HarnessV1ContinueTurnState::equal(Self, Self) -> Bool
 pub fn HarnessV1ContinueTurnState::new(harness_id~ : String, data? : @json.Json, pending_tool_approvals? : Array[HarnessV1PendingToolApproval], pending_tool_results? : Array[HarnessV1PendingToolResult]) -> Self
-#deprecated
 pub fn HarnessV1ContinueTurnState::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1ContinueTurnState::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -337,11 +295,8 @@ pub(all) struct HarnessV1DebugConfig {
   level : HarnessV1DebugLevel?
   subsystems : Array[String]
 }
-#deprecated
 pub fn HarnessV1DebugConfig::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1DebugConfig::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1DebugConfig::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -352,12 +307,9 @@ pub(all) enum HarnessV1DebugLevel {
   HarnessDebugDebug
   HarnessDebugTrace
 }
-#deprecated
 pub fn HarnessV1DebugLevel::equal(Self, Self) -> Bool
 pub fn HarnessV1DebugLevel::from_string(String) -> Self raise HarnessError
-#deprecated
 pub fn HarnessV1DebugLevel::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1DebugLevel::to_repr(Self) -> @debug.Repr
 pub fn HarnessV1DebugLevel::to_string(Self) -> String
 
@@ -374,11 +326,8 @@ pub(all) struct HarnessV1Diagnostic {
   session_id : String?
   timestamp : UInt64
 }
-#deprecated
 pub fn HarnessV1Diagnostic::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1Diagnostic::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1Diagnostic::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -387,12 +336,9 @@ pub(all) enum HarnessV1FileChangeKind {
   HarnessFileModify
   HarnessFileDelete
 }
-#deprecated
 pub fn HarnessV1FileChangeKind::equal(Self, Self) -> Bool
 pub fn HarnessV1FileChangeKind::from_string(String) -> Self raise HarnessError
-#deprecated
 pub fn HarnessV1FileChangeKind::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1FileChangeKind::to_repr(Self) -> @debug.Repr
 pub fn HarnessV1FileChangeKind::to_string(Self) -> String
 
@@ -402,11 +348,8 @@ pub(all) enum HarnessV1NetworkPolicy {
   HarnessNetworkDenyAll
   HarnessNetworkCustom(allowed_hosts~ : Array[String], allowed_cidrs~ : Array[String], denied_cidrs~ : Array[String])
 }
-#deprecated
 pub fn HarnessV1NetworkPolicy::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1NetworkPolicy::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1NetworkPolicy::to_repr(Self) -> @debug.Repr
 
 pub struct HarnessV1NetworkSandboxSession {
@@ -438,11 +381,8 @@ pub(all) struct HarnessV1PendingToolApproval {
   provider_executed : Bool
   native_name : String?
 }
-#deprecated
 pub fn HarnessV1PendingToolApproval::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1PendingToolApproval::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1PendingToolApproval::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -451,11 +391,8 @@ pub(all) struct HarnessV1PendingToolResult {
   tool_name : String
   input : String
 }
-#deprecated
 pub fn HarnessV1PendingToolResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1PendingToolResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1PendingToolResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -464,12 +401,9 @@ pub(all) enum HarnessV1PermissionMode {
   HarnessAllowEdits
   HarnessAllowAll
 }
-#deprecated
 pub fn HarnessV1PermissionMode::equal(Self, Self) -> Bool
 pub fn HarnessV1PermissionMode::from_string(String) -> Self raise HarnessError
-#deprecated
 pub fn HarnessV1PermissionMode::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1PermissionMode::to_repr(Self) -> @debug.Repr
 pub fn HarnessV1PermissionMode::to_string(Self) -> String
 
@@ -478,12 +412,9 @@ pub(all) enum HarnessV1Prompt {
   HarnessTextPrompt(String)
   HarnessUserMessage(@provider_utils.ModelMessage)
 }
-#deprecated
 pub fn HarnessV1Prompt::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1Prompt::not_equal(Self, Self) -> Bool
 pub fn HarnessV1Prompt::text(String) -> Self
-#deprecated
 pub fn HarnessV1Prompt::to_repr(Self) -> @debug.Repr
 pub fn HarnessV1Prompt::to_text(Self) -> String raise HarnessCapabilityUnsupportedError
 
@@ -515,12 +446,9 @@ pub(all) struct HarnessV1ResumeSessionState {
   data : @json.Json
   continue_from : HarnessV1ContinueTurnState?
 }
-#deprecated
 pub fn HarnessV1ResumeSessionState::equal(Self, Self) -> Bool
 pub fn HarnessV1ResumeSessionState::new(harness_id~ : String, data? : @json.Json, continue_from? : HarnessV1ContinueTurnState) -> Self
-#deprecated
 pub fn HarnessV1ResumeSessionState::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1ResumeSessionState::to_repr(Self) -> @debug.Repr
 
 pub(all) struct HarnessV1SandboxCreateOptions {
@@ -537,12 +465,9 @@ pub(all) struct HarnessV1Skill {
   content : String
   files : Array[HarnessV1SkillFile]
 }
-#deprecated
 pub fn HarnessV1Skill::equal(Self, Self) -> Bool
 pub fn HarnessV1Skill::new(name~ : String, description~ : String, content~ : String, files? : Array[HarnessV1SkillFile]) -> Self
-#deprecated
 pub fn HarnessV1Skill::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1Skill::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -550,11 +475,8 @@ pub(all) struct HarnessV1SkillFile {
   path : String
   content : String
 }
-#deprecated
 pub fn HarnessV1SkillFile::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1SkillFile::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1SkillFile::to_repr(Self) -> @debug.Repr
 
 pub(all) struct HarnessV1StartOptions {
@@ -603,12 +525,9 @@ pub(all) enum HarnessV1StreamPart {
   HarnessStreamError(error~ : @json.Json)
   HarnessRaw(raw_value~ : @json.Json)
 }
-#deprecated
 pub fn HarnessV1StreamPart::equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1StreamPart::not_equal(Self, Self) -> Bool
 pub fn HarnessV1StreamPart::to_provider_stream_part(Self) -> @provider.LanguageModelV4StreamPart?
-#deprecated
 pub fn HarnessV1StreamPart::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -617,12 +536,9 @@ pub(all) struct HarnessV1ToolApprovalSubmission {
   approved : Bool
   reason : String?
 }
-#deprecated
 pub fn HarnessV1ToolApprovalSubmission::equal(Self, Self) -> Bool
 pub fn HarnessV1ToolApprovalSubmission::new(approval_id~ : String, approved~ : Bool, reason? : String) -> Self
-#deprecated
 pub fn HarnessV1ToolApprovalSubmission::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1ToolApprovalSubmission::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -631,12 +547,9 @@ pub(all) struct HarnessV1ToolResultSubmission {
   output : @json.Json
   is_error : Bool
 }
-#deprecated
 pub fn HarnessV1ToolResultSubmission::equal(Self, Self) -> Bool
 pub fn HarnessV1ToolResultSubmission::new(tool_call_id~ : String, output~ : @json.Json, is_error? : Bool) -> Self
-#deprecated
 pub fn HarnessV1ToolResultSubmission::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1ToolResultSubmission::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -645,12 +558,9 @@ pub(all) struct HarnessV1ToolSpec {
   description : String?
   input_schema : @json.Json?
 }
-#deprecated
 pub fn HarnessV1ToolSpec::equal(Self, Self) -> Bool
 pub fn HarnessV1ToolSpec::new(name~ : String, description? : String, input_schema? : @json.Json) -> Self
-#deprecated
 pub fn HarnessV1ToolSpec::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn HarnessV1ToolSpec::to_repr(Self) -> @debug.Repr
 
 // Type aliases

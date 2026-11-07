@@ -812,73 +812,55 @@ pub fn ModelMessage::with_provider_options(
 }
 
 ///|
-#deprecated
 pub extend ModelContentPart with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelContentPart with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelToolCall with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelToolCall with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelToolResultContentPart with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelToolResultContentPart with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelToolResultOutput with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelToolResultOutput with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelToolResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelToolResult with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelToolApprovalRequest with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelToolApprovalRequest with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelToolApprovalResponse with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelToolApprovalResponse with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelMessageRole with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelMessageRole with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ModelMessage with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ModelMessage with Eq::{not_equal, equal}

@@ -181,9 +181,7 @@ pub fn SmoothTextTransformer::flush(
 }
 
 ///|
-#deprecated
 pub extend SmoothChunking with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SmoothChunking with Eq::{not_equal, equal}

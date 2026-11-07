@@ -23,13 +23,10 @@ pub fn create_open_responses(provider_name~ : String, url~ : String, api_key? : 
 pub(all) struct OpenResponsesLanguageModelOptions {
   reasoning_summary : OpenResponsesReasoningSummary?
 }
-#deprecated
 pub fn OpenResponsesLanguageModelOptions::equal(Self, Self) -> Bool
 pub fn OpenResponsesLanguageModelOptions::new(reasoning_summary? : OpenResponsesReasoningSummary) -> Self
-#deprecated
 pub fn OpenResponsesLanguageModelOptions::not_equal(Self, Self) -> Bool
 pub fn OpenResponsesLanguageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
-#deprecated
 pub fn OpenResponsesLanguageModelOptions::to_repr(Self) -> @debug.Repr
 
 pub struct OpenResponsesProvider {
@@ -53,11 +50,8 @@ pub(all) enum OpenResponsesReasoningSummary {
   ReasoningSummaryDetailed
   ReasoningSummaryAuto
 }
-#deprecated
 pub fn OpenResponsesReasoningSummary::equal(Self, Self) -> Bool
-#deprecated
 pub fn OpenResponsesReasoningSummary::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OpenResponsesReasoningSummary::to_repr(Self) -> @debug.Repr
 
 // Type aliases

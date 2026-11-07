@@ -95,9 +95,7 @@ pub fn fx_subscription_authentication_files(
 }
 
 ///|
-#deprecated
 pub extend FxSubscriptionCredential with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FxSubscriptionCredential with Eq::{not_equal, equal}

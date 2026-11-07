@@ -41,11 +41,8 @@ pub(all) enum OpenCodeAuthOptions {
   OpenCodeOpenAIAuth(api_key~ : String?, base_url~ : String?, organization~ : String?, project~ : String?)
   OpenCodeCompatibleAuth(api_key~ : String?, base_url~ : String?, name~ : String?, query_params~ : Map[String, String])
 }
-#deprecated
 pub fn OpenCodeAuthOptions::equal(Self, Self) -> Bool
-#deprecated
 pub fn OpenCodeAuthOptions::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OpenCodeAuthOptions::to_repr(Self) -> @debug.Repr
 
 pub struct OpenCodeHarness {
@@ -77,11 +74,8 @@ pub(all) struct OpenCodeModelCoordinate {
   model_id : String?
   model : String?
 }
-#deprecated
 pub fn OpenCodeModelCoordinate::equal(Self, Self) -> Bool
-#deprecated
 pub fn OpenCodeModelCoordinate::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OpenCodeModelCoordinate::to_repr(Self) -> @debug.Repr
 
 // Type aliases

@@ -1212,81 +1212,61 @@ fn programmatic_tool_calling() -> @provider_utils.Tool {
 }
 
 ///|
-#deprecated
 pub extend OpenAIToolCaller with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIToolCaller with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIToolNamespace with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIToolNamespace with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIToolOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIToolOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAICodeInterpreterContainer with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAICodeInterpreterContainer with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIShellMemoryLimit with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIShellMemoryLimit with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIShellDomainSecret with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIShellDomainSecret with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIShellNetworkPolicy with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIShellNetworkPolicy with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIShellSkill with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIShellSkill with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAILocalShellSkill with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAILocalShellSkill with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIShellEnvironment with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIShellEnvironment with Eq::{not_equal, equal}

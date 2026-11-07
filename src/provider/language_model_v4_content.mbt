@@ -525,89 +525,67 @@ pub fn LanguageModelV4Content::to_generated_content_array(
 }
 
 ///|
-#deprecated
 pub extend LanguageModelV4Text with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Text with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Reasoning with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Reasoning with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4GeneratedFileData with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4GeneratedFileData with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4File with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4File with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ReasoningFile with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ReasoningFile with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Source with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Source with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4CustomContent with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4CustomContent with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ToolCall with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ToolCall with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ToolResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ToolResult with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ToolApprovalRequest with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ToolApprovalRequest with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Content with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Content with Eq::{not_equal, equal}

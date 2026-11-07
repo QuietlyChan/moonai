@@ -311,13 +311,10 @@ pub(open) trait LanguageModelV4 {
 }
 
 ///|
-#deprecated
 pub extend LanguageModelV4GenerateResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4StreamPart with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4StreamResult with Debug::{to_repr}

@@ -185,57 +185,43 @@ pub fn GeneratedContent::custom(
 }
 
 ///|
-#deprecated
 pub extend GeneratedText with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GeneratedText with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend GeneratedReasoning with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GeneratedReasoning with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend GeneratedFileData with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GeneratedFileData with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend GeneratedFile with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GeneratedFile with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend GeneratedSource with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GeneratedSource with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend GeneratedCustomContent with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GeneratedCustomContent with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend GeneratedContent with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GeneratedContent with Eq::{not_equal, equal}

@@ -459,11 +459,9 @@ pub impl @provider.SpeechTranslationModelV4 for OpenAITranslationModel with fn d
 }
 
 ///|
-#deprecated
 pub extend OpenAITranslationModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAITranslationModelOptions with Eq::{not_equal, equal}
 
 ///|

@@ -1637,25 +1637,19 @@ pub async fn post_multipart_binary(
 }
 
 ///|
-#deprecated
 pub extend JsonHttpResponse with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BinaryHttpResponse with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend DownloadedFile with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend DownloadedFile with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HttpTransportError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HttpTimeoutError with Debug::{to_repr}

@@ -89,5 +89,4 @@ pub fn WorkflowChatTransport::reconnect_to_stream(
 }
 
 ///|
-#deprecated
 pub extend WorkflowChatResponse with Debug::{to_repr}

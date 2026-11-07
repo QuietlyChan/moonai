@@ -224,41 +224,31 @@ pub fn LanguageModelV4ToolChoice::to_tool_choice(
 }
 
 ///|
-#deprecated
 pub extend LanguageModelV4FunctionToolInputExample with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4FunctionToolInputExample with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4FunctionTool with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4FunctionTool with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ProviderTool with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ProviderTool with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Tool with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Tool with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ToolChoice with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ToolChoice with Eq::{not_equal, equal}

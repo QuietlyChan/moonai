@@ -130,5 +130,4 @@ pub fn EventSourceBuffer::flush(self : EventSourceBuffer) -> String? {
 }
 
 ///|
-#deprecated
 pub extend SseDecodeBatch with Debug::{to_repr}

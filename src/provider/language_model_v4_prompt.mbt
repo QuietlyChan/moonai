@@ -541,17 +541,13 @@ pub fn LanguageModelV4Prompt::to_language_model_prompt(
 }
 
 ///|
-#deprecated
 pub extend LanguageModelV4Message with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Message with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Prompt with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4Prompt with Eq::{not_equal, equal}

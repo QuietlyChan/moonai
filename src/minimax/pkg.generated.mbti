@@ -24,13 +24,10 @@ pub fn minimax(String, api_key? : String, base_url? : String, headers? : Map[Str
 pub(all) struct MiniMaxLanguageModelOptions {
   thinking : MiniMaxThinkingMode?
 }
-#deprecated
 pub fn MiniMaxLanguageModelOptions::equal(Self, Self) -> Bool
 pub fn MiniMaxLanguageModelOptions::new(thinking? : MiniMaxThinkingMode) -> Self
-#deprecated
 pub fn MiniMaxLanguageModelOptions::not_equal(Self, Self) -> Bool
 pub fn MiniMaxLanguageModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
-#deprecated
 pub fn MiniMaxLanguageModelOptions::to_repr(Self) -> @debug.Repr
 
 pub struct MiniMaxProvider {
@@ -56,11 +53,8 @@ pub(all) enum MiniMaxThinkingMode {
   AdaptiveThinking
   DisabledThinking
 }
-#deprecated
 pub fn MiniMaxThinkingMode::equal(Self, Self) -> Bool
-#deprecated
 pub fn MiniMaxThinkingMode::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MiniMaxThinkingMode::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -72,13 +66,10 @@ pub(all) struct MiniMaxVideoModelOptions {
   poll_interval_ms : Int32?
   poll_timeout_ms : Int32?
 }
-#deprecated
 pub fn MiniMaxVideoModelOptions::equal(Self, Self) -> Bool
 pub fn MiniMaxVideoModelOptions::new(resolution? : String, ratio? : String, reference_audio_urls? : Array[String], aigc_watermark? : Bool, poll_interval_ms? : Int32, poll_timeout_ms? : Int32) -> Self raise
-#deprecated
 pub fn MiniMaxVideoModelOptions::not_equal(Self, Self) -> Bool
 pub fn MiniMaxVideoModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
-#deprecated
 pub fn MiniMaxVideoModelOptions::to_repr(Self) -> @debug.Repr
 
 // Type aliases

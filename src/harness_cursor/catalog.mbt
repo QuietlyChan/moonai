@@ -109,17 +109,13 @@ pub fn cursor_builtin_tool(name~ : String) -> CursorBuiltinTool? {
 }
 
 ///|
-#deprecated
 pub extend CursorToolKind with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend CursorToolKind with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend CursorBuiltinTool with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend CursorBuiltinTool with Eq::{not_equal, equal}

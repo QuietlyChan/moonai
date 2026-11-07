@@ -282,25 +282,19 @@ pub async fn startHarnessV1(
 }
 
 ///|
-#deprecated
 pub extend HarnessV1ToolResultSubmission with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1ToolResultSubmission with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HarnessV1ToolApprovalSubmission with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1ToolApprovalSubmission with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HarnessInstructions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessInstructions with Eq::{not_equal, equal}

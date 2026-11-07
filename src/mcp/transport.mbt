@@ -789,11 +789,9 @@ pub fn experimental_stdio_mcp_transport(
 }
 
 ///|
-#deprecated
 pub extend MCPTransportSendOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MCPTransportCloseOptions with Debug::{to_repr}
 
 ///|

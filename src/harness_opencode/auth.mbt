@@ -229,17 +229,13 @@ pub fn resolveOpenCodeEnv(
 }
 
 ///|
-#deprecated
 pub extend OpenCodeAuthOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenCodeAuthOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenCodeModelCoordinate with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenCodeModelCoordinate with Eq::{not_equal, equal}

@@ -126,21 +126,16 @@ pub(open) trait EmbeddingModelV4 {
 }
 
 ///|
-#deprecated
 pub extend EmbeddingModelV4CallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend EmbeddingModelV4Usage with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend EmbeddingModelV4Usage with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend EmbeddingModelV4Result with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend EmbeddingModelV4Result with Eq::{not_equal, equal}

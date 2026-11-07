@@ -143,9 +143,7 @@ pub fn should_resolve_grok_native_subscription(
 }
 
 ///|
-#deprecated
 pub extend GrokOAuthRecord with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend GrokOAuthRecord with Eq::{not_equal, equal}

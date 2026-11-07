@@ -546,11 +546,9 @@ pub impl @provider.FilesV4 for DeepSeekFiles with fn delete_file(
 }
 
 ///|
-#deprecated
 pub extend DeepSeekFilesOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend DeepSeekFilesOptions with Eq::{not_equal, equal}
 
 ///|

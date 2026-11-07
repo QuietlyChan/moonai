@@ -114,5 +114,4 @@ pub async fn WorkflowAgent::generate(
 }
 
 ///|
-#deprecated
 pub extend WorkflowAgentResult with Debug::{to_repr}

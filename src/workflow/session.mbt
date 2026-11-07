@@ -174,13 +174,10 @@ pub fn workflow_snapshot_from_json(
 }
 
 ///|
-#deprecated
 pub extend WorkflowError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend WorkflowError with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend WorkflowSessionSnapshot with Debug::{to_repr}

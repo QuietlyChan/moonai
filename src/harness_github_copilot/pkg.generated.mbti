@@ -25,11 +25,8 @@ pub(all) struct GitHubCopilotAccount {
   host : String
   login : String
 }
-#deprecated
 pub fn GitHubCopilotAccount::equal(Self, Self) -> Bool
-#deprecated
 pub fn GitHubCopilotAccount::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn GitHubCopilotAccount::to_repr(Self) -> @debug.Repr
 
 // Type aliases

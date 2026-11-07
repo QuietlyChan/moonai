@@ -1079,225 +1079,169 @@ pub fn AnthropicLanguageModelOptions::to_provider_options(
 }
 
 ///|
-#deprecated
 pub extend AnthropicCitations with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicCitations with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicFilePartProviderOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicFilePartProviderOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicToolChange with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicToolChange with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicSystemMessageProviderOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicSystemMessageProviderOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicStructuredOutputMode with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicStructuredOutputMode with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicThinkingDisplay with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicThinkingDisplay with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicThinking with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicThinking with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicCacheTtl with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicCacheTtl with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicCacheControl with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicCacheControl with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicMcpToolConfiguration with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicMcpToolConfiguration with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicMcpServer with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicMcpServer with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicContainerSkill with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicContainerSkill with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicContainer with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicContainer with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicEffort with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicEffort with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicTaskBudget with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicTaskBudget with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicSpeed with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicSpeed with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicInferenceGeo with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicInferenceGeo with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicFallback with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicFallback with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicFallbacks with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicFallbacks with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicContextTrigger with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicContextTrigger with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicToolUseKeep with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicToolUseKeep with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicInputTokenClearAtLeast with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicInputTokenClearAtLeast with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicThinkingKeep with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicThinkingKeep with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicCompactionTrigger with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicCompactionTrigger with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicContextManagementEdit with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicContextManagementEdit with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicContextManagement with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicContextManagement with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AnthropicLanguageModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AnthropicLanguageModelOptions with Eq::{not_equal, equal}

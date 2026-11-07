@@ -971,17 +971,13 @@ pub fn parseTranscriptionStreamPart(
 }
 
 ///|
-#deprecated
 pub extend TranscriptionStreamStartFrame with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend TranscriptionStreamStartFrame with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend TranscriptionStreamClientFrame with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend TranscriptionStreamClientFrame with Eq::{not_equal, equal}

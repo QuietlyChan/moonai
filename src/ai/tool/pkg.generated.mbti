@@ -31,11 +31,8 @@ pub(all) enum ToolCallerReference {
   NamedToolCaller(String)
 }
 pub fn ToolCallerReference::direct() -> Self
-#deprecated
 pub fn ToolCallerReference::equal(Self, Self) -> Bool
-#deprecated
 pub fn ToolCallerReference::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ToolCallerReference::to_repr(Self) -> @debug.Repr
 pub fn ToolCallerReference::tool(String) -> Self
 

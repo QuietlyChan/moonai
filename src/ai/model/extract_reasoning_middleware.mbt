@@ -45,9 +45,7 @@ pub fn extract_reasoning_middleware(
 }
 
 ///|
-#deprecated
 pub extend ExtractReasoningMode with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ExtractReasoningMode with Eq::{not_equal, equal}

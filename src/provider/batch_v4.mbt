@@ -373,101 +373,76 @@ pub(open) trait BatchV4 {
 }
 
 ///|
-#deprecated
 pub extend BatchV4Modality with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4Modality with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend BatchV4State with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4State with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend BatchV4TerminatedState with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4TerminatedState with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend BatchV4Error with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4Error with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend BatchV4RequestCounts with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4RequestCounts with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend BatchV4Status with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4CallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4StartOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4TextRequest with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4ImageRequest with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4Request with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4RequestWarning with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4StartResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4OperationOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4CancelResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4ListOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4ListItem with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4ListResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4ItemPayload with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend BatchV4ItemResult with Debug::{to_repr}

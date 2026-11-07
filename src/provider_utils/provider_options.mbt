@@ -496,5 +496,4 @@ pub fn ProviderOptionsReader::diagnostics(
 }
 
 ///|
-#deprecated
 pub extend ProviderOptionsResolution with Debug::{to_repr}

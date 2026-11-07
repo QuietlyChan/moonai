@@ -495,9 +495,7 @@ impl @provider.FilesV4 for OpenAIFiles with fn delete_file(self, call_options) -
 }
 
 ///|
-#deprecated
 pub extend OpenAIFilesOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIFilesOptions with Eq::{not_equal, equal}

@@ -374,36 +374,28 @@ fn compatible_image_request_warnings(
 }
 
 ///|
-#deprecated
 pub extend OpenAICompatibleLanguageModelChatOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAICompatibleLanguageModelChatOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAICompatibleLanguageModelCompletionOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAICompatibleLanguageModelCompletionOptions with Eq::{
   not_equal,
   equal,
 }
 
 ///|
-#deprecated
 pub extend OpenAICompatibleEmbeddingModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAICompatibleEmbeddingModelOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAICompatibleImageModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAICompatibleImageModelOptions with Eq::{not_equal, equal}

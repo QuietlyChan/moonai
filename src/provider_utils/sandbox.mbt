@@ -455,17 +455,13 @@ pub async fn SandboxSession::run(
 }
 
 ///|
-#deprecated
 pub extend SandboxProcessResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SandboxProcessResult with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend SandboxProcessExit with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SandboxProcessExit with Eq::{not_equal, equal}

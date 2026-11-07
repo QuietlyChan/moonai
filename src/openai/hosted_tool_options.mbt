@@ -982,201 +982,151 @@ pub fn OpenAIToolSearchOptions::to_args_json(
 }
 
 ///|
-#deprecated
 pub extend OpenAIFileSearchComparisonOperator with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIFileSearchComparisonOperator with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIFileSearchFilter with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIFileSearchFilter with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIFileSearchRanking with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIFileSearchRanking with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIFileSearchOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIFileSearchOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchContextSize with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchContextSize with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchUserLocation with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchUserLocation with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchFilters with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchFilters with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchPreviewOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIWebSearchPreviewOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationBackground with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationBackground with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationInputFidelity with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationInputFidelity with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationModeration with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationModeration with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationOutputFormat with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationOutputFormat with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationQuality with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationQuality with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationSize with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationSize with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationMask with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationMask with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIImageGenerationOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIMCPAllowedTools with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIMCPAllowedTools with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIMCPApprovalPolicy with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIMCPApprovalPolicy with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIMCPOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIMCPOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAICustomToolGrammarSyntax with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAICustomToolGrammarSyntax with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAICustomToolFormat with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAICustomToolFormat with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAICustomToolOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAICustomToolOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIToolSearchExecution with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIToolSearchExecution with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OpenAIToolSearchOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OpenAIToolSearchOptions with Eq::{not_equal, equal}

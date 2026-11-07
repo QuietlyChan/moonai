@@ -70,17 +70,13 @@ pub fn SkillsV4UploadSkillResult::new(
 }
 
 ///|
-#deprecated
 pub extend SkillsV4File with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SkillsV4UploadSkillCallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SkillsV4UploadSkillResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SkillsV4UploadSkillResult with Eq::{not_equal, equal}

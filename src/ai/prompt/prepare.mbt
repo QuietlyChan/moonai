@@ -262,5 +262,4 @@ pub fn prepareLanguageModelCallOptions(
 }
 
 ///|
-#deprecated
 pub extend LanguageModelCallOptions with Debug::{to_repr}

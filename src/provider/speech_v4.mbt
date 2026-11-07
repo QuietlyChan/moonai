@@ -149,13 +149,10 @@ pub(open) trait SpeechModelV4 {
 }
 
 ///|
-#deprecated
 pub extend SpeechModelV4CallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SpeechModelV4Result with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SpeechModelV4Result with Eq::{not_equal, equal}

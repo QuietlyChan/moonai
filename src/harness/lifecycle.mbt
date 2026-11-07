@@ -97,33 +97,25 @@ pub fn validate_harness_v1_lifecycle_state(
 }
 
 ///|
-#deprecated
 pub extend HarnessV1PendingToolApproval with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1PendingToolApproval with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HarnessV1PendingToolResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1PendingToolResult with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HarnessV1ResumeSessionState with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1ResumeSessionState with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HarnessV1ContinueTurnState with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1ContinueTurnState with Eq::{not_equal, equal}

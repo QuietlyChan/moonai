@@ -363,25 +363,19 @@ pub fn native_streaming_body_transport() -> &StreamingBodyTransport {
 }
 
 ///|
-#deprecated
 pub extend HttpMethod with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HttpMethod with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HttpRequest with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HttpRequest with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HttpResponse with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HttpResponse with Eq::{not_equal, equal}

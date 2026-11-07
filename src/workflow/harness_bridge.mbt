@@ -63,9 +63,7 @@ pub async fn WorkflowHarnessBridge::run_prompt_turn(
 }
 
 ///|
-#deprecated
 pub extend WorkflowHarnessTurnResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend WorkflowHarnessTurnResult with Eq::{not_equal, equal}

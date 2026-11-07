@@ -213,25 +213,19 @@ pub fn parseJSONRPCMessage(
 }
 
 ///|
-#deprecated
 pub extend JSONRPCId with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend JSONRPCId with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend JSONRPCErrorData with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend JSONRPCErrorData with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend JSONRPCMessage with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend JSONRPCMessage with Eq::{not_equal, equal}

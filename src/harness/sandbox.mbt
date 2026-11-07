@@ -231,11 +231,9 @@ pub impl HarnessV1SandboxProvider for CallbackHarnessV1SandboxProvider with fn r
 }
 
 ///|
-#deprecated
 pub extend HarnessV1NetworkPolicy with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1NetworkPolicy with Eq::{not_equal, equal}
 
 ///|

@@ -64,17 +64,13 @@ pub fn LanguageModelV4FinishReason::with_raw(
 }
 
 ///|
-#deprecated
 pub extend LanguageModelV4UnifiedFinishReason with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4UnifiedFinishReason with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4FinishReason with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4FinishReason with Eq::{not_equal, equal}

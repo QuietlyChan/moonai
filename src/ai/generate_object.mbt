@@ -387,45 +387,34 @@ pub async fn streamObject(
 }
 
 ///|
-#deprecated
 pub extend ObjectResponse with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ObjectValidationError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ObjectValidationError with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ObjectGenerationFailure with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ObjectGenerationFailure with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend NoObjectGeneratedError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend StreamObjectFailedError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend StreamObjectFailedError with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend StreamObjectPart with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend StreamObjectPart with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend StreamObjectResponse with Debug::{to_repr}

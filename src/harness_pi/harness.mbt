@@ -252,11 +252,9 @@ pub fn create_pi(
 pub let pi : PiHarness = createPi()
 
 ///|
-#deprecated
 pub extend PiThinkingLevel with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend PiThinkingLevel with Eq::{not_equal, equal}
 
 ///|

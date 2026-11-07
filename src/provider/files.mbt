@@ -266,65 +266,49 @@ pub fn FilesV4DeleteFileResult::new(
 }
 
 ///|
-#deprecated
 pub extend UploadFileData with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4UploadFileCallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4UploadFileResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4UploadFileResult with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend FilesV4GetFileMetadataCallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4GetFileMetadataCallOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend FilesV4FileMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4FileMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend FilesV4DownloadFileCallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4DownloadFileCallOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend FilesV4DownloadFileResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4DownloadFileResult with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend FilesV4DeleteFileCallOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4DeleteFileCallOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend FilesV4DeleteFileResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend FilesV4DeleteFileResult with Eq::{not_equal, equal}

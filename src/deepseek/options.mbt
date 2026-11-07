@@ -129,9 +129,7 @@ fn parse_deepseek_options(
 }
 
 ///|
-#deprecated
 pub extend DeepSeekLanguageModelChatOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend DeepSeekLanguageModelChatOptions with Eq::{not_equal, equal}

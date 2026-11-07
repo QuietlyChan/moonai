@@ -616,65 +616,49 @@ pub fn check_resource_allowed(
 }
 
 ///|
-#deprecated
 pub extend OAuthTokens with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OAuthTokens with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OAuthClientInformation with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OAuthClientInformation with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OAuthClientMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OAuthClientMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OAuthAuthorizationServerInformation with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OAuthAuthorizationServerInformation with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OAuthAuthorizationServerMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OAuthAuthorizationServerMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OAuthProtectedResourceMetadata with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OAuthProtectedResourceMetadata with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend AuthResult with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend AuthResult with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend OAuthAuthorizationStart with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend OAuthAuthorizationStart with Eq::{not_equal, equal}

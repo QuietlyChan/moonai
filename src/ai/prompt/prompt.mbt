@@ -246,21 +246,16 @@ pub fn standardizePrompt(
 }
 
 ///|
-#deprecated
 pub extend PromptInput with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend Instructions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend Instructions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend Prompt with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend StandardizedPrompt with Debug::{to_repr}

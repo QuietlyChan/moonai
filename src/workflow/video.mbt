@@ -75,9 +75,7 @@ pub async fn workflow_generate_video(
 }
 
 ///|
-#deprecated
 pub extend WorkflowToolApprovalSecret with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend WorkflowToolApprovalSecret with Eq::{not_equal, equal}

@@ -23,9 +23,7 @@ pub fn invalid_argument(
 }
 
 ///|
-#deprecated
 pub extend InvalidArgumentError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend InvalidArgumentError with Eq::{not_equal, equal}

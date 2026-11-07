@@ -82,5 +82,4 @@ pub fn StreamTextResult::to_chat_response(
 }
 
 ///|
-#deprecated
 pub extend StreamTextResult with Debug::{to_repr}

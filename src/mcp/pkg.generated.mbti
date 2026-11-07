@@ -108,35 +108,26 @@ pub fn validate_json_rpc_message(@json.Json) -> JSONRPCMessage raise MCPClientEr
 pub(all) suberror MCPClientError {
   MCPClientError(message~ : String, code~ : Int32?, data~ : @json.Json?, status_code~ : Int32?, url~ : String?, response_body~ : String?, cause~ : String?)
 }
-#deprecated
 pub fn MCPClientError::equal(Self, Self) -> Bool
 pub fn MCPClientError::message(Self) -> String
 pub fn MCPClientError::new(message~ : String, code? : Int32, data? : @json.Json, status_code? : Int32, url? : String, response_body? : String, cause? : String) -> Self
-#deprecated
 pub fn MCPClientError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPClientError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror MCPClientOAuthError {
   MCPClientOAuthError(message~ : String, cause~ : String?)
 }
-#deprecated
 pub fn MCPClientOAuthError::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPClientOAuthError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPClientOAuthError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror UnauthorizedError {
   UnauthorizedError(message~ : String)
 }
-#deprecated
 pub fn UnauthorizedError::equal(Self, Self) -> Bool
-#deprecated
 pub fn UnauthorizedError::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn UnauthorizedError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
@@ -145,11 +136,8 @@ pub(all) enum AuthResult {
   Authorized
   Redirect
 }
-#deprecated
 pub fn AuthResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn AuthResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn AuthResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -160,11 +148,8 @@ pub(all) struct CallToolResult {
   tool_result : @json.Json?
   raw : @json.Json
 }
-#deprecated
 pub fn CallToolResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn CallToolResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn CallToolResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -174,12 +159,9 @@ pub(all) struct CompleteRequestParams {
   argument_value : String
   context_arguments : Map[String, String]
 }
-#deprecated
 pub fn CompleteRequestParams::equal(Self, Self) -> Bool
 pub fn CompleteRequestParams::new(reference~ : MCPCompletionReference, argument_name~ : String, argument_value~ : String, context_arguments? : Map[String, String]) -> Self
-#deprecated
 pub fn CompleteRequestParams::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn CompleteRequestParams::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -189,11 +171,8 @@ pub(all) struct CompleteResult {
   has_more : Bool?
   raw : @json.Json
 }
-#deprecated
 pub fn CompleteResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn CompleteResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn CompleteResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -202,11 +181,8 @@ pub(all) struct GetPromptResult {
   messages : Array[MCPPromptMessage]
   raw : @json.Json
 }
-#deprecated
 pub fn GetPromptResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn GetPromptResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn GetPromptResult::to_repr(Self) -> @debug.Repr
 
 pub struct HttpMCPTransport {
@@ -233,11 +209,8 @@ pub(all) struct InitializeResult {
   instructions : String?
   raw : @json.Json
 }
-#deprecated
 pub fn InitializeResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn InitializeResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn InitializeResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -246,11 +219,8 @@ pub(all) struct JSONRPCErrorData {
   message : String
   data : @json.Json?
 }
-#deprecated
 pub fn JSONRPCErrorData::equal(Self, Self) -> Bool
-#deprecated
 pub fn JSONRPCErrorData::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn JSONRPCErrorData::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -258,11 +228,8 @@ pub(all) enum JSONRPCId {
   JSONRPCStringId(String)
   JSONRPCNumberId(Int32)
 }
-#deprecated
 pub fn JSONRPCId::equal(Self, Self) -> Bool
-#deprecated
 pub fn JSONRPCId::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn JSONRPCId::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -272,16 +239,13 @@ pub(all) enum JSONRPCMessage {
   JSONRPCResponse(id~ : JSONRPCId, result~ : @json.Json)
   JSONRPCError(id~ : JSONRPCId?, error~ : JSONRPCErrorData)
 }
-#deprecated
 pub fn JSONRPCMessage::equal(Self, Self) -> Bool
 pub fn JSONRPCMessage::error(id~ : JSONRPCId, code~ : Int32, message~ : String, data? : @json.Json) -> Self
-#deprecated
 pub fn JSONRPCMessage::not_equal(Self, Self) -> Bool
 pub fn JSONRPCMessage::notification(method_name~ : String, params? : @json.Json) -> Self
 pub fn JSONRPCMessage::request(id~ : JSONRPCId, method_name~ : String, params? : @json.Json) -> Self
 pub fn JSONRPCMessage::response(id~ : JSONRPCId, result? : @json.Json) -> Self
 pub fn JSONRPCMessage::to_json(Self) -> @json.Json
-#deprecated
 pub fn JSONRPCMessage::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -290,11 +254,8 @@ pub(all) struct ListPromptsResult {
   next_cursor : String?
   raw : @json.Json
 }
-#deprecated
 pub fn ListPromptsResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn ListPromptsResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ListPromptsResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -303,11 +264,8 @@ pub(all) struct ListResourceTemplatesResult {
   next_cursor : String?
   raw : @json.Json
 }
-#deprecated
 pub fn ListResourceTemplatesResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn ListResourceTemplatesResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ListResourceTemplatesResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -316,11 +274,8 @@ pub(all) struct ListResourcesResult {
   next_cursor : String?
   raw : @json.Json
 }
-#deprecated
 pub fn ListResourcesResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn ListResourcesResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ListResourcesResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -329,11 +284,8 @@ pub(all) struct ListToolsResult {
   next_cursor : String?
   raw : @json.Json
 }
-#deprecated
 pub fn ListToolsResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn ListToolsResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ListToolsResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -343,11 +295,8 @@ pub(all) struct MCPAppResource {
   html : String
   meta : MCPAppResourceMeta?
 }
-#deprecated
 pub fn MCPAppResource::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPAppResource::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPAppResource::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -357,11 +306,8 @@ pub(all) struct MCPAppResourceCSP {
   frame_domains : Array[String]
   raw : @json.Json
 }
-#deprecated
 pub fn MCPAppResourceCSP::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPAppResourceCSP::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPAppResourceCSP::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -371,11 +317,8 @@ pub(all) struct MCPAppResourceMeta {
   permissions : @json.Json?
   raw : @json.Json
 }
-#deprecated
 pub fn MCPAppResourceMeta::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPAppResourceMeta::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPAppResourceMeta::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -385,11 +328,8 @@ pub(all) struct MCPAppToolMeta {
   app_visible : Bool
   raw : @json.Json
 }
-#deprecated
 pub fn MCPAppToolMeta::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPAppToolMeta::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPAppToolMeta::to_repr(Self) -> @debug.Repr
 
 pub struct MCPClient {
@@ -435,11 +375,8 @@ pub(all) enum MCPCompletionReference {
   MCPPromptReference(name~ : String)
   MCPResourceReference(uri~ : String)
 }
-#deprecated
 pub fn MCPCompletionReference::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPCompletionReference::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPCompletionReference::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -448,12 +385,9 @@ pub(all) struct MCPImplementation {
   version : String
   title : String?
 }
-#deprecated
 pub fn MCPImplementation::equal(Self, Self) -> Bool
 pub fn MCPImplementation::new(name~ : String, version~ : String, title? : String) -> Self
-#deprecated
 pub fn MCPImplementation::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPImplementation::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -464,11 +398,8 @@ pub(all) struct MCPPrompt {
   arguments : Array[MCPPromptArgument]
   raw : @json.Json
 }
-#deprecated
 pub fn MCPPrompt::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPPrompt::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPPrompt::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -477,11 +408,8 @@ pub(all) struct MCPPromptArgument {
   description : String?
   required : Bool?
 }
-#deprecated
 pub fn MCPPromptArgument::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPPromptArgument::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPPromptArgument::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -489,11 +417,8 @@ pub(all) struct MCPPromptMessage {
   role : String
   content : @json.Json
 }
-#deprecated
 pub fn MCPPromptMessage::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPPromptMessage::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPPromptMessage::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -503,7 +428,6 @@ pub(all) struct MCPRequestOptions {
   max_total_timeout_ms : Int32?
 }
 pub fn MCPRequestOptions::new(cancellation_token? : @provider.CancellationToken, timeout_ms? : Int32, max_total_timeout_ms? : Int32) -> Self
-#deprecated
 pub fn MCPRequestOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -516,11 +440,8 @@ pub(all) struct MCPResource {
   size : Int32?
   raw : @json.Json
 }
-#deprecated
 pub fn MCPResource::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPResource::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPResource::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -528,11 +449,8 @@ pub(all) enum MCPResourceContents {
   MCPTextResource(uri~ : String, name~ : String?, title~ : String?, mime_type~ : String?, text~ : String, meta~ : @json.Json?, raw~ : @json.Json)
   MCPBlobResource(uri~ : String, name~ : String?, title~ : String?, mime_type~ : String?, blob~ : String, meta~ : @json.Json?, raw~ : @json.Json)
 }
-#deprecated
 pub fn MCPResourceContents::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPResourceContents::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPResourceContents::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -544,11 +462,8 @@ pub(all) struct MCPResourceTemplate {
   mime_type : String?
   raw : @json.Json
 }
-#deprecated
 pub fn MCPResourceTemplate::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPResourceTemplate::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPResourceTemplate::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -562,11 +477,8 @@ pub(all) struct MCPTool {
   meta : @json.Json?
   raw : @json.Json
 }
-#deprecated
 pub fn MCPTool::equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPTool::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn MCPTool::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -574,7 +486,6 @@ pub(all) struct MCPTransportCloseOptions {
   cancellation_token : @provider.CancellationToken?
 }
 pub fn MCPTransportCloseOptions::new(cancellation_token? : @provider.CancellationToken) -> Self
-#deprecated
 pub fn MCPTransportCloseOptions::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
@@ -584,7 +495,6 @@ pub(all) struct MCPTransportSendOptions {
   resumption_token : String?
 }
 pub fn MCPTransportSendOptions::new(cancellation_token? : @provider.CancellationToken, related_request_id? : JSONRPCId, resumption_token? : String) -> Self
-#deprecated
 pub fn MCPTransportSendOptions::to_repr(Self) -> @debug.Repr
 
 pub struct MockMCPTransport {
@@ -607,11 +517,8 @@ pub(all) struct OAuthAuthorizationServerInformation {
   authorization_server_url : String
   token_endpoint : String
 }
-#deprecated
 pub fn OAuthAuthorizationServerInformation::equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthAuthorizationServerInformation::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthAuthorizationServerInformation::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -626,11 +533,8 @@ pub(all) struct OAuthAuthorizationServerMetadata {
   token_endpoint_auth_methods_supported : Array[String]
   raw : @json.Json
 }
-#deprecated
 pub fn OAuthAuthorizationServerMetadata::equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthAuthorizationServerMetadata::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthAuthorizationServerMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -638,11 +542,8 @@ pub(all) struct OAuthAuthorizationStart {
   authorization_url : String
   code_verifier : String
 }
-#deprecated
 pub fn OAuthAuthorizationStart::equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthAuthorizationStart::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthAuthorizationStart::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -654,11 +555,8 @@ pub(all) struct OAuthClientInformation {
   authorization_server : String?
   token_endpoint : String?
 }
-#deprecated
 pub fn OAuthClientInformation::equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthClientInformation::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthClientInformation::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -671,11 +569,8 @@ pub(all) struct OAuthClientMetadata {
   scope : String?
   raw : @json.Json
 }
-#deprecated
 pub fn OAuthClientMetadata::equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthClientMetadata::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthClientMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -685,11 +580,8 @@ pub(all) struct OAuthProtectedResourceMetadata {
   scopes_supported : Array[String]
   raw : @json.Json
 }
-#deprecated
 pub fn OAuthProtectedResourceMetadata::equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthProtectedResourceMetadata::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthProtectedResourceMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -703,11 +595,8 @@ pub(all) struct OAuthTokens {
   authorization_server : String?
   token_endpoint : String?
 }
-#deprecated
 pub fn OAuthTokens::equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthTokens::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn OAuthTokens::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -715,11 +604,8 @@ pub(all) struct ReadResourceResult {
   contents : Array[MCPResourceContents]
   raw : @json.Json
 }
-#deprecated
 pub fn ReadResourceResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn ReadResourceResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn ReadResourceResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
@@ -727,11 +613,8 @@ pub(all) struct SplitMCPAppToolsResult {
   model_visible : ListToolsResult
   app_visible : ListToolsResult
 }
-#deprecated
 pub fn SplitMCPAppToolsResult::equal(Self, Self) -> Bool
-#deprecated
 pub fn SplitMCPAppToolsResult::not_equal(Self, Self) -> Bool
-#deprecated
 pub fn SplitMCPAppToolsResult::to_repr(Self) -> @debug.Repr
 
 pub struct SseMCPTransport {

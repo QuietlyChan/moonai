@@ -233,25 +233,19 @@ pub fn HarnessV1StreamPart::to_provider_stream_part(
 }
 
 ///|
-#deprecated
 pub extend HarnessV1FileChangeKind with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1FileChangeKind with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HarnessV1CompactionTrigger with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1CompactionTrigger with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend HarnessV1StreamPart with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend HarnessV1StreamPart with Eq::{not_equal, equal}

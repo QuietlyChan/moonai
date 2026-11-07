@@ -550,21 +550,16 @@ pub async fn[E, T] post_json_sse_events(
 }
 
 ///|
-#deprecated
 pub extend SseHttpResponse with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SseTransportError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SseTimeoutError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SseProtocolError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend SseProviderError with Debug::{to_repr}

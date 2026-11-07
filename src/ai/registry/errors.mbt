@@ -47,25 +47,19 @@ pub(all) suberror NoSuchProviderCapabilityError {
 }
 
 ///|
-#deprecated
 pub extend NoSuchProviderError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend NoSuchProviderError with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend InvalidRegistryModelIdError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend InvalidRegistryModelIdError with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend NoSuchProviderCapabilityError with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend NoSuchProviderCapabilityError with Eq::{not_equal, equal}

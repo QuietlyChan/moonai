@@ -183,25 +183,19 @@ fn parse_minimax_video_options(
 }
 
 ///|
-#deprecated
 pub extend MiniMaxThinkingMode with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MiniMaxThinkingMode with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend MiniMaxLanguageModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MiniMaxLanguageModelOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend MiniMaxVideoModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend MiniMaxVideoModelOptions with Eq::{not_equal, equal}

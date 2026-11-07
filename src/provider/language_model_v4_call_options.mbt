@@ -331,21 +331,16 @@ pub fn LanguageModelV4CallOptions::to_chat_call_options(
 }
 
 ///|
-#deprecated
 pub extend LanguageModelV4JsonResponseFormat with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ResponseFormat with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ReasoningEffort with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend LanguageModelV4ReasoningEffort with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend LanguageModelV4CallOptions with Debug::{to_repr}

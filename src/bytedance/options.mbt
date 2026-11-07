@@ -300,17 +300,13 @@ fn parse_bytedance_video_options(
 }
 
 ///|
-#deprecated
 pub extend ByteDanceImageModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ByteDanceImageModelOptions with Eq::{not_equal, equal}
 
 ///|
-#deprecated
 pub extend ByteDanceVideoModelOptions with Debug::{to_repr}
 
 ///|
-#deprecated
 pub extend ByteDanceVideoModelOptions with Eq::{not_equal, equal}
