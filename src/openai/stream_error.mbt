@@ -24,7 +24,7 @@ fn openai_stream_error_discriminator(error : Json) -> String {
 }
 
 ///|
-fn openai_stream_numeric_status(error : Json) -> Int? {
+fn openai_stream_numeric_status(error : Json) -> Int32? {
   match error {
     { "code": Number(value, ..), .. } => {
       let status = value.to_int()
@@ -50,7 +50,7 @@ fn openai_stream_numeric_status(error : Json) -> Int? {
 }
 
 ///|
-fn openai_stream_error_status(error : Json) -> Int {
+fn openai_stream_error_status(error : Json) -> Int32 {
   guard openai_stream_numeric_status(error) is None else {
     return openai_stream_numeric_status(error).unwrap()
   }

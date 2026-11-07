@@ -9,11 +9,11 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createHuggingFace(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> HuggingFaceProvider
+pub fn createHuggingFace(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> HuggingFaceProvider
 
-pub fn create_huggingface(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> HuggingFaceProvider
+pub fn create_huggingface(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> HuggingFaceProvider
 
-pub fn huggingface(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise
+pub fn huggingface(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4 raise
 
 // Errors
 
@@ -21,9 +21,17 @@ pub fn huggingface(String, api_key? : String, base_url? : String, headers? : Map
 pub struct HuggingFaceProvider {
   // private fields
 }
+pub fn HuggingFaceProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn HuggingFaceProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn HuggingFaceProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn HuggingFaceProvider::languageModel(Self, String) -> &@provider.LanguageModelV4 raise
 pub fn HuggingFaceProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn HuggingFaceProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
 pub fn HuggingFaceProvider::responses(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn HuggingFaceProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn HuggingFaceProvider::specification_version(Self) -> String
+pub fn HuggingFaceProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn HuggingFaceProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for HuggingFaceProvider
 
 // Type aliases

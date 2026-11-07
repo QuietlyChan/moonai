@@ -2,14 +2,12 @@ import {
   "QuietlyChan/moonai/open_responses/protocol",
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
-  "moonbitlang/core/json",
 }
 
 import {
   "QuietlyChan/moonai/ai",
   "moonbitlang/async",
   "moonbitlang/async/http",
-  "moonbitlang/async/io",
   "moonbitlang/async/socket",
 } for "test"
 

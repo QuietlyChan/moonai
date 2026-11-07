@@ -12,7 +12,7 @@ struct KlingaiVideoModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -22,7 +22,7 @@ fn klingai_video_value(
   auth_token~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> KlingaiVideoModel {
   {
@@ -196,7 +196,7 @@ pub impl @provider.VideoModelV4 for KlingaiVideoModel with fn model_id(self) -> 
 ///|
 pub impl @provider.VideoModelV4 for KlingaiVideoModel with fn max_videos_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   None
 }
 
@@ -306,4 +306,15 @@ fn klingai_error_to_message(json : Json) -> String? raise {
     { "message": String(message), .. } => Some(message)
     _ => None
   }
+}
+
+///|
+pub extend KlingaiVideoModel with @QuietlyChan/moonai/provider.VideoModelV4::{
+  do_generate,
+  do_status,
+  specification_version,
+  provider,
+  do_start,
+  model_id,
+  max_videos_per_call,
 }

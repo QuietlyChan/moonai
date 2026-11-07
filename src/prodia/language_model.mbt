@@ -9,7 +9,7 @@ struct ProdiaLanguageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -19,7 +19,7 @@ fn prodia_language_model_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> ProdiaLanguageModel {
   {
@@ -332,4 +332,14 @@ pub impl @provider.LanguageModelV4 for ProdiaLanguageModel with fn do_stream(
     ),
   )
   @provider.LanguageModelV4StreamResult::new(None, None)
+}
+
+///|
+pub extend ProdiaLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
 }

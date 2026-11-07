@@ -7,7 +7,7 @@ struct ElevenLabsSpeechModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn elevenlabs_speech_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> ElevenLabsSpeechModel {
   {
@@ -163,4 +163,12 @@ fn elevenlabs_error_to_message(json : Json) -> String? raise {
     { "message": String(message), .. } => Some(message)
     _ => None
   }
+}
+
+///|
+pub extend ElevenLabsSpeechModel with @QuietlyChan/moonai/provider.SpeechModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
 }

@@ -34,16 +34,27 @@ pub fn to_open_code_gateway_base_url(String) -> String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum OpenCodeAuthOptions {
   OpenCodeGatewayAuth(api_key~ : String?, base_url~ : String?)
   OpenCodeAnthropicAuth(api_key~ : String?, auth_token~ : String?, base_url~ : String?)
   OpenCodeOpenAIAuth(api_key~ : String?, base_url~ : String?, organization~ : String?, project~ : String?)
   OpenCodeCompatibleAuth(api_key~ : String?, base_url~ : String?, name~ : String?, query_params~ : Map[String, String])
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenCodeAuthOptions::equal(Self, Self) -> Bool
+pub fn OpenCodeAuthOptions::not_equal(Self, Self) -> Bool
+pub fn OpenCodeAuthOptions::to_repr(Self) -> @debug.Repr
 
 pub struct OpenCodeHarness {
   settings : OpenCodeHarnessSettings
 }
+pub fn OpenCodeHarness::builtin_tools(Self) -> Array[@harness.HarnessV1BuiltinTool]
+pub async fn OpenCodeHarness::do_start(Self, @harness.HarnessV1StartOptions) -> &@harness.HarnessV1Session
+pub async fn OpenCodeHarness::get_bootstrap(Self) -> @harness.HarnessV1Bootstrap?
+pub fn OpenCodeHarness::harness_id(Self) -> String
+pub fn OpenCodeHarness::specification_version(Self) -> String
+pub fn OpenCodeHarness::supports_builtin_tool_approvals(Self) -> Bool
+pub fn OpenCodeHarness::supports_builtin_tool_filtering(Self) -> Bool
 pub impl @harness.HarnessV1 for OpenCodeHarness
 
 pub(all) struct OpenCodeHarnessSettings {
@@ -51,17 +62,21 @@ pub(all) struct OpenCodeHarnessSettings {
   model : String?
   provider : String?
   reasoning_variant : String?
-  port : Int?
-  startup_timeout_ms : Int
+  port : Int32?
+  startup_timeout_ms : Int32
   transport : @harness.HarnessV1BridgeTransportConfig?
 }
-pub fn OpenCodeHarnessSettings::new(auth? : OpenCodeAuthOptions, model? : String, provider? : String, reasoning_variant? : String, port? : Int, startup_timeout_ms? : Int, transport? : @harness.HarnessV1BridgeTransportConfig) -> Self
+pub fn OpenCodeHarnessSettings::new(auth? : OpenCodeAuthOptions, model? : String, provider? : String, reasoning_variant? : String, port? : Int32, startup_timeout_ms? : Int32, transport? : @harness.HarnessV1BridgeTransportConfig) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OpenCodeModelCoordinate {
   provider_id : String?
   model_id : String?
   model : String?
-} derive(Eq, @debug.Debug)
+}
+pub fn OpenCodeModelCoordinate::equal(Self, Self) -> Bool
+pub fn OpenCodeModelCoordinate::not_equal(Self, Self) -> Bool
+pub fn OpenCodeModelCoordinate::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

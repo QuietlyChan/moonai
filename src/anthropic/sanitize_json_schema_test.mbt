@@ -22,7 +22,7 @@ test "Anthropic sanitizes constraints and unsupported formats" {
     "required": ["interval", "slug"],
     "additionalProperties": false,
   }
-  let sanitized = sanitize_json_schema(schema)
+  let sanitized = @anthropic.sanitize_json_schema(schema)
   assert_eq(
     sanitized,
     (
@@ -70,7 +70,7 @@ test "Anthropic sanitizes recursive definitions and oneOf" {
       },
     },
   }
-  let sanitized = sanitizeJsonSchema(schema)
+  let sanitized = @anthropic.sanitizeJsonSchema(schema)
   match sanitized {
     {
       "anyOf": Array(choices),
@@ -110,11 +110,11 @@ test "Anthropic preserves supported formats and references" {
     "minLength": 1,
   }
   assert_eq(
-    sanitize_json_schema(schema),
+    @anthropic.sanitize_json_schema(schema),
     ({ "$ref": "#/definitions/Email" } : Json),
   )
   assert_eq(
-    sanitize_json_schema({ "type": "string", "format": "email" }),
+    @anthropic.sanitize_json_schema({ "type": "string", "format": "email" }),
     ({ "type": "string", "format": "email" } : Json),
   )
 }

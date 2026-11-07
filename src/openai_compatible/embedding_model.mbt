@@ -8,10 +8,10 @@ pub struct OpenAICompatibleEmbeddingModel {
   priv model_id : OpenAICompatibleEmbeddingModelId
   priv headers : Map[String, String]
   priv query_params : Map[String, String]
-  priv max_embeddings : Int
+  priv max_embeddings : Int32
   priv supports_parallel : Bool
   priv error_structure : OpenAICompatibleErrorStructure
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -21,13 +21,13 @@ pub fn openai_compatible_embedding(
   provider_name~ : String,
   base_url~ : String,
   model_id~ : OpenAICompatibleEmbeddingModelId,
-  api_key? : String = "",
-  headers? : Map[String, String] = Map([]),
-  query_params? : Map[String, String] = Map([]),
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-  idle_timeout_ms? : Int = 120_000,
-  max_embeddings_per_call? : Int = 2048,
-  supports_parallel_calls? : Bool = true,
+  api_key~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  query_params~ : Map[String, String] = Map([]),
+  error_structure~ : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
+  idle_timeout_ms~ : Int32 = 120_000,
+  max_embeddings_per_call~ : Int32 = 2048,
+  supports_parallel_calls~ : Bool = true,
   http_transport? : &@provider_utils.HttpTransport,
   api_key_environment_variable? : String,
 ) -> OpenAICompatibleEmbeddingModel {
@@ -179,7 +179,7 @@ pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel with fn m
 ///|
 pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel with fn max_embeddings_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   Some(self.max_embeddings)
 }
 
@@ -209,4 +209,15 @@ pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel with fn d
     options.retry_policy,
     options.cancellation_token,
   )
+}
+
+///|
+pub extend OpenAICompatibleEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  provider,
+  max_embeddings_per_call,
+  supports_parallel_calls,
+  max_input_bytes_per_call,
+  model_id,
 }

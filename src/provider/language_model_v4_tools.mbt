@@ -1,8 +1,9 @@
 ///|
 /// One example input for a V4 function tool.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4FunctionToolInputExample {
   input : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 function-tool input example.
@@ -14,6 +15,7 @@ pub fn LanguageModelV4FunctionToolInputExample::new(
 
 ///|
 /// A function tool advertised to a V4 language model.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4FunctionTool {
   name : String
   description : String?
@@ -21,22 +23,24 @@ pub(all) struct LanguageModelV4FunctionTool {
   input_examples : Array[LanguageModelV4FunctionToolInputExample]
   strict : Bool?
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// A provider-defined tool advertised to a V4 language model.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4ProviderTool {
   id : String
   name : String
   args : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// A tool available to a V4 language model.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4Tool {
   V4FunctionTool(LanguageModelV4FunctionTool)
   V4ProviderTool(LanguageModelV4ProviderTool)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 function tool.
@@ -44,9 +48,9 @@ pub fn LanguageModelV4Tool::function(
   name : String,
   input_schema : Json,
   description? : String,
-  input_examples? : Array[Json] = [],
+  input_examples~ : Array[Json] = [],
   strict? : Bool,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Tool {
   LanguageModelV4Tool::V4FunctionTool({
     name,
@@ -67,7 +71,7 @@ pub fn LanguageModelV4Tool::function(
 pub fn LanguageModelV4Tool::provider(
   id~ : String,
   name~ : String,
-  args? : Json = Json::empty_object(),
+  args~ : Json = Json::empty_object(),
 ) -> LanguageModelV4Tool {
   LanguageModelV4Tool::V4ProviderTool({ id, name, args, })
 }
@@ -110,12 +114,13 @@ pub fn LanguageModelV4Tool::description(self : LanguageModelV4Tool) -> String? {
 
 ///|
 /// How a V4 language model should select from its available tools.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4ToolChoice {
   V4ToolChoiceAuto
   V4ToolChoiceNone
   V4ToolChoiceRequired
   V4ToolChoiceTool(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Convert a legacy tool definition to the V4 tool contract.
@@ -217,3 +222,33 @@ pub fn LanguageModelV4ToolChoice::to_tool_choice(
     V4ToolChoiceTool(name) => Named(name)
   }
 }
+
+///|
+pub extend LanguageModelV4FunctionToolInputExample with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4FunctionToolInputExample with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4FunctionTool with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4FunctionTool with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4ProviderTool with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ProviderTool with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4Tool with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4Tool with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4ToolChoice with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ToolChoice with Eq::{not_equal, equal}

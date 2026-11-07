@@ -1,6 +1,6 @@
 ///|
 test "zai provider exposes chat models under the zai.chat name" {
-  let provider = create_zai(api_key="sk-test")
+  let provider = @zai.create_zai(api_key="sk-test")
   let model = provider.chat("glm-5")
   assert_eq(model.provider(), "zai.chat")
   assert_eq(model.model_id(), "glm-5")
@@ -13,7 +13,7 @@ test "zai provider exposes chat models under the zai.chat name" {
 
 ///|
 test "zai direct factory builds the same language model boundary" {
-  let model = zai("glm-4.5v", api_key="sk-test")
+  let model = @zai.zai("glm-4.5v", api_key="sk-test")
   assert_eq(model.provider(), "zai.chat")
   assert_eq(model.model_id(), "glm-4.5v")
 }

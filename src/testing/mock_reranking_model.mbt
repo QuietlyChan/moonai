@@ -11,8 +11,8 @@ pub struct MockRerankingModelV4 {
 /// Construct a deterministic reranking model.
 pub fn MockRerankingModelV4::new(
   result : @provider.RerankingModelV4Result,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-reranker",
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-reranker",
 ) -> MockRerankingModelV4 {
   { provider_name, model_id, result, captured_options: None, }
 }
@@ -53,4 +53,12 @@ pub impl @provider.RerankingModelV4 for MockRerankingModelV4 with fn do_rerank(
 ) -> @provider.RerankingModelV4Result {
   self.captured_options = Some(options)
   self.result
+}
+
+///|
+pub extend MockRerankingModelV4 with @QuietlyChan/moonai/provider.RerankingModelV4::{
+  do_rerank,
+  specification_version,
+  provider,
+  model_id,
 }

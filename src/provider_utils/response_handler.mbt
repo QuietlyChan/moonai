@@ -9,12 +9,12 @@ fn handle_failed_response(
   url~ : String,
   request_body~ : String,
   request_headers~ : Map[String, String],
-  status_code~ : Int,
+  status_code~ : Int32,
   response_headers~ : Map[String, String],
   response_body~ : String,
   error_json~ : Json?,
   error_to_message : ((Json) -> String? raise)?,
-  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  is_retryable_response : ((Int32, Json?) -> Bool? raise)?,
 ) -> (String, Bool) raise {
   try {
     // Some providers return an empty error body; fall back to a status-derived
@@ -34,8 +34,7 @@ fn handle_failed_response(
     }
     (message, retryable)
   } catch {
-    error if @async.is_cancellation_error(error) || @async.is_being_cancelled() =>
-      raise error
+    error if @async.is_being_cancelled() => raise error
     error =>
       match error {
         @provider.CancellationError => raise error

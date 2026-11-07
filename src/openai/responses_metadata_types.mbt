@@ -1,11 +1,12 @@
 ///|
 /// Response-level metadata produced by the OpenAI Responses API.
+#derive(Debug, Eq)
 pub(all) struct OpenAIResponsesMetadata {
   response_id : String?
   logprobs : Array[Json]?
   service_tier : String?
   reasoning_context : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct response-level OpenAI metadata.
@@ -39,9 +40,10 @@ fn OpenAIResponsesMetadata::to_json(self : OpenAIResponsesMetadata) -> Json {
 
 ///|
 /// Provider-keyed response metadata using the AI SDK public type name.
+#derive(Debug, Eq)
 pub(all) struct OpenaiResponsesProviderMetadata {
   openai : OpenAIResponsesMetadata
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct provider-keyed response metadata.
@@ -55,23 +57,25 @@ pub fn OpenaiResponsesProviderMetadata::new(
 /// Convert typed response metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesProviderMetadata,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   Map([(provider_name, self.openai.to_json())])
 }
 
 ///|
 /// Reasoning-part metadata produced by OpenAI Responses.
+#derive(Debug, Eq)
 pub(all) struct OpenAIResponsesReasoningMetadata {
   item_id : String
   reasoning_encrypted_content : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Provider-keyed reasoning metadata using the AI SDK public type name.
+#derive(Debug, Eq)
 pub(all) struct OpenaiResponsesReasoningProviderMetadata {
   openai : OpenAIResponsesReasoningMetadata
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct provider-keyed reasoning metadata.
@@ -86,7 +90,7 @@ pub fn OpenaiResponsesReasoningProviderMetadata::new(
 /// Convert reasoning metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesReasoningProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesReasoningProviderMetadata,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map([
     ("itemId", Json::string(self.openai.item_id)),
@@ -99,16 +103,18 @@ pub fn OpenaiResponsesReasoningProviderMetadata::to_provider_metadata(
 
 ///|
 /// Compaction-part metadata produced by OpenAI Responses.
+#derive(Debug, Eq)
 pub(all) struct OpenAIResponsesCompactionMetadata {
   item_id : String
   encrypted_content : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Provider-keyed compaction metadata using the AI SDK public type name.
+#derive(Debug, Eq)
 pub(all) struct OpenaiResponsesCompactionProviderMetadata {
   openai : OpenAIResponsesCompactionMetadata
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct provider-keyed compaction metadata.
@@ -123,7 +129,7 @@ pub fn OpenaiResponsesCompactionProviderMetadata::new(
 /// Convert compaction metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesCompactionProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesCompactionProviderMetadata,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map([
     ("type", Json::string("compaction")),
@@ -137,10 +143,11 @@ pub fn OpenaiResponsesCompactionProviderMetadata::to_provider_metadata(
 
 ///|
 /// Phase attached to one OpenAI Responses output-text item.
+#derive(Debug, Eq)
 pub(all) enum OpenAIResponsesTextPhase {
   ResponsesTextCommentary
   ResponsesTextFinalAnswer
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIResponsesTextPhase::wire_name(
@@ -154,17 +161,19 @@ fn OpenAIResponsesTextPhase::wire_name(
 
 ///|
 /// Text-part metadata produced by OpenAI Responses.
+#derive(Debug, Eq)
 pub(all) struct OpenAIResponsesTextMetadata {
   item_id : String
   phase : OpenAIResponsesTextPhase?
   annotations : Array[Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Provider-keyed text metadata using the AI SDK public type name.
+#derive(Debug, Eq)
 pub(all) struct OpenaiResponsesTextProviderMetadata {
   openai : OpenAIResponsesTextMetadata
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct provider-keyed output-text metadata.
@@ -180,7 +189,7 @@ pub fn OpenaiResponsesTextProviderMetadata::new(
 /// Convert output-text metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesTextProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesTextProviderMetadata,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map([
     ("itemId", Json::string(self.openai.item_id)),
@@ -196,11 +205,12 @@ pub fn OpenaiResponsesTextProviderMetadata::to_provider_metadata(
 
 ///|
 /// Source-document metadata emitted by OpenAI Responses annotations.
+#derive(Debug, Eq)
 pub(all) enum OpenAIResponsesSourceDocumentMetadata {
-  ResponsesFileCitation(file_id~ : String, index~ : Int)
+  ResponsesFileCitation(file_id~ : String, index~ : Int32)
   ResponsesContainerFileCitation(file_id~ : String, container_id~ : String)
-  ResponsesFilePath(file_id~ : String, index~ : Int)
-} derive(Debug, Eq)
+  ResponsesFilePath(file_id~ : String, index~ : Int32)
+}
 
 ///|
 fn OpenAIResponsesSourceDocumentMetadata::to_json(
@@ -222,9 +232,10 @@ fn OpenAIResponsesSourceDocumentMetadata::to_json(
 
 ///|
 /// Provider-keyed source-document metadata using the AI SDK public type name.
+#derive(Debug, Eq)
 pub(all) struct OpenaiResponsesSourceDocumentProviderMetadata {
   openai : OpenAIResponsesSourceDocumentMetadata
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct provider-keyed source-document metadata.
@@ -238,7 +249,76 @@ pub fn OpenaiResponsesSourceDocumentProviderMetadata::new(
 /// Convert source-document metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesSourceDocumentProviderMetadata,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   Map([(provider_name, self.openai.to_json())])
+}
+
+///|
+pub extend OpenAIResponsesMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenAIResponsesMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenaiResponsesProviderMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenaiResponsesProviderMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIResponsesReasoningMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenAIResponsesReasoningMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenaiResponsesReasoningProviderMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenaiResponsesReasoningProviderMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIResponsesCompactionMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenAIResponsesCompactionMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenaiResponsesCompactionProviderMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenaiResponsesCompactionProviderMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIResponsesTextPhase with Debug::{to_repr}
+
+///|
+pub extend OpenAIResponsesTextPhase with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIResponsesTextMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenAIResponsesTextMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenaiResponsesTextProviderMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenaiResponsesTextProviderMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIResponsesSourceDocumentMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenAIResponsesSourceDocumentMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend OpenaiResponsesSourceDocumentProviderMetadata with Debug::{to_repr}
+
+///|
+pub extend OpenaiResponsesSourceDocumentProviderMetadata with Eq::{
+  not_equal,
+  equal,
 }

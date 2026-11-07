@@ -46,7 +46,7 @@ async test "V4 generate_text and stream_text drive compatible completions" {
         max_connections=2,
       )
     }
-    let model = create_openai_compatible(
+    let model = @openai_compatible.create_openai_compatible(
       provider_name="local-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       api_key="test-key",

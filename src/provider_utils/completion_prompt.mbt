@@ -1,10 +1,11 @@
 ///|
 /// Text prompt and provider-required stop sequences produced from a V4 prompt
 /// for an OpenAI-style `/completions` endpoint.
+#derive(Debug, Eq)
 pub(all) struct CompletionPrompt {
   prompt : String
   stop_sequences : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Convert the provider-neutral V4 prompt into the labelled transcript used
@@ -15,8 +16,8 @@ pub(all) struct CompletionPrompt {
 /// OpenAI and OpenAI-compatible completion converters.
 pub fn convert_to_completion_prompt(
   prompt : @provider.LanguageModelV4Prompt,
-  user? : String = "user",
-  assistant? : String = "assistant",
+  user~ : String = "user",
+  assistant~ : String = "assistant",
 ) -> CompletionPrompt raise {
   let text = StringBuilder()
   let mut start = 0
@@ -72,3 +73,9 @@ pub fn convert_to_completion_prompt(
   text.write_string(":\n")
   { prompt: text.to_string(), stop_sequences: ["\n\{user}:"], }
 }
+
+///|
+pub extend CompletionPrompt with Debug::{to_repr}
+
+///|
+pub extend CompletionPrompt with Eq::{not_equal, equal}

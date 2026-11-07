@@ -1,5 +1,6 @@
 ///|
 /// A parsed tool call exposed by the high-level generation workflow.
+#derive(Debug, Eq)
 pub(all) struct GenerateTextToolCall {
   tool_call_id : String
   tool_name : String
@@ -10,11 +11,12 @@ pub(all) struct GenerateTextToolCall {
   invalid : Bool
   error : String?
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// A client- or provider-executed tool result exposed by the high-level
 /// generation workflow.
+#derive(Debug, Eq)
 pub(all) struct GenerateTextToolResult {
   tool_call_id : String
   tool_name : String
@@ -25,10 +27,11 @@ pub(all) struct GenerateTextToolResult {
   provider_executed : Bool
   dynamic : Bool
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// High-level request for approval of a parsed tool call.
+#derive(Debug, Eq)
 pub(all) struct GenerateTextToolApprovalRequestOutput {
   approval_id : String
   tool_call : GenerateTextToolCall
@@ -38,17 +41,18 @@ pub(all) struct GenerateTextToolApprovalRequestOutput {
   /// (AI SDK #19658).
   request_reason : String?
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// High-level response to a tool approval request.
+#derive(Debug, Eq)
 pub(all) struct GenerateTextToolApprovalResponseOutput {
   approval_id : String
   tool_call : GenerateTextToolCall
   approved : Bool
   reason : String?
   provider_executed : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 /// Ordered high-level content produced by `generateText`.
@@ -56,6 +60,7 @@ pub(all) struct GenerateTextToolApprovalResponseOutput {
 /// Provider V4 parts are normalized into this vocabulary before tool
 /// execution results are added. This keeps the provider contract separate
 /// from the high-level multi-step result.
+#derive(Debug, Eq)
 pub(all) enum GenerateTextContent {
   GenerateTextText(@provider.LanguageModelV4Text)
   GenerateTextReasoning(@provider.LanguageModelV4Reasoning)
@@ -67,23 +72,25 @@ pub(all) enum GenerateTextContent {
   GenerateTextSource(@provider.LanguageModelV4Source)
   GenerateTextToolCall(GenerateTextToolCall)
   GenerateTextToolResult(GenerateTextToolResult)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Performance metrics for one non-streaming language-model step.
+#derive(Debug, Eq)
 pub(all) struct GenerateTextStepPerformance {
-  step_time_ms : Int
-  response_time_ms : Int
-  tool_execution_ms : Map[String, Int]
+  step_time_ms : Int32
+  response_time_ms : Int32
+  tool_execution_ms : Map[String, Int32]
   effective_output_tokens_per_second : Double?
   effective_total_tokens_per_second : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Details for one language-model call in a multi-step generation.
+#derive(Debug)
 pub(all) struct GenerateTextStep {
   call_id : String
-  step_number : Int
+  step_number : Int32
   provider : String
   model_id : String
   runtime_context : Json
@@ -103,7 +110,7 @@ pub(all) struct GenerateTextStep {
   warnings : Array[@provider.Warning]
   response_messages : Array[@provider_utils.ModelMessage]
   provider_result : @provider.LanguageModelV4GenerateResult
-} derive(Debug)
+}
 
 ///|
 fn content_text(content : Array[GenerateTextContent]) -> String {
@@ -143,6 +150,7 @@ pub fn GenerateTextStep::reasoning(self : GenerateTextStep) -> String {
 
 ///|
 /// High-level result of `generateText`.
+#derive(Debug)
 pub(all) struct GenerateTextResult {
   content : Array[GenerateTextContent]
   tool_calls : Array[GenerateTextToolCall]
@@ -161,7 +169,7 @@ pub(all) struct GenerateTextResult {
   provider_metadata : Map[String, Json]
   steps : Array[GenerateTextStep]
   final_step : GenerateTextStep
-} derive(Debug)
+}
 
 ///|
 fn create_generate_text_result(
@@ -258,12 +266,14 @@ pub fn GenerateTextResult::to_chat_response(
 
 ///|
 /// Error raised when a client tool call names no registered tool.
+#derive(Debug, Eq)
 pub(all) suberror NoSuchToolError {
   NoSuchToolError(tool_name~ : String, available_tools~ : Array[String])
-} derive(Debug, Eq)
+}
 
 ///|
 /// Error raised when a static tool call contains invalid input.
+#derive(Debug, Eq)
 pub(all) suberror InvalidToolInputError {
   InvalidToolInputError(
     tool_call_id~ : String,
@@ -271,29 +281,104 @@ pub(all) suberror InvalidToolInputError {
     input~ : String,
     message~ : String
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Error raised when an approval response has no matching request.
+#derive(Debug, Eq)
 pub(all) suberror InvalidToolApprovalError {
   InvalidToolApprovalError(approval_id~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Error raised when a signed approval request cannot be authenticated.
+#derive(Debug, Eq)
 pub suberror InvalidToolApprovalSignatureError {
   InvalidToolApprovalSignatureError(
     approval_id~ : String,
     tool_call_id~ : String,
     reason~ : String
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Error raised when an approval request refers to no prior tool call.
+#derive(Debug, Eq)
 pub(all) suberror ToolCallNotFoundForApprovalError {
   ToolCallNotFoundForApprovalError(
     tool_call_id~ : String,
     approval_id~ : String
   )
-} derive(Debug, Eq)
+}
+
+///|
+pub extend GenerateTextToolCall with Debug::{to_repr}
+
+///|
+pub extend GenerateTextToolCall with Eq::{not_equal, equal}
+
+///|
+pub extend GenerateTextToolResult with Debug::{to_repr}
+
+///|
+pub extend GenerateTextToolResult with Eq::{not_equal, equal}
+
+///|
+pub extend GenerateTextToolApprovalRequestOutput with Debug::{to_repr}
+
+///|
+pub extend GenerateTextToolApprovalRequestOutput with Eq::{not_equal, equal}
+
+///|
+pub extend GenerateTextToolApprovalResponseOutput with Debug::{to_repr}
+
+///|
+pub extend GenerateTextToolApprovalResponseOutput with Eq::{not_equal, equal}
+
+///|
+pub extend GenerateTextContent with Debug::{to_repr}
+
+///|
+pub extend GenerateTextContent with Eq::{not_equal, equal}
+
+///|
+pub extend GenerateTextStepPerformance with Debug::{to_repr}
+
+///|
+pub extend GenerateTextStepPerformance with Eq::{not_equal, equal}
+
+///|
+pub extend GenerateTextStep with Debug::{to_repr}
+
+///|
+pub extend GenerateTextResult with Debug::{to_repr}
+
+///|
+pub extend NoSuchToolError with Debug::{to_repr}
+
+///|
+pub extend NoSuchToolError with Eq::{not_equal, equal}
+
+///|
+pub extend InvalidToolInputError with Debug::{to_repr}
+
+///|
+pub extend InvalidToolInputError with Eq::{not_equal, equal}
+
+///|
+pub extend InvalidToolApprovalError with Debug::{to_repr}
+
+///|
+pub extend InvalidToolApprovalError with Eq::{not_equal, equal}
+
+///|
+pub extend InvalidToolApprovalSignatureError with Debug::{to_repr}
+
+///|
+pub extend InvalidToolApprovalSignatureError with Eq::{not_equal, equal}
+
+///|
+pub extend ToolCallNotFoundForApprovalError with Debug::{to_repr}
+
+///|
+pub extend ToolCallNotFoundForApprovalError with Eq::{not_equal, equal}

@@ -7,7 +7,7 @@ struct ElevenLabsTranscriptionModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn elevenlabs_transcription_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> ElevenLabsTranscriptionModel {
   {
@@ -151,4 +151,13 @@ pub impl @provider.TranscriptionModelV4 for ElevenLabsTranscriptionModel with fn
   raise @provider.UnsupportedFunctionalityError(
     functionality="ElevenLabs transcription streaming",
   )
+}
+
+///|
+pub extend ElevenLabsTranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  do_stream,
+  model_id,
 }

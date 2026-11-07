@@ -6,7 +6,7 @@ priv struct OpenAIEmbeddingModel {
   model_id : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn openai_embedding_model(
   model_id~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAIEmbeddingModel {
   {
@@ -54,7 +54,7 @@ fn OpenAIEmbeddingModel::request_headers(
 fn openai_embedding_request(
   model_id : String,
   values : Array[String],
-  dimensions : Int?,
+  dimensions : Int32?,
   user : String?,
 ) -> Json {
   Json::object(
@@ -101,7 +101,7 @@ fn openai_embedding_vector(json : Json) -> Array[Double] raise {
 ///|
 fn decode_openai_embedding_response(
   json : Json,
-) -> (Array[Array[Double]], Int?) raise {
+) -> (Array[Array[Double]], Int32?) raise {
   if openai_error_message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI embedding request failed: \{message}",
@@ -210,7 +210,7 @@ impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn model_id(self) 
 ///|
 impl @provider.EmbeddingModelV4 for OpenAIEmbeddingModel with fn max_embeddings_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(2048)
 }
 

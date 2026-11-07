@@ -4,9 +4,9 @@ pub struct AssemblyAIProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
-  priv poll_interval_ms : Int
-  priv poll_timeout_ms : Int
+  priv idle_timeout_ms : Int32
+  priv poll_interval_ms : Int32
+  priv poll_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -14,12 +14,12 @@ pub struct AssemblyAIProvider {
 /// Create an AssemblyAI provider. The API key defaults to the
 /// `ASSEMBLYAI_API_KEY` environment variable.
 pub fn create_assemblyai(
-  api_key? : String = "",
-  base_url? : String = "https://api.assemblyai.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
-  poll_interval_ms? : Int = ASSEMBLYAI_POLL_INTERVAL_MS,
-  poll_timeout_ms? : Int = ASSEMBLYAI_POLL_TIMEOUT_MS,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.assemblyai.com",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
+  poll_interval_ms~ : Int32 = ASSEMBLYAI_POLL_INTERVAL_MS,
+  poll_timeout_ms~ : Int32 = ASSEMBLYAI_POLL_TIMEOUT_MS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> AssemblyAIProvider {
   {
@@ -38,12 +38,12 @@ pub fn create_assemblyai(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createAssemblyAI(
-  api_key? : String = "",
-  base_url? : String = "https://api.assemblyai.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
-  poll_interval_ms? : Int = ASSEMBLYAI_POLL_INTERVAL_MS,
-  poll_timeout_ms? : Int = ASSEMBLYAI_POLL_TIMEOUT_MS,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.assemblyai.com",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
+  poll_interval_ms~ : Int32 = ASSEMBLYAI_POLL_INTERVAL_MS,
+  poll_timeout_ms~ : Int32 = ASSEMBLYAI_POLL_TIMEOUT_MS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> AssemblyAIProvider {
   create_assemblyai(
@@ -163,4 +163,16 @@ pub impl @provider.ProviderV4 for AssemblyAIProvider with fn files(_self) {
 ///|
 pub impl @provider.ProviderV4 for AssemblyAIProvider with fn skills(_self) {
   None
+}
+
+///|
+pub extend AssemblyAIProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  language_model,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  skills,
 }

@@ -8,7 +8,7 @@ pub struct AnthropicSkills {
   priv api_key_environment_variable : String?
   priv anthropic_version : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -29,7 +29,7 @@ fn anthropic_skills(
   auth_token~ : String,
   anthropic_version~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
   api_key_environment_variable~ : String?,
 ) -> AnthropicSkills {
@@ -286,4 +286,11 @@ pub impl @provider.SkillsV4 for AnthropicSkills with fn upload_skill(
   options : @provider.SkillsV4UploadSkillCallOptions,
 ) -> @provider.SkillsV4UploadSkillResult {
   self.upload(options)
+}
+
+///|
+pub extend AnthropicSkills with @QuietlyChan/moonai/provider.SkillsV4::{
+  specification_version,
+  provider,
+  upload_skill,
 }

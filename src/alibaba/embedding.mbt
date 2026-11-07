@@ -6,7 +6,7 @@ priv struct AlibabaEmbeddingModel {
   api_key : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn alibaba_embedding_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> AlibabaEmbeddingModel {
   {
@@ -96,10 +96,10 @@ fn alibaba_sparse_embedding(value : Json, response : Json) -> Json? raise {
 }
 
 ///|
-fn embedding_texts(json : Json) -> Array[(Int, Array[Double], Json?)] raise {
+fn embedding_texts(json : Json) -> Array[(Int32, Array[Double], Json?)] raise {
   match json {
     { "output": { "embeddings": Array(values), .. }, .. } => {
-      let result : Array[(Int, Array[Double], Json?)] = []
+      let result : Array[(Int32, Array[Double], Json?)] = []
       for value in values {
         match value {
           { "embedding": Array(numbers), "text_index": Number(index, ..), .. } => {
@@ -137,7 +137,7 @@ fn embedding_texts(json : Json) -> Array[(Int, Array[Double], Json?)] raise {
 ///|
 priv struct AlibabaEmbeddingCoreResult {
   embeddings : Array[Array[Double]]
-  usage_tokens : Int?
+  usage_tokens : Int32?
   provider_metadata : Map[String, Json]
   warnings : Array[@provider.Warning]
   request : @provider.RequestMetadata
@@ -146,9 +146,9 @@ priv struct AlibabaEmbeddingCoreResult {
 
 ///|
 fn sort_embedding_values(
-  values : Array[(Int, Array[Double], Json?)],
-) -> Array[(Int, Array[Double], Json?)] {
-  let result : Array[(Int, Array[Double], Json?)] = []
+  values : Array[(Int32, Array[Double], Json?)],
+) -> Array[(Int32, Array[Double], Json?)] {
+  let result : Array[(Int32, Array[Double], Json?)] = []
   for value in values {
     let mut index = 0
     while index < result.length() && result[index].0 <= value.0 {
@@ -171,7 +171,7 @@ async fn AlibabaEmbeddingModel::perform_embedding_request(
   values : Array[String],
   request_headers : Map[String, String],
   raw_provider_options : Map[String, Json],
-  fallback_dimension : Int?,
+  fallback_dimension : Int32?,
   retry_policy : @provider.RetryPolicy,
   cancellation_token : @provider.CancellationToken?,
 ) -> AlibabaEmbeddingCoreResult {
@@ -288,7 +288,7 @@ impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn model_id(self)
 ///|
 impl @provider.EmbeddingModelV4 for AlibabaEmbeddingModel with fn max_embeddings_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(10)
 }
 

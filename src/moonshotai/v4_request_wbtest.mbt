@@ -1,8 +1,8 @@
 ///|
 fn moonshot_test_options(
   prompt~ : Array[@provider.LanguageModelV4Message],
-  provider_options? : Map[String, Json] = Map([]),
-  max_output_tokens? : Int,
+  provider_options~ : Map[String, Json] = Map([]),
+  max_output_tokens? : Int32,
   tools? : Array[@provider.LanguageModelV4Tool],
   tool_choice? : @provider.LanguageModelV4ToolChoice,
   reasoning? : @provider.LanguageModelV4ReasoningEffort,

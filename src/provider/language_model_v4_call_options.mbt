@@ -1,17 +1,19 @@
 ///|
 /// JSON output settings carried by the V4 language-model contract.
+#derive(Debug)
 pub(all) struct LanguageModelV4JsonResponseFormat {
   schema : Json?
   name : String?
   description : String?
-} derive(Debug)
+}
 
 ///|
 /// Standardized response format requested from a V4 language model.
+#derive(Debug)
 pub(all) enum LanguageModelV4ResponseFormat {
   V4ResponseText
   V4ResponseJson(LanguageModelV4JsonResponseFormat)
-} derive(Debug)
+}
 
 ///|
 /// Request V4 JSON output, optionally constrained by a JSON Schema.
@@ -63,6 +65,7 @@ pub fn LanguageModelV4ResponseFormat::to_response_format(
 
 ///|
 /// Reasoning effort requested from a V4 language model.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4ReasoningEffort {
   V4ReasoningProviderDefault
   V4ReasoningNone
@@ -72,7 +75,7 @@ pub(all) enum LanguageModelV4ReasoningEffort {
   V4ReasoningHigh
   V4ReasoningXHigh
   V4ReasoningMax
-} derive(Debug, Eq)
+}
 
 ///|
 /// Convert normalized reasoning effort to the V4 contract.
@@ -113,47 +116,48 @@ pub fn LanguageModelV4ReasoningEffort::to_reasoning_effort(
 ///
 /// This is intentionally separate from the high-level prompt in `ai/prompt`.
 /// Callers of this contract must provide a normalized V4 provider prompt.
+#derive(Debug)
 pub(all) struct LanguageModelV4CallOptions {
   prompt : LanguageModelV4Prompt
   tools : Array[LanguageModelV4Tool]
   tool_choice : LanguageModelV4ToolChoice?
   response_format : LanguageModelV4ResponseFormat
   reasoning : LanguageModelV4ReasoningEffort
-  max_output_tokens : Int?
+  max_output_tokens : Int32?
   temperature : Double?
   top_p : Double?
   top_k : Double?
   frequency_penalty : Double?
   presence_penalty : Double?
-  seed : Int?
+  seed : Int32?
   stop_sequences : Array[String]
   include_raw_chunks : Bool
   headers : Map[String, String]
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct V4 language-model call options.
 pub fn LanguageModelV4CallOptions::new(
   prompt : LanguageModelV4Prompt,
-  tools? : Array[LanguageModelV4Tool] = [],
+  tools~ : Array[LanguageModelV4Tool] = [],
   tool_choice? : LanguageModelV4ToolChoice,
-  response_format? : LanguageModelV4ResponseFormat = V4ResponseText,
-  reasoning? : LanguageModelV4ReasoningEffort = V4ReasoningProviderDefault,
-  max_output_tokens? : Int,
+  response_format~ : LanguageModelV4ResponseFormat = V4ResponseText,
+  reasoning~ : LanguageModelV4ReasoningEffort = V4ReasoningProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  include_raw_chunks~ : Bool = false,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> LanguageModelV4CallOptions {
   {
@@ -248,22 +252,22 @@ fn copy_v4_headers(headers : Map[String, String]) -> Map[String, String] {
 /// adapters. New provider-facing code should call `new` with V4 values.
 pub fn LanguageModelV4CallOptions::from_language_model_prompt(
   prompt : LanguageModelPrompt,
-  tools? : Array[ToolDefinition] = [],
+  tools~ : Array[ToolDefinition] = [],
   tool_choice? : ToolChoice,
-  response_format? : ResponseFormat = Text,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
-  max_output_tokens? : Int,
+  response_format~ : ResponseFormat = Text,
+  reasoning_effort~ : ReasoningEffort = ProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  include_raw_chunks~ : Bool = false,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> LanguageModelV4CallOptions {
   LanguageModelV4CallOptions::new(
@@ -325,3 +329,18 @@ pub fn LanguageModelV4CallOptions::to_chat_call_options(
     cancellation_token?=self.cancellation_token,
   )
 }
+
+///|
+pub extend LanguageModelV4JsonResponseFormat with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ResponseFormat with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ReasoningEffort with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4ReasoningEffort with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4CallOptions with Debug::{to_repr}

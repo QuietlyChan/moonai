@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f2f1ea" />
+    <title>MoonAI — MoonBit 原生 AI SDK</title>
+    <meta
+      name="description"
+      content="MoonAI 是面向 MoonBit 的统一、provider 中立的 AI SDK：流式生成、多步工具调用、多模态模型与 MCP 客户端，全部运行在 native 运行时。"
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231b2420'/%3E%3Cpath d='M11 9c-3 0-3 5-3 7s0 7 3 7M21 9c3 0 3 5 3 7s0 7-3 7' stroke='%23f2a93b' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./assets/site.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+
+    <header class="site-header">
+      <a class="brand" href="./">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" role="img">
+            <path d="M11 8c-3.4 0-3.4 5.4-3.4 8s0 8 3.4 8M21 8c3.4 0 3.4 5.4 3.4 8s0 8-3.4 8" />
+          </svg>
+        </span>
+        <span class="brand-text">MoonAI</span>
+      </a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="#features">能力</a>
+        <a href="#architecture">架构</a>
+        <a href="#demo">在线 Demo</a>
+        <a href="#quickstart">快速开始</a>
+        <a class="nav-external" href="https://github.com/QuietlyChan/moonai">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow reveal">MoonBit · Native · Provider-neutral</p>
+          <h1 class="reveal">
+            用 MoonBit 写 AI，
+            <em>不牺牲原生性能。</em>
+          </h1>
+          <p class="lede reveal">
+            MoonAI 把 Vercel AI SDK 的核心抽象带到 MoonBit：统一的模型接口、流式事件、
+            多步工具调用与 MCP 客户端，全部运行在 native async 运行时之上，没有 Node.js、没有桥接层。
+          </p>
+          <div class="hero-actions reveal">
+            <a class="button primary" href="#quickstart">
+              开始使用
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 3.5 13 8l-4.5 4.5" /></svg>
+            </a>
+            <a class="button ghost" href="#demo">体验交互 Demo</a>
+          </div>
+          <button class="install reveal" id="installCommand" type="button" title="点击复制">
+            <span class="install-prompt" aria-hidden="true">$</span>
+            <code>moon add QuietlyChan/moonai@0.2.0</code>
+            <span class="install-copy" id="installCopy">复制</span>
+          </button>
+        </div>
+
+        <div class="hero-visual reveal" aria-hidden="true">
+          <div class="code-window">
+            <div class="code-bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="code-title">agent.mbt</span>
+            </div>
+            <pre class="code"><code><span class="c-key">let</span> model = @openai.<span class="c-fn">openai</span>(
+  <span class="c-str">"gpt-4.1-mini"</span>,
+  api_key=@env.<span class="c-fn">get_env_var</span>(<span class="c-str">"OPENAI_API_KEY"</span>).<span class="c-fn">unwrap</span>(),
+)
+
+<span class="c-key">let</span> result = <span class="c-await">@ai.generateText</span>(
+  model,
+  prompt=<span class="c-str">"杭州今天适合跑步吗？"</span>,
+  tools=@shared.<span class="c-fn">weather_tools</span>(),
+  stop_when=@ai.<span class="c-fn">stepCount</span>(<span class="c-num">4</span>),
+)
+
+@io.<span class="c-fn">println</span>(result.text)</code></pre>
+            <div class="code-foot">
+              <span class="pill">native</span>
+              <span class="code-note">编译为单个可执行文件</span>
+            </div>
+          </div>
+          <div class="orbit-card">
+            <span class="orbit-label">stream</span>
+            <div class="orbit-line"><span class="orbit-fill"></span></div>
+            <span class="orbit-meta">text-delta · tool-call · step-finish</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats reveal" aria-label="项目数据">
+        <div><strong>30+</strong><span>内置 provider 包</span></div>
+        <div><strong>1134</strong><span>单元测试通过</span></div>
+        <div><strong>0</strong><span>编译警告</span></div>
+        <div><strong>native</strong><span>零 JS 运行时依赖</span></div>
+      </section>
+
+      <section class="section" id="features">
+        <header class="section-head reveal">
+          <p class="eyebrow">Capabilities</p>
+          <h2>一套接口，覆盖完整的模型生命周期</h2>
+          <p class="section-lede">
+            从一次文本生成，到多步工具循环、结构化输出、媒体模型与 MCP 会话，接口保持一致，
+            provider 之间的差异被收敛在边界内。
+          </p>
+        </header>
+        <div class="feature-grid">
+          <article class="feature reveal">
+            <span class="feature-index">01</span>
+            <h3>Provider 中立</h3>
+            <p>统一 <code>LanguageModelV4</code> 契约，OpenAI、Anthropic、Google、DeepSeek、阿里、MiniMax、xAI 等实现可互换。</p>
+          </article>
+          <article class="feature reveal">
+            <span class="feature-index">02</span>
+            <h3>多步工具调用</h3>
+            <p><code>generateText</code> / <code>streamText</code> 驱动完整 agent 循环：工具输入流、执行、结果回灌与停止条件。</p>
+          </article>
+          <article class="feature reveal">
+            <span class="feature-index">03</span>
+            <h3>流式优先</h3>
+            <p>统一的流事件词汇表，SSE 增量解析、事件批处理与取消传播由 SDK 负责，调用方只处理语义事件。</p>
+          </article>
+          <article class="feature reveal">
+            <span class="feature-index">04</span>
+            <h3>结构化输出</h3>
+            <p><code>generateObject</code> 与 JSON Schema 校验，失败时保留原始值并给出可诊断的 <code>APICallError</code>。</p>
+          </article>
+          <article class="feature reveal">
+            <span class="feature-index">05</span>
+            <h3>多模态模型</h3>
+            <p>文本、图像、视频、语音、转录、Embedding 与 Reranking 都有独立的 V4 模型边界。</p>
+          </article>
+          <article class="feature reveal">
+            <span class="feature-index">06</span>
+            <h3>MCP 与 Harness</h3>
+            <p>内置 MCP 客户端（stdio / HTTP / SSE）与 OpenCode、Pi、DeepAgents 会话桥接适配器。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section architecture" id="architecture">
+        <header class="section-head reveal">
+          <p class="eyebrow">Architecture</p>
+          <h2>四层，边界清晰</h2>
+          <p class="section-lede">上层只依赖 trait，下层负责协议、序列化与网络。替换任意一层，其他层保持不变。</p>
+        </header>
+        <div class="layer-stack reveal">
+          <div class="layer layer-app">
+            <span class="layer-tag">应用</span>
+            <p>CLI Agent · Web 后端 · 工作流编排</p>
+          </div>
+          <div class="layer layer-sdk">
+            <span class="layer-tag">@ai</span>
+            <p>generateText · streamText · generateObject · Agent · Tool</p>
+          </div>
+          <div class="layer layer-provider">
+            <span class="layer-tag">@provider</span>
+            <p>LanguageModelV4 / ImageModelV4 / VideoModelV4 / EmbeddingModelV4 …</p>
+          </div>
+          <div class="layer layer-runtime">
+            <span class="layer-tag">运行时</span>
+            <p>moonbitlang/async · socket · TLS · SSE · stdio</p>
+          </div>
+        </div>
+        <div class="arch-note reveal">
+          <span class="arch-note-mark">V4</span>
+          <p>
+            每个 provider 通过 <code>pub impl</code> 实现模型 trait，再以显式 <code>pub extend</code> 暴露方法。
+            没有宏魔法，接口即文档。
+          </p>
+        </div>
+      </section>
+
+      <section class="section demo-section" id="demo">
+        <header class="section-head reveal">
+          <p class="eyebrow">Interactive demo</p>
+          <h2>真实事件的复刻演练</h2>
+          <p class="section-lede">
+            下面是 Web Agent 示例的同款界面，事件流在浏览器内按真实 NDJSON 语义模拟：
+            工具输入片段、工具调用、执行结果与步进统计。
+          </p>
+        </header>
+
+        <div class="demo-shell reveal">
+          <div class="demo-flag">
+            <span class="demo-dot" aria-hidden="true"></span>
+            Mock demo · 无需 API Key，不发起网络请求
+          </div>
+
+          <div class="demo-workspace">
+            <div class="demo-chat">
+              <div class="demo-chat-head">
+                <div>
+                  <p class="demo-eyebrow">Conversation</p>
+                  <h3>MoonAI agent</h3>
+                </div>
+                <span class="demo-status" id="demoStatus">Ready</span>
+              </div>
+
+              <div class="demo-transcript" id="demoTranscript" role="log" aria-live="polite">
+                <div class="demo-empty" id="demoEmpty">
+                  <svg viewBox="0 0 40 40" aria-hidden="true">
+                    <path d="M14 10c-4.2 0-4.2 7-4.2 10s0 10 4.2 10M26 10c4.2 0 4.2 7 4.2 10s0 10-4.2 10" />
+                  </svg>
+                  <p>选一个任务，或直接提问。</p>
+                </div>
+              </div>
+
+              <div class="demo-suggestions" id="demoSuggestions">
+                <button type="button" data-prompt="Calculate 42 * 8 and explain the result.">计算 42 × 8</button>
+                <button type="button" data-prompt="What is the weather in Hangzhou today?">杭州天气</button>
+                <button type="button" data-prompt="How does MoonAI implement multi-step tool calling?">多步工具调用原理</button>
+              </div>
+
+              <form class="demo-composer" id="demoComposer">
+                <label class="sr-only" for="demoInput">向 MoonAI 发送消息</label>
+                <input
+                  id="demoInput"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Message MoonAI…"
+                  maxlength="400"
+                />
+                <button class="demo-send" id="demoSend" type="submit" disabled>
+                  <span>发送</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 3.5 13 8l-4.5 4.5" /></svg>
+                </button>
+              </form>
+            </div>
+
+            <aside class="demo-side" aria-label="工具活动与会话统计">
+              <div class="demo-side-block">
+                <p class="demo-side-title">Runtime</p>
+                <dl class="demo-runtime">
+                  <div><dt>Provider</dt><dd>demo</dd></div>
+                  <div><dt>Model</dt><dd>moonai-demo</dd></div>
+                  <div><dt>Transport</dt><dd>NDJSON</dd></div>
+                </dl>
+              </div>
+              <div class="demo-side-block">
+                <p class="demo-side-title">Tool activity</p>
+                <div class="demo-activity" id="demoActivity">
+                  <p class="demo-activity-empty">本轮暂无工具调用</p>
+                </div>
+              </div>
+              <div class="demo-side-block">
+                <p class="demo-side-title">Last run</p>
+                <div class="demo-usage">
+                  <div><span id="usageInput">0</span><small>input</small></div>
+                  <div><span id="usageOutput">0</span><small>output</small></div>
+                  <div><span id="usageSteps">0</span><small>steps</small></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          <p class="demo-footnote">
+            线上 Demo 仅为静态复刻。完整实现（真实流式、工具执行、取消传播）位于
+            <a href="https://github.com/QuietlyChan/moonai/tree/main/examples/web_agent">examples/web_agent</a>，
+            本地运行 <code>moon run examples/web_agent/backend</code> 后访问 <code>127.0.0.1:8080</code>。
+          </p>
+        </div>
+      </section>
+
+      <section class="section quickstart" id="quickstart">
+        <header class="section-head reveal">
+          <p class="eyebrow">Quickstart</p>
+          <h2>三分钟跑通第一次生成</h2>
+        </header>
+        <div class="quick-grid">
+          <div class="quick-step reveal">
+            <span class="step-no">1</span>
+            <h3>声明依赖</h3>
+            <pre class="snippet"><code>name = "demo/agent"
+
+import {
+  "QuietlyChan/moonai@0.2.0",
+  "moonbitlang/async@0.22.7",
+}
+
+preferred_target = "native"</code></pre>
+          </div>
+          <div class="quick-step reveal">
+            <span class="step-no">2</span>
+            <h3>编写一次调用</h3>
+            <pre class="snippet"><code>///|
+pub async fn main {
+  let model = @openai.openai(
+    "gpt-4.1-mini",
+    api_key=@env.get_env_var(
+      "OPENAI_API_KEY",
+    ).unwrap(),
+  )
+  let result = @ai.generateText(
+    model,
+    prompt="用一句话解释 MoonBit。",
+  )
+  @io.println(result.text)
+}</code></pre>
+          </div>
+          <div class="quick-step reveal">
+            <span class="step-no">3</span>
+            <h3>构建并运行</h3>
+            <pre class="snippet"><code>moon run .</code></pre>
+            <p class="quick-note">
+              产物是原生可执行文件。无需 Node.js，无需打包器，密钥只存在于进程内。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta reveal">
+        <h2>读代码，比读介绍更快</h2>
+        <p>1134 个测试覆盖流式解析、工具循环、重试与错误边界。</p>
+        <div class="cta-actions">
+          <a class="button primary" href="https://github.com/QuietlyChan/moonai">浏览仓库</a>
+          <a class="button ghost" href="https://mooncakes.io/docs/QuietlyChan/moonai">API 文档</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Apache-2.0 · 由 MoonBit 构建</p>
+      <nav aria-label="页脚导航">
+        <a href="https://github.com/QuietlyChan/moonai">GitHub</a>
+        <a href="https://mooncakes.io/docs/QuietlyChan/moonai">mooncakes</a>
+        <a href="https://github.com/QuietlyChan/moonai/releases/tag/v0.2.0">v0.2.0</a>
+      </nav>
+    </footer>
+
+    <script src="./assets/site.js" defer></script>
+  </body>
+</html>

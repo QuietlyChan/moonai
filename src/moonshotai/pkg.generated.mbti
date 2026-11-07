@@ -5,18 +5,19 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn convertMoonshotAIChatUsage(Json?) -> @provider.LanguageModelV4Usage
+pub fn convertMoonshotAIChatUsage(@json.Json?) -> @provider.LanguageModelV4Usage
 
-pub fn convert_moonshotai_chat_usage(Json?) -> @provider.LanguageModelV4Usage
+pub fn convert_moonshotai_chat_usage(@json.Json?) -> @provider.LanguageModelV4Usage
 
-pub fn createMoonshotAI(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MoonshotAIProvider
+pub fn createMoonshotAI(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MoonshotAIProvider
 
-pub fn create_moonshot_ai(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MoonshotAIProvider
+pub fn create_moonshot_ai(api_key? : String, base_url? : String, provider_name? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> MoonshotAIProvider
 
 pub fn getModelStructuredOutputSupport(String) -> Bool
 
@@ -28,26 +29,31 @@ pub fn get_moonshot_ai_model_family(String) -> MoonshotAIModelFamily
 
 pub fn is_moonshot_ai_kimi_model(String) -> Bool
 
-pub fn moonshotai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn moonshotai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct MoonshotAILanguageModelOptions {
   strict_json_schema : Bool?
   logprobs : Bool?
-  top_logprobs : Int?
+  top_logprobs : Int32?
   reasoning_effort : String?
-  prediction : Json?
+  prediction : @json.Json?
   thinking_type : String?
-  thinking_budget_tokens : Int?
+  thinking_budget_tokens : Int32?
   reasoning_history : String?
   prompt_cache_key : String?
   safety_identifier : String?
-} derive(Eq, @debug.Debug)
-pub fn MoonshotAILanguageModelOptions::new(strict_json_schema? : Bool, logprobs? : Bool, top_logprobs? : Int, reasoning_effort? : String, prediction? : Json, thinking_type? : String, thinking_budget_tokens? : Int, reasoning_history? : String, prompt_cache_key? : String, safety_identifier? : String) -> Self raise
-pub fn MoonshotAILanguageModelOptions::to_provider_options(Self) -> Map[String, Json]
+}
+pub fn MoonshotAILanguageModelOptions::equal(Self, Self) -> Bool
+pub fn MoonshotAILanguageModelOptions::new(strict_json_schema? : Bool, logprobs? : Bool, top_logprobs? : Int32, reasoning_effort? : String, prediction? : @json.Json, thinking_type? : String, thinking_budget_tokens? : Int32, reasoning_history? : String, prompt_cache_key? : String, safety_identifier? : String) -> Self raise
+pub fn MoonshotAILanguageModelOptions::not_equal(Self, Self) -> Bool
+pub fn MoonshotAILanguageModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
+pub fn MoonshotAILanguageModelOptions::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum MoonshotAIModelFamily {
   KimiK25
   KimiK26
@@ -55,7 +61,10 @@ pub(all) enum MoonshotAIModelFamily {
   KimiK3
   MoonshotV1
   Unknown
-} derive(Eq, @debug.Debug)
+}
+pub fn MoonshotAIModelFamily::equal(Self, Self) -> Bool
+pub fn MoonshotAIModelFamily::not_equal(Self, Self) -> Bool
+pub fn MoonshotAIModelFamily::to_repr(Self) -> @debug.Repr
 
 pub struct MoonshotAIProvider {
   // private fields
@@ -63,19 +72,35 @@ pub struct MoonshotAIProvider {
 pub fn MoonshotAIProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn MoonshotAIProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn MoonshotAIProvider::chat_model(Self, String) -> &@provider.LanguageModelV4
+pub fn MoonshotAIProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn MoonshotAIProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn MoonshotAIProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn MoonshotAIProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn MoonshotAIProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn MoonshotAIProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn MoonshotAIProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn MoonshotAIProvider::specification_version(Self) -> String
+pub fn MoonshotAIProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn MoonshotAIProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for MoonshotAIProvider
 
+#derive(Eq, @debug.Debug)
 pub(all) struct MoonshotErrorData {
   error : MoonshotErrorDetail
-} derive(Eq, @debug.Debug)
+}
+pub fn MoonshotErrorData::equal(Self, Self) -> Bool
+pub fn MoonshotErrorData::not_equal(Self, Self) -> Bool
+pub fn MoonshotErrorData::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct MoonshotErrorDetail {
   message : String
   error_type : String?
   code : String?
-} derive(Eq, @debug.Debug)
+}
+pub fn MoonshotErrorDetail::equal(Self, Self) -> Bool
+pub fn MoonshotErrorDetail::not_equal(Self, Self) -> Bool
+pub fn MoonshotErrorDetail::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type MoonshotAIChatModelId = String

@@ -13,7 +13,7 @@ test "explicit API key takes precedence over the environment" {
   defer restore_test_environment_variable(name, previous)
   @env.set_env_var(name, "environment-key")
   assert_eq(
-    load_api_key(
+    @provider_utils.load_api_key(
       "explicit-key",
       environment_variable_name=name,
       description="Test provider",
@@ -29,7 +29,7 @@ test "AI SDK-style API key loader preserves an explicit empty value" {
   defer restore_test_environment_variable(name, previous)
   @env.set_env_var(name, "environment-key")
   assert_eq(
-    loadApiKey(
+    @provider_utils.loadApiKey(
       Some(""),
       environment_variable_name=name,
       description="Test provider",
@@ -37,7 +37,7 @@ test "AI SDK-style API key loader preserves an explicit empty value" {
     "",
   )
   assert_eq(
-    loadApiKey(
+    @provider_utils.loadApiKey(
       None,
       environment_variable_name=name,
       description="Test provider",
@@ -53,7 +53,7 @@ test "API key falls back to the environment" {
   defer restore_test_environment_variable(name, previous)
   @env.set_env_var(name, "environment-key")
   assert_eq(
-    load_api_key(
+    @provider_utils.load_api_key(
       "",
       environment_variable_name=name,
       description="Test provider",
@@ -69,7 +69,7 @@ test "missing API key raises a typed provider error" {
   defer restore_test_environment_variable(name, previous)
   @env.unset_env_var(name)
   try
-    load_api_key(
+    @provider_utils.load_api_key(
       "",
       environment_variable_name=name,
       api_key_parameter_name="token",
@@ -99,7 +99,7 @@ test "required and optional settings use the same precedence" {
   defer restore_test_environment_variable(name, previous)
   @env.set_env_var(name, "environment-value")
   assert_eq(
-    load_setting(
+    @provider_utils.load_setting(
       "explicit-value",
       environment_variable_name=name,
       setting_name="base_url",
@@ -108,7 +108,7 @@ test "required and optional settings use the same precedence" {
     "explicit-value",
   )
   assert_eq(
-    load_setting(
+    @provider_utils.load_setting(
       "",
       environment_variable_name=name,
       setting_name="base_url",
@@ -117,11 +117,14 @@ test "required and optional settings use the same precedence" {
     "environment-value",
   )
   assert_eq(
-    load_optional_setting(None, environment_variable_name=name),
+    @provider_utils.load_optional_setting(None, environment_variable_name=name),
     Some("environment-value"),
   )
   @env.unset_env_var(name)
-  assert_eq(load_optional_setting(None, environment_variable_name=name), None)
+  assert_eq(
+    @provider_utils.load_optional_setting(None, environment_variable_name=name),
+    None,
+  )
 }
 
 ///|
@@ -131,15 +134,21 @@ test "optional settings preserve an explicit empty value" {
   defer restore_test_environment_variable(name, previous)
   @env.set_env_var(name, "environment-value")
   assert_eq(
-    load_optional_setting(Some(""), environment_variable_name=name),
+    @provider_utils.load_optional_setting(
+      Some(""),
+      environment_variable_name=name,
+    ),
     Some(""),
   )
   assert_eq(
-    loadOptionalSetting(Some(""), environment_variable_name=name),
+    @provider_utils.loadOptionalSetting(
+      Some(""),
+      environment_variable_name=name,
+    ),
     Some(""),
   )
   assert_eq(
-    loadSetting(
+    @provider_utils.loadSetting(
       Some(""),
       environment_variable_name=name,
       setting_name="baseURL",

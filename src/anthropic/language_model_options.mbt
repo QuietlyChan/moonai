@@ -31,9 +31,10 @@ fn anthropic_provider_reference_json(
 
 ///|
 /// Citation settings attached to an Anthropic document part.
+#derive(Debug, Eq)
 pub(all) struct AnthropicCitations {
   enabled : Bool
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct document citation settings.
@@ -43,12 +44,13 @@ pub fn AnthropicCitations::new(enabled~ : Bool) -> AnthropicCitations {
 
 ///|
 /// Provider options accepted on an Anthropic file content part.
+#derive(Debug, Eq)
 pub(all) struct AnthropicFilePartProviderOptions {
   container_upload : Bool?
   citations : AnthropicCitations?
   title : String?
   context : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed options for one Anthropic file part.
@@ -65,7 +67,7 @@ pub fn AnthropicFilePartProviderOptions::new(
 /// Convert typed file-part settings to an Anthropic provider namespace.
 pub fn AnthropicFilePartProviderOptions::to_provider_options(
   self : AnthropicFilePartProviderOptions,
-  provider_name? : String = "anthropic",
+  provider_name~ : String = "anthropic",
 ) -> Map[String, Json] {
   anthropic_typed_namespace(
     provider_name,
@@ -90,10 +92,11 @@ pub fn AnthropicFilePartProviderOptions::to_provider_options(
 
 ///|
 /// A tool addition or removal attached to a mid-conversation system message.
+#derive(Debug, Eq)
 pub(all) enum AnthropicToolChange {
   AnthropicToolAddition(String)
   AnthropicToolRemoval(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Add a function tool to the mid-conversation tool set.
@@ -119,14 +122,15 @@ fn AnthropicToolChange::to_json(self : AnthropicToolChange) -> Json {
 
 ///|
 /// Provider options accepted on an Anthropic system message.
+#derive(Debug, Eq)
 pub(all) struct AnthropicSystemMessageProviderOptions {
   tool_changes : Array[AnthropicToolChange]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed options for an Anthropic system message.
 pub fn AnthropicSystemMessageProviderOptions::new(
-  tool_changes? : Array[AnthropicToolChange] = [],
+  tool_changes~ : Array[AnthropicToolChange] = [],
 ) -> AnthropicSystemMessageProviderOptions {
   { tool_changes: tool_changes.copy(), }
 }
@@ -135,7 +139,7 @@ pub fn AnthropicSystemMessageProviderOptions::new(
 /// Convert typed system-message settings to an Anthropic provider namespace.
 pub fn AnthropicSystemMessageProviderOptions::to_provider_options(
   self : AnthropicSystemMessageProviderOptions,
-  provider_name? : String = "anthropic",
+  provider_name~ : String = "anthropic",
 ) -> Map[String, Json] {
   anthropic_typed_namespace(
     provider_name,
@@ -160,11 +164,12 @@ pub fn AnthropicSystemMessageProviderOptions::to_provider_options(
 
 ///|
 /// Strategy used to implement structured output on Anthropic models.
+#derive(Debug, Eq)
 pub(all) enum AnthropicStructuredOutputMode {
   AnthropicStructuredOutputFormat
   AnthropicStructuredOutputJsonTool
   AnthropicStructuredOutputAuto
-} derive(Debug, Eq)
+}
 
 ///|
 fn AnthropicStructuredOutputMode::wire_name(
@@ -179,10 +184,11 @@ fn AnthropicStructuredOutputMode::wire_name(
 
 ///|
 /// Visibility of adaptive thinking content in the response.
+#derive(Debug, Eq)
 pub(all) enum AnthropicThinkingDisplay {
   AnthropicThinkingOmitted
   AnthropicThinkingSummarized
-} derive(Debug, Eq)
+}
 
 ///|
 fn AnthropicThinkingDisplay::wire_name(
@@ -196,11 +202,12 @@ fn AnthropicThinkingDisplay::wire_name(
 
 ///|
 /// Anthropic extended-thinking configuration.
+#derive(Debug, Eq)
 pub(all) enum AnthropicThinking {
   AnthropicThinkingAdaptive(AnthropicThinkingDisplay?)
-  AnthropicThinkingEnabled(Int?)
+  AnthropicThinkingEnabled(Int32?)
   AnthropicThinkingDisabled
-} derive(Debug, Eq)
+}
 
 ///|
 /// Enable adaptive thinking and optionally select its response visibility.
@@ -212,7 +219,7 @@ pub fn AnthropicThinking::adaptive(
 
 ///|
 /// Enable budget-based extended thinking.
-pub fn AnthropicThinking::enabled(budget_tokens? : Int) -> AnthropicThinking {
+pub fn AnthropicThinking::enabled(budget_tokens? : Int32) -> AnthropicThinking {
   AnthropicThinkingEnabled(budget_tokens)
 }
 
@@ -253,10 +260,11 @@ fn AnthropicThinking::to_provider_json(self : AnthropicThinking) -> Json {
 
 ///|
 /// Prompt-cache lifetime supported by Anthropic.
+#derive(Debug, Eq)
 pub(all) enum AnthropicCacheTtl {
   AnthropicCacheFiveMinutes
   AnthropicCacheOneHour
-} derive(Debug, Eq)
+}
 
 ///|
 fn AnthropicCacheTtl::wire_name(self : AnthropicCacheTtl) -> String {
@@ -268,9 +276,10 @@ fn AnthropicCacheTtl::wire_name(self : AnthropicCacheTtl) -> String {
 
 ///|
 /// Anthropic request-level cache-control settings.
+#derive(Debug, Eq)
 pub(all) struct AnthropicCacheControl {
   ttl : AnthropicCacheTtl?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct ephemeral Anthropic cache-control settings.
@@ -296,9 +305,10 @@ fn AnthropicCacheControl::to_json(self : AnthropicCacheControl) -> Json {
 
 ///|
 /// Request metadata accepted by Anthropic Messages.
+#derive(Debug, Eq)
 pub(all) struct AnthropicMetadata {
   user_id : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct Anthropic request metadata with an opaque user identifier.
@@ -317,10 +327,11 @@ fn AnthropicMetadata::to_json(self : AnthropicMetadata) -> Json {
 
 ///|
 /// Tool filtering applied to one Anthropic MCP server.
+#derive(Debug, Eq)
 pub(all) struct AnthropicMcpToolConfiguration {
   enabled : Bool?
   allowed_tools : Array[String]?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct MCP tool filtering settings.
@@ -351,12 +362,13 @@ fn AnthropicMcpToolConfiguration::to_json(
 
 ///|
 /// A URL-backed MCP server used directly by Anthropic.
+#derive(Debug, Eq)
 pub(all) struct AnthropicMcpServer {
   name : String
   url : String
   authorization_token : String?
   tool_configuration : AnthropicMcpToolConfiguration?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct one URL-backed MCP server definition.
@@ -390,13 +402,14 @@ fn AnthropicMcpServer::to_json(self : AnthropicMcpServer) -> Json {
 
 ///|
 /// A built-in or uploaded skill mounted in an Anthropic container.
+#derive(Debug, Eq)
 pub(all) enum AnthropicContainerSkill {
   AnthropicBuiltInSkill(skill_id~ : String, version~ : String?)
   AnthropicCustomSkill(
     provider_reference~ : @provider.ProviderReference,
     version~ : String?
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Reference a built-in Anthropic skill.
@@ -451,16 +464,17 @@ fn AnthropicContainerSkill::to_json(self : AnthropicContainerSkill) -> Json {
 
 ///|
 /// Anthropic code-execution container settings.
+#derive(Debug, Eq)
 pub(all) struct AnthropicContainer {
   id : String?
   skills : Array[AnthropicContainerSkill]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct Anthropic container reuse and skill-mount settings.
 pub fn AnthropicContainer::new(
   id? : String,
-  skills? : Array[AnthropicContainerSkill] = [],
+  skills~ : Array[AnthropicContainerSkill] = [],
 ) -> AnthropicContainer {
   { id, skills: skills.copy(), }
 }
@@ -488,13 +502,14 @@ fn AnthropicContainer::to_json(self : AnthropicContainer) -> Json {
 
 ///|
 /// Anthropic output effort.
+#derive(Debug, Eq)
 pub(all) enum AnthropicEffort {
   AnthropicEffortLow
   AnthropicEffortMedium
   AnthropicEffortHigh
   AnthropicEffortXHigh
   AnthropicEffortMax
-} derive(Debug, Eq)
+}
 
 ///|
 fn AnthropicEffort::wire_name(self : AnthropicEffort) -> String {
@@ -509,16 +524,17 @@ fn AnthropicEffort::wire_name(self : AnthropicEffort) -> String {
 
 ///|
 /// Advisory token budget for one agentic task.
+#derive(Debug, Eq)
 pub(all) struct AnthropicTaskBudget {
-  total : Int
-  remaining : Int?
-} derive(Debug, Eq)
+  total : Int32
+  remaining : Int32?
+}
 
 ///|
 /// Construct and validate an Anthropic task token budget.
 pub fn AnthropicTaskBudget::new(
-  total~ : Int,
-  remaining? : Int,
+  total~ : Int32,
+  remaining? : Int32,
 ) -> AnthropicTaskBudget raise {
   guard total >= 20000 else {
     fail("Anthropic task budget total must be at least 20000")
@@ -548,10 +564,11 @@ fn AnthropicTaskBudget::to_json(self : AnthropicTaskBudget) -> Json {
 
 ///|
 /// Anthropic inference speed selection.
+#derive(Debug, Eq)
 pub(all) enum AnthropicSpeed {
   AnthropicSpeedFast
   AnthropicSpeedStandard
-} derive(Debug, Eq)
+}
 
 ///|
 fn AnthropicSpeed::wire_name(self : AnthropicSpeed) -> String {
@@ -563,10 +580,11 @@ fn AnthropicSpeed::wire_name(self : AnthropicSpeed) -> String {
 
 ///|
 /// Geography in which Anthropic inference may run.
+#derive(Debug, Eq)
 pub(all) enum AnthropicInferenceGeo {
   AnthropicInferenceUs
   AnthropicInferenceGlobal
-} derive(Debug, Eq)
+}
 
 ///|
 fn AnthropicInferenceGeo::wire_name(self : AnthropicInferenceGeo) -> String {
@@ -578,19 +596,20 @@ fn AnthropicInferenceGeo::wire_name(self : AnthropicInferenceGeo) -> String {
 
 ///|
 /// One explicit server-side fallback attempt.
+#derive(Debug, Eq)
 pub(all) struct AnthropicFallback {
   model : String
-  max_tokens : Int?
+  max_tokens : Int32?
   thinking : Map[String, Json]?
   output_config : Map[String, Json]?
   speed : AnthropicSpeed?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct one explicit Anthropic fallback attempt.
 pub fn AnthropicFallback::new(
   model~ : String,
-  max_tokens? : Int,
+  max_tokens? : Int32,
   thinking? : Map[String, Json],
   output_config? : Map[String, Json],
   speed? : AnthropicSpeed,
@@ -629,10 +648,11 @@ fn AnthropicFallback::to_json(self : AnthropicFallback) -> Json {
 
 ///|
 /// Default or explicit server-side fallback routing.
+#derive(Debug, Eq)
 pub(all) enum AnthropicFallbacks {
   AnthropicDefaultFallback
   AnthropicFallbackChain(Array[AnthropicFallback])
-} derive(Debug, Eq)
+}
 
 ///|
 /// Use Anthropic's recommended server-side fallback.
@@ -659,10 +679,11 @@ fn AnthropicFallbacks::to_json(self : AnthropicFallbacks) -> Json {
 
 ///|
 /// Trigger for clearing Anthropic-managed context.
+#derive(Debug, Eq)
 pub(all) enum AnthropicContextTrigger {
   AnthropicContextInputTokens(Double)
   AnthropicContextToolUses(Double)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Trigger context editing at an input-token count.
@@ -692,9 +713,10 @@ fn AnthropicContextTrigger::to_json(self : AnthropicContextTrigger) -> Json {
 
 ///|
 /// Number of recent tool uses retained by a clear-tool-uses edit.
+#derive(Debug, Eq)
 pub(all) struct AnthropicToolUseKeep {
   value : Double
-} derive(Debug, Eq)
+}
 
 ///|
 /// Retain a number of recent tool uses.
@@ -709,9 +731,10 @@ fn AnthropicToolUseKeep::to_json(self : AnthropicToolUseKeep) -> Json {
 
 ///|
 /// Minimum input-token count cleared by a clear-tool-uses edit.
+#derive(Debug, Eq)
 pub(all) struct AnthropicInputTokenClearAtLeast {
   value : Double
-} derive(Debug, Eq)
+}
 
 ///|
 /// Set the minimum number of input tokens cleared by an edit.
@@ -730,10 +753,11 @@ fn AnthropicInputTokenClearAtLeast::to_json(
 
 ///|
 /// Thinking blocks retained by a clear-thinking edit.
+#derive(Debug, Eq)
 pub(all) enum AnthropicThinkingKeep {
   AnthropicKeepAllThinking
   AnthropicKeepThinkingTurns(Double)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Retain all thinking blocks during a clear-thinking edit.
@@ -758,9 +782,10 @@ fn AnthropicThinkingKeep::to_json(self : AnthropicThinkingKeep) -> Json {
 
 ///|
 /// Input-token trigger for a compaction edit.
+#derive(Debug, Eq)
 pub(all) struct AnthropicCompactionTrigger {
   value : Double
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an input-token trigger for context compaction.
@@ -779,6 +804,7 @@ fn AnthropicCompactionTrigger::to_json(
 
 ///|
 /// One Anthropic server-side context-management edit.
+#derive(Debug, Eq)
 pub(all) enum AnthropicContextManagementEdit {
   AnthropicClearToolUses(
     trigger~ : AnthropicContextTrigger?,
@@ -793,7 +819,7 @@ pub(all) enum AnthropicContextManagementEdit {
     pause_after_compaction~ : Bool?,
     instructions~ : String?
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a clear-tool-uses context edit.
@@ -802,7 +828,7 @@ pub fn AnthropicContextManagementEdit::clear_tool_uses(
   keep? : AnthropicToolUseKeep,
   clear_at_least? : AnthropicInputTokenClearAtLeast,
   clear_tool_inputs? : Bool,
-  exclude_tools? : Array[String] = [],
+  exclude_tools~ : Array[String] = [],
 ) -> AnthropicContextManagementEdit {
   AnthropicClearToolUses(
     trigger~,
@@ -898,9 +924,10 @@ fn AnthropicContextManagementEdit::to_json(
 
 ///|
 /// Anthropic server-side context-management configuration.
+#derive(Debug, Eq)
 pub(all) struct AnthropicContextManagement {
   edits : Array[AnthropicContextManagementEdit]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct Anthropic server-side context management settings.
@@ -919,6 +946,7 @@ fn AnthropicContextManagement::to_json(
 
 ///|
 /// Typed provider options for Anthropic Messages language models.
+#derive(Debug, Eq)
 pub(all) struct AnthropicLanguageModelOptions {
   send_reasoning : Bool?
   structured_output_mode : AnthropicStructuredOutputMode?
@@ -936,7 +964,7 @@ pub(all) struct AnthropicLanguageModelOptions {
   fallbacks : AnthropicFallbacks?
   anthropic_beta : Array[String]
   context_management : AnthropicContextManagement?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed Anthropic Messages provider options.
@@ -947,7 +975,7 @@ pub fn AnthropicLanguageModelOptions::new(
   disable_parallel_tool_use? : Bool,
   cache_control? : AnthropicCacheControl,
   metadata? : AnthropicMetadata,
-  mcp_servers? : Array[AnthropicMcpServer] = [],
+  mcp_servers~ : Array[AnthropicMcpServer] = [],
   container? : AnthropicContainer,
   tool_streaming? : Bool,
   effort? : AnthropicEffort,
@@ -955,7 +983,7 @@ pub fn AnthropicLanguageModelOptions::new(
   speed? : AnthropicSpeed,
   inference_geo? : AnthropicInferenceGeo,
   fallbacks? : AnthropicFallbacks,
-  anthropic_beta? : Array[String] = [],
+  anthropic_beta~ : Array[String] = [],
   context_management? : AnthropicContextManagement,
 ) -> AnthropicLanguageModelOptions {
   {
@@ -982,7 +1010,7 @@ pub fn AnthropicLanguageModelOptions::new(
 /// Convert typed Anthropic settings to a provider-options namespace.
 pub fn AnthropicLanguageModelOptions::to_provider_options(
   self : AnthropicLanguageModelOptions,
-  provider_name? : String = "anthropic",
+  provider_name~ : String = "anthropic",
 ) -> Map[String, Json] {
   anthropic_typed_namespace(
     provider_name,
@@ -1049,3 +1077,171 @@ pub fn AnthropicLanguageModelOptions::to_provider_options(
     ),
   )
 }
+
+///|
+pub extend AnthropicCitations with Debug::{to_repr}
+
+///|
+pub extend AnthropicCitations with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicFilePartProviderOptions with Debug::{to_repr}
+
+///|
+pub extend AnthropicFilePartProviderOptions with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicToolChange with Debug::{to_repr}
+
+///|
+pub extend AnthropicToolChange with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicSystemMessageProviderOptions with Debug::{to_repr}
+
+///|
+pub extend AnthropicSystemMessageProviderOptions with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicStructuredOutputMode with Debug::{to_repr}
+
+///|
+pub extend AnthropicStructuredOutputMode with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicThinkingDisplay with Debug::{to_repr}
+
+///|
+pub extend AnthropicThinkingDisplay with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicThinking with Debug::{to_repr}
+
+///|
+pub extend AnthropicThinking with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicCacheTtl with Debug::{to_repr}
+
+///|
+pub extend AnthropicCacheTtl with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicCacheControl with Debug::{to_repr}
+
+///|
+pub extend AnthropicCacheControl with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicMetadata with Debug::{to_repr}
+
+///|
+pub extend AnthropicMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicMcpToolConfiguration with Debug::{to_repr}
+
+///|
+pub extend AnthropicMcpToolConfiguration with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicMcpServer with Debug::{to_repr}
+
+///|
+pub extend AnthropicMcpServer with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContainerSkill with Debug::{to_repr}
+
+///|
+pub extend AnthropicContainerSkill with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContainer with Debug::{to_repr}
+
+///|
+pub extend AnthropicContainer with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicEffort with Debug::{to_repr}
+
+///|
+pub extend AnthropicEffort with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicTaskBudget with Debug::{to_repr}
+
+///|
+pub extend AnthropicTaskBudget with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicSpeed with Debug::{to_repr}
+
+///|
+pub extend AnthropicSpeed with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicInferenceGeo with Debug::{to_repr}
+
+///|
+pub extend AnthropicInferenceGeo with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicFallback with Debug::{to_repr}
+
+///|
+pub extend AnthropicFallback with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicFallbacks with Debug::{to_repr}
+
+///|
+pub extend AnthropicFallbacks with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContextTrigger with Debug::{to_repr}
+
+///|
+pub extend AnthropicContextTrigger with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicToolUseKeep with Debug::{to_repr}
+
+///|
+pub extend AnthropicToolUseKeep with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicInputTokenClearAtLeast with Debug::{to_repr}
+
+///|
+pub extend AnthropicInputTokenClearAtLeast with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicThinkingKeep with Debug::{to_repr}
+
+///|
+pub extend AnthropicThinkingKeep with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicCompactionTrigger with Debug::{to_repr}
+
+///|
+pub extend AnthropicCompactionTrigger with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContextManagementEdit with Debug::{to_repr}
+
+///|
+pub extend AnthropicContextManagementEdit with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContextManagement with Debug::{to_repr}
+
+///|
+pub extend AnthropicContextManagement with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicLanguageModelOptions with Debug::{to_repr}
+
+///|
+pub extend AnthropicLanguageModelOptions with Eq::{not_equal, equal}

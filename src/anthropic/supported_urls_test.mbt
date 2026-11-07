@@ -1,6 +1,6 @@
 ///|
 test "Anthropic supports native HTTP image and PDF URLs" {
-  let model = anthropic("claude-test", api_key="test-key")
+  let model = @anthropic.anthropic("claude-test", api_key="test-key")
   let rules = model.supported_urls()
   assert_true(
     @provider_utils.is_url_supported(

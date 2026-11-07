@@ -1,10 +1,11 @@
 ///|
 /// Reasoning-summary detail accepted by Open Responses endpoints.
+#derive(Debug, Eq)
 pub(all) enum OpenResponsesReasoningSummary {
   ReasoningSummaryConcise
   ReasoningSummaryDetailed
   ReasoningSummaryAuto
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenResponsesReasoningSummary::wire_name(
@@ -19,9 +20,10 @@ fn OpenResponsesReasoningSummary::wire_name(
 
 ///|
 /// Typed provider options for an Open Responses language model.
+#derive(Debug, Eq)
 pub(all) struct OpenResponsesLanguageModelOptions {
   reasoning_summary : OpenResponsesReasoningSummary?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed Open Responses language-model options.
@@ -37,7 +39,7 @@ pub fn OpenResponsesLanguageModelOptions::new(
 /// The provider name must match the name passed to createOpenResponses.
 pub fn OpenResponsesLanguageModelOptions::to_provider_options(
   self : OpenResponsesLanguageModelOptions,
-  provider_name? : String = "openResponses",
+  provider_name~ : String = "openResponses",
 ) -> Map[String, Json] {
   let values : Map[String, Json] = Map(
     [
@@ -99,3 +101,15 @@ fn parse_open_responses_provider_options(
   )
   { options: { reasoning_summary, }, warnings: reader.diagnostics(), }
 }
+
+///|
+pub extend OpenResponsesReasoningSummary with Debug::{to_repr}
+
+///|
+pub extend OpenResponsesReasoningSummary with Eq::{not_equal, equal}
+
+///|
+pub extend OpenResponsesLanguageModelOptions with Debug::{to_repr}
+
+///|
+pub extend OpenResponsesLanguageModelOptions with Eq::{not_equal, equal}

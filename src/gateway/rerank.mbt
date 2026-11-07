@@ -7,7 +7,7 @@ struct GatewayRerankingModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn gateway_reranking_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> GatewayRerankingModel {
   {
@@ -151,4 +151,12 @@ pub impl @provider.RerankingModelV4 for GatewayRerankingModel with fn do_rerank(
     ),
     response=response.response,
   )
+}
+
+///|
+pub extend GatewayRerankingModel with @QuietlyChan/moonai/provider.RerankingModelV4::{
+  do_rerank,
+  specification_version,
+  provider,
+  model_id,
 }

@@ -1,10 +1,11 @@
 ///|
 /// One decoded WebSocket message or terminal close notification.
+#derive(Debug, Eq)
 pub(all) enum WebSocketReceive {
   WebSocketText(String)
   WebSocketBinary(Bytes)
-  WebSocketClosed(code~ : Int?, reason~ : String?)
-} derive(Debug, Eq)
+  WebSocketClosed(code~ : Int32?, reason~ : String?)
+}
 
 ///|
 /// Runtime-independent WebSocket connection used by provider protocols.
@@ -13,7 +14,7 @@ pub(open) trait WebSocketConnection {
   async fn send_text(Self, String) -> Unit
   async fn send_binary(Self, Bytes) -> Unit
   async fn receive(Self) -> WebSocketReceive
-  async fn send_close(Self, Int, String?) -> Unit
+  async fn send_close(Self, Int32, String?) -> Unit
   fn close(Self) -> Unit
 }
 
@@ -45,7 +46,7 @@ pub fn toWebSocketUrl(url : String) -> String {
 }
 
 ///|
-fn websocket_close_code_to_int(code : @websocket.CloseCode) -> Int {
+fn websocket_close_code_to_int(code : @websocket.CloseCode) -> Int32 {
   match code {
     Normal => 1000
     GoingAway => 1001
@@ -62,7 +63,7 @@ fn websocket_close_code_to_int(code : @websocket.CloseCode) -> Int {
 }
 
 ///|
-fn websocket_close_code_from_int(code : Int) -> @websocket.CloseCode {
+fn websocket_close_code_from_int(code : Int32) -> @websocket.CloseCode {
   match code {
     1000 => Normal
     1001 => GoingAway
@@ -151,7 +152,10 @@ impl WebSocketConnector for NativeWebSocketConnector with fn connect(
   if protocols.length() > 0 {
     handshake_headers["Sec-WebSocket-Protocol"] = protocols.join(", ")
   }
-  let connection = @websocket.connect(url, headers=handshake_headers)
+  let connection = @websocket.connect(
+    url,
+    headers=to_http_headers(handshake_headers),
+  )
   NativeWebSocketConnection::{ connection, } as &WebSocketConnection
 }
 
@@ -160,3 +164,9 @@ impl WebSocketConnector for NativeWebSocketConnector with fn connect(
 pub fn native_websocket_connector() -> &WebSocketConnector {
   NativeWebSocketConnector::new()
 }
+
+///|
+pub extend WebSocketReceive with Debug::{to_repr}
+
+///|
+pub extend WebSocketReceive with Eq::{not_equal, equal}

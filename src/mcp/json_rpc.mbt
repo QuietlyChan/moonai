@@ -1,26 +1,29 @@
 ///|
 /// JSON-RPC request identifiers accepted by MCP.
+#derive(Debug, Eq)
 pub(all) enum JSONRPCId {
   JSONRPCStringId(String)
-  JSONRPCNumberId(Int)
-} derive(Debug, Eq)
+  JSONRPCNumberId(Int32)
+}
 
 ///|
 /// A JSON-RPC 2.0 application error.
+#derive(Debug, Eq)
 pub(all) struct JSONRPCErrorData {
-  code : Int
+  code : Int32
   message : String
   data : Json?
-} derive(Debug, Eq)
+}
 
 ///|
 /// JSON-RPC messages exchanged by MCP transports.
+#derive(Debug, Eq)
 pub(all) enum JSONRPCMessage {
   JSONRPCRequest(id~ : JSONRPCId, method_name~ : String, params~ : Json?)
   JSONRPCNotification(method_name~ : String, params~ : Json?)
   JSONRPCResponse(id~ : JSONRPCId, result~ : Json)
   JSONRPCError(id~ : JSONRPCId?, error~ : JSONRPCErrorData)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a JSON-RPC request.
@@ -45,7 +48,7 @@ pub fn JSONRPCMessage::notification(
 /// Construct a successful JSON-RPC response.
 pub fn JSONRPCMessage::response(
   id~ : JSONRPCId,
-  result? : Json = Json::empty_object(),
+  result~ : Json = Json::empty_object(),
 ) -> JSONRPCMessage {
   JSONRPCResponse(id~, result~)
 }
@@ -54,7 +57,7 @@ pub fn JSONRPCMessage::response(
 /// Construct a failed JSON-RPC response.
 pub fn JSONRPCMessage::error(
   id~ : JSONRPCId,
-  code~ : Int,
+  code~ : Int32,
   message~ : String,
   data? : Json,
 ) -> JSONRPCMessage {
@@ -208,3 +211,21 @@ pub fn parseJSONRPCMessage(
 ) -> JSONRPCMessage raise MCPClientError {
   parse_json_rpc_message(text)
 }
+
+///|
+pub extend JSONRPCId with Debug::{to_repr}
+
+///|
+pub extend JSONRPCId with Eq::{not_equal, equal}
+
+///|
+pub extend JSONRPCErrorData with Debug::{to_repr}
+
+///|
+pub extend JSONRPCErrorData with Eq::{not_equal, equal}
+
+///|
+pub extend JSONRPCMessage with Debug::{to_repr}
+
+///|
+pub extend JSONRPCMessage with Eq::{not_equal, equal}

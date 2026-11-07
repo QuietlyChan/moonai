@@ -101,7 +101,7 @@ pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn model
 ///|
 pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn max_embeddings_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   match self.middleware.override_max_embeddings_per_call {
     Some(resolve) => resolve(self.model)
     None => self.model.max_embeddings_per_call()
@@ -143,4 +143,15 @@ pub impl @provider.EmbeddingModelV4 for MiddlewareEmbeddingModelV4 with fn do_em
     Some(wrap) => wrap(context)
     None => do_embed()
   }
+}
+
+///|
+pub extend MiddlewareEmbeddingModelV4 with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  provider,
+  max_embeddings_per_call,
+  supports_parallel_calls,
+  max_input_bytes_per_call,
+  model_id,
 }

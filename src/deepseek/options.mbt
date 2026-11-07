@@ -4,23 +4,24 @@ pub type DeepSeekChatModelId = String
 
 ///|
 /// Provider-specific DeepSeek chat options.
+#derive(Debug, Eq)
 pub(all) struct DeepSeekLanguageModelChatOptions {
   thinking_type : String?
   reasoning_effort : String?
   strict_json_schema : Bool
   logprobs : Bool?
-  top_logprobs : Int?
+  top_logprobs : Int32?
   user_id : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct validated DeepSeek chat options.
 pub fn DeepSeekLanguageModelChatOptions::new(
   thinking_type? : String,
   reasoning_effort? : String,
-  strict_json_schema? : Bool = true,
+  strict_json_schema~ : Bool = true,
   logprobs? : Bool,
-  top_logprobs? : Int,
+  top_logprobs? : Int32,
   user_id? : String,
 ) -> DeepSeekLanguageModelChatOptions raise {
   if top_logprobs is Some(value) {
@@ -126,3 +127,9 @@ fn parse_deepseek_options(
   }
   { options, warnings: reader.diagnostics(), }
 }
+
+///|
+pub extend DeepSeekLanguageModelChatOptions with Debug::{to_repr}
+
+///|
+pub extend DeepSeekLanguageModelChatOptions with Eq::{not_equal, equal}

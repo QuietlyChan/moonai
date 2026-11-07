@@ -355,3 +355,13 @@ pub impl @provider.LanguageModelV4 for CohereChatLanguageModel with fn do_stream
     Some(response_metadata),
   )
 }
+
+///|
+pub extend CohereChatLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

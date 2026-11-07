@@ -20,9 +20,9 @@ pub fn SpeechTranslationCallOptions::new(
   target_language~ : String,
   source_language? : String,
   output_audio_format? : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
   cancellation_token? : CancellationToken,
 ) -> SpeechTranslationCallOptions {
   {
@@ -41,22 +41,23 @@ pub fn SpeechTranslationCallOptions::new(
 ///|
 /// Usage values reported by a speech translation provider. Every field is
 /// optional because providers expose different audio and text accounting.
+#derive(Debug, Eq)
 pub(all) struct SpeechTranslationUsage {
   input_audio_seconds : Double?
-  input_audio_tokens : Int?
-  output_audio_tokens : Int?
-  input_text_tokens : Int?
-  output_text_tokens : Int?
-} derive(Debug, Eq)
+  input_audio_tokens : Int32?
+  output_audio_tokens : Int32?
+  input_text_tokens : Int32?
+  output_text_tokens : Int32?
+}
 
 ///|
 /// Construct an empty usage record that can be selectively populated.
 pub fn SpeechTranslationUsage::new(
   input_audio_seconds? : Double,
-  input_audio_tokens? : Int,
-  output_audio_tokens? : Int,
-  input_text_tokens? : Int,
-  output_text_tokens? : Int,
+  input_audio_tokens? : Int32,
+  output_audio_tokens? : Int32,
+  input_text_tokens? : Int32,
+  output_text_tokens? : Int32,
 ) -> SpeechTranslationUsage {
   {
     input_audio_seconds,
@@ -70,6 +71,7 @@ pub fn SpeechTranslationUsage::new(
 ///|
 /// Event protocol for streaming source transcripts, translated text, and
 /// translated audio.
+#derive(Debug, Eq)
 pub(all) enum SpeechTranslationStreamEvent {
   SpeechTranslationStreamStart(warnings~ : Array[Warning])
   SpeechTranslationAudio(
@@ -97,7 +99,7 @@ pub(all) enum SpeechTranslationStreamEvent {
     text~ : String,
     start_second~ : Double?,
     end_second~ : Double?,
-    channel_index~ : Int?,
+    channel_index~ : Int32?,
     provider_metadata~ : Map[String, Json]
   )
   SpeechTranslationSourceTranscriptFinal(
@@ -105,7 +107,7 @@ pub(all) enum SpeechTranslationStreamEvent {
     text~ : String,
     start_second~ : Double?,
     end_second~ : Double?,
-    channel_index~ : Int?,
+    channel_index~ : Int32?,
     provider_metadata~ : Map[String, Json]
   )
   SpeechTranslationResponseMetadata(ResponseMetadata)
@@ -118,10 +120,11 @@ pub(all) enum SpeechTranslationStreamEvent {
   )
   SpeechTranslationRaw(Json)
   SpeechTranslationStreamError(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Fully accumulated result of a speech translation stream.
+#derive(Debug, Eq)
 pub(all) struct SpeechTranslationResponse {
   source_text : String
   output_text : String
@@ -131,7 +134,7 @@ pub(all) struct SpeechTranslationResponse {
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a speech translation result without diagnostics.
@@ -173,3 +176,21 @@ pub fn SpeechTranslationResponse::with_diagnostics(
     warnings: copy_warnings(warnings),
   }
 }
+
+///|
+pub extend SpeechTranslationUsage with Debug::{to_repr}
+
+///|
+pub extend SpeechTranslationUsage with Eq::{not_equal, equal}
+
+///|
+pub extend SpeechTranslationStreamEvent with Debug::{to_repr}
+
+///|
+pub extend SpeechTranslationStreamEvent with Eq::{not_equal, equal}
+
+///|
+pub extend SpeechTranslationResponse with Debug::{to_repr}
+
+///|
+pub extend SpeechTranslationResponse with Eq::{not_equal, equal}

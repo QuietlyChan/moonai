@@ -5,8 +5,11 @@
 [![CI](https://github.com/QuietlyChan/moonai/actions/workflows/ci.yml/badge.svg)](https://github.com/QuietlyChan/moonai/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![MoonBit](https://img.shields.io/badge/MoonBit-native-F5A623.svg)](https://www.moonbitlang.com/)
+[![Demo](https://img.shields.io/badge/demo-online-e08a1e.svg)](https://quietlychan.github.io/moonai/)
 
 面向 MoonBit 的统一、模型服务商无关 AI SDK。
+
+在线介绍与交互 Demo：<https://quietlychan.github.io/moonai/>
 
 `moonai` 希望把 [Vercel AI SDK 7](https://ai-sdk.dev/) 的标准层设计带到
 MoonBit，包括统一模型接口、标准化流事件、服务商适配器、工具调用，以及可测试的
@@ -159,7 +162,7 @@ CLI 命令、参数、环境变量和工作目录；未传入时，适配器可�
 
 ## 安装
 
-项目已发布到 Mooncakes，当前版本为 `0.1.0`，可直接安装：
+项目已发布到 Mooncakes，当前版本为 `0.2.0`，可直接安装：
 
 ```shell
 moon add QuietlyChan/moonai

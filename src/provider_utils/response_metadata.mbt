@@ -7,7 +7,7 @@
 pub fn create_language_model_response_metadata(
   id? : String,
   model? : String,
-  created? : Int,
+  created? : Int32,
 ) -> @provider.ResponseMetadata {
   @provider.ResponseMetadata::new(id?, model_id?=model, created_at?=created)
 }
@@ -17,7 +17,7 @@ pub fn create_language_model_response_metadata(
 pub fn createLanguageModelResponseMetadata(
   id? : String,
   model? : String,
-  created? : Int,
+  created? : Int32,
 ) -> @provider.ResponseMetadata {
   create_language_model_response_metadata(id?, model?, created?)
 }

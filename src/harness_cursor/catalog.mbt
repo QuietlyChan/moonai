@@ -1,22 +1,24 @@
 ///|
 /// Cursor builtin tool kind, matching the ACP toolUseKind classification.
+#derive(Debug, Eq)
 pub(all) enum CursorToolKind {
   Bash
   Edit
   Readonly
   Other
-} derive(Debug, Eq)
+}
 
 ///|
 /// One entry of the Cursor CLI builtin tool catalog. Names, native ACP
 /// projections, display titles, and kinds were captured from the official
 /// Cursor CLI 2026.08.11 ACP implementation.
+#derive(Debug, Eq)
 pub(all) struct CursorBuiltinTool {
   name : String
   native_name : String
   title : String
   kind : CursorToolKind
-} derive(Debug, Eq)
+}
 
 ///|
 /// The Cursor builtin tool catalog (mcpToolCall is dynamic and
@@ -105,3 +107,15 @@ pub fn cursor_builtin_tool(name~ : String) -> CursorBuiltinTool? {
   }
   None
 }
+
+///|
+pub extend CursorToolKind with Debug::{to_repr}
+
+///|
+pub extend CursorToolKind with Eq::{not_equal, equal}
+
+///|
+pub extend CursorBuiltinTool with Debug::{to_repr}
+
+///|
+pub extend CursorBuiltinTool with Eq::{not_equal, equal}

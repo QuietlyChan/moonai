@@ -1,16 +1,16 @@
 ///|
 priv struct AlibabaChatMockStream {
-  status : Int
+  status : Int32
   response_headers : Map[String, String]
   chunks : Array[String]
-  next_chunk : Ref[Int]
+  next_chunk : Ref[Int32]
 }
 
 ///|
 fn AlibabaChatMockStream::new(
   chunks : Array[String],
-  status? : Int = 200,
-  headers? : Map[String, String] = Map([]),
+  status~ : Int32 = 200,
+  headers~ : Map[String, String] = Map([]),
 ) -> AlibabaChatMockStream {
   {
     status,
@@ -23,7 +23,7 @@ fn AlibabaChatMockStream::new(
 ///|
 impl @provider_utils.HttpStreamResponse for AlibabaChatMockStream with fn status_code(
   self,
-) -> Int {
+) -> Int32 {
   self.status
 }
 
@@ -249,7 +249,7 @@ async test "Alibaba drives a V4 JSON request with native options and usage" {
     ),
     AlibabaChatMockStream::new([]),
   )
-  let model = alibaba(
+  let model = @alibaba.alibaba(
     "qwen-plus",
     api_key="test-key",
     base_url="https://alibaba.test/compatible-mode/v1",
@@ -269,7 +269,7 @@ async test "Alibaba drives a V4 JSON request with native options and usage" {
     ),
     top_k=7.0,
     frequency_penalty=0.5,
-    provider_options=AlibabaLanguageModelChatOptions::new(
+    provider_options=@alibaba.AlibabaLanguageModelChatOptions::new(
       enable_thinking=true,
       thinking_budget=2048,
       parallel_tool_calls=false,
@@ -353,7 +353,7 @@ async test "Alibaba SSE preserves reasoning text tools and cache usage" {
       "x-request-id": "ali-stream-request",
     }),
   )
-  let model = alibaba(
+  let model = @alibaba.alibaba(
     "qwen-plus",
     api_key="test-key",
     base_url="https://alibaba.test/compatible-mode/v1",

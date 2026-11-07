@@ -16,12 +16,12 @@ fn assert_openai_high_level_tool(
 
 ///|
 test "OpenAI provider exposes the complete AI SDK tools namespace" {
-  let tools = createOpenAI(api_key="test-key").tools()
-  let file_options = OpenAIFileSearchOptions::new(
+  let tools = @openai.createOpenAI(api_key="test-key").tools()
+  let file_options = @openai.OpenAIFileSearchOptions::new(
     vector_store_ids=["vs_1"],
     max_num_results=4,
   )
-  let mcp_options = OpenAIMCPOptions::new(
+  let mcp_options = @openai.OpenAIMCPOptions::new(
     server_label="docs",
     server_url="https://mcp.example.com",
   )
@@ -29,7 +29,7 @@ test "OpenAI provider exposes the complete AI SDK tools namespace" {
     (tools.applyPatch(), "openai.apply_patch", false),
     (
       tools.customTool(
-        options=OpenAICustomToolOptions::new(
+        options=@openai.OpenAICustomToolOptions::new(
           description="Return a constrained identifier",
           format=CustomGrammarFormat(
             syntax=CustomGrammarRegex,
@@ -42,7 +42,9 @@ test "OpenAI provider exposes the complete AI SDK tools namespace" {
     ),
     (
       tools.codeInterpreter(
-        container=OpenAICodeInterpreterContainer::auto(file_ids=["file_1"]),
+        container=@openai.OpenAICodeInterpreterContainer::auto(file_ids=[
+          "file_1",
+        ]),
       ),
       "openai.code_interpreter",
       true,
@@ -52,7 +54,9 @@ test "OpenAI provider exposes the complete AI SDK tools namespace" {
     (tools.imageGeneration(), "openai.image_generation", true),
     (tools.localShell(), "openai.local_shell", false),
     (
-      tools.shell(environment=OpenAIShellEnvironment::local_environment()),
+      tools.shell(
+        environment=@openai.OpenAIShellEnvironment::local_environment(),
+      ),
       "openai.shell",
       false,
     ),
@@ -75,13 +79,18 @@ test "OpenAI provider exposes the complete AI SDK tools namespace" {
 
 ///|
 test "OpenAI namespace tools retain typed arguments through tool sets" {
-  let tools = createOpenAI(api_key="test-key").tools()
-  let file_options = OpenAIFileSearchOptions::new(
+  let tools = @openai.createOpenAI(api_key="test-key").tools()
+  let file_options = @openai.OpenAIFileSearchOptions::new(
     vector_store_ids=["vs_docs"],
     max_num_results=6,
-    ranking=OpenAIFileSearchRanking::new(ranker="auto", score_threshold=0.75),
+    ranking=@openai.OpenAIFileSearchRanking::new(
+      ranker="auto",
+      score_threshold=0.75,
+    ),
   )
-  let shell_environment = OpenAIShellEnvironment::container_reference("ctr_1")
+  let shell_environment = @openai.OpenAIShellEnvironment::container_reference(
+    "ctr_1",
+  )
   let tool_set = @provider_utils.toolSet([
     ("docs", tools.fileSearch(file_options)),
     ("terminal", tools.shell(environment=shell_environment)),
@@ -114,7 +123,7 @@ test "OpenAI namespace tools retain typed arguments through tool sets" {
 
 ///|
 test "OpenAI high-level tools carry AI SDK input and output schemas" {
-  let tools = createOpenAI(api_key="test-key").tools()
+  let tools = @openai.createOpenAI(api_key="test-key").tools()
   let patch = tools.apply_patch()
   assert_true(
     @provider_utils.json_schema_matches(patch.input_schema().unwrap(), {
@@ -190,7 +199,7 @@ test "OpenAI high-level tools carry AI SDK input and output schemas" {
 ///|
 async test "OpenAI application tools preserve execution and approval callbacks" {
   let events : Array[String] = []
-  let tool = createOpenAI(api_key="test-key")
+  let tool = @openai.createOpenAI(api_key="test-key")
     .tools()
     .applyPatch(
       execute=(input, options) => {
@@ -263,7 +272,7 @@ async test "OpenAI application tools preserve execution and approval callbacks" 
 ///|
 async test "OpenAI provider-executed tools preserve streaming callbacks" {
   let events : Array[String] = []
-  let tool = createOpenAI(api_key="test-key")
+  let tool = @openai.createOpenAI(api_key="test-key")
     .tools()
     .webSearch(
       on_input_start=options => events.push("start:" + options.tool_call_id),

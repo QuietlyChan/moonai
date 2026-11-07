@@ -15,7 +15,7 @@ test "provider registry resolves ProviderV4 models and provider extensions stay 
   let alibaba = @alibaba.create_alibaba(api_key="test-key")
   let deepseek = @deepseek.create_deepseek(api_key="test-key")
   let minimax = @minimax.create_minimax(api_key="test-key")
-  let registry = ProviderRegistry::new()
+  let registry = @registry.ProviderRegistry::new()
     .with_provider("openai", openai)
     .with_provider("gateway", compatible)
     .with_provider("responses", open_responses)
@@ -80,7 +80,7 @@ test "provider registry resolves ProviderV4 models and provider extensions stay 
 test "provider registry preserves model ids after the first separator" {
   let openai = @openai.create_openai(api_key="test-key")
   let providers : Map[String, &@provider.ProviderV4] = Map([("openai", openai)])
-  let registry = createProviderRegistry(providers, separator="/")
+  let registry = @registry.createProviderRegistry(providers, separator="/")
   assert_eq(registry.separator(), "/")
   assert_eq(
     registry.language_model("openai/model/version").model_id(),
@@ -93,10 +93,9 @@ test "provider registry applies language-model middleware" {
   let middleware = @provider.LanguageModelV4Middleware::new(override_provider=_ => {
     "wrapped-provider"
   })
-  let registry = ProviderRegistry::new(language_model_middleware=middleware).with_provider(
-    "custom",
-    @openai.create_openai(api_key="test-key"),
-  )
+  let registry = @registry.ProviderRegistry::new(
+    language_model_middleware=middleware,
+  ).with_provider("custom", @openai.create_openai(api_key="test-key"))
   let resolved = registry.language_model("custom:model")
   assert_eq(resolved.provider(), "wrapped-provider")
   assert_eq(resolved.model_id(), "model")
@@ -108,10 +107,9 @@ test "provider registry applies language-model middleware metadata" {
     override_provider=_ => "wrapped-v4-provider",
     override_model_id=_ => "wrapped-v4-model",
   )
-  let registry = ProviderRegistry::new(language_model_middleware=middleware).with_provider(
-    "custom",
-    @openai.create_openai(api_key="test-key"),
-  )
+  let registry = @registry.ProviderRegistry::new(
+    language_model_middleware=middleware,
+  ).with_provider("custom", @openai.create_openai(api_key="test-key"))
   let resolved = registry.language_model("custom:model")
   assert_eq(resolved.provider(), "wrapped-v4-provider")
   assert_eq(resolved.model_id(), "wrapped-v4-model")
@@ -124,10 +122,9 @@ test "provider registry applies image-model middleware" {
     override_model_id=_ => "wrapped-image-model",
     override_max_images_per_call=_ => Some(2),
   )
-  let registry = ProviderRegistry::new(image_model_middleware=middleware).with_provider(
-    "custom",
-    @openai.create_openai(api_key="test-key"),
-  )
+  let registry = @registry.ProviderRegistry::new(
+    image_model_middleware=middleware,
+  ).with_provider("custom", @openai.create_openai(api_key="test-key"))
   let resolved = registry.image_model("custom:image")
   assert_eq(resolved.provider(), "wrapped-image-provider")
   assert_eq(resolved.model_id(), "wrapped-image-model")

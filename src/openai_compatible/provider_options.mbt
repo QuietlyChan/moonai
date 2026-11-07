@@ -20,12 +20,13 @@ fn compatible_namespaced_options(
 
 ///|
 /// Typed provider options for OpenAI-compatible chat models.
+#derive(Debug, Eq)
 pub(all) struct OpenAICompatibleLanguageModelChatOptions {
   user : String?
   reasoning_effort : String?
   text_verbosity : String?
   strict_json_schema : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI-compatible chat options.
@@ -42,7 +43,7 @@ pub fn OpenAICompatibleLanguageModelChatOptions::new(
 /// Convert chat options to a provider namespace.
 pub fn OpenAICompatibleLanguageModelChatOptions::to_provider_options(
   self : OpenAICompatibleLanguageModelChatOptions,
-  provider_name? : String = "openaiCompatible",
+  provider_name~ : String = "openaiCompatible",
 ) -> Map[String, Json] {
   compatible_namespaced_options(
     provider_name,
@@ -67,12 +68,13 @@ pub fn OpenAICompatibleLanguageModelChatOptions::to_provider_options(
 
 ///|
 /// Typed provider options for OpenAI-compatible legacy completions.
+#derive(Debug, Eq)
 pub(all) struct OpenAICompatibleLanguageModelCompletionOptions {
   echo : Bool?
   logit_bias : Map[String, Double]?
   suffix : String?
   user : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI-compatible completion options.
@@ -89,7 +91,7 @@ pub fn OpenAICompatibleLanguageModelCompletionOptions::new(
 /// Convert completion options to a provider namespace.
 pub fn OpenAICompatibleLanguageModelCompletionOptions::to_provider_options(
   self : OpenAICompatibleLanguageModelCompletionOptions,
-  provider_name? : String = "openaiCompatible",
+  provider_name~ : String = "openaiCompatible",
 ) -> Map[String, Json] {
   let bias_json = match self.logit_bias {
     Some(values) => {
@@ -124,15 +126,16 @@ pub fn OpenAICompatibleLanguageModelCompletionOptions::to_provider_options(
 
 ///|
 /// Typed provider options for OpenAI-compatible embedding models.
+#derive(Debug, Eq)
 pub(all) struct OpenAICompatibleEmbeddingModelOptions {
-  dimensions : Int?
+  dimensions : Int32?
   user : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI-compatible embedding options.
 pub fn OpenAICompatibleEmbeddingModelOptions::new(
-  dimensions? : Int,
+  dimensions? : Int32,
   user? : String,
 ) -> OpenAICompatibleEmbeddingModelOptions {
   { dimensions, user, }
@@ -142,7 +145,7 @@ pub fn OpenAICompatibleEmbeddingModelOptions::new(
 /// Convert embedding options to a provider namespace.
 pub fn OpenAICompatibleEmbeddingModelOptions::to_provider_options(
   self : OpenAICompatibleEmbeddingModelOptions,
-  provider_name? : String = "openaiCompatible",
+  provider_name~ : String = "openaiCompatible",
 ) -> Map[String, Json] {
   compatible_namespaced_options(
     provider_name,
@@ -164,14 +167,15 @@ pub fn OpenAICompatibleEmbeddingModelOptions::to_provider_options(
 ///
 /// Unknown provider fields can be supplied through extensions, matching the
 /// loose object schema in the TypeScript package.
+#derive(Debug, Eq)
 pub(all) struct OpenAICompatibleImageModelOptions {
   size : String?
   quality : String?
   output_format : String?
-  output_compression : Int?
+  output_compression : Int32?
   background : String?
   extensions : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct and validate typed OpenAI-compatible image options.
@@ -179,9 +183,9 @@ pub fn OpenAICompatibleImageModelOptions::new(
   size? : String,
   quality? : String,
   output_format? : String,
-  output_compression? : Int,
+  output_compression? : Int32,
   background? : String,
-  extensions? : Map[String, Json] = Map([]),
+  extensions~ : Map[String, Json] = Map([]),
 ) -> OpenAICompatibleImageModelOptions raise {
   guard output_compression is None ||
     (output_compression.unwrap() >= 0 && output_compression.unwrap() <= 100) else {
@@ -194,7 +198,7 @@ pub fn OpenAICompatibleImageModelOptions::new(
 /// Convert image options to a provider namespace.
 pub fn OpenAICompatibleImageModelOptions::to_provider_options(
   self : OpenAICompatibleImageModelOptions,
-  provider_name? : String = "openaiCompatible",
+  provider_name~ : String = "openaiCompatible",
 ) -> Map[String, Json] {
   let values : Map[String, Json] = Map([])
   for entry in self.extensions.iter2() {
@@ -351,7 +355,7 @@ fn image_reserved_fields() -> Array[String] {
 /// callers get an explicit warning when they would otherwise be discarded.
 fn compatible_image_request_warnings(
   aspect_ratio : String?,
-  seed : Int?,
+  seed : Int32?,
   resolution : @provider_utils.ProviderOptionsResolution,
 ) -> Array[@provider.Warning] {
   let warnings = resolution.warnings.copy()
@@ -368,3 +372,30 @@ fn compatible_image_request_warnings(
   }
   warnings
 }
+
+///|
+pub extend OpenAICompatibleLanguageModelChatOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAICompatibleLanguageModelChatOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAICompatibleLanguageModelCompletionOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAICompatibleLanguageModelCompletionOptions with Eq::{
+  not_equal,
+  equal,
+}
+
+///|
+pub extend OpenAICompatibleEmbeddingModelOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAICompatibleEmbeddingModelOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAICompatibleImageModelOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAICompatibleImageModelOptions with Eq::{not_equal, equal}

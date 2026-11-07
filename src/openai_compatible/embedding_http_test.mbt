@@ -40,7 +40,7 @@ async test "embed and embedMany drive OpenAI-compatible embedding requests" {
         max_connections=3,
       )
     }
-    let provider = create_openai_compatible(
+    let provider = @openai_compatible.create_openai_compatible(
       provider_name="local-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       api_key="test-key",

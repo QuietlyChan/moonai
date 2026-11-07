@@ -1,8 +1,9 @@
 ///|
 /// Prompt-cache settings for Anthropic's advisor transcript.
+#derive(Debug, Eq)
 pub(all) struct AnthropicAdvisorCaching {
   ttl : AnthropicCacheTtl
-} derive(Debug, Eq)
+}
 
 ///|
 /// Enable ephemeral advisor caching for the selected lifetime.
@@ -71,7 +72,7 @@ fn anthropic_advisor_20260301_output_schema() -> Json {
 /// tool calls have completed, so deferred results are enabled.
 pub fn advisor_20260301(
   model~ : String,
-  max_uses? : Int,
+  max_uses? : Int32,
   caching? : AnthropicAdvisorCaching,
   on_input_start? : @provider_utils.ToolInputStartFunction,
   on_input_delta? : @provider_utils.ToolInputDeltaFunction,
@@ -96,3 +97,9 @@ pub fn advisor_20260301(
     on_input_available?,
   )
 }
+
+///|
+pub extend AnthropicAdvisorCaching with Debug::{to_repr}
+
+///|
+pub extend AnthropicAdvisorCaching with Eq::{not_equal, equal}

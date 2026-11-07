@@ -1,16 +1,16 @@
 ///|
 /// Maximum aggregate size of one HTTP response header block.
-const SAFE_DOWNLOAD_MAX_HEADER_BYTES : Int = 65_536
+const SAFE_DOWNLOAD_MAX_HEADER_BYTES : Int32 = 65_536
 
 ///|
 /// Maximum size used for individual status, header, and chunk-size lines.
-const SAFE_DOWNLOAD_MAX_LINE_BYTES : Int = 8_192
+const SAFE_DOWNLOAD_MAX_LINE_BYTES : Int32 = 8_192
 
 ///|
 priv struct SafeDownloadTarget {
   scheme : String
   hostname : String
-  port : Int
+  port : Int32
   authority : String
   request_target : String
 }
@@ -35,7 +35,7 @@ async fn SafeDownloadSocket::write(
 ///|
 async fn SafeDownloadSocket::read_some(
   self : SafeDownloadSocket,
-  max_len : Int,
+  max_len : Int32,
 ) -> Bytes? {
   match self {
     SafeDownloadPlain(tcp) => tcp.read_some(max_len~)
@@ -58,18 +58,18 @@ fn SafeDownloadSocket::close(self : SafeDownloadSocket) -> Unit {
 priv struct SafeDownloadConnection {
   socket : SafeDownloadSocket
   mut buffered : Bytes
-  mut offset : Int
+  mut offset : Int32
 }
 
 ///|
-fn SafeDownloadConnection::available(self : SafeDownloadConnection) -> Int {
+fn SafeDownloadConnection::available(self : SafeDownloadConnection) -> Int32 {
   self.buffered.length() - self.offset
 }
 
 ///|
 async fn SafeDownloadConnection::read_more(
   self : SafeDownloadConnection,
-  max_len : Int,
+  max_len : Int32,
 ) -> Bool {
   match self.socket.read_some(max_len) {
     None => false
@@ -89,7 +89,7 @@ async fn SafeDownloadConnection::read_more(
 async fn SafeDownloadConnection::read_line(
   self : SafeDownloadConnection,
   url : String,
-  max_bytes : Int,
+  max_bytes : Int32,
 ) -> String {
   for ;; {
     let remaining = self.buffered[self.offset:].to_owned()
@@ -133,7 +133,7 @@ async fn SafeDownloadConnection::read_line(
 async fn SafeDownloadConnection::read_exactly(
   self : SafeDownloadConnection,
   url : String,
-  length : Int,
+  length : Int32,
 ) -> Bytes {
   let output = @buffer.Buffer(size_hint=length)
   let mut remaining = length
@@ -307,7 +307,7 @@ fn safe_download_target(url : String) -> SafeDownloadTarget raise DownloadError 
 }
 
 ///|
-fn safe_download_ipv4_text(address : @socket.Addr) -> (String, Array[Int]) {
+fn safe_download_ipv4_text(address : @socket.Addr) -> (String, Array[Int32]) {
   let ip = address.ip()
   let parts = [
     ((ip >> 24) & 255).reinterpret_as_int(),
@@ -426,7 +426,7 @@ fn safe_download_request_text(
 fn safe_download_status_line(
   line : String,
   url : String,
-) -> (Int, String) raise DownloadError {
+) -> (Int32, String) raise DownloadError {
   guard line.find(" ") is Some(protocol_end) else {
     raise download_error(url, "HTTP response has an invalid status line")
   }
@@ -493,7 +493,7 @@ async fn SafeDownloadConnection::read_headers(
 async fn SafeDownloadConnection::read_response_body(
   self : SafeDownloadConnection,
   url : String,
-  status_code : Int,
+  status_code : Int32,
   headers : Map[String, String],
   max_bytes : Int64,
 ) -> Bytes {

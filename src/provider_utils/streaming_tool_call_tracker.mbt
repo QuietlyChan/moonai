@@ -1,25 +1,26 @@
 ///|
 /// Minimal normalized shape for one streamed OpenAI-style tool-call delta.
+#derive(Debug, Eq)
 pub(all) struct StreamingToolCallDelta {
-  index : Int?
+  index : Int32?
   id : String?
   tool_type : String?
   function_name : String?
   arguments_delta : String?
   provider_metadata : Map[String, Json]
   data : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct one normalized streaming tool-call delta.
 pub fn StreamingToolCallDelta::new(
-  index? : Int,
+  index? : Int32,
   id? : String,
   tool_type? : String,
   function_name? : String,
   arguments_delta? : String,
-  provider_metadata? : Map[String, Json] = Map([]),
-  data? : Json = Json::empty_object(),
+  provider_metadata~ : Map[String, Json] = Map([]),
+  data~ : Json = Json::empty_object(),
 ) -> StreamingToolCallDelta {
   {
     index,
@@ -34,11 +35,12 @@ pub fn StreamingToolCallDelta::new(
 
 ///|
 /// Controls validation of the optional OpenAI `type` discriminator.
+#derive(Debug, Eq)
 pub(all) enum StreamingToolCallTypeValidation {
   NoToolCallTypeValidation
   ValidateToolCallTypeIfPresent
   RequireFunctionToolCallType
-} derive(Debug, Eq)
+}
 
 ///|
 /// Provider-neutral lifecycle produced by the shared tracker state machine.
@@ -124,7 +126,7 @@ priv struct TrackedStreamingToolCall {
 pub struct StreamingToolCallTracker {
   priv calls : Array[TrackedStreamingToolCall]
   priv calls_by_id : Map[String, TrackedStreamingToolCall]
-  priv calls_by_index : Map[Int, TrackedStreamingToolCall]
+  priv calls_by_index : Map[Int32, TrackedStreamingToolCall]
   priv mut latest_call : TrackedStreamingToolCall?
   priv generate_id : IdGenerator
   priv type_validation : StreamingToolCallTypeValidation
@@ -150,7 +152,7 @@ fn identity_streaming_tool_call_metadata(
 /// Create an empty streaming tool-call tracker.
 pub fn StreamingToolCallTracker::new(
   id_generator? : IdGenerator,
-  type_validation? : StreamingToolCallTypeValidation = NoToolCallTypeValidation,
+  type_validation~ : StreamingToolCallTypeValidation = NoToolCallTypeValidation,
   extract_metadata? : StreamingToolCallMetadataExtractor,
   build_tool_call_provider_metadata? : StreamingToolCallMetadataBuilder,
 ) -> StreamingToolCallTracker {
@@ -387,3 +389,15 @@ pub fn StreamingToolCallTracker::calls(
   }
   calls
 }
+
+///|
+pub extend StreamingToolCallDelta with Debug::{to_repr}
+
+///|
+pub extend StreamingToolCallDelta with Eq::{not_equal, equal}
+
+///|
+pub extend StreamingToolCallTypeValidation with Debug::{to_repr}
+
+///|
+pub extend StreamingToolCallTypeValidation with Eq::{not_equal, equal}

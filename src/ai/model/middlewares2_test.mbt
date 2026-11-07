@@ -6,7 +6,7 @@ priv struct CapturingV4Model {
 
 ///|
 fn CapturingV4Model::new(
-  stream_events? : Array[@provider.LanguageModelV4StreamPart] = [],
+  stream_events~ : Array[@provider.LanguageModelV4StreamPart] = [],
 ) -> CapturingV4Model {
   { captured_options: Ref(None), stream_events, }
 }
@@ -75,9 +75,9 @@ fn capture_call_options() -> @provider.LanguageModelV4CallOptions {
 ///|
 async test "default instructions middleware injects a system message" {
   let model = CapturingV4Model::new()
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    default_instructions_middleware(
+    @model.default_instructions_middleware(
       instructions=@prompt.InstructionText("You are helpful."),
     ),
   )
@@ -93,9 +93,9 @@ async test "default instructions middleware injects a system message" {
 ///|
 async test "default instructions middleware keeps existing system messages" {
   let model = CapturingV4Model::new()
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    default_instructions_middleware(
+    @model.default_instructions_middleware(
       instructions=@prompt.InstructionText("You are helpful."),
     ),
   )
@@ -120,9 +120,9 @@ async test "default instructions middleware keeps existing system messages" {
 ///|
 async test "add tool input examples middleware appends to descriptions" {
   let model = CapturingV4Model::new()
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    add_tool_input_examples_middleware(),
+    @model.add_tool_input_examples_middleware(),
   )
   let tool = @provider.LanguageModelV4Tool::function(
     "lookup",
@@ -151,14 +151,18 @@ async test "add tool input examples middleware appends to descriptions" {
 ///|
 async test "add tool input examples middleware keeps examples when asked" {
   let model = CapturingV4Model::new()
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    add_tool_input_examples_middleware(prefix="Examples:", remove=false, format=fn(
-      example : @provider.LanguageModelV4FunctionToolInputExample,
-      _index : Int,
-    ) -> String {
-      "Q: \{(example.input).stringify()}"
-    }),
+    @model.add_tool_input_examples_middleware(
+      prefix="Examples:",
+      remove=false,
+      format=fn(
+        example : @provider.LanguageModelV4FunctionToolInputExample,
+        _index : Int32,
+      ) -> String {
+        "Q: \{(example.input).stringify()}"
+      },
+    ),
   )
   let tool = @provider.LanguageModelV4Tool::function(
     "lookup",
@@ -186,9 +190,9 @@ async test "add tool input examples middleware keeps examples when asked" {
 ///|
 async test "extract json middleware transforms generate output" {
   let model = CapturingV4Model::new()
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    extract_json_middleware(),
+    @model.extract_json_middleware(),
   )
   let result = wrapped.do_generate(capture_call_options())
   match result.content[0] {
@@ -207,9 +211,9 @@ async test "extract json middleware strips fences across stream deltas" {
     @provider.V4TextDelta(id="t0", delta="}\n```", provider_metadata=Map([])),
     @provider.V4TextEnd(id="t0", provider_metadata=Map([])),
   ])
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    extract_json_middleware(),
+    @model.extract_json_middleware(),
   )
   let events : Array[@provider.LanguageModelV4StreamPart] = []
   ignore(wrapped.do_stream(capture_call_options(), event => events.push(event)))
@@ -237,9 +241,9 @@ async test "extract json middleware passes plain text through" {
     ),
     @provider.V4TextEnd(id="t0", provider_metadata=Map([])),
   ])
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    extract_json_middleware(),
+    @model.extract_json_middleware(),
   )
   let events : Array[@provider.LanguageModelV4StreamPart] = []
   ignore(wrapped.do_stream(capture_call_options(), event => events.push(event)))
@@ -255,7 +259,7 @@ async test "extract json middleware passes plain text through" {
 
 ///|
 async test "default embedding settings middleware fills unset fields" {
-  let middleware = default_embedding_settings_middleware(
+  let middleware = @model.default_embedding_settings_middleware(
     headers=Map([("X-Default", "yes")]),
     provider_options={ "openai": { "dimensions": 256 } },
   )

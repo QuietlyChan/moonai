@@ -1,16 +1,18 @@
 ///|
 /// Detail object returned by the Moonshot AI API on failure.
+#derive(Debug, Eq)
 pub(all) struct MoonshotErrorDetail {
   message : String
   error_type : String?
   code : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Structured Moonshot AI API error data.
+#derive(Debug, Eq)
 pub(all) struct MoonshotErrorData {
   error : MoonshotErrorDetail
-} derive(Debug, Eq)
+}
 
 ///|
 /// Decode a standard Moonshot AI error response.
@@ -48,7 +50,7 @@ fn moonshot_error_message(json : Json) -> String? raise {
 ///|
 /// Classify an in-band Moonshot stream error into transport metadata so the
 /// retry policy can act on it (rate limits and server faults are retryable).
-fn moonshot_stream_error_metadata(error_type : String?) -> (Int?, Bool?) {
+fn moonshot_stream_error_metadata(error_type : String?) -> (Int32?, Bool?) {
   match error_type {
     Some("rate_limit_exceeded") | Some("rate_limit_error") =>
       (Some(429), Some(true))
@@ -255,9 +257,9 @@ priv struct MoonshotStreamDecoder {
   mut finalized : Bool
   logprobs_content : Array[Json]
   mut response_object : String?
-  mut choice_index : Int?
+  mut choice_index : Int32?
   mut message_role : String?
-  tool_call_types : Map[Int, String]
+  tool_call_types : Map[Int32, String]
 }
 
 ///|
@@ -343,7 +345,7 @@ fn MoonshotStreamDecoder::close_text(
 fn MoonshotStreamDecoder::apply_tool_delta(
   self : MoonshotStreamDecoder,
   value : Json,
-  fallback_index : Int,
+  fallback_index : Int32,
   events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit raise {
   guard value is Object(_) else { return }
@@ -584,7 +586,7 @@ fn MoonshotStreamDecoder::finish_events(
     None => ()
   }
   if self.tool_call_types.length() > 0 {
-    let indices : Array[Int] = self.tool_call_types.keys().collect()
+    let indices : Array[Int32] = self.tool_call_types.keys().collect()
     indices.sort_by(fn(left, right) { left.compare(right) })
     let types : Array[Json] = []
     for index in indices {
@@ -707,3 +709,15 @@ fn MoonshotStreamDecoder::response_metadata_snapshot(
 ) -> @provider.ResponseMetadata? {
   self.response_metadata
 }
+
+///|
+pub extend MoonshotErrorDetail with Debug::{to_repr}
+
+///|
+pub extend MoonshotErrorDetail with Eq::{not_equal, equal}
+
+///|
+pub extend MoonshotErrorData with Debug::{to_repr}
+
+///|
+pub extend MoonshotErrorData with Eq::{not_equal, equal}

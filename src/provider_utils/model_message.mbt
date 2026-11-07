@@ -4,6 +4,7 @@
 /// This type is intentionally distinct from
 /// `provider::LanguageModelContentPart`. The `ai/prompt` package validates and
 /// converts model messages before a provider sees them.
+#derive(Debug, Eq)
 pub(all) enum ModelContentPart {
   ModelText(String)
   ModelImageUrl(String)
@@ -28,7 +29,7 @@ pub(all) enum ModelContentPart {
     part~ : ModelContentPart,
     options~ : Map[String, Json]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a text part.
@@ -64,8 +65,8 @@ pub fn ModelContentPart::audio_data(
 /// Construct a URL-backed file part.
 pub fn ModelContentPart::file_url(
   url~ : String,
-  media_type? : String = "application/octet-stream",
-  filename? : String = "",
+  media_type~ : String = "application/octet-stream",
+  filename~ : String = "",
 ) -> ModelContentPart {
   ModelFileUrl(url~, media_type~, filename~)
 }
@@ -84,8 +85,8 @@ pub fn ModelContentPart::file_data(
 /// Construct a provider-reference-backed file part.
 pub fn ModelContentPart::file_reference(
   reference~ : @provider.ProviderReference,
-  media_type? : String = "application/octet-stream",
-  filename? : String = "",
+  media_type~ : String = "application/octet-stream",
+  filename~ : String = "",
 ) -> ModelContentPart {
   ModelFileReference(reference~, media_type~, filename~)
 }
@@ -189,6 +190,7 @@ pub fn ModelContentPart::without_provider_options(
 /// Inputs are JSON values at this layer. Conversion to a provider prompt is
 /// responsible for producing the serialized argument form used by current
 /// provider adapters.
+#derive(Debug, Eq)
 pub(all) struct ModelToolCall {
   id : String
   name : String
@@ -196,7 +198,7 @@ pub(all) struct ModelToolCall {
   provider_executed : Bool
   dynamic : Bool
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a tool call for an assistant history message.
@@ -204,9 +206,9 @@ pub fn ModelToolCall::new(
   id~ : String,
   name~ : String,
   input~ : Json,
-  provider_executed? : Bool = false,
-  dynamic? : Bool = false,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = false,
+  dynamic~ : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolCall {
   {
     id,
@@ -220,6 +222,7 @@ pub fn ModelToolCall::new(
 
 ///|
 /// A tool-result content part returned by a client or provider-executed tool.
+#derive(Debug, Eq)
 pub(all) enum ModelToolResultContentPart {
   ModelToolResultText(text~ : String, provider_options~ : Map[String, Json])
   ModelToolResultFileUrl(
@@ -241,10 +244,11 @@ pub(all) enum ModelToolResultContentPart {
     provider_options~ : Map[String, Json]
   )
   ModelToolResultCustom(provider_options~ : Map[String, Json])
-} derive(Debug, Eq)
+}
 
 ///|
 /// The normalized output shape of a tool result.
+#derive(Debug, Eq)
 pub(all) enum ModelToolResultOutput {
   ModelToolText(value~ : String, provider_options~ : Map[String, Json])
   ModelToolJson(value~ : Json, provider_options~ : Map[String, Json])
@@ -258,13 +262,13 @@ pub(all) enum ModelToolResultOutput {
     value~ : Array[ModelToolResultContentPart],
     provider_options~ : Map[String, Json]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a text model output for a tool result.
 pub fn ModelToolResultOutput::text(
   value : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultOutput {
   ModelToolText(
     value~,
@@ -276,7 +280,7 @@ pub fn ModelToolResultOutput::text(
 /// Construct a JSON model output for a tool result.
 pub fn ModelToolResultOutput::json(
   value : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultOutput {
   ModelToolJson(
     value~,
@@ -288,7 +292,7 @@ pub fn ModelToolResultOutput::json(
 /// Construct an execution-denied model output for a tool result.
 pub fn ModelToolResultOutput::execution_denied(
   reason? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultOutput {
   ModelToolExecutionDenied(
     reason~,
@@ -300,7 +304,7 @@ pub fn ModelToolResultOutput::execution_denied(
 /// Construct a text error model output for a tool result.
 pub fn ModelToolResultOutput::error_text(
   value : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultOutput {
   ModelToolErrorText(
     value~,
@@ -312,7 +316,7 @@ pub fn ModelToolResultOutput::error_text(
 /// Construct a JSON error model output for a tool result.
 pub fn ModelToolResultOutput::error_json(
   value : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultOutput {
   ModelToolErrorJson(
     value~,
@@ -324,7 +328,7 @@ pub fn ModelToolResultOutput::error_json(
 /// Construct a multimodal model output for a tool result.
 pub fn ModelToolResultOutput::content(
   value : Array[ModelToolResultContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultOutput {
   ModelToolContent(
     value=value.copy(),
@@ -334,15 +338,17 @@ pub fn ModelToolResultOutput::content(
 
 ///|
 /// A tool result in a user-facing model message.
+#derive(Debug, Eq)
 pub(all) struct ModelToolResult {
   tool_call_id : String
   tool_name : String
   output : ModelToolResultOutput
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// A provider-executed tool approval request in an assistant message.
+#derive(Debug, Eq)
 pub(all) struct ModelToolApprovalRequest {
   approval_id : String
   tool_call_id : String
@@ -351,17 +357,18 @@ pub(all) struct ModelToolApprovalRequest {
   /// Policy explanation carried from the approval decision
   /// (AI SDK #19658).
   request_reason : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// A tool approval response in a tool message.
+#derive(Debug, Eq)
 pub(all) struct ModelToolApprovalResponse {
   approval_id : String
   approved : Bool
   reason : String?
   provider_executed : Bool
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a text tool result.
@@ -369,7 +376,7 @@ pub fn ModelToolResult::text(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResult {
   {
     tool_call_id,
@@ -388,7 +395,7 @@ pub fn ModelToolResult::json(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResult {
   {
     tool_call_id,
@@ -407,7 +414,7 @@ pub fn ModelToolResult::execution_denied(
   tool_call_id~ : String,
   tool_name~ : String,
   reason? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResult {
   {
     tool_call_id,
@@ -424,7 +431,7 @@ pub fn ModelToolResult::execution_denied(
 /// Construct a text item inside a multimodal tool result.
 pub fn ModelToolResultContentPart::text(
   text : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultContentPart {
   ModelToolResultText(
     text~,
@@ -437,8 +444,8 @@ pub fn ModelToolResultContentPart::text(
 pub fn ModelToolResultContentPart::file_url(
   url~ : String,
   media_type~ : String,
-  filename? : String = "",
-  provider_options? : Map[String, Json] = Map([]),
+  filename~ : String = "",
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultContentPart {
   ModelToolResultFileUrl(
     url~,
@@ -453,8 +460,8 @@ pub fn ModelToolResultContentPart::file_url(
 pub fn ModelToolResultContentPart::file_data(
   data~ : String,
   media_type~ : String,
-  filename? : String = "",
-  provider_options? : Map[String, Json] = Map([]),
+  filename~ : String = "",
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultContentPart {
   ModelToolResultFileData(
     data~,
@@ -469,8 +476,8 @@ pub fn ModelToolResultContentPart::file_data(
 pub fn ModelToolResultContentPart::file_reference(
   reference~ : @provider.ProviderReference,
   media_type~ : String,
-  filename? : String = "",
-  provider_options? : Map[String, Json] = Map([]),
+  filename~ : String = "",
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultContentPart {
   ModelToolResultFileReference(
     reference~,
@@ -483,7 +490,7 @@ pub fn ModelToolResultContentPart::file_reference(
 ///|
 /// Construct a provider-specific custom item inside a tool result.
 pub fn ModelToolResultContentPart::custom(
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResultContentPart {
   ModelToolResultCustom(
     provider_options=copy_model_provider_options(provider_options),
@@ -496,7 +503,7 @@ pub fn ModelToolResult::content(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Array[ModelToolResultContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResult {
   {
     tool_call_id,
@@ -515,7 +522,7 @@ pub fn ModelToolResult::error_text(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResult {
   {
     tool_call_id,
@@ -534,7 +541,7 @@ pub fn ModelToolResult::error_json(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolResult {
   {
     tool_call_id,
@@ -552,7 +559,7 @@ pub fn ModelToolResult::error_json(
 pub fn ModelToolApprovalRequest::new(
   approval_id~ : String,
   tool_call_id~ : String,
-  is_automatic? : Bool = false,
+  is_automatic~ : Bool = false,
   signature? : String,
   request_reason? : String,
 ) -> ModelToolApprovalRequest {
@@ -565,8 +572,8 @@ pub fn ModelToolApprovalResponse::new(
   approval_id~ : String,
   approved~ : Bool,
   reason? : String,
-  provider_executed? : Bool = false,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelToolApprovalResponse {
   {
     approval_id,
@@ -609,12 +616,13 @@ pub fn ModelContentPart::tool_approval_response(
 
 ///|
 /// Role of a user-facing model message.
+#derive(Debug, Eq)
 pub(all) enum ModelMessageRole {
   ModelSystem
   ModelUser
   ModelAssistant
   ModelTool(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A user-facing prompt message.
@@ -622,6 +630,7 @@ pub(all) enum ModelMessageRole {
 /// Role-specific constructors prevent provider-facing messages from being
 /// passed directly to high-level workflows. The richer public representation
 /// can evolve independently of provider wire contracts.
+#derive(Debug, Eq)
 pub(all) struct ModelMessage {
   role : ModelMessageRole
   content : String
@@ -629,7 +638,7 @@ pub(all) struct ModelMessage {
   tool_calls : Array[ModelToolCall]
   reasoning_content : String?
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 fn new_model_message(
@@ -654,7 +663,7 @@ fn new_model_message(
 /// Construct a system message.
 pub fn ModelMessage::system(
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelMessage {
   new_model_message(ModelSystem, content, [], [], None, provider_options)
 }
@@ -663,7 +672,7 @@ pub fn ModelMessage::system(
 /// Construct a user text message.
 pub fn ModelMessage::user(
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelMessage {
   new_model_message(ModelUser, content, [], [], None, provider_options)
 }
@@ -672,7 +681,7 @@ pub fn ModelMessage::user(
 /// Construct a user message from content parts.
 pub fn ModelMessage::user_parts(
   parts : Array[ModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelMessage {
   new_model_message(ModelUser, "", parts, [], None, provider_options)
 }
@@ -681,9 +690,9 @@ pub fn ModelMessage::user_parts(
 /// Construct an assistant text message.
 pub fn ModelMessage::assistant(
   content : String,
-  tool_calls? : Array[ModelToolCall] = [],
+  tool_calls~ : Array[ModelToolCall] = [],
   reasoning_content? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelMessage {
   new_model_message(
     ModelAssistant,
@@ -699,9 +708,9 @@ pub fn ModelMessage::assistant(
 /// Construct an assistant message from content parts.
 pub fn ModelMessage::assistant_parts(
   parts : Array[ModelContentPart],
-  tool_calls? : Array[ModelToolCall] = [],
+  tool_calls~ : Array[ModelToolCall] = [],
   reasoning_content? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelMessage {
   new_model_message(
     ModelAssistant,
@@ -718,7 +727,7 @@ pub fn ModelMessage::assistant_parts(
 pub fn ModelMessage::tool(
   tool_call_id : String,
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelMessage {
   new_model_message(
     ModelTool(tool_call_id),
@@ -735,7 +744,7 @@ pub fn ModelMessage::tool(
 pub fn ModelMessage::tool_parts(
   tool_call_id : String,
   parts : Array[ModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelMessage {
   new_model_message(
     ModelTool(tool_call_id),
@@ -752,7 +761,7 @@ pub fn ModelMessage::tool_parts(
 /// forcing all parts to share one tool-call id.
 pub fn ModelMessage::tool_content(
   parts : Array[ModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> ModelMessage {
   new_model_message(ModelTool(""), "", parts, [], None, provider_options)
 }
@@ -801,3 +810,57 @@ pub fn ModelMessage::with_provider_options(
     merge_model_provider_options(self.provider_options, options),
   )
 }
+
+///|
+pub extend ModelContentPart with Debug::{to_repr}
+
+///|
+pub extend ModelContentPart with Eq::{not_equal, equal}
+
+///|
+pub extend ModelToolCall with Debug::{to_repr}
+
+///|
+pub extend ModelToolCall with Eq::{not_equal, equal}
+
+///|
+pub extend ModelToolResultContentPart with Debug::{to_repr}
+
+///|
+pub extend ModelToolResultContentPart with Eq::{not_equal, equal}
+
+///|
+pub extend ModelToolResultOutput with Debug::{to_repr}
+
+///|
+pub extend ModelToolResultOutput with Eq::{not_equal, equal}
+
+///|
+pub extend ModelToolResult with Debug::{to_repr}
+
+///|
+pub extend ModelToolResult with Eq::{not_equal, equal}
+
+///|
+pub extend ModelToolApprovalRequest with Debug::{to_repr}
+
+///|
+pub extend ModelToolApprovalRequest with Eq::{not_equal, equal}
+
+///|
+pub extend ModelToolApprovalResponse with Debug::{to_repr}
+
+///|
+pub extend ModelToolApprovalResponse with Eq::{not_equal, equal}
+
+///|
+pub extend ModelMessageRole with Debug::{to_repr}
+
+///|
+pub extend ModelMessageRole with Eq::{not_equal, equal}
+
+///|
+pub extend ModelMessage with Debug::{to_repr}
+
+///|
+pub extend ModelMessage with Eq::{not_equal, equal}

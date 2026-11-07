@@ -1,59 +1,66 @@
 ///|
 /// One server-side sampling or compaction iteration reported by Anthropic.
+#derive(Debug, Eq)
 pub(all) struct AnthropicUsageIteration {
   kind : String
   model : String?
-  input_tokens : Int
-  output_tokens : Int
-  cache_creation_input_tokens : Int?
-  cache_read_input_tokens : Int?
-} derive(Debug, Eq)
+  input_tokens : Int32
+  output_tokens : Int32
+  cache_creation_input_tokens : Int32?
+  cache_read_input_tokens : Int32?
+}
 
 ///|
 /// Details attached to a refusal stop reason.
+#derive(Debug, Eq)
 pub(all) struct AnthropicStopDetails {
   kind : String
   category : String?
   explanation : String?
   recommended_model : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// A skill loaded into an Anthropic container.
+#derive(Debug, Eq)
 pub(all) struct AnthropicContainerSkillMetadata {
   kind : String
   skill_id : String
   version : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Container information returned by code execution or another hosted tool.
+#derive(Debug, Eq)
 pub(all) struct AnthropicContainerMetadata {
   expires_at : String?
   id : String
   skills : Array[AnthropicContainerSkillMetadata]?
-} derive(Debug, Eq)
+}
 
 ///|
 /// One context-management edit applied by the server.
+#derive(Debug, Eq)
 pub(all) struct AnthropicContextManagementEditMetadata {
   kind : String
-  cleared_tool_uses : Int?
-  cleared_input_tokens : Int?
-  cleared_thinking_turns : Int?
-} derive(Debug, Eq)
+  cleared_tool_uses : Int32?
+  cleared_input_tokens : Int32?
+  cleared_thinking_turns : Int32?
+}
 
 ///|
 /// Context-management changes applied to a request.
+#derive(Debug, Eq)
 pub(all) struct AnthropicContextManagementMetadata {
   applied_edits : Array[AnthropicContextManagementEditMetadata]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Typed view of provider metadata returned by Anthropic Messages.
 ///
 /// `raw` retains the original response object so newly introduced Anthropic
 /// fields remain available before this view is extended.
+#derive(Debug)
 pub(all) struct AnthropicMessageMetadata {
   usage : Json?
   stop_sequence : String?
@@ -62,7 +69,7 @@ pub(all) struct AnthropicMessageMetadata {
   container : AnthropicContainerMetadata?
   context_management : AnthropicContextManagementMetadata?
   raw : Json
-} derive(Debug)
+}
 
 ///|
 fn metadata_json_field(json : Json, names : Array[String]) -> Json? {
@@ -88,7 +95,7 @@ fn metadata_string_field(json : Json, names : Array[String]) -> String? {
 }
 
 ///|
-fn metadata_int_field(json : Json, names : Array[String]) -> Int? {
+fn metadata_int_field(json : Json, names : Array[String]) -> Int32? {
   match metadata_json_field(json, names) {
     Some(Number(value, ..)) => Some(value.to_int())
     _ => None
@@ -313,3 +320,42 @@ pub fn decode_anthropic_message_metadata(
 pub fn decodeAnthropicMessageMetadata(json : Json) -> AnthropicMessageMetadata? {
   decode_anthropic_message_metadata(json)
 }
+
+///|
+pub extend AnthropicUsageIteration with Debug::{to_repr}
+
+///|
+pub extend AnthropicUsageIteration with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicStopDetails with Debug::{to_repr}
+
+///|
+pub extend AnthropicStopDetails with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContainerSkillMetadata with Debug::{to_repr}
+
+///|
+pub extend AnthropicContainerSkillMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContainerMetadata with Debug::{to_repr}
+
+///|
+pub extend AnthropicContainerMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContextManagementEditMetadata with Debug::{to_repr}
+
+///|
+pub extend AnthropicContextManagementEditMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicContextManagementMetadata with Debug::{to_repr}
+
+///|
+pub extend AnthropicContextManagementMetadata with Eq::{not_equal, equal}
+
+///|
+pub extend AnthropicMessageMetadata with Debug::{to_repr}

@@ -50,7 +50,7 @@ fn openai_compatible_prediction_metadata(
 ///|
 fn decode_openai_compatible_tool_call(
   json : Json,
-  index : Int,
+  index : Int32,
   metadata_key : String,
   id_generator : @provider_utils.IdGenerator,
 ) -> @provider.LanguageModelV4ToolCall raise {

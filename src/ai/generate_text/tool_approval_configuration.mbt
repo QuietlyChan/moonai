@@ -1,5 +1,6 @@
 ///|
 /// Normalized approval decision for one tool call.
+#derive(Debug, Eq)
 pub(all) enum ToolApprovalStatus {
   ToolApprovalNotApplicable
   ToolApprovalApproved(reason~ : String?)
@@ -7,7 +8,7 @@ pub(all) enum ToolApprovalStatus {
   /// Human approval required; the optional reason is the policy
   /// explanation surfaced on the approval request (AI SDK #19658).
   ToolApprovalUserApproval(reason~ : String?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Mark a tool call as not requiring approval.
@@ -110,3 +111,9 @@ pub fn ToolApprovalConfiguration::per_tool(
 ) -> ToolApprovalConfiguration {
   ToolApprovalPerTool(rules)
 }
+
+///|
+pub extend ToolApprovalStatus with Debug::{to_repr}
+
+///|
+pub extend ToolApprovalStatus with Eq::{not_equal, equal}

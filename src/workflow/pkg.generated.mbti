@@ -7,6 +7,7 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -14,26 +15,34 @@ pub const VERSION : String = "0.1.0"
 
 pub fn resolve_workflow_tool_approval_secret(secret~ : WorkflowToolApprovalSecret) -> String raise WorkflowError
 
-pub fn validate_workflow_output(spec~ : WorkflowOutputSpecification, text~ : String) -> Json raise WorkflowOutputValidationError
+pub fn validate_workflow_output(spec~ : WorkflowOutputSpecification, text~ : String) -> @json.Json raise WorkflowOutputValidationError
 
-pub async fn workflow_generate_video(model~ : &@provider.VideoModelV4, options~ : @provider.VideoModelV4CallOptions, step_id~ : String, poll_interval_ms? : Int, poll_timeout_ms? : Int) -> @provider.VideoModelV4Result
+pub async fn workflow_generate_video(model~ : &@provider.VideoModelV4, options~ : @provider.VideoModelV4CallOptions, step_id~ : String, poll_interval_ms? : Int32, poll_timeout_ms? : Int32) -> @provider.VideoModelV4Result
 
-pub fn workflow_snapshot_from_json(value~ : Json) -> WorkflowSessionSnapshot raise
+pub fn workflow_snapshot_from_json(value~ : @json.Json) -> WorkflowSessionSnapshot raise
 
-pub fn workflow_snapshot_to_json(snapshot~ : WorkflowSessionSnapshot) -> Json
+pub fn workflow_snapshot_to_json(snapshot~ : WorkflowSessionSnapshot) -> @json.Json
 
-pub fn workflow_ui_chunks_from_text(text~ : String, tool_calls~ : Array[@provider.ToolCall]) -> Array[Json]
+pub fn workflow_ui_chunks_from_text(text~ : String, tool_calls~ : Array[@provider.ToolCall]) -> Array[@json.Json]
 
-pub fn workflow_ui_message_chunk(@provider.LanguageModelV4StreamPart) -> Json?
+pub fn workflow_ui_message_chunk(@provider.LanguageModelV4StreamPart) -> @json.Json?
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub suberror WorkflowError {
   WorkflowError(message~ : String)
-} derive(Eq, @debug.Debug)
+}
+pub fn WorkflowError::equal(Self, Self) -> Bool
+pub fn WorkflowError::not_equal(Self, Self) -> Bool
+pub fn WorkflowError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub suberror WorkflowOutputValidationError {
   WorkflowOutputValidationError(message~ : String, text~ : String)
-} derive(Eq, @debug.Debug)
+}
+pub fn WorkflowOutputValidationError::equal(Self, Self) -> Bool
+pub fn WorkflowOutputValidationError::not_equal(Self, Self) -> Bool
+pub fn WorkflowOutputValidationError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub struct WorkflowAgent {
@@ -43,27 +52,31 @@ pub async fn WorkflowAgent::generate(Self, options~ : @agent.AgentCallOptions) -
 pub fn WorkflowAgent::messages(Self) -> Array[@provider_utils.ModelMessage]
 pub fn WorkflowAgent::new(agent~ : &@agent.Agent, output? : WorkflowOutputSpecification) -> Self
 pub fn WorkflowAgent::restore(Self, snapshot~ : WorkflowSessionSnapshot) -> Unit
-pub fn WorkflowAgent::snapshot(Self) -> Json
+pub fn WorkflowAgent::snapshot(Self) -> @json.Json
 
+#derive(@debug.Debug)
 pub(all) struct WorkflowAgentResult {
   text : String
-  output : Json?
-  steps : Int
+  output : @json.Json?
+  steps : Int32
   usage : @provider.LanguageModelV4Usage
   snapshot : WorkflowSessionSnapshot
-} derive(@debug.Debug)
+}
+pub fn WorkflowAgentResult::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct WorkflowChatResponse {
-  chunks : Array[Json]
-  snapshot : Json
-  steps : Int
-} derive(@debug.Debug)
+  chunks : Array[@json.Json]
+  snapshot : @json.Json
+  steps : Int32
+}
+pub fn WorkflowChatResponse::to_repr(Self) -> @debug.Repr
 
 pub struct WorkflowChatTransport {
   // private fields
 }
 pub fn WorkflowChatTransport::new(agent~ : WorkflowAgent) -> Self
-pub fn WorkflowChatTransport::reconnect_to_stream(Self, snapshot_json~ : Json) -> Array[Json] raise
+pub fn WorkflowChatTransport::reconnect_to_stream(Self, snapshot_json~ : @json.Json) -> Array[@json.Json] raise
 pub async fn WorkflowChatTransport::send_messages(Self, prompt~ : String) -> WorkflowChatResponse
 
 pub struct WorkflowHarnessBridge {
@@ -72,27 +85,39 @@ pub struct WorkflowHarnessBridge {
 pub fn WorkflowHarnessBridge::new(session~ : &@harness.HarnessV1Session) -> Self
 pub async fn WorkflowHarnessBridge::run_prompt_turn(Self, prompt~ : String, instructions? : String) -> WorkflowHarnessTurnResult
 
+#derive(Eq, @debug.Debug)
 pub(all) struct WorkflowHarnessTurnResult {
   text : String
   reasoning : String
-  tool_inputs_started : Int
-  events : Int
-} derive(Eq, @debug.Debug)
+  tool_inputs_started : Int32
+  events : Int32
+}
+pub fn WorkflowHarnessTurnResult::equal(Self, Self) -> Bool
+pub fn WorkflowHarnessTurnResult::not_equal(Self, Self) -> Bool
+pub fn WorkflowHarnessTurnResult::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct WorkflowOutputSpecification {
-  schema : Json
+  schema : @json.Json
   name : String?
-} derive(@debug.Debug)
+}
+pub fn WorkflowOutputSpecification::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct WorkflowSessionSnapshot {
   agent_id : String?
   messages : Array[@provider_utils.ModelMessage]
-  steps : Int
-} derive(@debug.Debug)
+  steps : Int32
+}
+pub fn WorkflowSessionSnapshot::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct WorkflowToolApprovalSecret {
   environment_variable : String
-} derive(Eq, @debug.Debug)
+}
+pub fn WorkflowToolApprovalSecret::equal(Self, Self) -> Bool
+pub fn WorkflowToolApprovalSecret::not_equal(Self, Self) -> Bool
+pub fn WorkflowToolApprovalSecret::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

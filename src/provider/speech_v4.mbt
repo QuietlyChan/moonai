@@ -3,6 +3,7 @@
 ///
 /// Provider options remain keyed by provider name, while retry and
 /// cancellation settings are MoonBit runtime extensions used by transports.
+#derive(Debug)
 pub(all) struct SpeechModelV4CallOptions {
   text : String
   voice : String?
@@ -14,7 +15,7 @@ pub(all) struct SpeechModelV4CallOptions {
   headers : Map[String, String]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct V4 speech call options.
@@ -25,9 +26,9 @@ pub fn SpeechModelV4CallOptions::new(
   instructions? : String,
   speed? : Double,
   language? : String,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> SpeechModelV4CallOptions {
   {
@@ -84,22 +85,23 @@ pub fn SpeechModelV4CallOptions::to_speech_call_options(
 
 ///|
 /// Result returned by a V4 speech model.
+#derive(Debug, Eq)
 pub(all) struct SpeechModelV4Result {
   audio : SpeechAudioData
   warnings : Array[Warning]
   request : RequestMetadata?
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 speech result.
 pub fn SpeechModelV4Result::new(
   audio~ : SpeechAudioData,
-  warnings? : Array[Warning] = [],
+  warnings~ : Array[Warning] = [],
   request? : RequestMetadata,
   response? : ResponseMetadata,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> SpeechModelV4Result {
   {
     audio,
@@ -145,3 +147,12 @@ pub(open) trait SpeechModelV4 {
   fn model_id(Self) -> String
   async fn do_generate(Self, SpeechModelV4CallOptions) -> SpeechModelV4Result
 }
+
+///|
+pub extend SpeechModelV4CallOptions with Debug::{to_repr}
+
+///|
+pub extend SpeechModelV4Result with Debug::{to_repr}
+
+///|
+pub extend SpeechModelV4Result with Eq::{not_equal, equal}

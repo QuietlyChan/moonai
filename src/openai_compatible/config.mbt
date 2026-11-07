@@ -1,11 +1,12 @@
 ///|
 /// Detail object returned by a standard OpenAI-compatible error response.
+#derive(Debug, Eq)
 pub(all) struct OpenAICompatibleErrorDetail {
   message : String
   error_type : String?
   param : Json?
   code : Json?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct one OpenAI-compatible error detail object.
@@ -20,9 +21,10 @@ pub fn OpenAICompatibleErrorDetail::new(
 
 ///|
 /// Structured error payload exported by the OpenAI-compatible provider.
+#derive(Debug, Eq)
 pub(all) struct OpenAICompatibleErrorData {
   error : OpenAICompatibleErrorDetail
-} derive(Debug, Eq)
+}
 
 ///|
 /// Decode the standard nested OpenAI-compatible error payload.
@@ -56,7 +58,7 @@ fn decode_openai_compatible_error_data(
 /// status based retry decision for a parsed error response.
 pub struct OpenAICompatibleErrorStructure {
   priv error_to_message_callback : (Json) -> String? raise
-  priv is_retryable_callback : (Int, Json?) -> Bool? raise
+  priv is_retryable_callback : (Int32, Json?) -> Bool? raise
 }
 
 ///|
@@ -67,7 +69,7 @@ pub type ProviderErrorStructure = OpenAICompatibleErrorStructure
 /// Create a provider error structure.
 pub fn OpenAICompatibleErrorStructure::new(
   error_to_message~ : (Json) -> String? raise,
-  is_retryable? : (Int, Json?) -> Bool? raise = default_retryable_override,
+  is_retryable~ : (Int32, Json?) -> Bool? raise = default_retryable_override,
 ) -> OpenAICompatibleErrorStructure {
   {
     error_to_message_callback: error_to_message,
@@ -77,7 +79,7 @@ pub fn OpenAICompatibleErrorStructure::new(
 
 ///|
 fn default_retryable_override(
-  _status_code : Int,
+  _status_code : Int32,
   _error : Json?,
 ) -> Bool? raise {
   // Adapt the pure built-in callback to the fallible transport hook contract.
@@ -119,7 +121,7 @@ fn OpenAICompatibleErrorStructure::message(
 ///|
 fn OpenAICompatibleErrorStructure::retryable(
   self : OpenAICompatibleErrorStructure,
-  status_code : Int,
+  status_code : Int32,
   error : Json?,
 ) -> Bool? raise {
   (self.is_retryable_callback)(status_code, error)
@@ -262,7 +264,10 @@ pub fn convert_openai_compatible_chat_usage(
 ///|
 /// Some providers report reasoning tokens that exceed the completion total;
 /// clamp the derived text count at zero to keep usage aggregates valid.
-fn non_negative_text_tokens(output_tokens : Int, reasoning_tokens : Int) -> Int {
+fn non_negative_text_tokens(
+  output_tokens : Int32,
+  reasoning_tokens : Int32,
+) -> Int32 {
   let text = output_tokens - reasoning_tokens
   if text < 0 {
     0
@@ -270,3 +275,15 @@ fn non_negative_text_tokens(output_tokens : Int, reasoning_tokens : Int) -> Int 
     text
   }
 }
+
+///|
+pub extend OpenAICompatibleErrorDetail with Debug::{to_repr}
+
+///|
+pub extend OpenAICompatibleErrorDetail with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAICompatibleErrorData with Debug::{to_repr}
+
+///|
+pub extend OpenAICompatibleErrorData with Eq::{not_equal, equal}

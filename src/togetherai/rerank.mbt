@@ -6,7 +6,7 @@ struct TogetherAIRerankingModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -16,7 +16,7 @@ fn togetherai_reranking_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> TogetherAIRerankingModel {
   {
@@ -145,4 +145,12 @@ fn json_string_field(value : Json, key : String) -> String? {
       }
     _ => None
   }
+}
+
+///|
+pub extend TogetherAIRerankingModel with @QuietlyChan/moonai/provider.RerankingModelV4::{
+  do_rerank,
+  specification_version,
+  provider,
+  model_id,
 }

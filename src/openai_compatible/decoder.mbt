@@ -212,7 +212,7 @@ fn OpenAICompatibleStreamDecoder::record_json(
 ///|
 fn OpenAICompatibleStreamDecoder::ensure_pending_tool(
   self : OpenAICompatibleStreamDecoder,
-  index : Int,
+  index : Int32,
   data : Json,
 ) -> Unit raise {
   guard index >= 0 else {
@@ -234,7 +234,7 @@ fn OpenAICompatibleStreamDecoder::ensure_pending_tool(
 ///|
 fn OpenAICompatibleStreamDecoder::apply_forwarded_tool_delta(
   self : OpenAICompatibleStreamDecoder,
-  index : Int,
+  index : Int32,
   id : String?,
   name : String?,
   arguments_delta : String?,
@@ -261,7 +261,7 @@ fn OpenAICompatibleStreamDecoder::apply_forwarded_tool_delta(
 fn OpenAICompatibleStreamDecoder::apply_tool_delta(
   self : OpenAICompatibleStreamDecoder,
   json : Json,
-  fallback_index : Int,
+  fallback_index : Int32,
   events : Array[@provider.LanguageModelV4StreamPart],
 ) -> Unit raise {
   guard json is Object(_) else { return }
@@ -396,7 +396,7 @@ fn OpenAICompatibleStreamDecoder::apply_json(
 ///|
 fn OpenAICompatibleStreamDecoder::first_unresolved_tool_call(
   self : OpenAICompatibleStreamDecoder,
-) -> Int? {
+) -> Int32? {
   for index in 0..<self.pending_tool_received.length() {
     if self.pending_tool_received[index] && !self.forwarded_tool_calls[index] {
       return Some(index)

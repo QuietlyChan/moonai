@@ -1,15 +1,16 @@
 ///|
 /// Alibaba prompt-token details returned by the Chat Completions endpoint.
+#derive(Debug, Eq)
 pub(all) struct AlibabaPromptTokensDetails {
-  cached_tokens : Int?
-  cache_creation_input_tokens : Int?
-} derive(Debug, Eq)
+  cached_tokens : Int32?
+  cache_creation_input_tokens : Int32?
+}
 
 ///|
 /// Construct Alibaba prompt-token details.
 pub fn AlibabaPromptTokensDetails::new(
-  cached_tokens? : Int,
-  cache_creation_input_tokens? : Int,
+  cached_tokens? : Int32,
+  cache_creation_input_tokens? : Int32,
 ) -> AlibabaPromptTokensDetails {
   { cached_tokens, cache_creation_input_tokens, }
 }
@@ -48,14 +49,15 @@ fn AlibabaPromptTokensDetails::from_json(
 
 ///|
 /// Alibaba completion-token details returned by reasoning-capable models.
+#derive(Debug, Eq)
 pub(all) struct AlibabaCompletionTokensDetails {
-  reasoning_tokens : Int?
-} derive(Debug, Eq)
+  reasoning_tokens : Int32?
+}
 
 ///|
 /// Construct Alibaba completion-token details.
 pub fn AlibabaCompletionTokensDetails::new(
-  reasoning_tokens? : Int,
+  reasoning_tokens? : Int32,
 ) -> AlibabaCompletionTokensDetails {
   { reasoning_tokens, }
 }
@@ -91,20 +93,21 @@ fn AlibabaCompletionTokensDetails::from_json(
 ///
 /// This mirrors the exported `AlibabaUsage` type in the AI SDK. Optional and
 /// JSON `null` fields both map to `None` at the typed MoonBit boundary.
+#derive(Debug, Eq)
 pub(all) struct AlibabaUsage {
-  prompt_tokens : Int?
-  completion_tokens : Int?
-  total_tokens : Int?
+  prompt_tokens : Int32?
+  completion_tokens : Int32?
+  total_tokens : Int32?
   prompt_tokens_details : AlibabaPromptTokensDetails?
   completion_tokens_details : AlibabaCompletionTokensDetails?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a provider-specific Alibaba usage value.
 pub fn AlibabaUsage::new(
-  prompt_tokens? : Int,
-  completion_tokens? : Int,
-  total_tokens? : Int,
+  prompt_tokens? : Int32,
+  completion_tokens? : Int32,
+  total_tokens? : Int32,
   prompt_tokens_details? : AlibabaPromptTokensDetails,
   completion_tokens_details? : AlibabaCompletionTokensDetails,
 ) -> AlibabaUsage {
@@ -200,3 +203,21 @@ fn convert_alibaba_chat_usage(usage : Json?) -> @provider.LanguageModelV4Usage {
     raw: base.raw,
   }
 }
+
+///|
+pub extend AlibabaPromptTokensDetails with Debug::{to_repr}
+
+///|
+pub extend AlibabaPromptTokensDetails with Eq::{not_equal, equal}
+
+///|
+pub extend AlibabaCompletionTokensDetails with Debug::{to_repr}
+
+///|
+pub extend AlibabaCompletionTokensDetails with Eq::{not_equal, equal}
+
+///|
+pub extend AlibabaUsage with Debug::{to_repr}
+
+///|
+pub extend AlibabaUsage with Eq::{not_equal, equal}

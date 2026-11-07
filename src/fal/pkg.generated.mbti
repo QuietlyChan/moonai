@@ -9,24 +9,37 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createFal(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> FalProvider
+pub fn createFal(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> FalProvider
 
-pub fn create_fal(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> FalProvider
+pub fn create_fal(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> FalProvider
 
-pub fn fal(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+pub fn fal(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
 
 // Errors
 
 // Types and methods
 type FalImageModel
+pub async fn FalImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn FalImageModel::max_images_per_call(Self) -> Int32?
+pub fn FalImageModel::model_id(Self) -> String
+pub fn FalImageModel::provider(Self) -> String
+pub fn FalImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for FalImageModel
 
 pub struct FalProvider {
   // private fields
 }
+pub fn FalProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn FalProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn FalProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn FalProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn FalProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn FalProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn FalProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn FalProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn FalProvider::specification_version(Self) -> String
+pub fn FalProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn FalProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for FalProvider
 
 // Type aliases

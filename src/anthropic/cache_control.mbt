@@ -1,12 +1,12 @@
 ///|
-const ANTHROPIC_MAX_CACHE_BREAKPOINTS : Int = 4
+const ANTHROPIC_MAX_CACHE_BREAKPOINTS : Int32 = 4
 
 ///|
 /// Track Anthropic cache breakpoints across one request. The same validator is
 /// shared by prompt conversion and tool preparation so the provider's limit is
 /// enforced in wire order.
 priv struct AnthropicCacheControlValidator {
-  mut breakpoint_count : Int
+  mut breakpoint_count : Int32
   warnings : Array[@provider.Warning]
 }
 

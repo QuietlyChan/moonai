@@ -8,7 +8,7 @@ fn copy_model_messages(
 }
 
 ///|
-fn client_tool_call_count(calls : Array[GenerateTextToolCall]) -> Int {
+fn client_tool_call_count(calls : Array[GenerateTextToolCall]) -> Int32 {
   let mut count = 0
   for call in calls {
     if !call.provider_executed {
@@ -111,7 +111,7 @@ async fn invoke_tool_input_callbacks(
 }
 
 ///|
-fn optional_token_sum(first : Int?, second : Int?) -> Int? {
+fn optional_token_sum(first : Int32?, second : Int32?) -> Int32? {
   if first is None && second is None {
     None
   } else {
@@ -120,7 +120,7 @@ fn optional_token_sum(first : Int?, second : Int?) -> Int? {
 }
 
 ///|
-fn tokens_per_second(tokens : Int?, duration_ms : Int) -> Double? {
+fn tokens_per_second(tokens : Int32?, duration_ms : Int32) -> Double? {
   guard duration_ms > 0 else { return None }
   match tokens {
     Some(value) => Some(value.to_double() * 1000.0 / duration_ms.to_double())
@@ -131,9 +131,9 @@ fn tokens_per_second(tokens : Int?, duration_ms : Int) -> Double? {
 ///|
 fn step_performance(
   usage : @provider.LanguageModelV4Usage,
-  step_time_ms : Int,
-  response_time_ms : Int,
-  tool_execution_ms : Map[String, Int],
+  step_time_ms : Int32,
+  response_time_ms : Int32,
+  tool_execution_ms : Map[String, Int32],
 ) -> GenerateTextStepPerformance {
   {
     step_time_ms,
@@ -160,10 +160,10 @@ fn step_performance(
 pub async fn generate_text(
   model : &@provider.LanguageModelV4,
   prompt? : String,
-  messages? : Array[@provider_utils.ModelMessage] = [],
+  messages~ : Array[@provider_utils.ModelMessage] = [],
   instructions? : @prompt.Instructions,
-  allow_system_in_messages? : Bool = false,
-  tools? : @provider_utils.ToolSet = Map([]),
+  allow_system_in_messages~ : Bool = false,
+  tools~ : @provider_utils.ToolSet = Map([]),
   tool_approval? : ToolApprovalConfiguration,
   experimental_tool_approval_secret? : ToolApprovalSecret,
   experimental_tool_callers? : @tool.ToolCallerConfiguration,
@@ -171,25 +171,25 @@ pub async fn generate_text(
   tool_order? : ToolOrder,
   prepare_step? : PrepareStepFunction,
   stop_when? : Array[StopCondition],
-  tool_choice? : @provider.ToolChoice = @provider.Auto,
-  response_format? : @provider.ResponseFormat = @provider.Text,
-  reasoning_effort? : @provider.ReasoningEffort = @provider.ProviderDefault,
-  max_output_tokens? : Int,
+  tool_choice~ : @provider.ToolChoice = @provider.Auto,
+  response_format~ : @provider.ResponseFormat = @provider.Text,
+  reasoning_effort~ : @provider.ReasoningEffort = @provider.ProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  runtime_context? : Json = Json::empty_object(),
-  tools_context? : Map[String, Json] = Map([]),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  include_raw_chunks~ : Bool = false,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  runtime_context~ : Json = Json::empty_object(),
+  tools_context~ : Map[String, Json] = Map([]),
   experimental_sandbox? : @provider_utils.SandboxSession,
   experimental_download? : @prompt.DownloadFunction,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
 ) -> GenerateTextResult {
   @provider.check_cancellation(cancellation_token)
@@ -422,10 +422,10 @@ pub async fn generate_text(
 pub async fn generateText(
   model : &@provider.LanguageModelV4,
   prompt? : String,
-  messages? : Array[@provider_utils.ModelMessage] = [],
+  messages~ : Array[@provider_utils.ModelMessage] = [],
   instructions? : @prompt.Instructions,
-  allow_system_in_messages? : Bool = false,
-  tools? : @provider_utils.ToolSet = Map([]),
+  allow_system_in_messages~ : Bool = false,
+  tools~ : @provider_utils.ToolSet = Map([]),
   tool_approval? : ToolApprovalConfiguration,
   experimental_tool_approval_secret? : ToolApprovalSecret,
   experimental_tool_callers? : @tool.ToolCallerConfiguration,
@@ -433,25 +433,25 @@ pub async fn generateText(
   tool_order? : ToolOrder,
   prepare_step? : PrepareStepFunction,
   stop_when? : Array[StopCondition],
-  tool_choice? : @provider.ToolChoice = @provider.Auto,
-  response_format? : @provider.ResponseFormat = @provider.Text,
-  reasoning_effort? : @provider.ReasoningEffort = @provider.ProviderDefault,
-  max_output_tokens? : Int,
+  tool_choice~ : @provider.ToolChoice = @provider.Auto,
+  response_format~ : @provider.ResponseFormat = @provider.Text,
+  reasoning_effort~ : @provider.ReasoningEffort = @provider.ProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  runtime_context? : Json = Json::empty_object(),
-  tools_context? : Map[String, Json] = Map([]),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  include_raw_chunks~ : Bool = false,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  runtime_context~ : Json = Json::empty_object(),
+  tools_context~ : Map[String, Json] = Map([]),
   experimental_sandbox? : @provider_utils.SandboxSession,
   experimental_download? : @prompt.DownloadFunction,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
 ) -> GenerateTextResult {
   generate_text(

@@ -7,7 +7,7 @@ struct CartesiaTranscriptionModel {
   model_id : String
   api_version : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -18,7 +18,7 @@ fn cartesia_transcription_value(
   base_url~ : String,
   api_version~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> CartesiaTranscriptionModel {
   {
@@ -147,4 +147,13 @@ fn CartesiaTranscriptionModel::request_headers(
     ),
     ["ai-sdk/\{self.provider_name}/\{VERSION}"],
   )
+}
+
+///|
+pub extend CartesiaTranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  do_stream,
+  model_id,
 }

@@ -6,7 +6,7 @@ priv struct MiniMaxVideoModel {
   api_key : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn minimax_video_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> MiniMaxVideoModel {
   {
@@ -160,7 +160,7 @@ fn MiniMaxVideoModel::create_v4_body(
   options : @provider.VideoModelV4CallOptions,
   provider_options : MiniMaxVideoModelOptions,
   warnings : Array[@provider.Warning],
-) -> (Json, Int, Array[String]) {
+) -> (Json, Int32, Array[String]) {
   if options.fps is Some(_) {
     warnings.push(
       @provider.Warning::Unsupported(

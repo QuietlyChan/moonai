@@ -1,7 +1,7 @@
 ///|
 priv struct MockTranscriptionAudioStream {
   chunks : Array[@provider.AudioChunk]
-  index : Ref[Int]
+  index : Ref[Int32]
   cancelled : Ref[Bool]
 }
 
@@ -33,15 +33,15 @@ impl @provider.AudioStream for MockTranscriptionAudioStream with fn cancel(self)
 priv struct MockTranscriptionWebSocketConnection {
   sent : Array[String]
   incoming : Array[@provider_utils.WebSocketReceive]
-  next_incoming : Ref[Int]
+  next_incoming : Ref[Int32]
   closed : Ref[Bool]
-  expected_sends_before_receive : Int
+  expected_sends_before_receive : Int32
 }
 
 ///|
 fn MockTranscriptionWebSocketConnection::new(
   incoming : Array[@provider_utils.WebSocketReceive],
-  expected_sends_before_receive? : Int = 3,
+  expected_sends_before_receive~ : Int32 = 3,
 ) -> MockTranscriptionWebSocketConnection {
   {
     sent: [],

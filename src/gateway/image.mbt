@@ -7,7 +7,7 @@ struct GatewayImageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn gateway_image_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> GatewayImageModel {
   {
@@ -149,7 +149,7 @@ pub impl @provider.ImageModelV4 for GatewayImageModel with fn model_id(self) -> 
 ///|
 pub impl @provider.ImageModelV4 for GatewayImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   None
 }
 
@@ -227,4 +227,13 @@ pub impl @provider.ImageModelV4 for GatewayImageModel with fn do_generate(
       ),
     ),
   )
+}
+
+///|
+pub extend GatewayImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
 }

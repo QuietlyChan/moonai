@@ -4,11 +4,12 @@
 /// `Enabled` requests generated-token log probabilities, while `Top` requests
 /// the top N candidates at each position. `Disabled` is useful when composing
 /// an options value programmatically and is encoded as `false`.
+#derive(Debug, Eq)
 pub(all) enum OpenAILogprobs {
   OpenAILogprobsEnabled
   OpenAILogprobsDisabled
-  OpenAILogprobsTop(Int)
-} derive(Debug, Eq)
+  OpenAILogprobsTop(Int32)
+}
 
 ///|
 /// Request generated-token log probabilities.
@@ -24,7 +25,7 @@ pub fn OpenAILogprobs::disabled() -> OpenAILogprobs {
 
 ///|
 /// Request the top `value` candidate log probabilities at each position.
-pub fn OpenAILogprobs::top(value : Int) -> OpenAILogprobs raise {
+pub fn OpenAILogprobs::top(value : Int32) -> OpenAILogprobs raise {
   guard value >= 0 else { fail("OpenAI logprobs must be non-negative") }
   OpenAILogprobsTop(value)
 }
@@ -40,10 +41,11 @@ fn OpenAILogprobs::to_json(self : OpenAILogprobs) -> Json {
 
 ///|
 /// Prompt-cache mode for GPT-5.6 and later models.
+#derive(Debug, Eq)
 pub(all) enum OpenAIPromptCacheMode {
   OpenAIPromptCacheImplicit
   OpenAIPromptCacheExplicit
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIPromptCacheMode::wire_name(self : OpenAIPromptCacheMode) -> String {
@@ -55,9 +57,10 @@ fn OpenAIPromptCacheMode::wire_name(self : OpenAIPromptCacheMode) -> String {
 
 ///|
 /// Prompt-cache TTL currently supported by OpenAI.
+#derive(Debug, Eq)
 pub(all) enum OpenAIPromptCacheTtl {
   OpenAIPromptCacheThirtyMinutes
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIPromptCacheTtl::wire_name(self : OpenAIPromptCacheTtl) -> String {
@@ -68,10 +71,11 @@ fn OpenAIPromptCacheTtl::wire_name(self : OpenAIPromptCacheTtl) -> String {
 
 ///|
 /// Structured prompt-cache settings shared by Responses and Chat models.
+#derive(Debug, Eq)
 pub(all) struct OpenAIPromptCacheOptions {
   mode : OpenAIPromptCacheMode?
   ttl : OpenAIPromptCacheTtl?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct prompt-cache settings.
@@ -100,6 +104,7 @@ fn OpenAIPromptCacheOptions::to_json(self : OpenAIPromptCacheOptions) -> Json {
 
 ///|
 /// OpenAI service tier selection.
+#derive(Debug, Eq)
 pub(all) enum OpenAIServiceTier {
   OpenAIServiceTierAuto
   OpenAIServiceTierFlex
@@ -107,7 +112,7 @@ pub(all) enum OpenAIServiceTier {
   OpenAIServiceTierFast
   OpenAIServiceTierUltrafast
   OpenAIServiceTierDefault
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIServiceTier::wire_name(self : OpenAIServiceTier) -> String {
@@ -125,10 +130,11 @@ fn OpenAIServiceTier::wire_name(self : OpenAIServiceTier) -> String {
 
 ///|
 /// Reasoning mode available on the newest OpenAI reasoning models.
+#derive(Debug, Eq)
 pub(all) enum OpenAIReasoningMode {
   OpenAIReasoningStandard
   OpenAIReasoningPro
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIReasoningMode::wire_name(self : OpenAIReasoningMode) -> String {
@@ -140,11 +146,12 @@ fn OpenAIReasoningMode::wire_name(self : OpenAIReasoningMode) -> String {
 
 ///|
 /// Reasoning context selection for Responses requests.
+#derive(Debug, Eq)
 pub(all) enum OpenAIReasoningContext {
   OpenAIReasoningContextAuto
   OpenAIReasoningContextCurrentTurn
   OpenAIReasoningContextAllTurns
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIReasoningContext::wire_name(self : OpenAIReasoningContext) -> String {
@@ -157,11 +164,12 @@ fn OpenAIReasoningContext::wire_name(self : OpenAIReasoningContext) -> String {
 
 ///|
 /// Text verbosity for OpenAI Responses and Chat requests.
+#derive(Debug, Eq)
 pub(all) enum OpenAITextVerbosity {
   OpenAITextVerbosityLow
   OpenAITextVerbosityMedium
   OpenAITextVerbosityHigh
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAITextVerbosity::wire_name(self : OpenAITextVerbosity) -> String {
@@ -174,10 +182,11 @@ fn OpenAITextVerbosity::wire_name(self : OpenAITextVerbosity) -> String {
 
 ///|
 /// Retention policy for OpenAI prompt caching.
+#derive(Debug, Eq)
 pub(all) enum OpenAIPromptCacheRetention {
   OpenAIPromptCacheInMemory
   OpenAIPromptCacheTwentyFourHours
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIPromptCacheRetention::wire_name(
@@ -191,11 +200,12 @@ fn OpenAIPromptCacheRetention::wire_name(
 
 ///|
 /// System-role handling for OpenAI Chat and Responses models.
+#derive(Debug, Eq)
 pub(all) enum OpenAISystemMessageMode {
   OpenAISystemMessageSystem
   OpenAISystemMessageDeveloper
   OpenAISystemMessageRemove
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAISystemMessageMode::wire_name(self : OpenAISystemMessageMode) -> String {
@@ -208,10 +218,11 @@ fn OpenAISystemMessageMode::wire_name(self : OpenAISystemMessageMode) -> String 
 
 ///|
 /// Responses output truncation behavior.
+#derive(Debug, Eq)
 pub(all) enum OpenAITruncation {
   OpenAITruncationAuto
   OpenAITruncationDisabled
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAITruncation::wire_name(self : OpenAITruncation) -> String {
@@ -223,9 +234,10 @@ fn OpenAITruncation::wire_name(self : OpenAITruncation) -> String {
 
 ///|
 /// An item in Responses server-side context management.
+#derive(Debug, Eq)
 pub(all) enum OpenAIContextManagement {
   OpenAIContextCompaction(compact_threshold~ : Double)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a server-side compaction setting.
@@ -251,10 +263,11 @@ fn OpenAIContextManagement::to_json(self : OpenAIContextManagement) -> Json {
 
 ///|
 /// Mode used by Responses `allowed_tools`.
+#derive(Debug, Eq)
 pub(all) enum OpenAIAllowedToolsMode {
   OpenAIAllowedToolsAuto
   OpenAIAllowedToolsRequired
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIAllowedToolsMode::wire_name(self : OpenAIAllowedToolsMode) -> String {
@@ -266,10 +279,11 @@ fn OpenAIAllowedToolsMode::wire_name(self : OpenAIAllowedToolsMode) -> String {
 
 ///|
 /// Restrict the callable tools while preserving the complete tools list.
+#derive(Debug, Eq)
 pub(all) struct OpenAIAllowedTools {
   tool_names : Array[String]
   mode : OpenAIAllowedToolsMode?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an allowed-tools restriction.
@@ -302,6 +316,7 @@ fn OpenAIAllowedTools::to_json(self : OpenAIAllowedTools) -> Json {
 
 ///|
 /// One OpenAI Responses `include` value.
+#derive(Debug, Eq)
 pub(all) enum OpenAIResponsesInclude {
   OpenAIIncludeReasoningEncryptedContent
   OpenAIIncludeFileSearchCallResults
@@ -311,7 +326,7 @@ pub(all) enum OpenAIResponsesInclude {
   OpenAIIncludeComputerCallOutputImageUrl
   OpenAIIncludeMessageInputImageImageUrl
   OpenAIIncludeMessageOutputTextLogprobs
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIResponsesInclude::wire_name(self : OpenAIResponsesInclude) -> String {
@@ -351,12 +366,13 @@ fn openai_metadata_json(values : Map[String, String]) -> Json {
 /// This mirrors AI SDK's `OpenAILanguageModelResponsesOptions`. Standard
 /// generation controls remain on `@provider.ChatCallOptions`; this type only
 /// contains OpenAI-specific fields.
+#derive(Debug)
 pub(all) struct OpenAILanguageModelResponsesOptions {
   conversation : String?
   include_values : Array[OpenAIResponsesInclude]?
   instructions : String?
   logprobs : OpenAILogprobs?
-  max_tool_calls : Int?
+  max_tool_calls : Int32?
   metadata : Json?
   parallel_tool_calls : Bool?
   previous_response_id : String?
@@ -379,7 +395,7 @@ pub(all) struct OpenAILanguageModelResponsesOptions {
   force_reasoning : Bool?
   context_management : Array[OpenAIContextManagement]?
   allowed_tools : OpenAIAllowedTools?
-} derive(Debug)
+}
 
 ///|
 /// Construct typed Responses options. Values are encoded in the provider
@@ -389,7 +405,7 @@ pub fn OpenAILanguageModelResponsesOptions::new(
   include_values? : Array[OpenAIResponsesInclude],
   instructions? : String,
   logprobs? : OpenAILogprobs,
-  max_tool_calls? : Int,
+  max_tool_calls? : Int32,
   metadata? : Json,
   parallel_tool_calls? : Bool,
   previous_response_id? : String,
@@ -454,7 +470,7 @@ pub fn OpenAILanguageModelResponsesOptions::new(
 /// Convert typed Responses options to a provider-options namespace.
 pub fn OpenAILanguageModelResponsesOptions::to_provider_options(
   self : OpenAILanguageModelResponsesOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map(
     [
@@ -560,13 +576,14 @@ pub fn OpenAILanguageModelResponsesOptions::to_provider_options(
 
 ///|
 /// Typed provider options for the official OpenAI Chat Completions model.
+#derive(Debug)
 pub(all) struct OpenAILanguageModelChatOptions {
   logit_bias : Map[String, Double]?
   logprobs : OpenAILogprobs?
   parallel_tool_calls : Bool?
   user : String?
   reasoning_effort : String?
-  max_completion_tokens : Int?
+  max_completion_tokens : Int32?
   store : Bool?
   metadata : Map[String, String]?
   prediction : Json?
@@ -579,7 +596,7 @@ pub(all) struct OpenAILanguageModelChatOptions {
   safety_identifier : String?
   system_message_mode : OpenAISystemMessageMode?
   force_reasoning : Bool?
-} derive(Debug)
+}
 
 ///|
 /// Construct typed Chat Completions options.
@@ -589,7 +606,7 @@ pub fn OpenAILanguageModelChatOptions::new(
   parallel_tool_calls? : Bool,
   user? : String,
   reasoning_effort? : String,
-  max_completion_tokens? : Int,
+  max_completion_tokens? : Int32,
   store? : Bool,
   metadata? : Map[String, String],
   prediction? : Json,
@@ -632,7 +649,7 @@ pub fn OpenAILanguageModelChatOptions::new(
 /// Convert typed Chat Completions options to a provider-options namespace.
 pub fn OpenAILanguageModelChatOptions::to_provider_options(
   self : OpenAILanguageModelChatOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   let logit_bias = match self.logit_bias {
     Some(value) => {
@@ -707,13 +724,14 @@ pub fn OpenAILanguageModelChatOptions::to_provider_options(
 
 ///|
 /// Typed provider options for the official OpenAI legacy Completion model.
+#derive(Debug)
 pub(all) struct OpenAILanguageModelCompletionOptions {
   echo : Bool?
   logit_bias : Map[String, Double]?
   suffix : String?
   user : String?
   logprobs : OpenAILogprobs?
-} derive(Debug)
+}
 
 ///|
 /// Construct typed legacy Completion options.
@@ -731,7 +749,7 @@ pub fn OpenAILanguageModelCompletionOptions::new(
 /// Convert typed Completion options to a provider-options namespace.
 pub fn OpenAILanguageModelCompletionOptions::to_provider_options(
   self : OpenAILanguageModelCompletionOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   let logit_bias = match self.logit_bias {
     Some(value) => {
@@ -767,15 +785,16 @@ pub fn OpenAILanguageModelCompletionOptions::to_provider_options(
 
 ///|
 /// Typed provider options for OpenAI embedding models.
+#derive(Debug, Eq)
 pub(all) struct OpenAIEmbeddingModelOptions {
-  dimensions : Int?
+  dimensions : Int32?
   user : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI embedding options.
 pub fn OpenAIEmbeddingModelOptions::new(
-  dimensions? : Int,
+  dimensions? : Int32,
   user? : String,
 ) -> OpenAIEmbeddingModelOptions raise {
   if dimensions is Some(value) && value < 1 {
@@ -788,7 +807,7 @@ pub fn OpenAIEmbeddingModelOptions::new(
 /// Convert typed embedding options to a provider-options namespace.
 pub fn OpenAIEmbeddingModelOptions::to_provider_options(
   self : OpenAIEmbeddingModelOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   openai_typed_namespace(
     provider_name,
@@ -807,6 +826,7 @@ pub fn OpenAIEmbeddingModelOptions::to_provider_options(
 
 ///|
 /// Quality setting for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageQuality {
   OpenAIImageQualityStandard
   OpenAIImageQualityHd
@@ -816,7 +836,7 @@ pub(all) enum OpenAIImageQuality {
   OpenAIImageQualityXHigh
   OpenAIImageQualityMax
   OpenAIImageQualityAuto
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageQuality::wire_name(self : OpenAIImageQuality) -> String {
@@ -835,11 +855,12 @@ fn OpenAIImageQuality::wire_name(self : OpenAIImageQuality) -> String {
 
 ///|
 /// Background behavior for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageBackground {
   OpenAIImageBackgroundTransparent
   OpenAIImageBackgroundOpaque
   OpenAIImageBackgroundAuto
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageBackground::wire_name(self : OpenAIImageBackground) -> String {
@@ -852,11 +873,12 @@ fn OpenAIImageBackground::wire_name(self : OpenAIImageBackground) -> String {
 
 ///|
 /// Output format for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageOutputFormat {
   OpenAIImageOutputPng
   OpenAIImageOutputJpeg
   OpenAIImageOutputWebp
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageOutputFormat::wire_name(self : OpenAIImageOutputFormat) -> String {
@@ -869,10 +891,11 @@ fn OpenAIImageOutputFormat::wire_name(self : OpenAIImageOutputFormat) -> String 
 
 ///|
 /// Style for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageStyle {
   OpenAIImageStyleVivid
   OpenAIImageStyleNatural
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageStyle::wire_name(self : OpenAIImageStyle) -> String {
@@ -884,10 +907,11 @@ fn OpenAIImageStyle::wire_name(self : OpenAIImageStyle) -> String {
 
 ///|
 /// Content-moderation level for OpenAI image generation.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageModeration {
   OpenAIImageModerationAuto
   OpenAIImageModerationLow
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageModeration::wire_name(self : OpenAIImageModeration) -> String {
@@ -899,10 +923,11 @@ fn OpenAIImageModeration::wire_name(self : OpenAIImageModeration) -> String {
 
 ///|
 /// Input fidelity for OpenAI image editing.
+#derive(Debug, Eq)
 pub(all) enum OpenAIImageInputFidelity {
   OpenAIImageInputFidelityHigh
   OpenAIImageInputFidelityLow
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAIImageInputFidelity::wire_name(
@@ -915,7 +940,7 @@ fn OpenAIImageInputFidelity::wire_name(
 }
 
 ///|
-fn validate_openai_image_compression(value : Int?) -> Unit raise {
+fn validate_openai_image_compression(value : Int32?) -> Unit raise {
   if value is Some(number) && (number < 0 || number > 100) {
     fail("OpenAI image output_compression must be between 0 and 100")
   }
@@ -927,7 +952,7 @@ fn openai_image_option_namespace(
   quality : OpenAIImageQuality?,
   background : OpenAIImageBackground?,
   output_format : OpenAIImageOutputFormat?,
-  output_compression : Int?,
+  output_compression : Int32?,
   user : String?,
   style : OpenAIImageStyle?,
   moderation : OpenAIImageModeration?,
@@ -968,13 +993,14 @@ fn openai_image_option_namespace(
 
 ///|
 /// Common typed provider options for OpenAI image models.
+#derive(Debug, Eq)
 pub(all) struct OpenAIImageModelOptions {
   quality : OpenAIImageQuality?
   background : OpenAIImageBackground?
   output_format : OpenAIImageOutputFormat?
-  output_compression : Int?
+  output_compression : Int32?
   user : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct common OpenAI image options.
@@ -982,7 +1008,7 @@ pub fn OpenAIImageModelOptions::new(
   quality? : OpenAIImageQuality,
   background? : OpenAIImageBackground,
   output_format? : OpenAIImageOutputFormat,
-  output_compression? : Int,
+  output_compression? : Int32,
   user? : String,
 ) -> OpenAIImageModelOptions raise {
   validate_openai_image_compression(output_compression)
@@ -993,7 +1019,7 @@ pub fn OpenAIImageModelOptions::new(
 /// Convert common image options to a provider-options namespace.
 pub fn OpenAIImageModelOptions::to_provider_options(
   self : OpenAIImageModelOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   openai_image_option_namespace(
     provider_name,
@@ -1010,15 +1036,16 @@ pub fn OpenAIImageModelOptions::to_provider_options(
 
 ///|
 /// Typed provider options for OpenAI image generation requests.
+#derive(Debug, Eq)
 pub(all) struct OpenAIImageModelGenerationOptions {
   quality : OpenAIImageQuality?
   background : OpenAIImageBackground?
   output_format : OpenAIImageOutputFormat?
-  output_compression : Int?
+  output_compression : Int32?
   user : String?
   style : OpenAIImageStyle?
   moderation : OpenAIImageModeration?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI image-generation options.
@@ -1026,7 +1053,7 @@ pub fn OpenAIImageModelGenerationOptions::new(
   quality? : OpenAIImageQuality,
   background? : OpenAIImageBackground,
   output_format? : OpenAIImageOutputFormat,
-  output_compression? : Int,
+  output_compression? : Int32,
   user? : String,
   style? : OpenAIImageStyle,
   moderation? : OpenAIImageModeration,
@@ -1047,7 +1074,7 @@ pub fn OpenAIImageModelGenerationOptions::new(
 /// Convert typed image-generation options to a provider namespace.
 pub fn OpenAIImageModelGenerationOptions::to_provider_options(
   self : OpenAIImageModelGenerationOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   openai_image_option_namespace(
     provider_name,
@@ -1064,14 +1091,15 @@ pub fn OpenAIImageModelGenerationOptions::to_provider_options(
 
 ///|
 /// Typed provider options for OpenAI image editing requests.
+#derive(Debug, Eq)
 pub(all) struct OpenAIImageModelEditOptions {
   quality : OpenAIImageQuality?
   background : OpenAIImageBackground?
   output_format : OpenAIImageOutputFormat?
-  output_compression : Int?
+  output_compression : Int32?
   user : String?
   input_fidelity : OpenAIImageInputFidelity?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI image-edit options.
@@ -1079,7 +1107,7 @@ pub fn OpenAIImageModelEditOptions::new(
   quality? : OpenAIImageQuality,
   background? : OpenAIImageBackground,
   output_format? : OpenAIImageOutputFormat,
-  output_compression? : Int,
+  output_compression? : Int32,
   user? : String,
   input_fidelity? : OpenAIImageInputFidelity,
 ) -> OpenAIImageModelEditOptions raise {
@@ -1098,7 +1126,7 @@ pub fn OpenAIImageModelEditOptions::new(
 /// Convert typed image-edit options to a provider namespace.
 pub fn OpenAIImageModelEditOptions::to_provider_options(
   self : OpenAIImageModelEditOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   openai_image_option_namespace(
     provider_name,
@@ -1115,10 +1143,11 @@ pub fn OpenAIImageModelEditOptions::to_provider_options(
 
 ///|
 /// Typed provider options for OpenAI speech synthesis models.
+#derive(Debug, Eq)
 pub(all) struct OpenAISpeechModelOptions {
   instructions : String?
   speed : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI speech options.
@@ -1136,7 +1165,7 @@ pub fn OpenAISpeechModelOptions::new(
 /// Convert typed speech options to a provider-options namespace.
 pub fn OpenAISpeechModelOptions::to_provider_options(
   self : OpenAISpeechModelOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   openai_typed_namespace(
     provider_name,
@@ -1155,10 +1184,11 @@ pub fn OpenAISpeechModelOptions::to_provider_options(
 
 ///|
 /// Timestamp granularity requested from OpenAI transcription models.
+#derive(Debug, Eq)
 pub(all) enum OpenAITranscriptionTimestampGranularity {
   OpenAITranscriptionWord
   OpenAITranscriptionSegment
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAITranscriptionTimestampGranularity::wire_name(
@@ -1172,13 +1202,14 @@ fn OpenAITranscriptionTimestampGranularity::wire_name(
 
 ///|
 /// Latency/accuracy tradeoff for realtime OpenAI transcription.
+#derive(Debug, Eq)
 pub(all) enum OpenAITranscriptionStreamingDelay {
   OpenAITranscriptionDelayMinimal
   OpenAITranscriptionDelayLow
   OpenAITranscriptionDelayMedium
   OpenAITranscriptionDelayHigh
   OpenAITranscriptionDelayXHigh
-} derive(Debug, Eq)
+}
 
 ///|
 fn OpenAITranscriptionStreamingDelay::wire_name(
@@ -1195,10 +1226,11 @@ fn OpenAITranscriptionStreamingDelay::wire_name(
 
 ///|
 /// Provider options specific to OpenAI realtime transcription.
+#derive(Debug, Eq)
 pub(all) struct OpenAITranscriptionStreamingOptions {
   delay : OpenAITranscriptionStreamingDelay?
   include_values : Array[String]?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed realtime transcription options.
@@ -1234,6 +1266,7 @@ fn OpenAITranscriptionStreamingOptions::to_json(
 
 ///|
 /// Typed provider options for OpenAI transcription models.
+#derive(Debug, Eq)
 pub(all) struct OpenAITranscriptionModelOptions {
   include_values : Array[String]?
   language : String?
@@ -1241,7 +1274,7 @@ pub(all) struct OpenAITranscriptionModelOptions {
   temperature : Double?
   timestamp_granularities : Array[OpenAITranscriptionTimestampGranularity]?
   streaming : OpenAITranscriptionStreamingOptions?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct typed OpenAI transcription options.
@@ -1270,7 +1303,7 @@ pub fn OpenAITranscriptionModelOptions::new(
 /// Convert typed transcription options to a provider-options namespace.
 pub fn OpenAITranscriptionModelOptions::to_provider_options(
   self : OpenAITranscriptionModelOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   openai_typed_namespace(
     provider_name,
@@ -1312,3 +1345,192 @@ pub fn OpenAITranscriptionModelOptions::to_provider_options(
     ),
   )
 }
+
+///|
+pub extend OpenAILogprobs with Debug::{to_repr}
+
+///|
+pub extend OpenAILogprobs with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIPromptCacheMode with Debug::{to_repr}
+
+///|
+pub extend OpenAIPromptCacheMode with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIPromptCacheTtl with Debug::{to_repr}
+
+///|
+pub extend OpenAIPromptCacheTtl with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIPromptCacheOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAIPromptCacheOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIServiceTier with Debug::{to_repr}
+
+///|
+pub extend OpenAIServiceTier with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIReasoningMode with Debug::{to_repr}
+
+///|
+pub extend OpenAIReasoningMode with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIReasoningContext with Debug::{to_repr}
+
+///|
+pub extend OpenAIReasoningContext with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAITextVerbosity with Debug::{to_repr}
+
+///|
+pub extend OpenAITextVerbosity with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIPromptCacheRetention with Debug::{to_repr}
+
+///|
+pub extend OpenAIPromptCacheRetention with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAISystemMessageMode with Debug::{to_repr}
+
+///|
+pub extend OpenAISystemMessageMode with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAITruncation with Debug::{to_repr}
+
+///|
+pub extend OpenAITruncation with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIContextManagement with Debug::{to_repr}
+
+///|
+pub extend OpenAIContextManagement with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIAllowedToolsMode with Debug::{to_repr}
+
+///|
+pub extend OpenAIAllowedToolsMode with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIAllowedTools with Debug::{to_repr}
+
+///|
+pub extend OpenAIAllowedTools with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIResponsesInclude with Debug::{to_repr}
+
+///|
+pub extend OpenAIResponsesInclude with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAILanguageModelResponsesOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAILanguageModelChatOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAILanguageModelCompletionOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAIEmbeddingModelOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAIEmbeddingModelOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageQuality with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageQuality with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageBackground with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageBackground with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageOutputFormat with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageOutputFormat with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageStyle with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageStyle with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageModeration with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageModeration with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageInputFidelity with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageInputFidelity with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageModelOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageModelOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageModelGenerationOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageModelGenerationOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAIImageModelEditOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAIImageModelEditOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAISpeechModelOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAISpeechModelOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAITranscriptionTimestampGranularity with Debug::{to_repr}
+
+///|
+pub extend OpenAITranscriptionTimestampGranularity with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAITranscriptionStreamingDelay with Debug::{to_repr}
+
+///|
+pub extend OpenAITranscriptionStreamingDelay with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAITranscriptionStreamingOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAITranscriptionStreamingOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAITranscriptionModelOptions with Debug::{to_repr}
+
+///|
+pub extend OpenAITranscriptionModelOptions with Eq::{not_equal, equal}

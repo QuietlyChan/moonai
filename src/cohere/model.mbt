@@ -4,7 +4,7 @@ pub struct CohereProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
 }
@@ -13,10 +13,10 @@ pub struct CohereProvider {
 /// Create a Cohere provider. The API key defaults to the `COHERE_API_KEY`
 /// environment variable.
 pub fn create_cohere(
-  api_key? : String = "",
-  base_url? : String = "https://api.cohere.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.cohere.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> CohereProvider {
@@ -35,10 +35,10 @@ pub fn create_cohere(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createCohere(
-  api_key? : String = "",
-  base_url? : String = "https://api.cohere.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.cohere.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> CohereProvider {
@@ -227,10 +227,10 @@ pub impl @provider.ProviderV4 for CohereProvider with fn skills(_self) {
 /// Construct the default V4 Cohere language model directly.
 pub fn cohere(
   model_id : CohereChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.cohere.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.cohere.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {
@@ -242,4 +242,14 @@ pub fn cohere(
     http_transport?,
     id_generator?,
   ).language_model(model_id)
+}
+
+///|
+pub extend CohereProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
 }

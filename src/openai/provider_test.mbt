@@ -5,7 +5,7 @@ async fn bind_test_server() -> @http.Server {
 
 ///|
 test "OpenAI public factory exposes the AI SDK provider contract" {
-  let provider = createOpenAI(
+  let provider = @openai.createOpenAI(
     api_key="test-key",
     base_url="https://example.test/v1",
   )
@@ -85,7 +85,7 @@ async test "official OpenAI provider composes chat and responses protocols" {
         max_connections=2,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       organization="org-test",
@@ -158,7 +158,7 @@ async test "OpenAI Chat retries provider errors before output without leaking st
         max_connections=2,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -215,7 +215,7 @@ async test "OpenAI Responses V4 preserves native stream usage and finish reason"
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -297,7 +297,7 @@ async test "OpenAI Responses V4 preserves item metadata on stream parts" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -402,7 +402,7 @@ async test "official OpenAI provider composes non-streaming generation" {
         max_connections=2,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -447,7 +447,7 @@ async test "OpenAI Responses maps an early provider error to APICallError" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -496,7 +496,7 @@ async test "OpenAI Responses maps response.failed before output to APICallError"
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -540,7 +540,7 @@ async test "OpenAI Responses rejects a Chat Completions SSE payload" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -587,7 +587,7 @@ async test "OpenAI Responses keeps post-output errors in the stream" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -637,7 +637,7 @@ async test "OpenAI Responses maps errors flushed with acceptance to APICallError
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -689,7 +689,7 @@ async test "OpenAI Responses keeps post-acceptance errors in the stream" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -751,7 +751,7 @@ async test "OpenAI Responses retries before acceptance without leaking decoder s
         max_connections=2,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -824,7 +824,7 @@ async test "OpenAI Responses continues normally after acceptance" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -880,7 +880,7 @@ async test "official OpenAI provider exposes embedding models" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -923,7 +923,7 @@ async test "official OpenAI provider exposes completion models" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -984,7 +984,7 @@ async test "official OpenAI image models apply model-specific limits and format"
         max_connections=3,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -1031,7 +1031,7 @@ async test "official OpenAI completion model owns streaming decoding" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -1102,7 +1102,7 @@ async test "official OpenAI image edits use provider-owned multipart options" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,

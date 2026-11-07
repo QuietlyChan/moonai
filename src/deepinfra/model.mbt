@@ -4,7 +4,7 @@ pub struct DeepInfraProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv id_generator : @provider_utils.IdGenerator
   priv http_transport : &@provider_utils.HttpTransport
 }
@@ -13,10 +13,10 @@ pub struct DeepInfraProvider {
 /// Create a DeepInfra provider. The API key defaults to the
 /// `DEEPINFRA_API_KEY` environment variable.
 pub fn create_deepinfra(
-  api_key? : String = "",
-  base_url? : String = "https://api.deepinfra.com/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.deepinfra.com/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> DeepInfraProvider {
@@ -35,10 +35,10 @@ pub fn create_deepinfra(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createDeepInfra(
-  api_key? : String = "",
-  base_url? : String = "https://api.deepinfra.com/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.deepinfra.com/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> DeepInfraProvider {
@@ -259,10 +259,10 @@ pub impl @provider.ProviderV4 for DeepInfraProvider with fn skills(_self) {
 /// Construct the default V4 DeepInfra language model directly.
 pub fn deepinfra(
   model_id : DeepInfraChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.deepinfra.com/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.deepinfra.com/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {
@@ -274,4 +274,14 @@ pub fn deepinfra(
     http_transport?,
     id_generator?,
   ).language_model(model_id)
+}
+
+///|
+pub extend DeepInfraProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  reranking_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
 }

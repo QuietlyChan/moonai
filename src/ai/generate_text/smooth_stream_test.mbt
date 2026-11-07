@@ -1,6 +1,6 @@
 ///|
 test "smooth transformer re-chunks text deltas at word boundaries" {
-  let smoother = SmoothTextTransformer::new(chunking=SmoothWord)
+  let smoother = @generate_text.SmoothTextTransformer::new(chunking=SmoothWord)
   let first = smoother.process(
     @provider.V4TextDelta(id="t1", delta="Hello wor", provider_metadata=Map([])),
   )
@@ -25,7 +25,7 @@ test "smooth transformer re-chunks text deltas at word boundaries" {
 
 ///|
 test "smooth transformer flushes buffered text on non-text events" {
-  let smoother = SmoothTextTransformer::new(chunking=SmoothWord)
+  let smoother = @generate_text.SmoothTextTransformer::new(chunking=SmoothWord)
   let _ = smoother.process(
     @provider.V4TextDelta(
       id="t1",
@@ -54,7 +54,7 @@ test "smooth transformer flushes buffered text on non-text events" {
 
 ///|
 test "smooth transformer keeps provider metadata on the flushed tail only" {
-  let smoother = SmoothTextTransformer::new(chunking=SmoothLine)
+  let smoother = @generate_text.SmoothTextTransformer::new(chunking=SmoothLine)
   let metadata : Map[String, Json] = Map([
     ("anthropic", Json::object(Map([("signature", Json::string("sig"))]))),
   ])
@@ -90,7 +90,7 @@ test "smooth transformer keeps provider metadata on the flushed tail only" {
 
 ///|
 test "smooth transformer flushes when the delta id changes" {
-  let smoother = SmoothTextTransformer::new(chunking=SmoothWord)
+  let smoother = @generate_text.SmoothTextTransformer::new(chunking=SmoothWord)
   let _ = smoother.process(
     @provider.V4TextDelta(id="a", delta="first tail", provider_metadata=Map([])),
   )

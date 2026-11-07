@@ -1,20 +1,22 @@
 ///|
 /// LanguageModelMessageRole of one normalized provider-facing language-model message.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelMessageRole {
   System
   User
   Assistant
   Tool(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Provider-specific identifiers for one logical uploaded file.
 ///
 /// A single reference can retain identifiers from multiple providers, for
 /// example `openai -> file-abc` and `anthropic -> file-xyz`.
+#derive(Debug, Eq)
 pub(all) struct ProviderReference {
   entries : Map[String, String]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a provider reference from provider-to-file-id entries.
@@ -70,6 +72,7 @@ pub fn LanguageModelMessageRole::to_openai_string(
 
 ///|
 /// A normalized content part consumed by provider language models.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelContentPart {
   Text(String)
   ImageUrl(String)
@@ -98,7 +101,7 @@ pub(all) enum LanguageModelContentPart {
     part~ : LanguageModelContentPart,
     options~ : Map[String, Json]
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a text content part.
@@ -138,8 +141,8 @@ pub fn LanguageModelContentPart::audio_data(
 /// Construct a URL-backed file content part.
 pub fn LanguageModelContentPart::file_url(
   url~ : String,
-  media_type? : String = "application/octet-stream",
-  filename? : String = "",
+  media_type~ : String = "application/octet-stream",
+  filename~ : String = "",
 ) -> LanguageModelContentPart {
   FileUrl(url~, media_type~, filename~)
 }
@@ -158,8 +161,8 @@ pub fn LanguageModelContentPart::file_data(
 /// Construct a provider-reference-backed file content part.
 pub fn LanguageModelContentPart::file_reference(
   reference~ : ProviderReference,
-  media_type? : String = "application/octet-stream",
-  filename? : String = "",
+  media_type~ : String = "application/octet-stream",
+  filename~ : String = "",
 ) -> LanguageModelContentPart {
   FileReference(reference~, media_type~, filename~)
 }
@@ -302,6 +305,7 @@ fn merge_content_provider_options(
 ///
 /// High-level APIs accept `ModelMessage` from `provider_utils`; only the
 /// `ai/prompt` conversion layer constructs this type for provider calls.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelMessage {
   role : LanguageModelMessageRole
   content : String
@@ -309,7 +313,7 @@ pub(all) struct LanguageModelMessage {
   tool_calls : Array[ToolCall]
   reasoning_content : String?
   provider_options : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// A provider-facing prompt made up of normalized language-model messages.
@@ -320,10 +324,10 @@ pub type LanguageModelPrompt = Array[LanguageModelMessage]
 pub fn LanguageModelMessage::new(
   role : LanguageModelMessageRole,
   content~ : String,
-  parts? : Array[LanguageModelContentPart] = [],
-  tool_calls? : Array[ToolCall] = [],
+  parts~ : Array[LanguageModelContentPart] = [],
+  tool_calls~ : Array[ToolCall] = [],
   reasoning_content? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   { role, content, parts, tool_calls, reasoning_content, provider_options, }
 }
@@ -332,7 +336,7 @@ pub fn LanguageModelMessage::new(
 /// Construct a system message.
 pub fn LanguageModelMessage::system(
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(System, content~, provider_options~)
 }
@@ -341,7 +345,7 @@ pub fn LanguageModelMessage::system(
 /// Construct a user message.
 pub fn LanguageModelMessage::user(
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(User, content~, provider_options~)
 }
@@ -350,7 +354,7 @@ pub fn LanguageModelMessage::user(
 /// Construct a user message from multimodal content parts.
 pub fn LanguageModelMessage::user_parts(
   parts : Array[LanguageModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(User, content="", parts~, provider_options~)
 }
@@ -359,9 +363,9 @@ pub fn LanguageModelMessage::user_parts(
 /// Construct an assistant message.
 pub fn LanguageModelMessage::assistant(
   content : String,
-  tool_calls? : Array[ToolCall] = [],
+  tool_calls~ : Array[ToolCall] = [],
   reasoning_content? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(
     Assistant,
@@ -376,9 +380,9 @@ pub fn LanguageModelMessage::assistant(
 /// Construct an assistant message from multimodal content parts.
 pub fn LanguageModelMessage::assistant_parts(
   parts : Array[LanguageModelContentPart],
-  tool_calls? : Array[ToolCall] = [],
+  tool_calls~ : Array[ToolCall] = [],
   reasoning_content? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(
     Assistant,
@@ -395,7 +399,7 @@ pub fn LanguageModelMessage::assistant_parts(
 pub fn LanguageModelMessage::tool(
   tool_call_id : String,
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(Tool(tool_call_id), content~, provider_options~)
 }
@@ -405,7 +409,7 @@ pub fn LanguageModelMessage::tool(
 pub fn LanguageModelMessage::tool_parts(
   tool_call_id : String,
   parts : Array[LanguageModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(
     Tool(tool_call_id),
@@ -420,7 +424,7 @@ pub fn LanguageModelMessage::tool_parts(
 /// parts without forcing a synthetic shared call id.
 pub fn LanguageModelMessage::tool_content(
   parts : Array[LanguageModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(Tool(""), content="", parts~, provider_options~)
 }
@@ -475,24 +479,25 @@ pub fn LanguageModelMessage::with_provider_options(
 
 ///|
 /// Standard token accounting returned by providers.
+#derive(Debug, Eq)
 pub(all) struct Usage {
-  input_tokens : Int
-  output_tokens : Int
-  total_tokens : Int
-  reasoning_tokens : Int
-  cached_input_tokens : Int
-  cache_write_input_tokens : Int
-} derive(Debug, Eq)
+  input_tokens : Int32
+  output_tokens : Int32
+  total_tokens : Int32
+  reasoning_tokens : Int32
+  cached_input_tokens : Int32
+  cache_write_input_tokens : Int32
+}
 
 ///|
 /// Construct token usage with explicit counters.
 pub fn Usage::new(
-  input_tokens~ : Int,
-  output_tokens~ : Int,
-  total_tokens? : Int,
-  reasoning_tokens? : Int = 0,
-  cached_input_tokens? : Int = 0,
-  cache_write_input_tokens? : Int = 0,
+  input_tokens~ : Int32,
+  output_tokens~ : Int32,
+  total_tokens? : Int32,
+  reasoning_tokens~ : Int32 = 0,
+  cached_input_tokens~ : Int32 = 0,
+  cache_write_input_tokens~ : Int32 = 0,
 ) -> Usage {
   {
     input_tokens,
@@ -533,6 +538,7 @@ pub fn Usage::add(self : Usage, other : Usage) -> Usage {
 
 ///|
 /// Why the model stopped generating.
+#derive(Debug, Eq)
 pub(all) enum FinishReason {
   Stop
   Length
@@ -540,7 +546,7 @@ pub(all) enum FinishReason {
   ContentFilter
   Error
   Unknown(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Normalize an OpenAI finish reason.
@@ -558,28 +564,31 @@ pub fn FinishReason::from_openai(value : String) -> FinishReason {
 
 ///|
 /// How a provider should select from the advertised tools.
+#derive(Debug, Eq)
 pub(all) enum ToolChoice {
   Auto
   NoTool
   Required
   Named(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// JSON output settings carried by the provider-neutral language-model call.
 /// Provider adapters own wire-specific strictness controls.
+#derive(Debug)
 pub(all) struct JsonResponseFormat {
   schema : Json?
   name : String?
   description : String?
-} derive(Debug)
+}
 
 ///|
 /// Standardized response format request.
+#derive(Debug)
 pub(all) enum ResponseFormat {
   Text
   JsonResponse(JsonResponseFormat)
-} derive(Debug)
+}
 
 ///|
 /// Request JSON output, optionally constrained by a JSON Schema.
@@ -599,6 +608,7 @@ pub fn ResponseFormat::json_object() -> ResponseFormat {
 
 ///|
 /// Provider-neutral reasoning effort for models that expose reasoning controls.
+#derive(Debug, Eq)
 pub(all) enum ReasoningEffort {
   ProviderDefault
   Disabled
@@ -608,51 +618,52 @@ pub(all) enum ReasoningEffort {
   High
   XHigh
   Max
-} derive(Debug, Eq)
+}
 
 ///|
 /// Provider-neutral options passed to a chat model.
+#derive(Debug)
 pub(all) struct ChatCallOptions {
   messages : LanguageModelPrompt
   tools : Array[ToolDefinition]
   tool_choice : ToolChoice?
   response_format : ResponseFormat
   reasoning_effort : ReasoningEffort
-  max_output_tokens : Int?
+  max_output_tokens : Int32?
   temperature : Double?
   top_p : Double?
   top_k : Double?
   frequency_penalty : Double?
   presence_penalty : Double?
-  seed : Int?
+  seed : Int32?
   stop_sequences : Array[String]
   include_raw_chunks : Bool
   headers : Map[String, String]
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct normalized chat call options.
 pub fn ChatCallOptions::new(
   messages : LanguageModelPrompt,
-  tools? : Array[ToolDefinition] = [],
+  tools~ : Array[ToolDefinition] = [],
   tool_choice? : ToolChoice,
-  response_format? : ResponseFormat = Text,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
-  max_output_tokens? : Int,
+  response_format~ : ResponseFormat = Text,
+  reasoning_effort~ : ReasoningEffort = ProviderDefault,
+  max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
   top_k? : Double,
   frequency_penalty? : Double,
   presence_penalty? : Double,
-  seed? : Int,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  seed? : Int32,
+  stop_sequences~ : Array[String] = [],
+  include_raw_chunks~ : Bool = false,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ChatCallOptions {
   {
@@ -752,6 +763,7 @@ fn copy_string_headers(headers : Map[String, String]) -> Map[String, String] {
 
 ///|
 /// A fully accumulated generation response.
+#derive(Debug, Eq)
 pub(all) struct ChatResponse {
   content : Array[GeneratedContent]
   text : String
@@ -763,7 +775,7 @@ pub(all) struct ChatResponse {
   response : ResponseMetadata?
   provider_metadata : Map[String, Json]
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a response without transport diagnostics.
@@ -882,6 +894,7 @@ pub fn ChatResponse::with_transport(
 
 ///|
 /// The stable event protocol emitted by all streaming providers.
+#derive(Debug)
 pub(all) enum StreamEvent {
   StreamStart
   Warning(Warning)
@@ -905,4 +918,70 @@ pub(all) enum StreamEvent {
   Finish(usage~ : Usage, reason~ : FinishReason)
   Raw(Json)
   StreamError(StreamErrorInfo)
-} derive(Debug)
+}
+
+///|
+pub extend LanguageModelMessageRole with Debug::{to_repr}
+
+///|
+pub extend LanguageModelMessageRole with Eq::{not_equal, equal}
+
+///|
+pub extend ProviderReference with Debug::{to_repr}
+
+///|
+pub extend ProviderReference with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelContentPart with Debug::{to_repr}
+
+///|
+pub extend LanguageModelContentPart with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelMessage with Debug::{to_repr}
+
+///|
+pub extend LanguageModelMessage with Eq::{not_equal, equal}
+
+///|
+pub extend Usage with Debug::{to_repr}
+
+///|
+pub extend Usage with Eq::{not_equal, equal}
+
+///|
+pub extend FinishReason with Debug::{to_repr}
+
+///|
+pub extend FinishReason with Eq::{not_equal, equal}
+
+///|
+pub extend ToolChoice with Debug::{to_repr}
+
+///|
+pub extend ToolChoice with Eq::{not_equal, equal}
+
+///|
+pub extend JsonResponseFormat with Debug::{to_repr}
+
+///|
+pub extend ResponseFormat with Debug::{to_repr}
+
+///|
+pub extend ReasoningEffort with Debug::{to_repr}
+
+///|
+pub extend ReasoningEffort with Eq::{not_equal, equal}
+
+///|
+pub extend ChatCallOptions with Debug::{to_repr}
+
+///|
+pub extend ChatResponse with Debug::{to_repr}
+
+///|
+pub extend ChatResponse with Eq::{not_equal, equal}
+
+///|
+pub extend StreamEvent with Debug::{to_repr}

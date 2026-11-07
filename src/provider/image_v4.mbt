@@ -4,11 +4,12 @@
 /// The payload deliberately has no filename because AI SDK's V4 contract
 /// models image files as data or URLs. Protocol adapters choose a multipart
 /// filename when their endpoint requires one.
+#derive(Debug, Eq)
 pub(all) enum ImageModelV4File {
   ImageV4Data(data~ : String, media_type~ : String)
   ImageV4Bytes(data~ : Bytes, media_type~ : String)
   ImageV4Url(url~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a Base64-backed V4 image input.
@@ -38,7 +39,7 @@ pub fn ImageModelV4File::url(url : String) -> ImageModelV4File {
 /// Convert a V4 image file at the explicit protocol adapter boundary.
 pub fn ImageModelV4File::to_image_file(
   self : ImageModelV4File,
-  filename? : String = "image",
+  filename~ : String = "image",
 ) -> ImageFile {
   match self {
     ImageV4Data(data~, media_type~) =>
@@ -61,33 +62,34 @@ pub fn ImageModelV4File::from_image_file(file : ImageFile) -> ImageModelV4File {
 
 ///|
 /// Options passed to `ImageModelV4::do_generate`.
+#derive(Debug)
 pub(all) struct ImageModelV4CallOptions {
   prompt : String?
-  n : Int
+  n : Int32
   size : String?
   aspect_ratio : String?
-  seed : Int?
+  seed : Int32?
   files : Array[ImageModelV4File]?
   mask : ImageModelV4File?
   provider_options : Map[String, Json]
   headers : Map[String, String]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct V4 image generation options.
 pub fn ImageModelV4CallOptions::new(
   prompt? : String,
-  n? : Int = 1,
+  n~ : Int32 = 1,
   size? : String,
   aspect_ratio? : String,
-  seed? : Int,
+  seed? : Int32,
   files? : Array[ImageModelV4File],
   mask? : ImageModelV4File,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ImageModelV4CallOptions {
   {
@@ -139,24 +141,26 @@ pub fn ImageModelV4CallOptions::from_image_call_options(
 
 ///|
 /// Image token usage in the V4 contract.
+#derive(Debug, Eq)
 pub(all) struct ImageModelV4Usage {
-  input_tokens : Int?
-  output_tokens : Int?
-  total_tokens : Int?
-} derive(Debug, Eq)
+  input_tokens : Int32?
+  output_tokens : Int32?
+  total_tokens : Int32?
+}
 
 ///|
 /// Construct V4 image usage.
 pub fn ImageModelV4Usage::new(
-  input_tokens? : Int,
-  output_tokens? : Int,
-  total_tokens? : Int,
+  input_tokens? : Int32,
+  output_tokens? : Int32,
+  total_tokens? : Int32,
 ) -> ImageModelV4Usage {
   { input_tokens, output_tokens, total_tokens, }
 }
 
 ///|
 /// Result of an image generation call through the V4 contract.
+#derive(Debug, Eq)
 pub(all) struct ImageModelV4Result {
   images : Array[GeneratedImage]
   warnings : Array[Warning]
@@ -164,14 +168,14 @@ pub(all) struct ImageModelV4Result {
   request : RequestMetadata?
   response : ResponseMetadata?
   usage : ImageModelV4Usage?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 image result.
 pub fn ImageModelV4Result::new(
   images : Array[GeneratedImage],
-  warnings? : Array[Warning] = [],
-  provider_metadata? : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
+  provider_metadata~ : Map[String, Json] = Map([]),
   request? : RequestMetadata,
   response? : ResponseMetadata,
   usage? : ImageModelV4Usage,
@@ -234,6 +238,27 @@ pub(open) trait ImageModelV4 {
   fn specification_version(Self) -> String
   fn provider(Self) -> String
   fn model_id(Self) -> String
-  fn max_images_per_call(Self) -> Int?
+  fn max_images_per_call(Self) -> Int32?
   async fn do_generate(Self, ImageModelV4CallOptions) -> ImageModelV4Result
 }
+
+///|
+pub extend ImageModelV4File with Debug::{to_repr}
+
+///|
+pub extend ImageModelV4File with Eq::{not_equal, equal}
+
+///|
+pub extend ImageModelV4CallOptions with Debug::{to_repr}
+
+///|
+pub extend ImageModelV4Usage with Debug::{to_repr}
+
+///|
+pub extend ImageModelV4Usage with Eq::{not_equal, equal}
+
+///|
+pub extend ImageModelV4Result with Debug::{to_repr}
+
+///|
+pub extend ImageModelV4Result with Eq::{not_equal, equal}

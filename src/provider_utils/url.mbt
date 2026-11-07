@@ -52,7 +52,7 @@ fn is_query_unreserved(value : Byte) -> Bool {
 }
 
 ///|
-fn hex_digit(value : Int) -> Char {
+fn hex_digit(value : Int32) -> Char {
   if value < 10 {
     (b'0' + value.to_byte()).to_char()
   } else {

@@ -10,6 +10,7 @@ import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -17,11 +18,11 @@ pub fn asLanguageModelV4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
 pub fn as_language_model_v4(&@provider.ChatModel) -> &@provider.LanguageModelV4
 
-pub async fn cancelBatch(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4CancelResult
+pub async fn cancelBatch(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4CancelResult
 
-pub async fn cancel_batch(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4CancelResult
+pub async fn cancel_batch(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4CancelResult
 
-pub async fn complete(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
+pub async fn complete(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
 
 pub fn cosine_similarity(vector1~ : Array[Double], vector2~ : Array[Double]) -> Double raise InvalidArgumentError
 
@@ -37,23 +38,23 @@ pub fn customProvider(language_models? : Map[String, &@provider.LanguageModelV4]
 
 pub fn custom_provider(language_models? : Map[String, &@provider.LanguageModelV4], embedding_models? : Map[String, &@provider.EmbeddingModelV4], image_models? : Map[String, &@provider.ImageModelV4], transcription_models? : Map[String, &@provider.TranscriptionModelV4], speech_models? : Map[String, &@provider.SpeechModelV4], reranking_models? : Map[String, &@provider.RerankingModelV4], video_models? : Map[String, &@provider.VideoModelV4], files? : &@provider.FilesV4, skills? : &@provider.SkillsV4, fallback_provider? : &@provider.ProviderV4) -> @registry.CustomProvider
 
-pub async fn deleteFile(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4DeleteFileResult
+pub async fn deleteFile(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, @json.Json]) -> @provider.FilesV4DeleteFileResult
 
-pub async fn delete_file(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4DeleteFileResult
+pub async fn delete_file(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, @json.Json]) -> @provider.FilesV4DeleteFileResult
 
-pub async fn downloadFile(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4DownloadFileResult
+pub async fn downloadFile(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, @json.Json]) -> @provider.FilesV4DownloadFileResult
 
-pub async fn download_file(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4DownloadFileResult
+pub async fn download_file(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, @json.Json]) -> @provider.FilesV4DownloadFileResult
 
-pub fn dynamicTool(Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : Json, provider_options? : Map[String, Json], metadata? : Map[String, Json], execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn dynamicTool(@json.Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : @json.Json, provider_options? : Map[String, @json.Json], metadata? : Map[String, @json.Json], execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
-pub fn dynamic_tool(Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : Json, provider_options? : Map[String, Json], metadata? : Map[String, Json], execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn dynamic_tool(@json.Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : @json.Json, provider_options? : Map[String, @json.Json], metadata? : Map[String, @json.Json], execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
-pub async fn embed(&@provider.EmbeddingModelV4, String, dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingResponse
+pub async fn embed(&@provider.EmbeddingModelV4, String, dimensions? : Int32, user? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : @json.Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingResponse
 
-pub async fn embedMany(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int, runtime_context? : Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingBatchResponse
+pub async fn embedMany(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int32, user? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int32, runtime_context? : @json.Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingBatchResponse
 
-pub async fn embed_many(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int, user? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int, runtime_context? : Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingBatchResponse
+pub async fn embed_many(&@provider.EmbeddingModelV4, Array[String], dimensions? : Int32, user? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, max_parallel_calls? : Int32, runtime_context? : @json.Json, on_start? : async (EmbedStartEvent) -> Unit, on_end? : async (EmbedEndEvent) -> Unit) -> @provider.EmbeddingBatchResponse
 
 pub fn experimentalGetToolCaller(@provider_utils.Tool) -> @provider_utils.ToolCallerDefinition?
 
@@ -61,73 +62,73 @@ pub fn experimentalToolCaller(@provider_utils.Tool, @provider_utils.ToolCallerDe
 
 pub fn experimental_get_tool_caller(@provider_utils.Tool) -> @provider_utils.ToolCallerDefinition?
 
-pub async fn experimental_streamTranscribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+pub async fn experimental_streamTranscribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, @json.Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
 
 pub fn experimental_tool_caller(@provider_utils.Tool, @provider_utils.ToolCallerDefinition) -> @provider_utils.Tool
 
 pub fn format_warning(warning~ : @provider.Warning, provider~ : String?, model~ : String?) -> String
 
-pub async fn generateImage(&@provider.ImageModelV4, String, n? : Int, max_images_per_call? : Int, size? : String, aspect_ratio? : String, seed? : Int, files? : Array[@provider.ImageModelV4File], mask? : @provider.ImageModelV4File, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.ImageResponse
+pub async fn generateImage(&@provider.ImageModelV4, String, n? : Int32, max_images_per_call? : Int32, size? : String, aspect_ratio? : String, seed? : Int32, files? : Array[@provider.ImageModelV4File], mask? : @provider.ImageModelV4File, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.ImageResponse
 
-pub async fn generateObject(&@provider.LanguageModelV4, Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> ObjectResponse
+pub async fn generateObject(&@provider.LanguageModelV4, @json.Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, @json.Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> ObjectResponse
 
-pub async fn generateSpeech(&@provider.SpeechModelV4, String, voice? : String, output_format? : String, instructions? : String, speed? : Double, language? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechResponse
+pub async fn generateSpeech(&@provider.SpeechModelV4, String, voice? : String, output_format? : String, instructions? : String, speed? : Double, language? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechResponse
 
-pub async fn generateText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.GenerateTextResult
+pub async fn generateText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, @json.Json], runtime_context? : @json.Json, tools_context? : Map[String, @json.Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.GenerateTextResult
 
-pub async fn generateVideo(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4Result
+pub async fn generateVideo(&@provider.VideoModelV4, String, n? : Int32, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int32, seed? : Int32, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4Result
 
-pub async fn generate_image(&@provider.ImageModelV4, String, n? : Int, max_images_per_call? : Int, size? : String, aspect_ratio? : String, seed? : Int, files? : Array[@provider.ImageModelV4File], mask? : @provider.ImageModelV4File, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.ImageResponse
+pub async fn generate_image(&@provider.ImageModelV4, String, n? : Int32, max_images_per_call? : Int32, size? : String, aspect_ratio? : String, seed? : Int32, files? : Array[@provider.ImageModelV4File], mask? : @provider.ImageModelV4File, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.ImageResponse
 
-pub async fn generate_object(&@provider.LanguageModelV4, Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> ObjectResponse
+pub async fn generate_object(&@provider.LanguageModelV4, @json.Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, @json.Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> ObjectResponse
 
-pub async fn generate_speech(&@provider.SpeechModelV4, String, voice? : String, output_format? : String, instructions? : String, speed? : Double, language? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechResponse
+pub async fn generate_speech(&@provider.SpeechModelV4, String, voice? : String, output_format? : String, instructions? : String, speed? : Double, language? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechResponse
 
-pub async fn generate_text(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.GenerateTextResult
+pub async fn generate_text(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, @json.Json], runtime_context? : @json.Json, tools_context? : Map[String, @json.Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.GenerateTextResult
 
-pub async fn generate_video(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4Result
+pub async fn generate_video(&@provider.VideoModelV4, String, n? : Int32, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int32, seed? : Int32, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4Result
 
-pub async fn getBatchResults(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> Array[@provider.BatchV4ItemResult]
+pub async fn getBatchResults(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> Array[@provider.BatchV4ItemResult]
 
-pub async fn getBatchStatus(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4Status
+pub async fn getBatchStatus(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4Status
 
-pub async fn getFileMetadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
+pub async fn getFileMetadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, @json.Json]) -> @provider.FilesV4FileMetadata
 
 pub fn getTextFromDataUrl(String) -> String raise InvalidArgumentError
 
-pub async fn getVideoStatus(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
+pub async fn getVideoStatus(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
 
-pub async fn get_batch_results(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> Array[@provider.BatchV4ItemResult]
+pub async fn get_batch_results(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> Array[@provider.BatchV4ItemResult]
 
-pub async fn get_batch_status(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4Status
+pub async fn get_batch_status(&@provider.BatchV4, batch_id~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4Status
 
-pub async fn get_file_metadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, Json]) -> @provider.FilesV4FileMetadata
+pub async fn get_file_metadata(&@provider.FilesV4, file_id~ : String, provider_options? : Map[String, @json.Json]) -> @provider.FilesV4FileMetadata
 
 pub fn get_text_from_data_url(String) -> String raise InvalidArgumentError
 
-pub async fn get_video_status(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
+pub async fn get_video_status(&@provider.VideoModelV4, operation_id~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStatusResult
 
 pub fn hasToolCall(Array[String]) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
 pub fn has_tool_call(Array[String]) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
-pub fn invalid_argument(parameter~ : String, value~ : Json, message~ : String) -> InvalidArgumentError
+pub fn invalid_argument(parameter~ : String, value~ : @json.Json, message~ : String) -> InvalidArgumentError
 
 pub fn isExecutableTool(@provider_utils.Tool) -> Bool
 
 pub fn isLoopFinished() -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
-pub fn isStepCount(Int) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
+pub fn isStepCount(Int32) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
 pub fn is_executable_tool(@provider_utils.Tool) -> Bool
 
 pub fn is_loop_finished() -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
-pub fn is_step_count(Int) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
+pub fn is_step_count(Int32) -> async (Array[@generate_text.GenerateTextStep]) -> Bool
 
-pub async fn listBatches(&@provider.BatchV4, limit? : Int, cursor? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4ListResult
+pub async fn listBatches(&@provider.BatchV4, limit? : Int32, cursor? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4ListResult
 
-pub async fn list_batches(&@provider.BatchV4, limit? : Int, cursor? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4ListResult
+pub async fn list_batches(&@provider.BatchV4, limit? : Int32, cursor? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4ListResult
 
 pub fn log_warnings(options~ : LogWarningsOptions) -> Unit
 
@@ -135,63 +136,63 @@ pub fn model_id_of_language_model(&@provider.LanguageModelV4) -> @model.ModelId
 
 pub fn parse_model_id(String) -> @model.ModelId raise @model.InvalidModelIdError
 
-pub async fn rerank(&@provider.RerankingModelV4, @provider.RerankingModelV4Documents, String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
+pub async fn rerank(&@provider.RerankingModelV4, @provider.RerankingModelV4Documents, String, top_n? : Int32, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : @json.Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
 
-pub async fn rerankText(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
+pub async fn rerankText(&@provider.RerankingModelV4, Array[String], String, top_n? : Int32, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : @json.Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
 
-pub async fn rerank_text(&@provider.RerankingModelV4, Array[String], String, top_n? : Int, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
+pub async fn rerank_text(&@provider.RerankingModelV4, Array[String], String, top_n? : Int32, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken, runtime_context? : @json.Json, on_start? : async (RerankStartEvent) -> Unit, on_end? : async (RerankEndEvent) -> Unit) -> RerankResult
 
-pub fn split_array(array~ : Array[String], chunk_size~ : Int) -> Array[Array[String]] raise InvalidArgumentError
+pub fn split_array(array~ : Array[String], chunk_size~ : Int32) -> Array[Array[String]] raise InvalidArgumentError
 
-pub async fn startBatch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4Request], webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4StartResult
+pub async fn startBatch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4Request], webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4StartResult
 
-pub async fn startVideo(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
+pub async fn startVideo(&@provider.VideoModelV4, String, n? : Int32, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int32, seed? : Int32, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
 
-pub async fn start_batch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4Request], webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4StartResult
+pub async fn start_batch(&@provider.BatchV4, requests~ : Array[@provider.BatchV4Request], webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], cancellation_token? : @provider.CancellationToken) -> @provider.BatchV4StartResult
 
-pub async fn start_video(&@provider.VideoModelV4, String, n? : Int, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int, seed? : Int, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
+pub async fn start_video(&@provider.VideoModelV4, String, n? : Int32, aspect_ratio? : String, resolution? : String, duration? : Double, fps? : Int32, seed? : Int32, image? : @provider.VideoModelV4File, frame_images? : Array[@provider.VideoModelV4FrameImage], input_references? : Array[@provider.VideoModelV4File], generate_audio? : Bool, webhook_url? : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.VideoModelV4OperationStartResult
 
-pub async fn streamObject(&@provider.LanguageModelV4, Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_partial? : async (Json) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> StreamObjectResponse
+pub async fn streamObject(&@provider.LanguageModelV4, @json.Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, @json.Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_partial? : async (@json.Json) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> StreamObjectResponse
 
-pub async fn streamSpeechTranslation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
+pub async fn streamSpeechTranslation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, @json.Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
 
-pub async fn streamText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], smooth? : @generate_text.SmoothChunking, smooth_delay_ms? : Int, on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.StreamTextResult
+pub async fn streamText(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, @json.Json], runtime_context? : @json.Json, tools_context? : Map[String, @json.Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], smooth? : @generate_text.SmoothChunking, smooth_delay_ms? : Int32, on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.StreamTextResult
 
-pub async fn streamTranscribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+pub async fn streamTranscribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, @json.Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
 
-pub async fn stream_completion(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], on_event? : async (@provider.StreamEvent) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
+pub async fn stream_completion(&@provider.CompletionModel, String, suffix? : String, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, @json.Json], on_event? : async (@provider.StreamEvent) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.CompletionResponse
 
-pub async fn stream_object(&@provider.LanguageModelV4, Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_partial? : async (Json) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> StreamObjectResponse
+pub async fn stream_object(&@provider.LanguageModelV4, @json.Json, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, name? : String, description? : String, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], headers? : Map[String, String], provider_options? : Map[String, @json.Json], experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], on_partial? : async (@json.Json) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> StreamObjectResponse
 
-pub async fn stream_speech_translation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
+pub async fn stream_speech_translation(&@provider.SpeechTranslationModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, target_language~ : String, source_language? : String, output_audio_format? : @provider.AudioFormat, provider_options? : Map[String, @json.Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.SpeechTranslationStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.SpeechTranslationResponse
 
-pub async fn stream_text(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, Json], runtime_context? : Json, tools_context? : Map[String, Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], smooth? : @generate_text.SmoothChunking, smooth_delay_ms? : Int, output? : @generate_text.OutputSpec, on_partial_output? : async (Json) -> Unit, on_element? : async (Json) -> Unit, on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.StreamTextResult
+pub async fn stream_text(&@provider.LanguageModelV4, prompt? : String, messages? : Array[@provider_utils.ModelMessage], instructions? : @prompt.Instructions, allow_system_in_messages? : Bool, tools? : Map[String, @provider_utils.Tool], tool_approval? : @generate_text.ToolApprovalConfiguration, experimental_tool_approval_secret? : @generate_text.ToolApprovalSecret, experimental_tool_callers? : Map[String, Array[@tool.ToolCallerReference]], active_tools? : Array[String], tool_order? : Array[String], prepare_step? : async (@generate_text.PrepareStepOptions) -> @generate_text.PrepareStepResult?, stop_when? : Array[async (Array[@generate_text.GenerateTextStep]) -> Bool], tool_choice? : @provider.ToolChoice, response_format? : @provider.ResponseFormat, reasoning_effort? : @provider.ReasoningEffort, max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, frequency_penalty? : Double, presence_penalty? : Double, seed? : Int32, stop_sequences? : Array[String], include_raw_chunks? : Bool, headers? : Map[String, String], provider_options? : Map[String, @json.Json], runtime_context? : @json.Json, tools_context? : Map[String, @json.Json], experimental_sandbox? : @provider_utils.SandboxSession, experimental_download? : async (Array[@prompt.DownloadRequest]) -> Array[@prompt.DownloadedAsset?], smooth? : @generate_text.SmoothChunking, smooth_delay_ms? : Int32, output? : @generate_text.OutputSpec, on_partial_output? : async (@json.Json) -> Unit, on_element? : async (@json.Json) -> Unit, on_event? : async (@provider.LanguageModelV4StreamPart) -> Unit, retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @generate_text.StreamTextResult
 
-pub async fn stream_transcribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+pub async fn stream_transcribe(&@provider.TranscriptionModelV4, audio~ : &@provider.AudioStream, input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, @json.Json], headers? : Map[String, String], include_raw_chunks? : Bool, on_event? : async (@provider.TranscriptionStreamEvent) -> Unit, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
 
-pub fn tool(Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : Json, input_examples? : Array[Json], strict? : Bool, provider_options? : Map[String, Json], metadata? : Map[String, Json], execute? : async (Json, @provider_utils.ToolExecutionOptions) -> Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
+pub fn tool(@json.Json, description? : String, description_resolver? : (@provider_utils.ToolDescriptionOptions) -> String, output_schema? : @json.Json, input_examples? : Array[@json.Json], strict? : Bool, provider_options? : Map[String, @json.Json], metadata? : Map[String, @json.Json], execute? : async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json, needs_approval? : @provider_utils.ToolNeedsApproval, to_model_output? : async (@provider_utils.ToolModelOutputOptions) -> @provider_utils.ModelToolResultOutput, on_input_start? : async (@provider_utils.ToolExecutionOptions) -> Unit, on_input_delta? : async (@provider_utils.ToolInputDeltaOptions) -> Unit, on_input_available? : async (@provider_utils.ToolInputAvailableOptions) -> Unit) -> @provider_utils.Tool
 
 pub fn toolSet(Array[(String, @provider_utils.Tool)]) -> Map[String, @provider_utils.Tool]
 
 pub fn tool_set(Array[(String, @provider_utils.Tool)]) -> Map[String, @provider_utils.Tool]
 
-pub async fn transcribe(&@provider.TranscriptionModelV4, audio~ : @provider.TranscriptionAudio, media_type~ : String, headers? : Map[String, String], provider_options? : Map[String, Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
+pub async fn transcribe(&@provider.TranscriptionModelV4, audio~ : @provider.TranscriptionAudio, media_type~ : String, headers? : Map[String, String], provider_options? : Map[String, @json.Json], retry_policy? : @provider.RetryPolicy, cancellation_token? : @provider.CancellationToken) -> @provider.TranscriptionResponse
 
-pub fn ui_chunks_from_text(text~ : String, tool_calls~ : Array[@provider.ToolCall]) -> Array[Json]
+pub fn ui_chunks_from_text(text~ : String, tool_calls~ : Array[@provider.ToolCall]) -> Array[@json.Json]
 
-pub fn ui_message_chunk(@provider.LanguageModelV4StreamPart) -> Json?
+pub fn ui_message_chunk(@provider.LanguageModelV4StreamPart) -> @json.Json?
 
-pub async fn uploadFile(&@provider.FilesV4, data~ : @provider.UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> @provider.FilesV4UploadFileResult
+pub async fn uploadFile(&@provider.FilesV4, data~ : @provider.UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, @json.Json]) -> @provider.FilesV4UploadFileResult
 
-pub async fn uploadSkill(&@provider.SkillsV4, files~ : Array[@provider.SkillsV4File], display_title? : String, provider_options? : Map[String, Json]) -> @provider.SkillsV4UploadSkillResult
+pub async fn uploadSkill(&@provider.SkillsV4, files~ : Array[@provider.SkillsV4File], display_title? : String, provider_options? : Map[String, @json.Json]) -> @provider.SkillsV4UploadSkillResult
 
-pub async fn upload_file(&@provider.FilesV4, data~ : @provider.UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, Json]) -> @provider.FilesV4UploadFileResult
+pub async fn upload_file(&@provider.FilesV4, data~ : @provider.UploadFileData, media_type~ : String, filename? : String, provider_options? : Map[String, @json.Json]) -> @provider.FilesV4UploadFileResult
 
-pub async fn upload_skill(&@provider.SkillsV4, files~ : Array[@provider.SkillsV4File], display_title? : String, provider_options? : Map[String, Json]) -> @provider.SkillsV4UploadSkillResult
+pub async fn upload_skill(&@provider.SkillsV4, files~ : Array[@provider.SkillsV4File], display_title? : String, provider_options? : Map[String, @json.Json]) -> @provider.SkillsV4UploadSkillResult
 
-pub fn validateObject(Json, Json) -> Unit raise ObjectValidationError
+pub fn validateObject(@json.Json, @json.Json) -> Unit raise ObjectValidationError
 
-pub fn validate_object(Json, Json) -> Unit raise ObjectValidationError
+pub fn validate_object(@json.Json, @json.Json) -> Unit raise ObjectValidationError
 
 pub fn wrapEmbeddingModel(&@provider.EmbeddingModelV4, @provider.EmbeddingModelV4Middleware, model_id? : String, provider_id? : String) -> &@provider.EmbeddingModelV4
 
@@ -222,25 +223,40 @@ pub fn wrap_language_model_v4(&@provider.LanguageModelV4, @provider.LanguageMode
 pub fn wrap_language_model_v4_chain(&@provider.LanguageModelV4, Array[@provider.LanguageModelV4Middleware], model_id? : String, provider_id? : String) -> &@provider.LanguageModelV4
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror InvalidArgumentError {
-  InvalidArgumentError(parameter~ : String, value~ : Json, message~ : String)
-} derive(Eq, @debug.Debug)
+  InvalidArgumentError(parameter~ : String, value~ : @json.Json, message~ : String)
+}
+pub fn InvalidArgumentError::equal(Self, Self) -> Bool
+pub fn InvalidArgumentError::not_equal(Self, Self) -> Bool
+pub fn InvalidArgumentError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub suberror NoObjectGeneratedError {
   NoObjectGeneratedError(message~ : String, text~ : String?, response~ : @generate_text.GenerateTextResult, failure~ : ObjectGenerationFailure)
-} derive(@debug.Debug)
+}
+pub fn NoObjectGeneratedError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub suberror ObjectValidationError {
   ObjectValidationError(path~ : String, message~ : String)
-} derive(Eq, @debug.Debug)
+}
+pub fn ObjectValidationError::equal(Self, Self) -> Bool
+pub fn ObjectValidationError::not_equal(Self, Self) -> Bool
+pub fn ObjectValidationError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub suberror StreamObjectFailedError {
   StreamObjectFailedError(message~ : String, text~ : String?)
-} derive(Eq, @debug.Debug)
+}
+pub fn StreamObjectFailedError::equal(Self, Self) -> Bool
+pub fn StreamObjectFailedError::not_equal(Self, Self) -> Bool
+pub fn StreamObjectFailedError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(@debug.Debug)
 pub(all) struct EmbedEndEvent {
-  runtime_context : Json
+  runtime_context : @json.Json
   call_id : String
   operation_id : String
   provider : String
@@ -249,95 +265,125 @@ pub(all) struct EmbedEndEvent {
   embeddings : Array[Array[Double]]
   usage : @provider.Usage
   warnings : Array[@provider.Warning]
-  provider_metadata : Map[String, Json]
-} derive(@debug.Debug)
+  provider_metadata : Map[String, @json.Json]
+}
+pub fn EmbedEndEvent::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct EmbedStartEvent {
-  runtime_context : Json
+  runtime_context : @json.Json
   call_id : String
   operation_id : String
   provider : String
   model_id : String
   values : Array[String]
-  max_retries : Int
+  max_retries : Int32
   headers : Map[String, String]
-  provider_options : Map[String, Json]
-} derive(@debug.Debug)
+  provider_options : Map[String, @json.Json]
+}
+pub fn EmbedStartEvent::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct LogWarningsOptions {
   warnings : Array[@provider.Warning]
   provider : String?
   model : String?
-} derive(@debug.Debug)
-
+}
 pub(all) enum ObjectGenerationFailure {
   EmptyResponse
   InvalidJson(message~ : String)
   SchemaMismatch(path~ : String, message~ : String)
-} derive(Eq, @debug.Debug)
+}
+pub fn ObjectGenerationFailure::equal(Self, Self) -> Bool
+pub fn ObjectGenerationFailure::not_equal(Self, Self) -> Bool
+pub fn ObjectGenerationFailure::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct ObjectResponse {
-  object : Json
+  object : @json.Json
   response : @generate_text.GenerateTextResult
-} derive(@debug.Debug)
+}
+pub fn ObjectResponse::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct RerankEndEvent {
-  runtime_context : Json
+  runtime_context : @json.Json
   call_id : String
   operation_id : String
   provider : String
   model_id : String
-  documents : Array[Json]
+  documents : Array[@json.Json]
   query : String
   ranking : Array[RerankItem]
   warnings : Array[@provider.Warning]
-  provider_metadata : Map[String, Json]
-} derive(@debug.Debug)
+  provider_metadata : Map[String, @json.Json]
+}
+pub fn RerankEndEvent::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RerankItem {
-  original_index : Int
+  original_index : Int32
   score : Double
   document : RerankingDocument
-} derive(Eq, @debug.Debug)
+}
+pub fn RerankItem::equal(Self, Self) -> Bool
+pub fn RerankItem::not_equal(Self, Self) -> Bool
+pub fn RerankItem::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct RerankResult {
   original_documents : @provider.RerankingModelV4Documents
   reranked_documents : @provider.RerankingModelV4Documents
   ranking : Array[RerankItem]
   response : @provider.ResponseMetadata
-  provider_metadata : Map[String, Json]
-} derive(Eq, @debug.Debug)
+  provider_metadata : Map[String, @json.Json]
+}
+pub fn RerankResult::equal(Self, Self) -> Bool
+pub fn RerankResult::not_equal(Self, Self) -> Bool
+pub fn RerankResult::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct RerankStartEvent {
-  runtime_context : Json
+  runtime_context : @json.Json
   call_id : String
   operation_id : String
   provider : String
   model_id : String
-  documents : Array[Json]
+  documents : Array[@json.Json]
   query : String
-  top_n : Int?
-  max_retries : Int
+  top_n : Int32?
+  max_retries : Int32
   headers : Map[String, String]
-  provider_options : Map[String, Json]
-} derive(@debug.Debug)
+  provider_options : Map[String, @json.Json]
+}
+pub fn RerankStartEvent::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum RerankingDocument {
   TextDocument(String)
-  ObjectDocument(Json)
-} derive(Eq, @debug.Debug)
+  ObjectDocument(@json.Json)
+}
+pub fn RerankingDocument::equal(Self, Self) -> Bool
+pub fn RerankingDocument::not_equal(Self, Self) -> Bool
+pub fn RerankingDocument::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum StreamObjectPart {
-  PartialObject(object~ : Json)
-  FinalObject(object~ : Json)
-} derive(Eq, @debug.Debug)
+  PartialObject(object~ : @json.Json)
+  FinalObject(object~ : @json.Json)
+}
+pub fn StreamObjectPart::equal(Self, Self) -> Bool
+pub fn StreamObjectPart::not_equal(Self, Self) -> Bool
+pub fn StreamObjectPart::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct StreamObjectResponse {
-  object : Json
+  object : @json.Json
   text : String
   provider_result : @provider.LanguageModelV4GenerateResult
   warnings : Array[@provider.Warning]
-} derive(@debug.Debug)
+}
+pub fn StreamObjectResponse::to_repr(Self) -> @debug.Repr
 
 pub struct UiMessageStream {
   // private fields
@@ -476,7 +522,7 @@ pub using @provider_utils {type SandboxProcess}
 
 pub using @provider_utils {type SandboxSession}
 
-pub type SingleToolApprovalFunction = async (Json, @generate_text.SingleToolApprovalOptions) -> @generate_text.ToolApprovalStatus
+pub type SingleToolApprovalFunction = async (@json.Json, @generate_text.SingleToolApprovalOptions) -> @generate_text.ToolApprovalStatus
 
 pub using @generate_text {type SingleToolApprovalOptions}
 
@@ -512,13 +558,13 @@ pub type ToolDescriptionFunction = (@provider_utils.ToolDescriptionOptions) -> S
 
 pub using @provider_utils {type ToolDescriptionOptions}
 
-pub type ToolExecuteFunction = async (Json, @provider_utils.ToolExecutionOptions) -> Json
+pub type ToolExecuteFunction = async (@json.Json, @provider_utils.ToolExecutionOptions) -> @json.Json
 
 pub using @provider_utils {type ToolExecutionOptions}
 
 pub using @provider_utils {type ToolNeedsApproval}
 
-pub type ToolNeedsApprovalFunction = async (Json, @provider_utils.ToolNeedsApprovalOptions) -> Bool
+pub type ToolNeedsApprovalFunction = async (@json.Json, @provider_utils.ToolNeedsApprovalOptions) -> Bool
 
 pub using @provider_utils {type ToolNeedsApprovalOptions}
 

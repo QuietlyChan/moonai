@@ -7,7 +7,7 @@ pub type MCPElicitationHandler = async (Json) -> Json
 pub(all) struct MCPClientConfig {
   transport : &MCPTransport
   initialization_options : MCPRequestOptions?
-  max_retries : Int
+  max_retries : Int32
   client_name : String
   client_version : String
   capabilities : MCPClientCapabilities
@@ -19,10 +19,10 @@ pub(all) struct MCPClientConfig {
 pub fn MCPClientConfig::new(
   transport~ : &MCPTransport,
   initialization_options? : MCPRequestOptions,
-  max_retries? : Int = 0,
-  client_name? : String = "ai-sdk-mcp-client",
-  client_version? : String = VERSION,
-  capabilities? : MCPClientCapabilities = Json::empty_object(),
+  max_retries~ : Int32 = 0,
+  client_name~ : String = "ai-sdk-mcp-client",
+  client_version~ : String = VERSION,
+  capabilities~ : MCPClientCapabilities = Json::empty_object(),
   initial_initialize_result? : InitializeResult,
 ) -> MCPClientConfig raise MCPClientError {
   guard max_retries >= 0 else { raise mcp_error("maxRetries must be >= 0") }
@@ -46,15 +46,15 @@ pub struct MCPClient {
   priv transport : &MCPTransport
   priv client_info : MCPImplementation
   priv client_capabilities : MCPClientCapabilities
-  priv max_retries : Int
-  priv next_request_id : Ref[Int]
+  priv max_retries : Int32
+  priv next_request_id : Ref[Int32]
   priv closed : Ref[Bool]
   priv initialize_result_value : Ref[InitializeResult?]
   priv elicitation_handler : Ref[MCPElicitationHandler?]
 }
 
 ///|
-fn effective_timeout(options : MCPRequestOptions?) -> Int? {
+fn effective_timeout(options : MCPRequestOptions?) -> Int32? {
   match options {
     None => None
     Some(value) =>
@@ -241,8 +241,10 @@ pub async fn create_mcp_client(config : MCPClientConfig) -> MCPClient {
   }
   // Close the transport on any initialization failure; on success the
   // client keeps ownership.
-  errdefer (config.transport.close(MCPTransportCloseOptions::new()) catch {
-    _ => ()
+  errdefer @async.protect_from_cancel(() => {
+    config.transport.close(MCPTransportCloseOptions::new()) catch {
+      _ => ()
+    }
   })
   run_mcp_with_options(config.initialization_options, () => {
     config.transport.start()
@@ -371,7 +373,7 @@ fn retryable_mcp_error(error : Error) -> Bool {
 pub async fn MCPClient::call_tool(
   self : MCPClient,
   name~ : String,
-  arguments? : Json = Json::empty_object(),
+  arguments~ : Json = Json::empty_object(),
   options? : MCPRequestOptions,
 ) -> CallToolResult {
   guard arguments is Object(_) else {
@@ -403,7 +405,7 @@ pub async fn MCPClient::call_tool(
 pub async fn MCPClient::callTool(
   self : MCPClient,
   name~ : String,
-  arguments? : Json = Json::empty_object(),
+  arguments~ : Json = Json::empty_object(),
   options? : MCPRequestOptions,
 ) -> CallToolResult {
   self.call_tool(name~, arguments~, options?)
@@ -496,7 +498,7 @@ pub async fn MCPClient::experimental_list_prompts(
 pub async fn MCPClient::experimental_get_prompt(
   self : MCPClient,
   name~ : String,
-  arguments? : Json = Json::empty_object(),
+  arguments~ : Json = Json::empty_object(),
   options? : MCPRequestOptions,
 ) -> GetPromptResult {
   guard arguments is Object(_) else {
@@ -572,7 +574,7 @@ pub fn MCPClient::onElicitationRequest(
 /// Close the MCP client and its transport.
 pub async fn MCPClient::close(
   self : MCPClient,
-  options? : MCPTransportCloseOptions = MCPTransportCloseOptions::new(),
+  options~ : MCPTransportCloseOptions = MCPTransportCloseOptions::new(),
 ) -> Unit {
   guard !self.closed.val else { return }
   self.closed.val = true

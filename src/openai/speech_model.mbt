@@ -6,7 +6,7 @@ pub(all) struct OpenAISpeechModel {
   model_id : String
   api_key : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -18,7 +18,7 @@ pub fn openai_speech_model(
   model_id~ : String,
   api_key~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> OpenAISpeechModel {
   {
@@ -192,4 +192,12 @@ pub impl @provider.SpeechModelV4 for OpenAISpeechModel with fn do_generate(
   options,
 ) {
   self.generate_speech_v4(options)
+}
+
+///|
+pub extend OpenAISpeechModel with @QuietlyChan/moonai/provider.SpeechModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
 }

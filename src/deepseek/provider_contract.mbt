@@ -65,3 +65,14 @@ pub impl @provider.ProviderV4 for DeepSeekProvider with fn files(self) {
 pub impl @provider.ProviderV4 for DeepSeekProvider with fn skills(_self) {
   None
 }
+
+///|
+pub extend DeepSeekProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  transcription_model,
+  skills,
+}

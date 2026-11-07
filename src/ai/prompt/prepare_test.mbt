@@ -1,6 +1,6 @@
 ///|
 test "standardize prompt converts a string to one user message" {
-  let standardized = standardize_prompt(Some("hello"), [])
+  let standardized = @prompt.standardize_prompt(Some("hello"), [])
   assert_eq(standardized.instructions, None)
   assert_eq(standardized.messages, [@provider_utils.ModelMessage::user("hello")])
 }
@@ -8,7 +8,7 @@ test "standardize prompt converts a string to one user message" {
 ///|
 test "standardize prompt copies an explicit message list" {
   let source = [@provider_utils.ModelMessage::user("hello")]
-  let standardized = standardize_prompt(None, source)
+  let standardized = @prompt.standardize_prompt(None, source)
   standardized.messages.push(@provider_utils.ModelMessage::assistant("world"))
   assert_eq(source, [@provider_utils.ModelMessage::user("hello")])
 }
@@ -16,7 +16,7 @@ test "standardize prompt copies an explicit message list" {
 ///|
 test "standardize prompt rejects prompt and messages together" {
   try
-    standardize_prompt(Some("hello"), [
+    @prompt.standardize_prompt(Some("hello"), [
       @provider_utils.ModelMessage::user("world"),
     ])
   catch {
@@ -34,7 +34,7 @@ test "standardize prompt rejects prompt and messages together" {
 
 ///|
 test "standardize prompt rejects an empty input" {
-  try standardize_prompt(None, []) catch {
+  try @prompt.standardize_prompt(None, []) catch {
     @provider.InvalidPromptError(message~) =>
       assert_true(message.contains("prompt or messages must be defined"))
     error => fail("unexpected empty prompt error: \{error}")
@@ -45,8 +45,8 @@ test "standardize prompt rejects an empty input" {
 
 ///|
 test "language model call options require a positive output token limit" {
-  let invalid = LanguageModelCallOptions::new(max_output_tokens=0)
-  try prepare_language_model_call_options(invalid) catch {
+  let invalid = @prompt.LanguageModelCallOptions::new(max_output_tokens=0)
+  try @prompt.prepare_language_model_call_options(invalid) catch {
     @provider.InvalidArgumentError(argument~, message~) => {
       assert_eq(argument, "max_output_tokens")
       assert_true(
@@ -62,8 +62,8 @@ test "language model call options require a positive output token limit" {
 ///|
 test "language model call options isolate mutable stop sequences" {
   let source = ["END"]
-  let prepared = prepare_language_model_call_options(
-    LanguageModelCallOptions::new(
+  let prepared = @prompt.prepare_language_model_call_options(
+    @prompt.LanguageModelCallOptions::new(
       max_output_tokens=128,
       stop_sequences=source,
       reasoning_effort=@provider.High,

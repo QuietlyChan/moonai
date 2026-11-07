@@ -9,7 +9,7 @@ pub(all) struct OpenAIResponsesModel {
   api_key : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   id_generator : @provider_utils.IdGenerator
   http_transport : &@provider_utils.HttpTransport
 }

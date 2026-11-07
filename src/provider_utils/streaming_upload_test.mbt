@@ -1,7 +1,7 @@
 ///|
 priv struct ScriptedUploadStream {
   chunks : Array[Bytes]
-  next : Ref[Int]
+  next : Ref[Int32]
 }
 
 ///|
@@ -85,7 +85,7 @@ async test "streaming multipart upload reassembles the buffered body" {
   @async.with_task_group() <| group => {
     let server = @http.Server(@socket.Addr::parse("127.0.0.1:0"))
     let received_body : Ref[Bytes] = Ref(b"")
-    let received_length : Ref[Int] = Ref(0)
+    let received_length : Ref[Int32] = Ref(0)
     group.spawn_bg(no_wait=true) <| () => {
       server.run_forever(
         (_request, body, connection) => {
@@ -106,17 +106,17 @@ async test "streaming multipart upload reassembles the buffered body" {
     for chunk in [chunk_one, chunk_two] {
       stream_bytes = stream_bytes + chunk
     }
-    let plan = plan_multipart_streaming(
+    let plan = @provider_utils.plan_multipart_streaming(
       streaming_test_fields(stream),
       boundary=STREAMING_TEST_BOUNDARY,
     )
     // The plan matches the fully buffered encoding byte for byte.
-    let buffered = encode_multipart_form_data(
+    let buffered = @provider_utils.encode_multipart_form_data(
       buffered_equivalent_fields(stream_bytes),
       boundary=STREAMING_TEST_BOUNDARY,
     )
     assert_eq(plan.content_length, buffered.body.length().to_int64())
-    let response = post_multipart_streaming(
+    let response = @provider_utils.post_multipart_streaming(
       url="http://127.0.0.1:\{server.addr.port()}/upload",
       headers=Map([]),
       plan~,
@@ -133,7 +133,7 @@ async test "streaming multipart upload reassembles the buffered body" {
 ///|
 test "streaming multipart plans require exactly one sized stream" {
   let stream = ScriptedUploadStream::new([@utf8.encode("x")])
-  let plan = plan_multipart_streaming(
+  let plan = @provider_utils.plan_multipart_streaming(
     streaming_test_fields(stream),
     boundary=STREAMING_TEST_BOUNDARY,
   )
@@ -146,7 +146,7 @@ test "streaming multipart plans require exactly one sized stream" {
 ///|
 priv struct UnsizedUploadStream {
   chunks : Array[Bytes]
-  next : Ref[Int]
+  next : Ref[Int32]
 }
 
 ///|
@@ -176,7 +176,7 @@ impl @provider.UploadByteStream for UnsizedUploadStream with fn size_hint_bytes(
 test "streaming multipart plans reject unsized streams" {
   let stream = UnsizedUploadStream::new([@utf8.encode("x")])
   let outcome = try {
-    let _ = plan_multipart_streaming(
+    let _ = @provider_utils.plan_multipart_streaming(
       streaming_test_fields(stream),
       boundary=STREAMING_TEST_BOUNDARY,
     )

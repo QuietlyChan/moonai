@@ -7,11 +7,14 @@ async fn bind_test_server() -> @http.Server {
 fn open_responses_test_model(
   provider_name : String,
   url~ : String,
-  api_key? : String = "",
+  api_key~ : String = "",
 ) -> &@provider.LanguageModelV4 {
-  create_open_responses(provider_name~, url~, api_key~, idle_timeout_ms=2_000).language_model(
-    "test-model",
-  )
+  @open_responses.create_open_responses(
+    provider_name~,
+    url~,
+    api_key~,
+    idle_timeout_ms=2_000,
+  ).language_model("test-model")
 }
 
 ///|
@@ -384,7 +387,7 @@ async test "V4 generate preserves raw usage and raw finish reason" {
       prompt="hello",
       top_k=20.0,
       seed=42,
-      provider_options=OpenResponsesLanguageModelOptions::new(
+      provider_options=@open_responses.OpenResponsesLanguageModelOptions::new(
         reasoning_summary=ReasoningSummaryDetailed,
       ).to_provider_options(provider_name="local-v4"),
     )
@@ -433,7 +436,7 @@ async test "V4 stream bundles warnings and emits native terminal metadata" {
     )
     let mut starts = 0
     let mut finish_raw : String? = None
-    let mut finish_no_cache : Int? = None
+    let mut finish_no_cache : Int32? = None
     let result = @ai.stream_text(model, prompt="hello", top_k=20.0, on_event=event => {
       match event {
         @provider.V4StreamStart(warnings~) => {

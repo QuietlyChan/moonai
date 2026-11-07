@@ -336,7 +336,7 @@ fn parse_anthropic_mcp_tool_configuration(
 fn parse_anthropic_mcp_server(
   value : Json,
   reader : @provider_utils.ProviderOptionsReader,
-  index : Int,
+  index : Int32,
 ) -> Json? {
   let path = "mcpServers[\{index}]"
   guard value is Object(fields) else {
@@ -443,7 +443,7 @@ fn parse_anthropic_container_provider_reference(
 fn parse_anthropic_container_skill_option(
   value : Json,
   reader : @provider_utils.ProviderOptionsReader,
-  index : Int,
+  index : Int32,
 ) -> Json? {
   let path = "container.skills[\{index}]"
   guard value is Object(fields) else {
@@ -600,7 +600,7 @@ fn parse_anthropic_task_budget(
 fn parse_anthropic_fallback(
   value : Json,
   reader : @provider_utils.ProviderOptionsReader,
-  index : Int,
+  index : Int32,
 ) -> Json? {
   let path = "fallbacks[\{index}]"
   guard value is Object(fields) else {
@@ -723,7 +723,7 @@ fn parse_anthropic_context_counter(
 fn parse_anthropic_request_context_edit(
   value : Json,
   reader : @provider_utils.ProviderOptionsReader,
-  index : Int,
+  index : Int32,
 ) -> Json? {
   let path = "contextManagement.edits[\{index}]"
   guard value is Object(fields) else {

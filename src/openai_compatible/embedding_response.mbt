@@ -26,7 +26,7 @@ fn decode_embedding_vector(json : Json) -> Array[Double] raise {
 fn decode_embedding_response_data(
   json : Json,
   error_structure : OpenAICompatibleErrorStructure,
-) -> (Array[Array[Double]], Int?) raise {
+) -> (Array[Array[Double]], Int32?) raise {
   if error_structure.message(json) is Some(message) {
     raise @provider.InvalidResponseDataError(
       message="OpenAI-compatible embedding request failed: \{message}",

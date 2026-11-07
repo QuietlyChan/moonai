@@ -9,35 +9,60 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createProdia(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ProdiaProvider
+pub fn createProdia(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> ProdiaProvider
 
-pub fn create_prodia(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> ProdiaProvider
+pub fn create_prodia(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> ProdiaProvider
 
-pub fn prodia(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+pub fn prodia(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
 
 // Errors
 
 // Types and methods
 type ProdiaImageModel
+pub async fn ProdiaImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn ProdiaImageModel::max_images_per_call(Self) -> Int32?
+pub fn ProdiaImageModel::model_id(Self) -> String
+pub fn ProdiaImageModel::provider(Self) -> String
+pub fn ProdiaImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for ProdiaImageModel
 
 type ProdiaLanguageModel
+pub async fn ProdiaLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn ProdiaLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn ProdiaLanguageModel::model_id(Self) -> String
+pub fn ProdiaLanguageModel::provider(Self) -> String
+pub fn ProdiaLanguageModel::specification_version(Self) -> String
+pub fn ProdiaLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for ProdiaLanguageModel
 
 pub struct ProdiaProvider {
   // private fields
 }
+pub fn ProdiaProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn ProdiaProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn ProdiaProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn ProdiaProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn ProdiaProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn ProdiaProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn ProdiaProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn ProdiaProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn ProdiaProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn ProdiaProvider::specification_version(Self) -> String
+pub fn ProdiaProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn ProdiaProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub fn ProdiaProvider::video(Self, String) -> &@provider.VideoModelV4
 pub fn ProdiaProvider::videoModel(Self, String) -> &@provider.VideoModelV4
 pub fn ProdiaProvider::video_model(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for ProdiaProvider
 
 type ProdiaVideoModel
+pub async fn ProdiaVideoModel::do_generate(Self, @provider.VideoModelV4CallOptions) -> @provider.VideoModelV4Result
+pub async fn ProdiaVideoModel::do_start(Self, @provider.VideoModelV4CallOptions) -> @provider.VideoModelV4OperationStartResult
+pub async fn ProdiaVideoModel::do_status(Self, @provider.VideoModelV4OperationStatusCallOptions) -> @provider.VideoModelV4OperationStatusResult
+pub fn ProdiaVideoModel::max_videos_per_call(Self) -> Int32?
+pub fn ProdiaVideoModel::model_id(Self) -> String
+pub fn ProdiaVideoModel::provider(Self) -> String
+pub fn ProdiaVideoModel::specification_version(Self) -> String
 pub impl @provider.VideoModelV4 for ProdiaVideoModel
 
 // Type aliases

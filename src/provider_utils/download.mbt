@@ -4,14 +4,15 @@
 /// This is intentionally separate from `APICallError`: download URLs often
 /// come from model output rather than from a provider endpoint, and callers
 /// need to distinguish an unsafe redirect or malformed URL from an API error.
+#derive(Debug, Eq)
 pub(all) suberror DownloadError {
   DownloadError(
     url~ : String,
     message~ : String,
-    status_code~ : Int?,
+    status_code~ : Int32?,
     status_text~ : String?
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Default maximum download size used by AI SDK's shared downloader.
@@ -117,7 +118,7 @@ fn ensure_download_size(
 }
 
 ///|
-fn ascii_digit(byte : Byte, base : Int) -> Int? {
+fn ascii_digit(byte : Byte, base : Int32) -> Int32? {
   let value = byte.to_int()
   let digit = if value >= b'0'.to_int() && value <= b'9'.to_int() {
     value - b'0'.to_int()
@@ -136,7 +137,7 @@ fn ascii_digit(byte : Byte, base : Int) -> Int? {
 }
 
 ///|
-fn parse_unsigned(value : String, base : Int) -> Int? {
+fn parse_unsigned(value : String, base : Int32) -> Int32? {
   let bytes = @utf8.encode(value)
   guard bytes.length() > 0 else { return None }
   let mut result = 0
@@ -151,7 +152,7 @@ fn parse_unsigned(value : String, base : Int) -> Int? {
 }
 
 ///|
-fn parse_unsigned_int64(value : String, base : Int) -> Int64? {
+fn parse_unsigned_int64(value : String, base : Int32) -> Int64? {
   guard value != "" else { return None }
   try @string.parse_int64(value, base~) catch {
     _ => None
@@ -164,7 +165,7 @@ fn parse_unsigned_int64(value : String, base : Int) -> Int64? {
 ///|
 /// Parse the legacy IPv4 spellings accepted by URL parsers, including
 /// decimal, hexadecimal, octal, and shortened integer forms.
-fn parse_ipv4(value : String) -> Array[Int]? {
+fn parse_ipv4(value : String) -> Array[Int32]? {
   let parts = value.split(".").to_array()
   guard parts.length() >= 1 && parts.length() <= 4 else { return None }
   let numbers : Array[Int64] = []
@@ -184,7 +185,7 @@ fn parse_ipv4(value : String) -> Array[Int]? {
     }
     numbers.push(number)
   }
-  let result : Array[Int] = []
+  let result : Array[Int32] = []
   match numbers.length() {
     1 => {
       let value = numbers[0]
@@ -221,7 +222,7 @@ fn parse_ipv4(value : String) -> Array[Int]? {
 }
 
 ///|
-fn is_private_ipv4(value : Array[Int]) -> Bool {
+fn is_private_ipv4(value : Array[Int32]) -> Bool {
   guard value.length() == 4 else { return true }
   let a = value[0]
   let b = value[1]
@@ -242,7 +243,7 @@ fn is_private_ipv4(value : Array[Int]) -> Bool {
 }
 
 ///|
-fn parse_ipv6_groups(value : String) -> Array[Int]? {
+fn parse_ipv6_groups(value : String) -> Array[Int32]? {
   let address = value.to_lower()
   let zone_stripped = match address.find("%") {
     Some(index) => address[:index].to_owned()
@@ -250,12 +251,12 @@ fn parse_ipv6_groups(value : String) -> Array[Int]? {
   }
   let halves = zone_stripped.split("::").to_array()
   guard halves.length() <= 2 else { return None }
-  let parse_half = fn(segment : StringView) -> Array[Int]? {
+  let parse_half = fn(segment : StringView) -> Array[Int32]? {
     if segment.length() == 0 {
       return Some([])
     }
     let parts = segment.split(":").to_array()
-    let groups : Array[Int] = []
+    let groups : Array[Int32] = []
     for index, part_view in parts {
       let part = part_view.to_owned()
       if part.contains(".") {
@@ -288,7 +289,7 @@ fn parse_ipv6_groups(value : String) -> Array[Int]? {
     }
     let fill = 8 - head.length() - tail.length()
     guard fill >= 0 else { return None }
-    let result : Array[Int] = []
+    let result : Array[Int32] = []
     for group in head {
       result.push(group)
     }
@@ -307,7 +308,7 @@ fn parse_ipv6_groups(value : String) -> Array[Int]? {
 }
 
 ///|
-fn top_zero(groups : Array[Int], count : Int) -> Bool {
+fn top_zero(groups : Array[Int32], count : Int32) -> Bool {
   for index in 0..<count {
     if groups[index] != 0 {
       return false
@@ -358,7 +359,7 @@ fn is_private_ipv6(value : String) -> Bool {
 }
 
 ///|
-fn authority_end(value : String) -> Int {
+fn authority_end(value : String) -> Int32 {
   let mut end = value.length()
   for separator in ["/", "?", "#"] {
     match value.find(separator) {
@@ -507,7 +508,7 @@ fn download_response_header(
 pub fn read_response_with_size_limit(
   response : HttpResponse,
   url~ : String,
-  max_bytes? : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
+  max_bytes~ : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
 ) -> Bytes raise DownloadError {
   let content_length = match
     download_response_header(response.headers, "content-length") {
@@ -523,13 +524,13 @@ pub fn read_response_with_size_limit(
 pub fn readResponseWithSizeLimit(
   response : HttpResponse,
   url~ : String,
-  max_bytes? : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
+  max_bytes~ : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
 ) -> Bytes raise DownloadError {
   read_response_with_size_limit(response, url~, max_bytes~)
 }
 
 ///|
-fn is_download_redirect_status(status_code : Int) -> Bool {
+fn is_download_redirect_status(status_code : Int32) -> Bool {
   status_code == 301 ||
   status_code == 302 ||
   status_code == 303 ||
@@ -702,3 +703,9 @@ fn sanitize_download_headers(
 ) -> Map[String, String] {
   sanitize_request_headers(headers)
 }
+
+///|
+pub extend DownloadError with Debug::{to_repr}
+
+///|
+pub extend DownloadError with Eq::{not_equal, equal}

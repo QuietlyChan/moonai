@@ -6,13 +6,13 @@ struct CohereEmbeddingModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
 ///|
 /// Cohere's per-request embedding input limit.
-pub const COHERE_MAX_EMBEDDINGS_PER_CALL : Int = 96
+pub const COHERE_MAX_EMBEDDINGS_PER_CALL : Int32 = 96
 
 ///|
 fn cohere_embedding_value(
@@ -20,7 +20,7 @@ fn cohere_embedding_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> CohereEmbeddingModel {
   {
@@ -37,7 +37,7 @@ fn cohere_embedding_value(
 ///|
 fn decode_cohere_embedding_response(
   value : Json,
-) -> (Array[Array[Double]], Int?) raise {
+) -> (Array[Array[Double]], Int32?) raise {
   match value {
     { "embeddings": { "float": Array(rows), .. }, .. } => {
       let embeddings : Array[Array[Double]] = []
@@ -56,7 +56,7 @@ fn decode_cohere_embedding_response(
           _ => fail("cohere embedding response has malformed rows")
         }
       }
-      let mut tokens : Int? = None
+      let mut tokens : Int32? = None
       match value {
         {
           "meta": {
@@ -97,7 +97,7 @@ pub impl @provider.EmbeddingModelV4 for CohereEmbeddingModel with fn model_id(
 ///|
 pub impl @provider.EmbeddingModelV4 for CohereEmbeddingModel with fn max_embeddings_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(COHERE_MAX_EMBEDDINGS_PER_CALL)
 }
 
@@ -192,7 +192,7 @@ struct CohereRerankingModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -202,7 +202,7 @@ fn cohere_reranking_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> CohereRerankingModel {
   {
@@ -327,4 +327,23 @@ pub impl @provider.RerankingModelV4 for CohereRerankingModel with fn do_rerank(
     response={ ..response.response, body: Some(response.value.stringify()), },
     warnings~,
   )
+}
+
+///|
+pub extend CohereEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  provider,
+  max_embeddings_per_call,
+  supports_parallel_calls,
+  max_input_bytes_per_call,
+  model_id,
+}
+
+///|
+pub extend CohereRerankingModel with @QuietlyChan/moonai/provider.RerankingModelV4::{
+  do_rerank,
+  specification_version,
+  provider,
+  model_id,
 }

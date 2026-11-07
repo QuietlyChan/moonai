@@ -6,7 +6,7 @@ pub struct ByteDanceImageModel {
   priv base_url : String
   priv model_id_value : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -14,10 +14,10 @@ pub struct ByteDanceImageModel {
 /// Construct a Seedream image model.
 pub fn ByteDanceImageModel::new(
   model_id : ByteDanceImageModelId,
-  api_key? : String = "",
-  base_url? : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ByteDanceImageModel {
   {
@@ -196,7 +196,7 @@ pub impl @provider.ImageModelV4 for ByteDanceImageModel with fn model_id(self) {
 ///|
 pub impl @provider.ImageModelV4 for ByteDanceImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 
@@ -206,4 +206,13 @@ pub impl @provider.ImageModelV4 for ByteDanceImageModel with fn do_generate(
   options,
 ) {
   self.generate(options)
+}
+
+///|
+pub extend ByteDanceImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
 }

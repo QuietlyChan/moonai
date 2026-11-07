@@ -3,18 +3,18 @@
 pub struct MockImageModel {
   priv provider_name : String
   priv model_id : String
-  priv max_images : Int
+  priv max_images : Int32
   priv result : @provider.ImageResponse
-  priv captured_batch_sizes : Array[Int]
+  priv captured_batch_sizes : Array[Int32]
 }
 
 ///|
 /// Construct a deterministic image model.
 pub fn MockImageModel::new(
   result : @provider.ImageResponse,
-  max_images_per_call? : Int = 10,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-image-model",
+  max_images_per_call~ : Int32 = 10,
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-image-model",
 ) -> MockImageModel {
   {
     provider_name,
@@ -29,7 +29,7 @@ pub fn MockImageModel::new(
 /// Return requested batch sizes in call order.
 pub fn MockImageModel::captured_batch_sizes(
   self : MockImageModel,
-) -> Array[Int] {
+) -> Array[Int32] {
   self.captured_batch_sizes.copy()
 }
 
@@ -46,7 +46,7 @@ pub impl @provider.ImageWireModel for MockImageModel with fn model_id(self) -> S
 ///|
 pub impl @provider.ImageWireModel for MockImageModel with fn max_images_per_call(
   self,
-) -> Int {
+) -> Int32 {
   self.max_images
 }
 
@@ -99,7 +99,7 @@ pub impl @provider.ImageModelV4 for MockImageModel with fn model_id(self) -> Str
 ///|
 pub impl @provider.ImageModelV4 for MockImageModel with fn max_images_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   Some(self.max_images)
 }
 
@@ -133,4 +133,18 @@ pub impl @provider.ImageModelV4 for MockImageModel with fn do_generate(
       ),
     ),
   )
+}
+
+///|
+pub extend MockImageModel with @QuietlyChan/moonai/provider.ImageWireModel::{
+  provider,
+  generate,
+  model_id,
+  max_images_per_call,
+}
+
+///|
+pub extend MockImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
 }

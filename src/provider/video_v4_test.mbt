@@ -1,6 +1,6 @@
 ///|
 test "video V4 file conversion preserves URL and inline data" {
-  let url = VideoModelV4File::url(
+  let url = @provider.VideoModelV4File::url(
     "https://example.com/input.mp4",
     media_type="video/mp4",
   )
@@ -9,13 +9,16 @@ test "video V4 file conversion preserves URL and inline data" {
     is Url(url="https://example.com/input.mp4", media_type=Some("video/mp4")),
   )
 
-  let bytes = VideoModelV4File::bytes(data=b"video", media_type="video/mp4")
+  let bytes = @provider.VideoModelV4File::bytes(
+    data=b"video",
+    media_type="video/mp4",
+  )
   let wire = bytes.to_video_input()
   assert_true(
     wire is Base64(data~, media_type="video/mp4") && data == "dmlkZW8=",
   )
   assert_true(
-    VideoModelV4File::from_video_input(wire)
+    @provider.VideoModelV4File::from_video_input(wire)
     is VideoV4Data(
       data="dmlkZW8=",
       media_type="video/mp4",
@@ -27,15 +30,18 @@ test "video V4 file conversion preserves URL and inline data" {
 
 ///|
 test "video V4 result retains binary payload and diagnostics" {
-  let response = VideoResponse::new([
-    GeneratedVideo::new(GeneratedVideoData::Binary(b"mp4"), "video/mp4"),
+  let response = @provider.VideoResponse::new([
+    @provider.GeneratedVideo::new(
+      @provider.GeneratedVideoData::Binary(b"mp4"),
+      "video/mp4",
+    ),
   ]).with_diagnostics(
     None,
-    Some(ResponseMetadata::new(model_id="mock-video")),
+    Some(@provider.ResponseMetadata::new(model_id="mock-video")),
     Map([("mock", Json::object(Map([("ok", Json::boolean(true))])))]),
-    [Warning::Other(message="one warning")],
+    [@provider.Warning::Other(message="one warning")],
   )
-  let v4 = VideoModelV4Result::from_video_response(response)
+  let v4 = @provider.VideoModelV4Result::from_video_response(response)
   assert_true(
     v4.videos[0] is VideoV4Binary(data~, media_type="video/mp4") &&
     data == b"mp4",
@@ -44,35 +50,40 @@ test "video V4 result retains binary payload and diagnostics" {
   assert_eq(v4.response.unwrap().model_id, Some("mock-video"))
   let round_trip = v4.to_video_response()
   assert_true(
-    round_trip.videos[0].data is GeneratedVideoData::Binary(data) &&
+    round_trip.videos[0].data is @provider.GeneratedVideoData::Binary(data) &&
     data == b"mp4",
   )
 }
 
 ///|
 test "video V4 frame helpers retain semantic roles" {
-  let first = VideoModelV4FrameImage::first(
-    VideoModelV4File::url("https://example.com/first.png"),
+  let first = @provider.VideoModelV4FrameImage::first(
+    @provider.VideoModelV4File::url("https://example.com/first.png"),
   )
   let wire = first.to_video_frame()
   assert_true(wire.frame_type is FirstFrame)
-  let restored = VideoModelV4FrameImage::from_video_frame_image(wire)
+  let restored = @provider.VideoModelV4FrameImage::from_video_frame_image(wire)
   assert_true(restored.frame_type is VideoV4FirstFrame)
 }
 
 ///|
 test "legacy video options lift into V4 without losing file roles" {
-  let v4 = VideoModelV4CallOptions::from_video_call_options(
-    VideoCallOptions::new(
+  let v4 = @provider.VideoModelV4CallOptions::from_video_call_options(
+    @provider.VideoCallOptions::new(
       "animate",
-      image=VideoInput::base64(data="aW1hZ2U=", media_type="image/png"),
+      image=@provider.VideoInput::base64(
+        data="aW1hZ2U=",
+        media_type="image/png",
+      ),
       frame_images=[
-        VideoFrameImage::new(
-          VideoInput::url("https://example.com/last.png"),
+        @provider.VideoFrameImage::new(
+          @provider.VideoInput::url("https://example.com/last.png"),
           LastFrame,
         ),
       ],
-      input_references=[VideoInput::url("https://example.com/ref.mp4")],
+      input_references=[
+        @provider.VideoInput::url("https://example.com/ref.mp4"),
+      ],
     ),
   )
   assert_eq(v4.prompt, Some("animate"))

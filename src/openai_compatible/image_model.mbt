@@ -8,10 +8,10 @@ pub struct OpenAICompatibleImageModel {
   priv model_id : String
   priv headers : Map[String, String]
   priv query_params : Map[String, String]
-  priv max_images : Int
+  priv max_images : Int32
   priv include_response_format : Bool
   priv error_structure : OpenAICompatibleErrorStructure
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
   priv download_transport : &@provider_utils.HttpTransport?
 }
@@ -22,13 +22,13 @@ pub fn openai_compatible_image(
   provider_name~ : String,
   base_url~ : String,
   model_id~ : String,
-  api_key? : String = "",
-  headers? : Map[String, String] = Map([]),
-  query_params? : Map[String, String] = Map([]),
-  max_images_per_call? : Int = 10,
-  include_response_format? : Bool = false,
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  query_params~ : Map[String, String] = Map([]),
+  max_images_per_call~ : Int32 = 10,
+  include_response_format~ : Bool = false,
+  error_structure~ : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   api_key_environment_variable? : String,
 ) -> OpenAICompatibleImageModel {
@@ -294,7 +294,7 @@ pub impl @provider.ImageModelV4 for OpenAICompatibleImageModel with fn model_id(
 ///|
 pub impl @provider.ImageModelV4 for OpenAICompatibleImageModel with fn max_images_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   Some(self.max_images)
 }
 
@@ -304,4 +304,13 @@ pub impl @provider.ImageModelV4 for OpenAICompatibleImageModel with fn do_genera
   options,
 ) {
   self.generate_images_v4(options)
+}
+
+///|
+pub extend OpenAICompatibleImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
 }

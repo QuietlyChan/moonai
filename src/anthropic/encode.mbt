@@ -681,7 +681,7 @@ fn prepare_anthropic_v4_request_with_config(
     )
     effort = Some("high")
   }
-  let mut thinking_budget : Int? = match thinking {
+  let mut thinking_budget : Int32? = match thinking {
     Some(AnthropicThinkingEnabled(value)) => value
     _ => None
   }

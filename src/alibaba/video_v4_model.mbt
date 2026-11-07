@@ -19,7 +19,7 @@ impl @provider.VideoModelV4 for AlibabaVideoModel with fn model_id(self) -> Stri
 ///|
 impl @provider.VideoModelV4 for AlibabaVideoModel with fn max_videos_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   Some(1)
 }
 

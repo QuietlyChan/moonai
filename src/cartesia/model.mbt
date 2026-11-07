@@ -5,7 +5,7 @@ pub struct CartesiaProvider {
   priv base_url : String
   priv api_version : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -13,11 +13,11 @@ pub struct CartesiaProvider {
 /// Create a Cartesia provider. The API key defaults to the
 /// `CARTESIA_API_KEY` environment variable.
 pub fn create_cartesia(
-  api_key? : String = "",
-  base_url? : String = "https://api.cartesia.ai",
-  api_version? : String = CARTESIA_API_VERSION,
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.cartesia.ai",
+  api_version~ : String = CARTESIA_API_VERSION,
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> CartesiaProvider {
   {
@@ -35,11 +35,11 @@ pub fn create_cartesia(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createCartesia(
-  api_key? : String = "",
-  base_url? : String = "https://api.cartesia.ai",
-  api_version? : String = CARTESIA_API_VERSION,
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.cartesia.ai",
+  api_version~ : String = CARTESIA_API_VERSION,
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> CartesiaProvider {
   create_cartesia(
@@ -193,4 +193,15 @@ pub impl @provider.ProviderV4 for CartesiaProvider with fn files(_self) {
 ///|
 pub impl @provider.ProviderV4 for CartesiaProvider with fn skills(_self) {
   None
+}
+
+///|
+pub extend CartesiaProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  language_model,
+  reranking_model,
+  embedding_model,
+  files,
+  skills,
 }

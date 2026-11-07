@@ -1,6 +1,6 @@
 ///|
 test "xai provider exposes chat and image models" {
-  let provider = create_xai(api_key="sk-test")
+  let provider = @xai.create_xai(api_key="sk-test")
   let chat = provider.chat("grok-4.3")
   assert_eq(chat.provider(), "xai.chat")
   assert_eq(chat.model_id(), "grok-4.3")
@@ -12,14 +12,14 @@ test "xai provider exposes chat and image models" {
 
 ///|
 test "xai direct factory builds the same language model boundary" {
-  let model = xai("grok-4.6", api_key="sk-test")
+  let model = @xai.xai("grok-4.6", api_key="sk-test")
   assert_eq(model.provider(), "xai.chat")
   assert_eq(model.model_id(), "grok-4.6")
 }
 
 ///|
 test "xai provider exposes video models" {
-  let provider = create_xai(api_key="sk-test")
+  let provider = @xai.create_xai(api_key="sk-test")
   let video = provider.video("grok-imagine-video")
   assert_eq(video.provider(), "xai.video")
   assert_eq(video.model_id(), "grok-imagine-video")

@@ -4,24 +4,25 @@ package "QuietlyChan/moonai/xai"
 import {
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
+  "moonbitlang/core/json",
 }
 
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createXai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> XaiProvider
+pub fn createXai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> XaiProvider
 
-pub fn create_xai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> XaiProvider
+pub fn create_xai(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> XaiProvider
 
 pub fn supportsReasoningEffort(String) -> Bool
 
 pub fn supports_reasoning_effort(String) -> Bool
 
-pub fn xai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn xai(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
 pub fn xai_code_execution_tool() -> @provider.LanguageModelV4Tool
 
-pub fn xai_encode_provider_tool(@provider.LanguageModelV4ProviderTool) -> Json?
+pub fn xai_encode_provider_tool(@provider.LanguageModelV4ProviderTool) -> @json.Json?
 
 pub fn xai_web_search_tool(allowed_domains? : Array[String], excluded_domains? : Array[String], enable_image_search? : Bool, enable_image_understanding? : Bool) -> @provider.LanguageModelV4Tool
 
@@ -31,12 +32,23 @@ pub fn xai_x_search_tool(allowed_x_handles? : Array[String], excluded_x_handles?
 
 // Types and methods
 type XaiChatLanguageModel
+pub async fn XaiChatLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn XaiChatLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn XaiChatLanguageModel::model_id(Self) -> String
+pub fn XaiChatLanguageModel::provider(Self) -> String
+pub fn XaiChatLanguageModel::specification_version(Self) -> String
+pub fn XaiChatLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for XaiChatLanguageModel
 
 type XaiFiles
 pub impl @provider.FilesV4 for XaiFiles
 
 type XaiImageModel
+pub async fn XaiImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn XaiImageModel::max_images_per_call(Self) -> Int32?
+pub fn XaiImageModel::model_id(Self) -> String
+pub fn XaiImageModel::provider(Self) -> String
+pub fn XaiImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for XaiImageModel
 
 pub struct XaiProvider {
@@ -45,17 +57,31 @@ pub struct XaiProvider {
 pub fn XaiProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn XaiProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn XaiProvider::files(Self) -> &@provider.FilesV4
+pub fn XaiProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn XaiProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn XaiProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn XaiProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn XaiProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn XaiProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn XaiProvider::specification_version(Self) -> String
+pub fn XaiProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn XaiProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub fn XaiProvider::video(Self, String) -> &@provider.VideoModelV4
 pub fn XaiProvider::videoModel(Self, String) -> &@provider.VideoModelV4
 pub fn XaiProvider::video_model(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for XaiProvider
 
 type XaiVideoModel
+pub async fn XaiVideoModel::do_generate(Self, @provider.VideoModelV4CallOptions) -> @provider.VideoModelV4Result
+pub async fn XaiVideoModel::do_start(Self, @provider.VideoModelV4CallOptions) -> @provider.VideoModelV4OperationStartResult
+pub async fn XaiVideoModel::do_status(Self, @provider.VideoModelV4OperationStatusCallOptions) -> @provider.VideoModelV4OperationStatusResult
+pub fn XaiVideoModel::max_videos_per_call(Self) -> Int32?
+pub fn XaiVideoModel::model_id(Self) -> String
+pub fn XaiVideoModel::provider(Self) -> String
+pub fn XaiVideoModel::specification_version(Self) -> String
 pub impl @provider.VideoModelV4 for XaiVideoModel
 
 // Type aliases

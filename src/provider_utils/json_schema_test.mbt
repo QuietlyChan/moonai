@@ -15,9 +15,9 @@ test "JSON Schema validates nested structured output" {
     "additionalProperties": false,
   }
   let value : Json = { "name": "MoonBit", "scores": [1, 2, 3] }
-  validate_json_schema(schema, value)
-  assert_true(json_schema_matches(schema, value))
-  assert_true(jsonSchemaMatches(schema, value))
+  @provider_utils.validate_json_schema(schema, value)
+  assert_true(@provider_utils.json_schema_matches(schema, value))
+  assert_true(@provider_utils.jsonSchemaMatches(schema, value))
 }
 
 ///|
@@ -38,7 +38,7 @@ test "JSON Schema reports the nested path for invalid output" {
     },
   }
   let value : Json = { "items": [{ "name": 42 }] }
-  try validate_json_schema(schema, value) catch {
+  try @provider_utils.validate_json_schema(schema, value) catch {
     JsonSchemaValidationError(path~, message~) => {
       assert_eq(path, "$.items[0].name")
       assert_eq(message, "value has the wrong JSON type")
@@ -46,7 +46,7 @@ test "JSON Schema reports the nested path for invalid output" {
   } noraise {
     _ => fail("expected schema validation to fail")
   }
-  assert_true(!json_schema_matches(schema, value))
+  assert_true(!@provider_utils.json_schema_matches(schema, value))
 }
 
 ///|
@@ -58,10 +58,10 @@ test "JSON Schema supports boolean and composition schemas" {
     ],
     "not": { "const": 3 },
   }
-  validateJsonSchema(schema, 4)
-  assert_true(json_schema_matches(schema, 2))
-  assert_true(!json_schema_matches(schema, 3))
-  assert_true(!json_schema_matches(schema, 5))
-  assert_true(json_schema_matches(true, { "anything": [1, 2] }))
-  assert_true(!json_schema_matches(false, null))
+  @provider_utils.validateJsonSchema(schema, 4)
+  assert_true(@provider_utils.json_schema_matches(schema, 2))
+  assert_true(!@provider_utils.json_schema_matches(schema, 3))
+  assert_true(!@provider_utils.json_schema_matches(schema, 5))
+  assert_true(@provider_utils.json_schema_matches(true, { "anything": [1, 2] }))
+  assert_true(!@provider_utils.json_schema_matches(false, null))
 }

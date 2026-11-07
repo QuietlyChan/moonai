@@ -8,7 +8,7 @@ test "OpenAI translation options preserve the empty provider schema" {
 ///|
 priv struct MockTranslationAudioStream {
   chunks : Array[@provider.AudioChunk]
-  index : Ref[Int]
+  index : Ref[Int32]
   cancelled : Ref[Bool]
 }
 
@@ -40,15 +40,15 @@ impl @provider.AudioStream for MockTranslationAudioStream with fn cancel(self) {
 priv struct MockTranslationWebSocketConnection {
   sent : Array[String]
   incoming : Array[@provider_utils.WebSocketReceive]
-  next_incoming : Ref[Int]
+  next_incoming : Ref[Int32]
   closed : Ref[Bool]
-  expected_sends_before_receive : Int
+  expected_sends_before_receive : Int32
 }
 
 ///|
 fn MockTranslationWebSocketConnection::new(
   incoming : Array[@provider_utils.WebSocketReceive],
-  expected_sends_before_receive? : Int = 3,
+  expected_sends_before_receive~ : Int32 = 3,
 ) -> MockTranslationWebSocketConnection {
   {
     sent: [],

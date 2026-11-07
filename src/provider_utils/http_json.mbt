@@ -1,39 +1,44 @@
 ///|
 /// Successful JSON HTTP response together with the exact request and response
 /// metadata retained by the transport layer.
+#derive(Debug)
 pub(all) struct JsonHttpResponse {
   value : Json
   request : @provider.RequestMetadata
   response : @provider.ResponseMetadata
-} derive(Debug)
+}
 
 ///|
 /// Successful binary HTTP response together with transport diagnostics.
+#derive(Debug)
 pub(all) struct BinaryHttpResponse {
   value : Bytes
   request : @provider.RequestMetadata
   response : @provider.ResponseMetadata
-} derive(Debug)
+}
 
 ///|
 /// Binary resource downloaded for a multipart file field.
+#derive(Debug, Eq)
 pub(all) struct DownloadedFile {
   data : Bytes
   media_type : String
   response : @provider.ResponseMetadata
-} derive(Debug, Eq)
+}
 
 ///|
 /// A network/connection failure which is safe to retry by default.
+#derive(Debug)
 suberror HttpTransportError {
   HttpTransportError(String, String)
-} derive(Debug)
+}
 
 ///|
 /// A provider response that exceeded its configured timeout.
+#derive(Debug)
 suberror HttpTimeoutError {
   HttpTimeoutError(String, String)
-} derive(Debug)
+}
 
 ///|
 fn response_metadata(
@@ -78,7 +83,7 @@ fn metadata_json_string_field(json : Json, field : String) -> String? {
 }
 
 ///|
-fn metadata_json_int_field_opt(json : Json, field : String) -> Int? {
+fn metadata_json_int_field_opt(json : Json, field : String) -> Int32? {
   match json {
     Object(object) =>
       match object.get(field) {
@@ -98,7 +103,7 @@ fn parse_successful_json_response(
   url : String,
   request_body : String,
   request_headers : Map[String, String],
-  status_code : Int,
+  status_code : Int32,
   response_headers : Map[String, String],
 ) -> Json raise {
   parse_json(response_body) catch {
@@ -131,13 +136,12 @@ fn validate_successful_json_response(
   url : String,
   request_body : String,
   request_headers : Map[String, String],
-  status_code : Int,
+  status_code : Int32,
   response_headers : Map[String, String],
 ) -> Unit raise {
   guard validate_response is Some(validate) else { return }
   try validate(value) catch {
-    error if @async.is_cancellation_error(error) || @async.is_being_cancelled() =>
-      raise error
+    error if @async.is_being_cancelled() => raise error
     error =>
       match error {
         @provider.CancellationError => raise error
@@ -171,8 +175,7 @@ pub fn[T] handle_json_response(
   handler : (Json) -> T raise,
 ) -> T raise {
   handler(response.value) catch {
-    error if @async.is_cancellation_error(error) || @async.is_being_cancelled() =>
-      raise error
+    error if @async.is_being_cancelled() => raise error
     error =>
       match error {
         @provider.CancellationError => raise error
@@ -209,15 +212,14 @@ pub fn[T] handleJsonResponse(
 async fn fetch_buffered_with_timeout(
   provider_name : String,
   request : HttpRequest,
-  timeout_ms : Int,
+  timeout_ms : Int32,
   transport : &HttpTransport,
 ) -> HttpResponse {
   let fetch = () => {
     transport.fetch(request) catch {
       DownloadError(url~, message~, status_code~, status_text~) =>
         raise DownloadError(url~, message~, status_code~, status_text~)
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error =>
         match error {
           @provider.CancellationError | @provider.APICallError(..) =>
@@ -247,10 +249,10 @@ async fn post_data_json_once(
   headers~ : Map[String, String],
   body~ : Bytes,
   request_body~ : String,
-  timeout_ms : Int,
+  timeout_ms : Int32,
   cancellation_token : @provider.CancellationToken?,
   error_to_message : ((Json) -> String? raise)?,
-  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  is_retryable_response : ((Int32, Json?) -> Bool? raise)?,
   validate_response : ((Json) -> Unit raise)?,
   transport : &HttpTransport,
 ) -> JsonHttpResponse {
@@ -325,10 +327,10 @@ async fn post_json_once(
   url~ : String,
   headers~ : Map[String, String],
   body~ : Json,
-  timeout_ms : Int,
+  timeout_ms : Int32,
   cancellation_token : @provider.CancellationToken?,
   error_to_message : ((Json) -> String? raise)?,
-  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  is_retryable_response : ((Int32, Json?) -> Bool? raise)?,
   validate_response : ((Json) -> Unit raise)?,
   transport : &HttpTransport,
 ) -> JsonHttpResponse {
@@ -356,11 +358,11 @@ pub async fn post_json(
   url~ : String,
   headers~ : Map[String, String],
   body~ : Json,
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   validate_response? : (Json) -> Unit raise,
   transport? : &HttpTransport,
 ) -> JsonHttpResponse {
@@ -383,8 +385,7 @@ pub async fn post_json(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -412,10 +413,10 @@ async fn post_json_binary_once(
   url~ : String,
   headers~ : Map[String, String],
   body~ : Json,
-  timeout_ms : Int,
+  timeout_ms : Int32,
   cancellation_token : @provider.CancellationToken?,
   error_to_message : ((Json) -> String? raise)?,
-  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  is_retryable_response : ((Int32, Json?) -> Bool? raise)?,
   transport : &HttpTransport,
 ) -> BinaryHttpResponse {
   @provider.check_cancellation(cancellation_token)
@@ -479,11 +480,11 @@ pub async fn post_json_binary(
   url~ : String,
   headers~ : Map[String, String],
   body~ : Json,
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   transport? : &HttpTransport,
 ) -> BinaryHttpResponse {
   let resolved_transport = transport.unwrap_or(native_http_transport())
@@ -504,8 +505,7 @@ pub async fn post_json_binary(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -536,11 +536,11 @@ pub async fn post_multipart(
   url~ : String,
   headers~ : Map[String, String],
   form_data~ : MultipartFormData,
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   validate_response? : (Json) -> Unit raise,
   transport? : &HttpTransport,
 ) -> JsonHttpResponse {
@@ -566,8 +566,7 @@ pub async fn post_multipart(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -599,10 +598,10 @@ async fn get_json_once(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms : Int,
+  timeout_ms : Int32,
   cancellation_token : @provider.CancellationToken?,
   error_to_message : ((Json) -> String? raise)?,
-  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  is_retryable_response : ((Int32, Json?) -> Bool? raise)?,
   validate_response : ((Json) -> Unit raise)?,
   transport : &HttpTransport,
 ) -> JsonHttpResponse {
@@ -677,11 +676,11 @@ pub async fn get_json(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   validate_response? : (Json) -> Unit raise,
   transport? : &HttpTransport,
 ) -> JsonHttpResponse {
@@ -703,8 +702,7 @@ pub async fn get_json(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -750,7 +748,7 @@ async fn download_file_once(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms : Int,
+  timeout_ms : Int32,
   cancellation_token : @provider.CancellationToken?,
   trusted_origin : String?,
   max_bytes : Int64,
@@ -847,12 +845,12 @@ async fn download_file_once(
 pub async fn download_file(
   provider_name~ : String,
   url~ : String,
-  headers? : Map[String, String] = Map([]),
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   trusted_origin? : String,
-  max_bytes? : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
+  max_bytes~ : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
   transport? : &HttpTransport,
 ) -> DownloadedFile {
   guard max_bytes >= 0L else {
@@ -880,8 +878,7 @@ pub async fn download_file(
         safe_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -904,7 +901,7 @@ async fn get_bytes_once(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms : Int,
+  timeout_ms : Int32,
   cancellation_token : @provider.CancellationToken?,
   transport : &HttpTransport,
 ) -> BinaryHttpResponse {
@@ -965,8 +962,8 @@ pub async fn get_bytes(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   transport? : &HttpTransport,
 ) -> BinaryHttpResponse {
@@ -985,8 +982,7 @@ pub async fn get_bytes(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1016,10 +1012,10 @@ async fn delete_json_once(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms : Int,
+  timeout_ms : Int32,
   cancellation_token : @provider.CancellationToken?,
   error_to_message : ((Json) -> String? raise)?,
-  is_retryable_response : ((Int, Json?) -> Bool? raise)?,
+  is_retryable_response : ((Int32, Json?) -> Bool? raise)?,
   validate_response : ((Json) -> Unit raise)?,
   transport : &HttpTransport,
 ) -> JsonHttpResponse {
@@ -1099,11 +1095,11 @@ pub async fn delete_json(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   validate_response? : (Json) -> Unit raise,
   transport? : &HttpTransport,
 ) -> JsonHttpResponse {
@@ -1125,8 +1121,7 @@ pub async fn delete_json(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1157,10 +1152,10 @@ async fn get_json_protected_once(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms~ : Int,
+  timeout_ms~ : Int32,
   cancellation_token~ : @provider.CancellationToken?,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   validate_response? : (Json) -> Unit raise,
   trusted_origin~ : String?,
   transport~ : &HttpTransport,
@@ -1291,11 +1286,11 @@ pub async fn get_json_protected(
   provider_name~ : String,
   url~ : String,
   headers~ : Map[String, String],
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   validate_response? : (Json) -> Unit raise,
   trusted_origin? : String,
   transport? : &HttpTransport,
@@ -1319,8 +1314,7 @@ pub async fn get_json_protected(
         transport=resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1358,7 +1352,7 @@ pub async fn post_multipart_streaming(
   plan~ : MultipartStreamingPlan,
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   validate_response? : (Json) -> Unit raise,
   transport~ : &StreamingBodyTransport,
 ) -> JsonHttpResponse {
@@ -1445,11 +1439,11 @@ pub async fn post_bytes(
   url~ : String,
   headers~ : Map[String, String],
   body~ : Bytes,
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   transport? : &HttpTransport,
 ) -> JsonHttpResponse {
   let resolved_transport = transport.unwrap_or(native_http_transport())
@@ -1517,8 +1511,7 @@ pub async fn post_bytes(
       }
       http_response
     } catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1550,11 +1543,11 @@ pub async fn post_multipart_binary(
   url~ : String,
   headers~ : Map[String, String],
   form_data~ : MultipartFormData,
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   error_to_message? : (Json) -> String? raise,
-  is_retryable_response? : (Int, Json?) -> Bool? raise,
+  is_retryable_response? : (Int32, Json?) -> Bool? raise,
   transport? : &HttpTransport,
 ) -> BinaryHttpResponse {
   let resolved_transport = transport.unwrap_or(native_http_transport())
@@ -1621,8 +1614,7 @@ pub async fn post_multipart_binary(
       }
       http_response
     } catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1643,3 +1635,21 @@ pub async fn post_multipart_binary(
     }
   }
 }
+
+///|
+pub extend JsonHttpResponse with Debug::{to_repr}
+
+///|
+pub extend BinaryHttpResponse with Debug::{to_repr}
+
+///|
+pub extend DownloadedFile with Debug::{to_repr}
+
+///|
+pub extend DownloadedFile with Eq::{not_equal, equal}
+
+///|
+pub extend HttpTransportError with Debug::{to_repr}
+
+///|
+pub extend HttpTimeoutError with Debug::{to_repr}

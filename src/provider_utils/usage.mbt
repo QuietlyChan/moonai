@@ -13,7 +13,7 @@ pub fn createNullLanguageModelUsage() -> @provider.LanguageModelV4Usage {
 }
 
 ///|
-fn add_optional_token_counts(first : Int?, second : Int?) -> Int? {
+fn add_optional_token_counts(first : Int32?, second : Int32?) -> Int32? {
   if first is None && second is None {
     None
   } else {

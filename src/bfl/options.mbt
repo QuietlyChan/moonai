@@ -5,11 +5,11 @@ pub type BflImageModelId = String
 
 ///|
 /// Default polling interval between status checks.
-pub const BFL_POLL_INTERVAL_MS : Int = 500
+pub const BFL_POLL_INTERVAL_MS : Int32 = 500
 
 ///|
 /// Default overall polling timeout before giving up.
-pub const BFL_POLL_TIMEOUT_MS : Int = 60_000
+pub const BFL_POLL_TIMEOUT_MS : Int32 = 60_000
 
 ///|
 /// Provider options accepted under the `bfl` namespace (all optional, wire

@@ -3,18 +3,18 @@
 pub struct MockVideoModel {
   priv provider_name : String
   priv model_id : String
-  priv max_videos : Int
+  priv max_videos : Int32
   priv result : @provider.VideoResponse
-  priv captured_batch_sizes : Array[Int]
+  priv captured_batch_sizes : Array[Int32]
 }
 
 ///|
 /// Construct a deterministic video model.
 pub fn MockVideoModel::new(
   result : @provider.VideoResponse,
-  max_videos_per_call? : Int = 1,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-video-model",
+  max_videos_per_call~ : Int32 = 1,
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-video-model",
 ) -> MockVideoModel {
   {
     provider_name,
@@ -29,7 +29,7 @@ pub fn MockVideoModel::new(
 /// Return requested batch sizes in call order.
 pub fn MockVideoModel::captured_batch_sizes(
   self : MockVideoModel,
-) -> Array[Int] {
+) -> Array[Int32] {
   self.captured_batch_sizes.copy()
 }
 
@@ -46,7 +46,7 @@ pub impl @provider.VideoWireModel for MockVideoModel with fn model_id(self) -> S
 ///|
 pub impl @provider.VideoWireModel for MockVideoModel with fn max_videos_per_call(
   self,
-) -> Int {
+) -> Int32 {
   self.max_videos
 }
 
@@ -80,7 +80,7 @@ pub impl @provider.VideoModelV4 for MockVideoModel with fn model_id(self) -> Str
 ///|
 pub impl @provider.VideoModelV4 for MockVideoModel with fn max_videos_per_call(
   self,
-) -> Int? {
+) -> Int32? {
   Some(self.max_videos)
 }
 
@@ -153,4 +153,20 @@ pub impl @provider.VideoModelV4 for MockVideoModel with fn do_status(
     state=@provider.OperationSucceeded,
     result~,
   )
+}
+
+///|
+pub extend MockVideoModel with @QuietlyChan/moonai/provider.VideoWireModel::{
+  provider,
+  generate,
+  model_id,
+  max_videos_per_call,
+}
+
+///|
+pub extend MockVideoModel with @QuietlyChan/moonai/provider.VideoModelV4::{
+  do_generate,
+  do_status,
+  specification_version,
+  do_start,
 }

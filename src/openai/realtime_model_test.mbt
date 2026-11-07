@@ -33,7 +33,7 @@ async test "OpenAI realtime creates client secrets and factory tokens" {
         max_connections=2,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       organization="org-test",
@@ -98,7 +98,7 @@ async test "OpenAI realtime creates client secrets and factory tokens" {
 
 ///|
 test "OpenAI realtime model delegates client and server event mapping" {
-  let model = openai_realtime("gpt-realtime", api_key="test-key")
+  let model = @openai.openai_realtime("gpt-realtime", api_key="test-key")
   json_inspect(
     model.serialize_client_event(@provider.RealtimeInputAudioCommit),
     content={ "type": "input_audio_buffer.commit" },
@@ -135,7 +135,7 @@ async test "OpenAI realtime rejects client secret responses without a token" {
         max_connections=1,
       )
     }
-    let model = openai_realtime(
+    let model = @openai.openai_realtime(
       "gpt-realtime",
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",

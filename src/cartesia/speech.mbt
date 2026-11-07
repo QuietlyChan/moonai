@@ -7,7 +7,7 @@ struct CartesiaSpeechModel {
   model_id : String
   api_version : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -18,7 +18,7 @@ fn cartesia_speech_value(
   base_url~ : String,
   api_version~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> CartesiaSpeechModel {
   {
@@ -168,4 +168,12 @@ fn cartesia_error_to_message(json : Json) -> String? raise {
     { "error": String(message), .. } => Some(message)
     _ => None
   }
+}
+
+///|
+pub extend CartesiaSpeechModel with @QuietlyChan/moonai/provider.SpeechModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
 }

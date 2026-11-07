@@ -4,7 +4,9 @@ async test "Alibaba embedding rejects a direct call above its batch limit" {
   for index = 0; index < 11; index = index + 1 {
     values.push("value-\{index}")
   }
-  let model = create_alibaba(api_key="unused").embedding("text-embedding-v4")
+  let model = @alibaba.create_alibaba(api_key="unused").embedding(
+    "text-embedding-v4",
+  )
   try model.do_embed(@provider.EmbeddingModelV4CallOptions::new(values)) catch {
     @provider.TooManyEmbeddingValuesForCallError(
       provider~,
@@ -25,7 +27,9 @@ async test "Alibaba embedding rejects a direct call above its batch limit" {
 
 ///|
 async test "Alibaba embedding reports sparse-only output as unsupported" {
-  let model = create_alibaba(api_key="unused").embedding("text-embedding-v4")
+  let model = @alibaba.create_alibaba(api_key="unused").embedding(
+    "text-embedding-v4",
+  )
   let options = @provider.EmbeddingModelV4CallOptions::new(["MoonBit"], provider_options={
     "alibaba": { "outputType": "sparse" },
   })
@@ -44,7 +48,9 @@ async test "Alibaba V4 embedding rejects a call above its batch limit" {
   for index = 0; index < 11; index = index + 1 {
     values.push("value-\{index}")
   }
-  let model = create_alibaba(api_key="unused").embedding("text-embedding-v4")
+  let model = @alibaba.create_alibaba(api_key="unused").embedding(
+    "text-embedding-v4",
+  )
   try model.do_embed(@provider.EmbeddingModelV4CallOptions::new(values)) catch {
     @provider.TooManyEmbeddingValuesForCallError(
       provider~,
@@ -65,12 +71,12 @@ async test "Alibaba V4 embedding rejects a call above its batch limit" {
 
 ///|
 test "Alibaba typed embedding options validate enum values" {
-  try AlibabaEmbeddingModelOptions::new(text_type="passage") catch {
+  try @alibaba.AlibabaEmbeddingModelOptions::new(text_type="passage") catch {
     _ => ()
   } noraise {
     _ => fail("expected an invalid text_type to be rejected")
   }
-  try AlibabaEmbeddingModelOptions::new(output_type="binary") catch {
+  try @alibaba.AlibabaEmbeddingModelOptions::new(output_type="binary") catch {
     _ => ()
   } noraise {
     _ => fail("expected an invalid output_type to be rejected")
@@ -79,7 +85,7 @@ test "Alibaba typed embedding options validate enum values" {
 
 ///|
 test "Alibaba embedding dimension validation matches the AI SDK schema" {
-  let options = AlibabaEmbeddingModelOptions::new(dimension=0)
+  let options = @alibaba.AlibabaEmbeddingModelOptions::new(dimension=0)
   assert_eq(options.dimension, Some(0))
 }
 
@@ -139,7 +145,7 @@ impl @provider_utils.HttpTransport for AlibabaEmbeddingNoUsageTransport with fn 
 
 ///|
 async test "Alibaba V4 embedding omits absent usage and null sparse metadata" {
-  let model = create_alibaba(
+  let model = @alibaba.create_alibaba(
     api_key="test-key",
     embedding_base_url="https://mock.alibaba.test/api/v1",
     http_transport=AlibabaEmbeddingNoUsageTransport::{ },
@@ -162,7 +168,7 @@ async test "Alibaba V4 embedding omits absent usage and null sparse metadata" {
 ///|
 async test "Alibaba embedding sorts values and exposes sparse metadata" {
   let transport = AlibabaEmbeddingSuccessTransport::new()
-  let model = create_alibaba(
+  let model = @alibaba.create_alibaba(
     api_key="test-key",
     embedding_base_url="https://mock.alibaba.test/api/v1",
     http_transport=transport,
@@ -170,7 +176,7 @@ async test "Alibaba embedding sorts values and exposes sparse metadata" {
   let result = model.do_embed(
     @provider.EmbeddingModelV4CallOptions::new(
       ["first", "second"],
-      provider_options=AlibabaEmbeddingModelOptions::new(
+      provider_options=@alibaba.AlibabaEmbeddingModelOptions::new(
         text_type="document",
         dimension=2,
         output_type="dense&sparse",
@@ -207,14 +213,14 @@ async test "Alibaba embedding sorts values and exposes sparse metadata" {
 
 ///|
 priv struct AlibabaEmbeddingResponseTransport {
-  status_code : Int
+  status_code : Int32
   body : String
 }
 
 ///|
 fn AlibabaEmbeddingResponseTransport::new(
   body : String,
-  status_code? : Int = 200,
+  status_code~ : Int32 = 200,
 ) -> AlibabaEmbeddingResponseTransport {
   { status_code, body, }
 }
@@ -262,7 +268,7 @@ async test "Alibaba embedding rejects malformed native responses" {
   ]
   for case in cases {
     let transport = AlibabaEmbeddingResponseTransport::new(case.0)
-    let model = create_alibaba(
+    let model = @alibaba.create_alibaba(
       api_key="test-key",
       embedding_base_url="https://mock.alibaba.test/api/v1",
       http_transport=transport,
@@ -302,7 +308,7 @@ async test "Alibaba embedding surfaces native API error messages" {
     "{\"message\":\"invalid embedding input\"}",
     status_code=400,
   )
-  let model = create_alibaba(
+  let model = @alibaba.create_alibaba(
     api_key="test-key",
     embedding_base_url="https://mock.alibaba.test/api/v1",
     http_transport=transport,

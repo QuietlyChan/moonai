@@ -162,7 +162,7 @@ fn append_openai_reasoning_part(
   store : Bool,
   has_conversation : Bool,
   has_previous_response_id : Bool,
-  reasoning_item_indices : Map[String, Int],
+  reasoning_item_indices : Map[String, Int32],
   reasoning_references : Map[String, Bool],
   reasoning_items_with_encrypted_content : Map[String, Bool],
   provider_name : String,

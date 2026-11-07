@@ -8,6 +8,7 @@ pub type LanguageModelV4ResponseMetadata = ResponseMetadata
 
 ///|
 /// A generated V4 language-model result.
+#derive(Debug)
 pub(all) struct LanguageModelV4GenerateResult {
   content : Array[LanguageModelV4Content]
   finish_reason : LanguageModelV4FinishReason
@@ -16,7 +17,7 @@ pub(all) struct LanguageModelV4GenerateResult {
   request : RequestMetadata?
   response : ResponseMetadata?
   warnings : Array[Warning]
-} derive(Debug)
+}
 
 ///|
 /// Build a V4 result from the normalized response used by current providers.
@@ -141,6 +142,7 @@ pub fn LanguageModelV4GenerateResult::with_usage_and_finish_reason(
 /// `StreamEvent` remains the wire-facing callback for `ChatModel`.
 /// V4 uses a separate vocabulary so providers can expose the AI SDK stream
 /// lifecycle without forcing the older contract to grow incompatible fields.
+#derive(Debug)
 pub(all) enum LanguageModelV4StreamPart {
   V4StreamStart(warnings~ : Array[Warning])
   V4TextStart(id~ : String, provider_metadata~ : Map[String, Json])
@@ -186,7 +188,7 @@ pub(all) enum LanguageModelV4StreamPart {
   )
   V4Raw(Json)
   V4Error(StreamErrorInfo)
-} derive(Debug)
+}
 
 ///|
 /// Convert one provider wire event to the V4 stream vocabulary.
@@ -273,10 +275,11 @@ pub fn LanguageModelV4StreamPart::from_stream_event(
 /// while this value carries the request/response diagnostics. Warnings, usage,
 /// finish reason, and provider metadata belong to stream parts, matching the
 /// AI SDK provider contract.
+#derive(Debug)
 pub(all) struct LanguageModelV4StreamResult {
   request : RequestMetadata?
   response : ResponseMetadata?
-} derive(Debug)
+}
 
 ///|
 /// Construct a V4 stream result.
@@ -306,3 +309,12 @@ pub(open) trait LanguageModelV4 {
     async (LanguageModelV4StreamPart) -> Unit,
   ) -> LanguageModelV4StreamResult
 }
+
+///|
+pub extend LanguageModelV4GenerateResult with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4StreamPart with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4StreamResult with Debug::{to_repr}

@@ -4,21 +4,22 @@
 /// Retry policy is a MoonBit runtime extension: JavaScript providers receive
 /// retry behavior from the high-level package, while MoonBit transports keep
 /// it on the call so adapters can remain cancellation-aware.
+#derive(Debug)
 pub(all) struct EmbeddingModelV4CallOptions {
   values : Array[String]
   headers : Map[String, String]
   provider_options : Map[String, Json]
   retry_policy : RetryPolicy
   cancellation_token : CancellationToken?
-} derive(Debug)
+}
 
 ///|
 /// Construct V4 embedding call options.
 pub fn EmbeddingModelV4CallOptions::new(
   values : Array[String],
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> EmbeddingModelV4CallOptions {
   {
@@ -34,18 +35,20 @@ pub fn EmbeddingModelV4CallOptions::new(
 /// Token usage returned by an embedding model.
 ///
 /// Providers that do not report usage return `None` from the model result.
+#derive(Debug, Eq)
 pub(all) struct EmbeddingModelV4Usage {
-  tokens : Int?
-} derive(Debug, Eq)
+  tokens : Int32?
+}
 
 ///|
 /// Construct known embedding usage.
-pub fn EmbeddingModelV4Usage::new(tokens : Int) -> EmbeddingModelV4Usage {
+pub fn EmbeddingModelV4Usage::new(tokens : Int32) -> EmbeddingModelV4Usage {
   { tokens: Some(tokens), }
 }
 
 ///|
 /// Result of one V4 embedding model call.
+#derive(Debug, Eq)
 pub(all) struct EmbeddingModelV4Result {
   embeddings : Array[Array[Double]]
   usage : EmbeddingModelV4Usage?
@@ -53,17 +56,17 @@ pub(all) struct EmbeddingModelV4Result {
   request : RequestMetadata?
   response : ResponseMetadata?
   warnings : Array[Warning]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a V4 result.
 pub fn EmbeddingModelV4Result::new(
   embeddings : Array[Array[Double]],
   usage? : EmbeddingModelV4Usage,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
   request? : RequestMetadata,
   response? : ResponseMetadata,
-  warnings? : Array[Warning] = [],
+  warnings~ : Array[Warning] = [],
 ) -> EmbeddingModelV4Result {
   {
     embeddings,
@@ -114,10 +117,25 @@ pub(open) trait EmbeddingModelV4 {
   fn specification_version(Self) -> String
   fn provider(Self) -> String
   fn model_id(Self) -> String
-  fn max_embeddings_per_call(Self) -> Int?
+  fn max_embeddings_per_call(Self) -> Int32?
   /// Experimental UTF-8 input-byte budget for one embedding call, mirroring
   /// AI SDK's `maxInputBytesPerCall` capability. `None` means no byte limit.
   fn max_input_bytes_per_call(Self) -> Int64?
   fn supports_parallel_calls(Self) -> Bool
   async fn do_embed(Self, EmbeddingModelV4CallOptions) -> EmbeddingModelV4Result
 }
+
+///|
+pub extend EmbeddingModelV4CallOptions with Debug::{to_repr}
+
+///|
+pub extend EmbeddingModelV4Usage with Debug::{to_repr}
+
+///|
+pub extend EmbeddingModelV4Usage with Eq::{not_equal, equal}
+
+///|
+pub extend EmbeddingModelV4Result with Debug::{to_repr}
+
+///|
+pub extend EmbeddingModelV4Result with Eq::{not_equal, equal}

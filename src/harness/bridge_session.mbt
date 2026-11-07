@@ -23,9 +23,9 @@ pub fn HarnessV1BridgeSession::new(
   harness_id~ : String,
   connection~ : &HarnessV1BridgeConnection,
   model_id? : String,
-  resumed? : Bool = false,
-  last_seen_event_id? : Int = 0,
-  extension? : Map[String, Json] = Map([]),
+  resumed~ : Bool = false,
+  last_seen_event_id~ : Int32 = 0,
+  extension~ : Map[String, Json] = Map([]),
   permission_mode? : HarnessV1PermissionMode,
   tool_filtering? : HarnessV1BuiltinToolFiltering,
   diagnostic_reporter? : HarnessV1DiagnosticReporter,
@@ -246,4 +246,18 @@ pub impl HarnessV1Session for HarnessV1BridgeSession with fn do_destroy(self) {
     }
     self.bridge_state.close()
   }
+}
+
+///|
+pub extend HarnessV1BridgeSession with HarnessV1Session::{
+  session_id,
+  do_suspend_turn,
+  do_destroy,
+  do_stop,
+  do_prompt_turn,
+  is_resume,
+  do_compact,
+  do_continue_turn,
+  do_detach,
+  model_id,
 }

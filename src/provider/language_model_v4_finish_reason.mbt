@@ -1,5 +1,6 @@
 ///|
 /// Unified finish reason used by the V4 language-model contract.
+#derive(Debug, Eq)
 pub(all) enum LanguageModelV4UnifiedFinishReason {
   V4FinishStop
   V4FinishLength
@@ -7,14 +8,15 @@ pub(all) enum LanguageModelV4UnifiedFinishReason {
   V4FinishToolCalls
   V4FinishError
   V4FinishOther
-} derive(Debug, Eq)
+}
 
 ///|
 /// Finish reason with an optional provider-native value.
+#derive(Debug, Eq)
 pub(all) struct LanguageModelV4FinishReason {
   unified : LanguageModelV4UnifiedFinishReason
   raw : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Convert a normalized ChatModel finish reason into V4.
@@ -60,3 +62,15 @@ pub fn LanguageModelV4FinishReason::with_raw(
 ) -> LanguageModelV4FinishReason {
   { unified: self.unified, raw, }
 }
+
+///|
+pub extend LanguageModelV4UnifiedFinishReason with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4UnifiedFinishReason with Eq::{not_equal, equal}
+
+///|
+pub extend LanguageModelV4FinishReason with Debug::{to_repr}
+
+///|
+pub extend LanguageModelV4FinishReason with Eq::{not_equal, equal}

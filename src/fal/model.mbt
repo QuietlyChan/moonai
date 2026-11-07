@@ -4,7 +4,7 @@ pub struct FalProvider {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -12,10 +12,10 @@ pub struct FalProvider {
 /// Create a fal provider. The API key defaults to the `FAL_API_KEY`
 /// environment variable.
 pub fn create_fal(
-  api_key? : String = "",
-  base_url? : String = "https://fal.run",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://fal.run",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> FalProvider {
   {
@@ -32,10 +32,10 @@ pub fn create_fal(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createFal(
-  api_key? : String = "",
-  base_url? : String = "https://fal.run",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://fal.run",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> FalProvider {
   create_fal(api_key~, base_url~, headers~, idle_timeout_ms~, http_transport?)
@@ -151,13 +151,25 @@ pub impl @provider.ProviderV4 for FalProvider with fn skills(_self) {
 /// Construct the default V4 fal image model directly.
 pub fn fal(
   model_id : FalImageModelId,
-  api_key? : String = "",
-  base_url? : String = "https://fal.run",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://fal.run",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.ImageModelV4 {
   create_fal(api_key~, base_url~, headers~, idle_timeout_ms~, http_transport?).image(
     model_id,
   )
+}
+
+///|
+pub extend FalProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  language_model,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
 }

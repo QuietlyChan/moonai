@@ -1,26 +1,26 @@
 ///|
 priv struct MockHttpStreamResponse {
-  status : Int
+  status : Int32
   reason_text : String
   response_headers : Map[String, String]
   chunks : Array[String]
-  delays_ms : Array[Int]
-  next_chunk : Ref[Int]
+  delays_ms : Array[Int32]
+  next_chunk : Ref[Int32]
   closed : Ref[Bool]
 }
 
 ///|
 fn MockHttpStreamResponse::new(
   chunks : Array[String],
-  status? : Int = 200,
-  reason? : String = "OK",
-  headers? : Map[String, String] = Map([]),
-  delays_ms? : Array[Int] = [],
+  status~ : Int32 = 200,
+  reason~ : String = "OK",
+  headers~ : Map[String, String] = Map([]),
+  delays_ms~ : Array[Int32] = [],
 ) -> MockHttpStreamResponse {
   {
     status,
     reason_text: reason,
-    response_headers: copy_headers(headers),
+    response_headers: @provider_utils.copy_headers(headers),
     chunks,
     delays_ms,
     next_chunk: Ref(0),
@@ -40,7 +40,7 @@ impl HttpStreamResponse for MockHttpStreamResponse with fn reason(self) {
 
 ///|
 impl HttpStreamResponse for MockHttpStreamResponse with fn headers(self) {
-  copy_headers(self.response_headers)
+  @provider_utils.copy_headers(self.response_headers)
 }
 
 ///|
@@ -75,15 +75,15 @@ impl HttpStreamResponse for MockHttpStreamResponse with fn close(self) {
 
 ///|
 priv struct MockHttpTransport {
-  buffered_response : HttpResponse
+  buffered_response : @provider_utils.HttpResponse
   stream_response : MockHttpStreamResponse
-  buffered_requests : Array[HttpRequest]
-  stream_requests : Array[HttpRequest]
+  buffered_requests : Array[@provider_utils.HttpRequest]
+  stream_requests : Array[@provider_utils.HttpRequest]
 }
 
 ///|
 fn MockHttpTransport::new(
-  buffered_response : HttpResponse,
+  buffered_response : @provider_utils.HttpResponse,
   stream_response : MockHttpStreamResponse,
 ) -> MockHttpTransport {
   {
@@ -110,14 +110,14 @@ impl HttpTransport for MockHttpTransport with fn fetch_stream(self, request) {
 async test "HttpTransport injects buffered JSON requests" {
   let stream = MockHttpStreamResponse::new([])
   let transport = MockHttpTransport::new(
-    HttpResponse::text(
+    @provider_utils.HttpResponse::text(
       status_code=200,
       body="{\"id\":\"response-1\",\"value\":42}",
       headers={ "x-request-id": "request-1" },
     ),
     stream,
   )
-  let response = post_json(
+  let response = @provider_utils.post_json(
     provider_name="mock",
     url="https://example.test/v1/generate",
     headers={ "Authorization": "Bearer test-key" },
@@ -140,13 +140,13 @@ async test "HttpTransport injects buffered JSON requests" {
 async test "buffered invalid JSON retains API call diagnostics" {
   let stream = MockHttpStreamResponse::new([])
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{not-json", headers={
+    @provider_utils.HttpResponse::text(status_code=200, body="{not-json", headers={
       "x-request-id": "request-invalid-json",
     }),
     stream,
   )
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/generate",
       headers={ "Authorization": "Bearer test-key" },
@@ -191,13 +191,15 @@ async test "buffered invalid JSON retains API call diagnostics" {
 async test "buffered JSON validators retain parsed response data" {
   let stream = MockHttpStreamResponse::new([])
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{\"value\":\"wrong\"}", headers={
-      "x-request-id": "request-invalid-schema",
-    }),
+    @provider_utils.HttpResponse::text(
+      status_code=200,
+      body="{\"value\":\"wrong\"}",
+      headers={ "x-request-id": "request-invalid-schema" },
+    ),
     stream,
   )
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/generate",
       headers=Map([]),
@@ -245,12 +247,12 @@ async test "buffered JSON validators retain parsed response data" {
 async test "successful JSON handlers preserve results and wrap failures" {
   let stream = MockHttpStreamResponse::new([])
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{\"value\":42}", headers={
+    @provider_utils.HttpResponse::text(status_code=200, body="{\"value\":42}", headers={
       "x-request-id": "request-handler",
     }),
     stream,
   )
-  let response = post_json(
+  let response = @provider_utils.post_json(
     provider_name="mock",
     url="https://example.test/v1/generate",
     headers=Map([]),
@@ -258,7 +260,7 @@ async test "successful JSON handlers preserve results and wrap failures" {
     retry_policy=@provider.RetryPolicy::none(),
     transport~,
   )
-  let value = handleJsonResponse(response, json => {
+  let value = @provider_utils.handleJsonResponse(response, json => {
     match json {
       { "value": Number(value, ..), .. } => value.to_int()
       _ => fail("missing value")
@@ -266,7 +268,7 @@ async test "successful JSON handlers preserve results and wrap failures" {
   })
   assert_eq(value, 42)
   try
-    handle_json_response(response, json => {
+    @provider_utils.handle_json_response(response, json => {
       guard json is Null else {
         raise @provider.InvalidResponseDataError(
           message="provider conversion failed",
@@ -299,7 +301,7 @@ async test "successful JSON handlers preserve results and wrap failures" {
 async test "failed JSON response handlers preserve API call diagnostics" {
   let stream = MockHttpStreamResponse::new([])
   let transport = MockHttpTransport::new(
-    HttpResponse::text(
+    @provider_utils.HttpResponse::text(
       status_code=400,
       body="{\"error\":{\"message\":\"invalid request\"}}",
       headers={ "x-request-id": "request-error-handler" },
@@ -307,7 +309,7 @@ async test "failed JSON response handlers preserve API call diagnostics" {
     stream,
   )
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/generate",
       headers={ "Authorization": "Bearer test-key" },
@@ -358,13 +360,13 @@ async test "failed JSON response handlers preserve API call diagnostics" {
 async test "response handlers preserve cancellation and existing API call errors" {
   let stream = MockHttpStreamResponse::new([])
   let successful_transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{\"value\":42}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{\"value\":42}"),
     stream,
   )
   let cancellation_token = @provider.CancellationToken::new()
   cancellation_token.cancel()
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/generate",
       headers=Map([]),
@@ -380,11 +382,14 @@ async test "response handlers preserve cancellation and existing API call errors
     _ => fail("expected successful-response cancellation to propagate")
   }
   let failed_transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=400, body="{\"error\":\"bad\"}"),
+    @provider_utils.HttpResponse::text(
+      status_code=400,
+      body="{\"error\":\"bad\"}",
+    ),
     stream,
   )
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/generate",
       headers=Map([]),
@@ -435,13 +440,15 @@ async test "response handlers preserve cancellation and existing API call errors
 async test "binary response retry classifier failures use status retryability" {
   let stream = MockHttpStreamResponse::new([])
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=503, body="{\"error\":\"overloaded\"}", headers={
-      "x-request-id": "binary-error-handler",
-    }),
+    @provider_utils.HttpResponse::text(
+      status_code=503,
+      body="{\"error\":\"overloaded\"}",
+      headers={ "x-request-id": "binary-error-handler" },
+    ),
     stream,
   )
   try
-    post_json_binary(
+    @provider_utils.post_json_binary(
       provider_name="mock",
       url="https://example.test/v1/audio",
       headers=Map([]),
@@ -487,7 +494,7 @@ async test "binary response retry classifier failures use status retryability" {
 async test "GET failed-response handlers retain an empty request body" {
   let stream = MockHttpStreamResponse::new([])
   let transport = MockHttpTransport::new(
-    HttpResponse::text(
+    @provider_utils.HttpResponse::text(
       status_code=422,
       body="{\"error\":\"invalid resource\"}",
       headers={ "x-request-id": "get-error-handler" },
@@ -495,7 +502,7 @@ async test "GET failed-response handlers retain an empty request body" {
     stream,
   )
   try
-    get_json(
+    @provider_utils.get_json(
       provider_name="mock",
       url="https://example.test/v1/resources/item-1",
       headers=Map([]),
@@ -539,13 +546,13 @@ async test "GET failed-response handlers retain an empty request body" {
 async test "buffered JSON responses enforce the shared size limit" {
   let stream = MockHttpStreamResponse::new([])
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}", headers={
+    @provider_utils.HttpResponse::text(status_code=200, body="{}", headers={
       "content-length": "2147483649",
     }),
     stream,
   )
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/generate",
       headers=Map([]),
@@ -573,11 +580,11 @@ async test "SSE failed-response handlers preserve stream diagnostics" {
     headers={ "x-request-id": "sse-error-handler" },
   )
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{}"),
     stream,
   )
   try
-    post_json_sse_events(
+    @provider_utils.post_json_sse_events(
       provider_name="mock",
       url="https://example.test/v1/stream",
       headers={ "Authorization": "Bearer stream-key" },
@@ -591,8 +598,8 @@ async test "SSE failed-response handlers preserve stream diagnostics" {
       },
       start_events=[@provider.StreamStart],
       is_stream_error=event => event is @provider.StreamError(_),
-      feed_line=_ => SseDecodeBatch::empty(false),
-      flush_buffered=() => SseDecodeBatch::empty(false),
+      feed_line=_ => @provider_utils.SseDecodeBatch::empty(false),
+      flush_buffered=() => @provider_utils.SseDecodeBatch::empty(false),
       response=() => "unreachable",
       transport~,
       on_event=_ => (),
@@ -636,21 +643,21 @@ async test "HttpTransport injects streaming SSE requests and closes responses" {
     headers={ "content-type": "text/event-stream" },
   )
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{}"),
     stream,
   )
-  let buffer = EventSourceBuffer::new()
+  let buffer = @provider_utils.EventSourceBuffer::new()
   let payloads : Array[String] = []
   let events : Array[@provider.StreamEvent] = []
   let decode_payload = payload => {
     if payload == "[DONE]" {
-      SseDecodeBatch::empty(true)
+      @provider_utils.SseDecodeBatch::empty(true)
     } else {
       payloads.push(payload)
       { events: [], consumed_event: true, done: false, }
     }
   }
-  let result = post_json_sse_events(
+  let result = @provider_utils.post_json_sse_events(
     provider_name="mock",
     url="https://example.test/v1/stream",
     headers={ "Authorization": "Bearer stream-key" },
@@ -661,13 +668,13 @@ async test "HttpTransport injects streaming SSE requests and closes responses" {
     feed_line=raw => {
       match buffer.feed_line(raw) {
         Some(payload) => decode_payload(payload)
-        None => SseDecodeBatch::empty(false)
+        None => @provider_utils.SseDecodeBatch::empty(false)
       }
     },
     flush_buffered=() => {
       match buffer.flush() {
         Some(payload) => decode_payload(payload)
-        None => SseDecodeBatch::empty(false)
+        None => @provider_utils.SseDecodeBatch::empty(false)
       }
     },
     response=() => payloads.join(","),
@@ -692,14 +699,14 @@ async test "SSE transport runs the protocol finalizer only at normal EOF" {
     "content-type": "text/event-stream",
   })
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{}"),
     stream,
   )
-  let buffer = EventSourceBuffer::new()
+  let buffer = @provider_utils.EventSourceBuffer::new()
   let finalizer_calls = Ref(0)
   let payloads : Array[String] = []
   let events : Array[@provider.StreamEvent] = []
-  let result = post_json_sse_events(
+  let result = @provider_utils.post_json_sse_events(
     provider_name="mock",
     url="https://example.test/v1/stream",
     headers=Map([]),
@@ -714,7 +721,7 @@ async test "SSE transport runs the protocol finalizer only at normal EOF" {
           payloads.push(payload)
           { events: [], consumed_event: true, done: false, }
         }
-        None => SseDecodeBatch::empty(false)
+        None => @provider_utils.SseDecodeBatch::empty(false)
       }
     },
     flush_buffered=() => {
@@ -723,7 +730,7 @@ async test "SSE transport runs the protocol finalizer only at normal EOF" {
           payloads.push(payload)
           { events: [], consumed_event: true, done: false, }
         }
-        None => SseDecodeBatch::empty(false)
+        None => @provider_utils.SseDecodeBatch::empty(false)
       }
     },
     finish_stream=() => {
@@ -759,12 +766,12 @@ async test "SSE transport does not run the protocol finalizer on idle timeout" {
     delays_ms=[50],
   )
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{}"),
     stream,
   )
   let finalizer_calls = Ref(0)
   try
-    post_json_sse_events(
+    @provider_utils.post_json_sse_events(
       provider_name="mock",
       url="https://example.test/v1/stream",
       headers=Map([]),
@@ -773,11 +780,11 @@ async test "SSE transport does not run the protocol finalizer on idle timeout" {
       retry_policy=@provider.RetryPolicy::none(),
       start_events=[@provider.StreamStart],
       is_stream_error=event => event is @provider.StreamError(_),
-      feed_line=_ => SseDecodeBatch::empty(false),
-      flush_buffered=() => SseDecodeBatch::empty(false),
+      feed_line=_ => @provider_utils.SseDecodeBatch::empty(false),
+      flush_buffered=() => @provider_utils.SseDecodeBatch::empty(false),
       finish_stream=() => {
         finalizer_calls.val = finalizer_calls.val + 1
-        SseDecodeBatch::empty(true)
+        @provider_utils.SseDecodeBatch::empty(true)
       },
       response=() => (),
       transport~,
@@ -802,17 +809,17 @@ async test "generic SSE transport emits the V4 start envelope once" {
     headers={ "content-type": "text/event-stream" },
   )
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{}"),
     stream,
   )
-  let buffer = EventSourceBuffer::new()
+  let buffer = @provider_utils.EventSourceBuffer::new()
   let payloads : Array[String] = []
   let events : Array[@provider.LanguageModelV4StreamPart] = []
-  let decode_payload : (String) -> SseDecodeBatch[
+  let decode_payload : (String) -> @provider_utils.SseDecodeBatch[
     @provider.LanguageModelV4StreamPart,
   ] = payload => {
     if payload == "[DONE]" {
-      SseDecodeBatch::empty(true)
+      @provider_utils.SseDecodeBatch::empty(true)
     } else {
       payloads.push(payload)
       {
@@ -823,7 +830,7 @@ async test "generic SSE transport emits the V4 start envelope once" {
     }
   }
   let warnings = [@provider.Other(message="mock warning")]
-  let result = post_json_sse_events(
+  let result = @provider_utils.post_json_sse_events(
     provider_name="mock",
     url="https://example.test/v1/stream",
     headers=Map([]),
@@ -836,13 +843,13 @@ async test "generic SSE transport emits the V4 start envelope once" {
     feed_line=raw => {
       match buffer.feed_line(raw) {
         Some(payload) => decode_payload(payload)
-        None => SseDecodeBatch::empty(false)
+        None => @provider_utils.SseDecodeBatch::empty(false)
       }
     },
     flush_buffered=() => {
       match buffer.flush() {
         Some(payload) => decode_payload(payload)
-        None => SseDecodeBatch::empty(false)
+        None => @provider_utils.SseDecodeBatch::empty(false)
       }
     },
     response=() => payloads.join(","),
@@ -867,17 +874,17 @@ async test "SSE start policy buffers accepted frames until provider output" {
     headers={ "content-type": "text/event-stream" },
   )
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{}"),
     stream,
   )
-  let buffer = EventSourceBuffer::new()
+  let buffer = @provider_utils.EventSourceBuffer::new()
   let accepted = Ref(false)
   let output = Ref(false)
   let started_count = Ref(0)
   let events : Array[@provider.StreamEvent] = []
   let decode_payload = payload => {
     if payload == "[DONE]" {
-      SseDecodeBatch::empty(true)
+      @provider_utils.SseDecodeBatch::empty(true)
     } else {
       if payload == "accepted" {
         accepted.val = true
@@ -891,13 +898,13 @@ async test "SSE start policy buffers accepted frames until provider output" {
       }
     }
   }
-  let start_policy = SseStreamStartPolicy::new(
+  let start_policy = @provider_utils.SseStreamStartPolicy::new(
     is_accepted=() => accepted.val,
     is_output=() => output.val,
     on_started=() => started_count.val = started_count.val + 1,
   )
   ignore(
-    post_json_sse_events(
+    @provider_utils.post_json_sse_events(
       provider_name="mock",
       url="https://example.test/v1/stream",
       headers=Map([]),
@@ -908,13 +915,13 @@ async test "SSE start policy buffers accepted frames until provider output" {
       feed_line=raw => {
         match buffer.feed_line(raw) {
           Some(payload) => decode_payload(payload)
-          None => SseDecodeBatch::empty(false)
+          None => @provider_utils.SseDecodeBatch::empty(false)
         }
       },
       flush_buffered=() => {
         match buffer.flush() {
           Some(payload) => decode_payload(payload)
-          None => SseDecodeBatch::empty(false)
+          None => @provider_utils.SseDecodeBatch::empty(false)
         }
       },
       response=() => "complete",
@@ -938,15 +945,17 @@ async test "SSE accepted grace resets after each parsed setup frame" {
     delays_ms=[0, 0, 75, 0, 150, 0],
   )
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{}"),
     stream,
   )
-  let buffer = EventSourceBuffer::new()
+  let buffer = @provider_utils.EventSourceBuffer::new()
   let accepted = Ref(false)
   let released = Ref(false)
   let started_count = Ref(0)
   let events : Array[@provider.StreamEvent] = []
-  let decode_payload : (String) -> SseDecodeBatch[@provider.StreamEvent] raise = payload => {
+  let decode_payload : (String) -> @provider_utils.SseDecodeBatch[
+    @provider.StreamEvent,
+  ] raise = payload => {
     if payload == "accepted" {
       accepted.val = true
       {
@@ -971,7 +980,7 @@ async test "SSE accepted grace resets after each parsed setup frame" {
       }
     }
   }
-  let start_policy = SseStreamStartPolicy::new(
+  let start_policy = @provider_utils.SseStreamStartPolicy::new(
     is_accepted=() => accepted.val,
     is_output=() => false,
     accepted_grace_ms=200,
@@ -981,7 +990,7 @@ async test "SSE accepted grace resets after each parsed setup frame" {
     },
   )
   try
-    post_json_sse_events(
+    @provider_utils.post_json_sse_events(
       provider_name="mock",
       url="https://example.test/v1/stream",
       headers=Map([]),
@@ -992,13 +1001,13 @@ async test "SSE accepted grace resets after each parsed setup frame" {
       feed_line=raw => {
         match buffer.feed_line(raw) {
           Some(payload) => decode_payload(payload)
-          None => SseDecodeBatch::empty(false)
+          None => @provider_utils.SseDecodeBatch::empty(false)
         }
       },
       flush_buffered=() => {
         match buffer.flush() {
           Some(payload) => decode_payload(payload)
-          None => SseDecodeBatch::empty(false)
+          None => @provider_utils.SseDecodeBatch::empty(false)
         }
       },
       response=() => "unreachable",
@@ -1024,12 +1033,12 @@ async test "SSE provider errors preserve HTTP diagnostics" {
     "x-request-id": "sse-error-1",
   })
   let transport = MockHttpTransport::new(
-    HttpResponse::text(status_code=200, body="{}"),
+    @provider_utils.HttpResponse::text(status_code=200, body="{}"),
     stream,
   )
   let events : Array[@provider.StreamEvent] = []
   try
-    post_json_sse_events(
+    @provider_utils.post_json_sse_events(
       provider_name="mock",
       url="https://example.test/v1/stream",
       headers={ "Authorization": "Bearer stream-key" },
@@ -1045,7 +1054,7 @@ async test "SSE provider errors preserve HTTP diagnostics" {
           is_retryable=true,
         )
       },
-      flush_buffered=() => SseDecodeBatch::empty(false),
+      flush_buffered=() => @provider_utils.SseDecodeBatch::empty(false),
       response=() => "unreachable",
       transport~,
       on_event=event => events.push(event),
@@ -1082,8 +1091,8 @@ async test "SSE provider errors preserve HTTP diagnostics" {
 
 ///|
 priv struct AlwaysFailingHttpTransport {
-  buffered_calls : Ref[Int]
-  stream_calls : Ref[Int]
+  buffered_calls : Ref[Int32]
+  stream_calls : Ref[Int32]
 }
 
 ///|
@@ -1112,7 +1121,7 @@ priv struct SlowHttpTransport {}
 ///|
 impl HttpTransport for SlowHttpTransport with fn fetch(_self, _request) {
   @async.sleep(50)
-  HttpResponse::text(status_code=200, body="{}")
+  @provider_utils.HttpResponse::text(status_code=200, body="{}")
 }
 
 ///|
@@ -1215,7 +1224,7 @@ async test "buffered transport failures retry then become API call errors" {
     max_delay_ms=0,
   )
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/generate",
       headers={ "Authorization": "Bearer network-key" },
@@ -1260,7 +1269,7 @@ async test "buffered transport failures retry then become API call errors" {
 async test "binary multipart and GET share the API call error boundary" {
   let transport = AlwaysFailingHttpTransport::new()
   try
-    post_json_binary(
+    @provider_utils.post_json_binary(
       provider_name="mock",
       url="https://example.test/v1/binary",
       headers=Map([]),
@@ -1276,11 +1285,11 @@ async test "binary multipart and GET share the API call error boundary" {
   } noraise {
     _ => fail("expected a binary transport error")
   }
-  let form_data = encode_multipart_form_data([
-    MultipartField::text(name="prompt", value="multipart"),
+  let form_data = @provider_utils.encode_multipart_form_data([
+    @provider_utils.MultipartField::text(name="prompt", value="multipart"),
   ])
   try
-    post_multipart(
+    @provider_utils.post_multipart(
       provider_name="mock",
       url="https://example.test/v1/multipart",
       headers={ "X-Test": "multipart" },
@@ -1306,7 +1315,7 @@ async test "binary multipart and GET share the API call error boundary" {
     _ => fail("expected a multipart transport error")
   }
   try
-    get_json(
+    @provider_utils.get_json(
       provider_name="mock",
       url="https://example.test/v1/status",
       headers={ "X-Test": "get" },
@@ -1334,7 +1343,7 @@ async test "SSE connection failures retry then become API call errors" {
   )
   let events : Array[@provider.StreamEvent] = []
   try
-    post_json_sse_events(
+    @provider_utils.post_json_sse_events(
       provider_name="mock",
       url="https://example.test/v1/stream",
       headers={ "Authorization": "Bearer stream-key" },
@@ -1342,8 +1351,8 @@ async test "SSE connection failures retry then become API call errors" {
       retry_policy~,
       start_events=[@provider.StreamStart],
       is_stream_error=event => event is @provider.StreamError(_),
-      feed_line=_ => SseDecodeBatch::empty(false),
-      flush_buffered=() => SseDecodeBatch::empty(false),
+      feed_line=_ => @provider_utils.SseDecodeBatch::empty(false),
+      flush_buffered=() => @provider_utils.SseDecodeBatch::empty(false),
       response=() => "unreachable",
       transport~,
       on_event=event => events.push(event),
@@ -1373,7 +1382,7 @@ async test "SSE read failures become API call errors" {
   let stream = ReadFailingStreamResponse::{ closed: Ref(false), }
   let transport = ReadFailingHttpTransport::{ stream, }
   try
-    post_json_sse_events(
+    @provider_utils.post_json_sse_events(
       provider_name="mock",
       url="https://example.test/v1/stream",
       headers=Map([]),
@@ -1381,8 +1390,8 @@ async test "SSE read failures become API call errors" {
       retry_policy=@provider.RetryPolicy::none(),
       start_events=[@provider.StreamStart],
       is_stream_error=event => event is @provider.StreamError(_),
-      feed_line=_ => SseDecodeBatch::empty(false),
-      flush_buffered=() => SseDecodeBatch::empty(false),
+      feed_line=_ => @provider_utils.SseDecodeBatch::empty(false),
+      flush_buffered=() => @provider_utils.SseDecodeBatch::empty(false),
       response=() => "unreachable",
       transport~,
       on_event=_ => (),
@@ -1401,7 +1410,7 @@ async test "SSE read failures become API call errors" {
 ///|
 async test "buffered timeout has no HTTP status" {
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/slow",
       headers=Map([]),
@@ -1431,7 +1440,7 @@ async test "buffered timeout has no HTTP status" {
 ///|
 async test "transport preserves an existing API call error" {
   try
-    post_json(
+    @provider_utils.post_json(
       provider_name="mock",
       url="https://example.test/v1/generate",
       headers=Map([]),

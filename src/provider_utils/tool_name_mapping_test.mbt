@@ -10,7 +10,7 @@ test "tool name mapping maps provider-defined tools in both directions" {
       name="custom-code-tool",
     ),
   ]
-  let mapping = create_tool_name_mapping(
+  let mapping = @provider_utils.create_tool_name_mapping(
     tools,
     Map([
       ("anthropic.computer-use", "computer_use"),
@@ -28,7 +28,7 @@ test "tool name mapping maps provider-defined tools in both directions" {
 
 ///|
 test "tool name mapping ignores function and unknown provider tools" {
-  let mapping = createToolNameMapping(
+  let mapping = @provider_utils.createToolNameMapping(
     [
       @provider.ToolDefinition::new(
         "function-tool",
@@ -45,14 +45,14 @@ test "tool name mapping ignores function and unknown provider tools" {
 
 ///|
 test "empty tool name mapping is the identity" {
-  let mapping = create_tool_name_mapping([], Map([]))
+  let mapping = @provider_utils.create_tool_name_mapping([], Map([]))
   assert_eq(mapping.to_provider_tool_name("any-tool"), "any-tool")
   assert_eq(mapping.to_custom_tool_name("any-tool"), "any-tool")
 }
 
 ///|
 test "tool name mapping matches AI SDK last-write collision behavior" {
-  let mapping = create_tool_name_mapping(
+  let mapping = @provider_utils.create_tool_name_mapping(
     [
       @provider.ToolDefinition::provider(id="openai.first", name="first-custom"),
       @provider.ToolDefinition::provider(
@@ -69,7 +69,7 @@ test "tool name mapping matches AI SDK last-write collision behavior" {
 
 ///|
 test "V4 tool name mapping stays in the versioned provider contract" {
-  let mapping = create_v4_tool_name_mapping(
+  let mapping = @provider_utils.create_v4_tool_name_mapping(
     [
       @provider.LanguageModelV4Tool::provider(
         id="anthropic.computer-use",

@@ -4,9 +4,9 @@ pub async fn transcribe(
   model : &TranscriptionModelV4,
   audio~ : TranscriptionAudio,
   media_type~ : String,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> TranscriptionResponse {
   check_cancellation(cancellation_token)
@@ -35,10 +35,10 @@ pub async fn stream_transcribe(
   model : &TranscriptionModelV4,
   audio~ : &AudioStream,
   input_audio_format~ : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
-  on_event? : async (TranscriptionStreamEvent) -> Unit = _ => (),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
+  on_event~ : async (TranscriptionStreamEvent) -> Unit = _ => (),
   cancellation_token? : CancellationToken,
 ) -> TranscriptionResponse {
   check_cancellation(cancellation_token)
@@ -118,10 +118,10 @@ pub async fn experimental_streamTranscribe(
   model : &TranscriptionModelV4,
   audio~ : &AudioStream,
   input_audio_format~ : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
-  on_event? : async (TranscriptionStreamEvent) -> Unit = _ => (),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
+  on_event~ : async (TranscriptionStreamEvent) -> Unit = _ => (),
   cancellation_token? : CancellationToken,
 ) -> TranscriptionResponse {
   stream_transcribe(
@@ -142,10 +142,10 @@ pub async fn streamTranscribe(
   model : &TranscriptionModelV4,
   audio~ : &AudioStream,
   input_audio_format~ : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
-  on_event? : async (TranscriptionStreamEvent) -> Unit = _ => (),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
+  on_event~ : async (TranscriptionStreamEvent) -> Unit = _ => (),
   cancellation_token? : CancellationToken,
 ) -> TranscriptionResponse {
   stream_transcribe(

@@ -358,3 +358,13 @@ pub impl @provider.LanguageModelV4 for MistralChatLanguageModel with fn do_strea
     Some(response_metadata),
   )
 }
+
+///|
+pub extend MistralChatLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

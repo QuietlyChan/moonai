@@ -5,11 +5,12 @@
 /// protocol decoders choose the event vocabulary. In particular, V4 language
 /// models can emit `LanguageModelV4StreamPart` directly instead of routing
 /// through the older `StreamEvent` contract.
+#derive(Debug)
 pub(all) struct SseDecodeBatch[E] {
   events : Array[E]
   consumed_event : Bool
   done : Bool
-} derive(Debug)
+}
 
 ///|
 /// Return a generic batch that did not consume a complete SSE event.
@@ -33,7 +34,7 @@ fn empty_sse_lifecycle_callback() -> Unit {
 pub struct SseStreamStartPolicy {
   priv is_accepted : () -> Bool
   priv is_output : () -> Bool
-  priv accepted_grace_ms : Int
+  priv accepted_grace_ms : Int32
   priv on_started : () -> Unit
   priv on_retry : () -> Unit
 }
@@ -43,9 +44,9 @@ pub struct SseStreamStartPolicy {
 pub fn SseStreamStartPolicy::new(
   is_accepted~ : () -> Bool,
   is_output~ : () -> Bool,
-  accepted_grace_ms? : Int = 50,
-  on_started? : () -> Unit = empty_sse_lifecycle_callback,
-  on_retry? : () -> Unit = empty_sse_lifecycle_callback,
+  accepted_grace_ms~ : Int32 = 50,
+  on_started~ : () -> Unit = empty_sse_lifecycle_callback,
+  on_retry~ : () -> Unit = empty_sse_lifecycle_callback,
 ) -> SseStreamStartPolicy raise {
   guard accepted_grace_ms >= 0 else {
     fail("SSE accepted grace period must not be negative")
@@ -127,3 +128,6 @@ pub fn EventSourceBuffer::flush(self : EventSourceBuffer) -> String? {
   self.data_lines.clear()
   Some(payload)
 }
+
+///|
+pub extend SseDecodeBatch with Debug::{to_repr}

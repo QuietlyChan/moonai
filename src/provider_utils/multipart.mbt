@@ -1,16 +1,18 @@
 ///|
 /// One value in a multipart/form-data request.
+#derive(Debug, Eq)
 pub(all) enum MultipartValue {
   MultipartText(String)
   MultipartFile(filename~ : String, media_type~ : String, data~ : Bytes)
-} derive(Debug, Eq)
+}
 
 ///|
 /// One named multipart/form-data field.
+#derive(Debug, Eq)
 pub(all) struct MultipartField {
   name : String
   value : MultipartValue
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct a text form-data field.
@@ -31,28 +33,30 @@ pub fn MultipartField::file(
 
 ///|
 /// Encoded multipart/form-data payload and its request metadata representation.
+#derive(Debug, Eq)
 pub(all) struct MultipartFormData {
   boundary : String
   content_type : String
   body : Bytes
   diagnostic_body : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Binary image input after URL download or base64 decoding.
+#derive(Debug, Eq)
 pub(all) struct ResolvedImageFile {
   filename : String
   media_type : String
   data : Bytes
-} derive(Debug, Eq)
+}
 
 ///|
 /// Resolve a provider-neutral image file into bytes suitable for multipart.
 pub async fn resolve_image_file(
   file : @provider.ImageFile,
   provider_name~ : String,
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   trusted_origin? : String,
   transport? : &HttpTransport,
@@ -87,10 +91,10 @@ pub async fn resolve_image_file(
 /// the V4 provider contract intentionally does not carry one.
 pub async fn resolve_image_model_v4_file(
   file : @provider.ImageModelV4File,
-  filename? : String = "image",
+  filename~ : String = "image",
   provider_name~ : String,
-  timeout_ms? : Int = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   trusted_origin? : String,
   transport? : &HttpTransport,
@@ -171,7 +175,7 @@ fn multipart_file_diagnostic(
   name : String,
   filename : String,
   media_type : String,
-  byte_length : Int,
+  byte_length : Int32,
 ) -> String {
   "<file name=\"\{name}\" filename=\"\{filename}\" type=\"\{media_type}\" bytes=\{byte_length}>"
 }
@@ -220,7 +224,7 @@ fn multipart_fields_contain_boundary(
 /// Encode ordered fields as an RFC 7578 multipart/form-data request body.
 pub fn encode_multipart_form_data(
   fields : Array[MultipartField],
-  boundary? : String = "moonai-7MA4YWxkTrZu0gW",
+  boundary~ : String = "moonai-7MA4YWxkTrZu0gW",
 ) -> MultipartFormData raise {
   validate_multipart_token(boundary, "boundary")
   let mut resolved_boundary = boundary
@@ -317,7 +321,7 @@ pub(all) struct MultipartStreamingPlan {
 ///|
 fn multipart_plan_field_parts(
   fields : Array[MultipartFieldPlan],
-  index : Int,
+  index : Int32,
   boundary : String,
   buffer : @buffer.Buffer,
   diagnostic : StringBuilder,
@@ -386,7 +390,7 @@ fn field_name_of_plan(field : MultipartFieldPlan) -> String {
 /// can avoid chunked encoding.
 pub fn plan_multipart_streaming(
   fields : Array[MultipartFieldPlan],
-  boundary? : String = "moonai-7MA4YWxkTrZu0gW",
+  boundary~ : String = "moonai-7MA4YWxkTrZu0gW",
 ) -> MultipartStreamingPlan raise {
   validate_multipart_token(boundary, "boundary")
   let prefix = @buffer.Buffer()
@@ -449,3 +453,27 @@ pub fn plan_multipart_streaming(
     diagnostic_body: diagnostic.to_string(),
   }
 }
+
+///|
+pub extend MultipartValue with Debug::{to_repr}
+
+///|
+pub extend MultipartValue with Eq::{not_equal, equal}
+
+///|
+pub extend MultipartField with Debug::{to_repr}
+
+///|
+pub extend MultipartField with Eq::{not_equal, equal}
+
+///|
+pub extend MultipartFormData with Debug::{to_repr}
+
+///|
+pub extend MultipartFormData with Eq::{not_equal, equal}
+
+///|
+pub extend ResolvedImageFile with Debug::{to_repr}
+
+///|
+pub extend ResolvedImageFile with Eq::{not_equal, equal}

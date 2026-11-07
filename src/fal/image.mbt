@@ -7,7 +7,7 @@ struct FalImageModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -17,7 +17,7 @@ fn fal_image_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> FalImageModel {
   {
@@ -61,7 +61,7 @@ fn FalImageModel::request_headers(
 /// multiple inputs use image_urls.
 fn fal_image_request_body(
   prompt~ : String,
-  n~ : Int,
+  n~ : Int32,
   aspect_ratio~ : String?,
   image_urls~ : Array[String],
   provider_options~ : Map[String, Json],
@@ -130,7 +130,7 @@ pub impl @provider.ImageModelV4 for FalImageModel with fn model_id(self) -> Stri
 ///|
 pub impl @provider.ImageModelV4 for FalImageModel with fn max_images_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   None
 }
 
@@ -222,4 +222,13 @@ fn fal_error_to_message(json : Json) -> String? raise {
     { "error": String(message), .. } => Some(message)
     _ => None
   }
+}
+
+///|
+pub extend FalImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
 }

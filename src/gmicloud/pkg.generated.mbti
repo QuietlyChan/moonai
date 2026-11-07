@@ -9,11 +9,11 @@ import {
 // Values
 pub const VERSION : String = "0.1.0"
 
-pub fn createGmicloud(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GmicloudProvider
+pub fn createGmicloud(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GmicloudProvider
 
-pub fn create_gmicloud(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GmicloudProvider
+pub fn create_gmicloud(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> GmicloudProvider
 
-pub fn gmicloud(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
+pub fn gmicloud(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport, id_generator? : () -> String) -> &@provider.LanguageModelV4
 
 // Errors
 
@@ -23,8 +23,16 @@ pub struct GmicloudProvider {
 }
 pub fn GmicloudProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn GmicloudProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn GmicloudProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn GmicloudProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn GmicloudProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn GmicloudProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GmicloudProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn GmicloudProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn GmicloudProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn GmicloudProvider::specification_version(Self) -> String
+pub fn GmicloudProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn GmicloudProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for GmicloudProvider
 
 // Type aliases

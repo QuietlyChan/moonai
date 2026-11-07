@@ -20,7 +20,7 @@ pub(all) struct ImageModelV4Middleware {
   transform_params : (async (ImageModelV4CallOptions, &ImageModelV4) -> ImageModelV4CallOptions)?
   override_provider : ((&ImageModelV4) -> String)?
   override_model_id : ((&ImageModelV4) -> String)?
-  override_max_images_per_call : ((&ImageModelV4) -> Int?)?
+  override_max_images_per_call : ((&ImageModelV4) -> Int32?)?
   wrap_generate : (async (ImageModelV4MiddlewareContext) -> ImageModelV4Result)?
 }
 
@@ -30,7 +30,7 @@ pub fn ImageModelV4Middleware::new(
   transform_params? : async (ImageModelV4CallOptions, &ImageModelV4) -> ImageModelV4CallOptions,
   override_provider? : (&ImageModelV4) -> String,
   override_model_id? : (&ImageModelV4) -> String,
-  override_max_images_per_call? : (&ImageModelV4) -> Int?,
+  override_max_images_per_call? : (&ImageModelV4) -> Int32?,
   wrap_generate? : async (ImageModelV4MiddlewareContext) -> ImageModelV4Result,
 ) -> ImageModelV4Middleware {
   {

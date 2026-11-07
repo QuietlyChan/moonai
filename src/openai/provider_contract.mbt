@@ -62,3 +62,9 @@ pub impl @provider.ProviderV4 for OpenAIProvider with fn files(self) {
 pub impl @provider.ProviderV4 for OpenAIProvider with fn skills(self) {
   Some(OpenAIProvider::skills(self))
 }
+
+///|
+pub extend OpenAIProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  reranking_model,
+}

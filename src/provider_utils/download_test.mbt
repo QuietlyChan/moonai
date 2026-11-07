@@ -4,7 +4,7 @@ priv struct DownloadTestStream {
 }
 
 ///|
-impl HttpStreamResponse for DownloadTestStream with fn status_code(_self) -> Int {
+impl HttpStreamResponse for DownloadTestStream with fn status_code(_self) -> Int32 {
   200
 }
 
@@ -41,8 +41,8 @@ impl HttpStreamResponse for DownloadTestStream with fn close(self) {
 
 ///|
 priv struct DownloadTestTransport {
-  responses : Map[String, HttpResponse]
-  requests : Array[HttpRequest]
+  responses : Map[String, @provider_utils.HttpResponse]
+  requests : Array[@provider_utils.HttpRequest]
   stream : DownloadTestStream
 }
 
@@ -51,7 +51,9 @@ impl HttpTransport for DownloadTestTransport with fn fetch(self, request) {
   self.requests.push(request)
   self.responses
   .get(self.requests[self.requests.length() - 1].url)
-  .unwrap_or(HttpResponse::text(status_code=404, body="missing"))
+  .unwrap_or(
+    @provider_utils.HttpResponse::text(status_code=404, body="missing"),
+  )
 }
 
 ///|
@@ -64,7 +66,7 @@ impl HttpTransport for DownloadTestTransport with fn fetch_stream(
 
 ///|
 fn assert_download_blocked(url : String) -> Unit raise {
-  try validate_download_url(url) catch {
+  try @provider_utils.validate_download_url(url) catch {
     DownloadError(..) => return
   } noraise {
     _ => fail("expected URL to be blocked: \{url}")
@@ -73,7 +75,7 @@ fn assert_download_blocked(url : String) -> Unit raise {
 
 ///|
 fn assert_download_allowed(url : String) -> Unit raise {
-  try validate_download_url(url) catch {
+  try @provider_utils.validate_download_url(url) catch {
     error =>
       fail("unexpected download validation error: \{@debug.to_string(error)}")
   } noraise {
@@ -106,12 +108,12 @@ test "download URL validation blocks internal and unsupported targets" {
 async test "download follows safe relative redirects" {
   let transport = DownloadTestTransport::{
     responses: {
-      "https://example.com/assets/source": HttpResponse::text(
+      "https://example.com/assets/source": @provider_utils.HttpResponse::text(
         status_code=302,
         body="",
         headers={ "Location": "./image.png" },
       ),
-      "https://example.com/assets/image.png": HttpResponse::text(
+      "https://example.com/assets/image.png": @provider_utils.HttpResponse::text(
         status_code=200,
         body="PNG",
         headers={ "content-type": "image/png" },
@@ -120,7 +122,7 @@ async test "download follows safe relative redirects" {
     requests: [],
     stream: DownloadTestStream::{ closed: Ref(false), },
   }
-  let result = download_file(
+  let result = @provider_utils.download_file(
     provider_name="test",
     url="https://example.com/assets/source",
     retry_policy=@provider.RetryPolicy::none(),
@@ -139,7 +141,7 @@ async test "download decodes Base64 and percent-encoded data URLs without transp
     requests: [],
     stream: DownloadTestStream::{ closed: Ref(false), },
   }
-  let base64_result = download_file(
+  let base64_result = @provider_utils.download_file(
     provider_name="test",
     url="data:text/plain;base64,aGVsbG8=",
     retry_policy=@provider.RetryPolicy::none(),
@@ -147,7 +149,7 @@ async test "download decodes Base64 and percent-encoded data URLs without transp
   )
   assert_eq(base64_result.data, @utf8.encode("hello"))
   assert_eq(base64_result.media_type, "text/plain")
-  let percent_result = download_file(
+  let percent_result = @provider_utils.download_file(
     provider_name="test",
     url="data:application/octet-stream,%00%2B%FF",
     retry_policy=@provider.RetryPolicy::none(),
@@ -162,13 +164,13 @@ async test "download decodes Base64 and percent-encoded data URLs without transp
 async test "download rejects malformed data URLs and oversized content" {
   let transport = DownloadTestTransport::{
     responses: {
-      "https://example.com/header": HttpResponse::new(
+      "https://example.com/header": @provider_utils.HttpResponse::new(
         status_code=200,
         reason="OK",
         headers={ "content-length": "6" },
         body=b"small",
       ),
-      "https://example.com/body": HttpResponse::new(
+      "https://example.com/body": @provider_utils.HttpResponse::new(
         status_code=200,
         reason="OK",
         body=b"larger",
@@ -183,7 +185,7 @@ async test "download rejects malformed data URLs and oversized content" {
       "https://example.com/header", "https://example.com/body",
     ] {
     try
-      download_file(
+      @provider_utils.download_file(
         provider_name="test",
         url~,
         max_bytes=4L,
@@ -203,7 +205,7 @@ async test "download rejects malformed data URLs and oversized content" {
 async test "download rejects a redirect to a private address before requesting it" {
   let transport = DownloadTestTransport::{
     responses: {
-      "https://example.com/source": HttpResponse::text(
+      "https://example.com/source": @provider_utils.HttpResponse::text(
         status_code=302,
         body="",
         headers={ "location": "http://127.0.0.1/secret" },
@@ -213,7 +215,7 @@ async test "download rejects a redirect to a private address before requesting i
     stream: DownloadTestStream::{ closed: Ref(false), },
   }
   try
-    download_file(
+    @provider_utils.download_file(
       provider_name="test",
       url="https://example.com/source",
       retry_policy=@provider.RetryPolicy::none(),
@@ -235,12 +237,12 @@ async test "download rejects a redirect to a private address before requesting i
 async test "download drops credentials on a cross-origin redirect" {
   let transport = DownloadTestTransport::{
     responses: {
-      "https://example.com/source": HttpResponse::text(
+      "https://example.com/source": @provider_utils.HttpResponse::text(
         status_code=302,
         body="",
         headers={ "location": "https://cdn.example.com/file" },
       ),
-      "https://cdn.example.com/file": HttpResponse::text(
+      "https://cdn.example.com/file": @provider_utils.HttpResponse::text(
         status_code=200,
         body="ok",
       ),
@@ -248,7 +250,7 @@ async test "download drops credentials on a cross-origin redirect" {
     requests: [],
     stream: DownloadTestStream::{ closed: Ref(false), },
   }
-  let _ = download_file(
+  let _ = @provider_utils.download_file(
     provider_name="test",
     url="https://example.com/source",
     headers={

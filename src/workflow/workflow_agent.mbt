@@ -9,18 +9,19 @@ pub struct WorkflowAgent {
   priv output : WorkflowOutputSpecification?
   priv agent_id : String?
   priv mut messages : Array[@provider_utils.ModelMessage]
-  priv mut steps : Int
+  priv mut steps : Int32
 }
 
 ///|
 /// The result of one workflow agent run.
+#derive(Debug)
 pub(all) struct WorkflowAgentResult {
   text : String
   output : Json?
-  steps : Int
+  steps : Int32
   usage : @provider.LanguageModelV4Usage
   snapshot : WorkflowSessionSnapshot
-} derive(Debug)
+}
 
 ///|
 /// Create a workflow agent around an inner agent.
@@ -111,3 +112,6 @@ pub async fn WorkflowAgent::generate(
     },
   }
 }
+
+///|
+pub extend WorkflowAgentResult with Debug::{to_repr}

@@ -1,10 +1,11 @@
 ///|
 /// Client or server implementation information used during initialization.
+#derive(Debug, Eq)
 pub(all) struct MCPImplementation {
   name : String
   version : String
   title : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct MCP implementation metadata.
@@ -26,16 +27,18 @@ pub type MCPServerCapabilities = Json
 
 ///|
 /// The result of the MCP initialize handshake.
+#derive(Debug, Eq)
 pub(all) struct InitializeResult {
   protocol_version : String
   capabilities : MCPServerCapabilities
   server_info : MCPImplementation
   instructions : String?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// A tool definition advertised by an MCP server.
+#derive(Debug, Eq)
 pub(all) struct MCPTool {
   name : String
   title : String?
@@ -45,38 +48,42 @@ pub(all) struct MCPTool {
   annotations : Json?
   meta : Json?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// A page of MCP tool definitions.
+#derive(Debug, Eq)
 pub(all) struct ListToolsResult {
   tools : Array[MCPTool]
   next_cursor : String?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// One MCP resource descriptor.
+#derive(Debug, Eq)
 pub(all) struct MCPResource {
   uri : String
   name : String
   title : String?
   description : String?
   mime_type : String?
-  size : Int?
+  size : Int32?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// A page of MCP resources.
+#derive(Debug, Eq)
 pub(all) struct ListResourcesResult {
   resources : Array[MCPResource]
   next_cursor : String?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// A parameterized MCP resource template.
+#derive(Debug, Eq)
 pub(all) struct MCPResourceTemplate {
   uri_template : String
   name : String
@@ -84,18 +91,20 @@ pub(all) struct MCPResourceTemplate {
   description : String?
   mime_type : String?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// MCP resource templates returned by a server.
+#derive(Debug, Eq)
 pub(all) struct ListResourceTemplatesResult {
   resource_templates : Array[MCPResourceTemplate]
   next_cursor : String?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Text or binary resource content returned by resources/read.
+#derive(Debug, Eq)
 pub(all) enum MCPResourceContents {
   MCPTextResource(
     uri~ : String,
@@ -115,71 +124,79 @@ pub(all) enum MCPResourceContents {
     meta~ : Json?,
     raw~ : Json
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Resource content returned by resources/read.
+#derive(Debug, Eq)
 pub(all) struct ReadResourceResult {
   contents : Array[MCPResourceContents]
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// MCP prompt argument metadata.
+#derive(Debug, Eq)
 pub(all) struct MCPPromptArgument {
   name : String
   description : String?
   required : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 /// A prompt advertised by an MCP server.
+#derive(Debug, Eq)
 pub(all) struct MCPPrompt {
   name : String
   title : String?
   description : String?
   arguments : Array[MCPPromptArgument]
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// A page of MCP prompts.
+#derive(Debug, Eq)
 pub(all) struct ListPromptsResult {
   prompts : Array[MCPPrompt]
   next_cursor : String?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// One user or assistant prompt message. Content is retained as protocol JSON.
+#derive(Debug, Eq)
 pub(all) struct MCPPromptMessage {
   role : String
   content : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// A materialized MCP prompt.
+#derive(Debug, Eq)
 pub(all) struct GetPromptResult {
   description : String?
   messages : Array[MCPPromptMessage]
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// A reference used by completion/complete.
+#derive(Debug, Eq)
 pub(all) enum MCPCompletionReference {
   MCPPromptReference(name~ : String)
   MCPResourceReference(uri~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Parameters for an MCP completion request.
+#derive(Debug, Eq)
 pub(all) struct CompleteRequestParams {
   reference : MCPCompletionReference
   argument_name : String
   argument_value : String
   context_arguments : Map[String, String]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an MCP completion request.
@@ -187,44 +204,47 @@ pub fn CompleteRequestParams::new(
   reference~ : MCPCompletionReference,
   argument_name~ : String,
   argument_value~ : String,
-  context_arguments? : Map[String, String] = Map([]),
+  context_arguments~ : Map[String, String] = Map([]),
 ) -> CompleteRequestParams {
   { reference, argument_name, argument_value, context_arguments, }
 }
 
 ///|
 /// Values returned by completion/complete.
+#derive(Debug, Eq)
 pub(all) struct CompleteResult {
   values : Array[String]
-  total : Int?
+  total : Int32?
   has_more : Bool?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Result returned by an MCP tool call.
+#derive(Debug, Eq)
 pub(all) struct CallToolResult {
   content : Array[Json]
   structured_content : Json?
   is_error : Bool
   tool_result : Json?
   raw : Json
-} derive(Debug, Eq)
+}
 
 ///|
 /// Per-request cancellation and timeout controls.
+#derive(Debug)
 pub(all) struct MCPRequestOptions {
   cancellation_token : @provider.CancellationToken?
-  timeout_ms : Int?
-  max_total_timeout_ms : Int?
-} derive(Debug)
+  timeout_ms : Int32?
+  max_total_timeout_ms : Int32?
+}
 
 ///|
 /// Construct MCP request controls.
 pub fn MCPRequestOptions::new(
   cancellation_token? : @provider.CancellationToken,
-  timeout_ms? : Int,
-  max_total_timeout_ms? : Int,
+  timeout_ms? : Int32,
+  max_total_timeout_ms? : Int32,
 ) -> MCPRequestOptions {
   { cancellation_token, timeout_ms, max_total_timeout_ms, }
 }
@@ -270,7 +290,7 @@ fn optional_bool(fields : Map[String, Json], field : String) -> Bool? {
 }
 
 ///|
-fn optional_int(fields : Map[String, Json], field : String) -> Int? {
+fn optional_int(fields : Map[String, Json], field : String) -> Int32? {
   match fields.get(field) {
     Some(Number(value, ..)) => Some(value.to_int())
     _ => None
@@ -553,3 +573,120 @@ fn decode_complete_result(value : Json) -> CompleteResult raise MCPClientError {
     raw: value,
   }
 }
+
+///|
+pub extend MCPImplementation with Debug::{to_repr}
+
+///|
+pub extend MCPImplementation with Eq::{not_equal, equal}
+
+///|
+pub extend InitializeResult with Debug::{to_repr}
+
+///|
+pub extend InitializeResult with Eq::{not_equal, equal}
+
+///|
+pub extend MCPTool with Debug::{to_repr}
+
+///|
+pub extend MCPTool with Eq::{not_equal, equal}
+
+///|
+pub extend ListToolsResult with Debug::{to_repr}
+
+///|
+pub extend ListToolsResult with Eq::{not_equal, equal}
+
+///|
+pub extend MCPResource with Debug::{to_repr}
+
+///|
+pub extend MCPResource with Eq::{not_equal, equal}
+
+///|
+pub extend ListResourcesResult with Debug::{to_repr}
+
+///|
+pub extend ListResourcesResult with Eq::{not_equal, equal}
+
+///|
+pub extend MCPResourceTemplate with Debug::{to_repr}
+
+///|
+pub extend MCPResourceTemplate with Eq::{not_equal, equal}
+
+///|
+pub extend ListResourceTemplatesResult with Debug::{to_repr}
+
+///|
+pub extend ListResourceTemplatesResult with Eq::{not_equal, equal}
+
+///|
+pub extend MCPResourceContents with Debug::{to_repr}
+
+///|
+pub extend MCPResourceContents with Eq::{not_equal, equal}
+
+///|
+pub extend ReadResourceResult with Debug::{to_repr}
+
+///|
+pub extend ReadResourceResult with Eq::{not_equal, equal}
+
+///|
+pub extend MCPPromptArgument with Debug::{to_repr}
+
+///|
+pub extend MCPPromptArgument with Eq::{not_equal, equal}
+
+///|
+pub extend MCPPrompt with Debug::{to_repr}
+
+///|
+pub extend MCPPrompt with Eq::{not_equal, equal}
+
+///|
+pub extend ListPromptsResult with Debug::{to_repr}
+
+///|
+pub extend ListPromptsResult with Eq::{not_equal, equal}
+
+///|
+pub extend MCPPromptMessage with Debug::{to_repr}
+
+///|
+pub extend MCPPromptMessage with Eq::{not_equal, equal}
+
+///|
+pub extend GetPromptResult with Debug::{to_repr}
+
+///|
+pub extend GetPromptResult with Eq::{not_equal, equal}
+
+///|
+pub extend MCPCompletionReference with Debug::{to_repr}
+
+///|
+pub extend MCPCompletionReference with Eq::{not_equal, equal}
+
+///|
+pub extend CompleteRequestParams with Debug::{to_repr}
+
+///|
+pub extend CompleteRequestParams with Eq::{not_equal, equal}
+
+///|
+pub extend CompleteResult with Debug::{to_repr}
+
+///|
+pub extend CompleteResult with Eq::{not_equal, equal}
+
+///|
+pub extend CallToolResult with Debug::{to_repr}
+
+///|
+pub extend CallToolResult with Eq::{not_equal, equal}
+
+///|
+pub extend MCPRequestOptions with Debug::{to_repr}

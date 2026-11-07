@@ -7,36 +7,56 @@ import {
 }
 
 // Values
-pub const BFL_POLL_INTERVAL_MS : Int = 500
+pub const BFL_POLL_INTERVAL_MS : Int32 = 500
 
-pub const BFL_POLL_TIMEOUT_MS : Int = 60_000
+pub const BFL_POLL_TIMEOUT_MS : Int32 = 60_000
 
 pub const VERSION : String = "0.1.0"
 
-pub fn bfl(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
+pub fn bfl(String, api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, poll_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> &@provider.ImageModelV4
 
-pub fn createBfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
+pub fn createBfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, poll_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
 
-pub fn create_bfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int, poll_interval_ms? : Int, poll_timeout_ms? : Int, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
+pub fn create_bfl(api_key? : String, base_url? : String, headers? : Map[String, String], idle_timeout_ms? : Int32, poll_interval_ms? : Int32, poll_timeout_ms? : Int32, http_transport? : &@provider_utils.HttpTransport) -> BflProvider
 
 // Errors
 
 // Types and methods
 type BflImageModel
+pub async fn BflImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn BflImageModel::max_images_per_call(Self) -> Int32?
+pub fn BflImageModel::model_id(Self) -> String
+pub fn BflImageModel::provider(Self) -> String
+pub fn BflImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for BflImageModel
 
 pub struct BflProvider {
   // private fields
 }
+pub fn BflProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn BflProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn BflProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn BflProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn BflProvider::image_model(Self, String) -> &@provider.ImageModelV4
+pub fn BflProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn BflProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn BflProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn BflProvider::specification_version(Self) -> String
+pub fn BflProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn BflProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub fn BflProvider::video(Self, String) -> &@provider.VideoModelV4
 pub fn BflProvider::videoModel(Self, String) -> &@provider.VideoModelV4
 pub fn BflProvider::video_model(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for BflProvider
 
 type BflVideoModel
+pub async fn BflVideoModel::do_generate(Self, @provider.VideoModelV4CallOptions) -> @provider.VideoModelV4Result
+pub async fn BflVideoModel::do_start(Self, @provider.VideoModelV4CallOptions) -> @provider.VideoModelV4OperationStartResult
+pub async fn BflVideoModel::do_status(Self, @provider.VideoModelV4OperationStatusCallOptions) -> @provider.VideoModelV4OperationStatusResult
+pub fn BflVideoModel::max_videos_per_call(Self) -> Int32?
+pub fn BflVideoModel::model_id(Self) -> String
+pub fn BflVideoModel::provider(Self) -> String
+pub fn BflVideoModel::specification_version(Self) -> String
 pub impl @provider.VideoModelV4 for BflVideoModel
 
 // Type aliases

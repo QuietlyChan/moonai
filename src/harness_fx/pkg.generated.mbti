@@ -27,10 +27,14 @@ pub fn fx_subscription_authentication_files(env~ : Map[String, String], sandbox_
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct FxSubscriptionCredential {
   access_token : String
   account_id : String
-} derive(Eq, @debug.Debug)
+}
+pub fn FxSubscriptionCredential::equal(Self, Self) -> Bool
+pub fn FxSubscriptionCredential::not_equal(Self, Self) -> Bool
+pub fn FxSubscriptionCredential::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

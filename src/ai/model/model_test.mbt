@@ -1,10 +1,14 @@
 ///|
 test "model identities use provider-qualified keys" {
-  let id = ModelId::new(provider="openai", model_id="gpt-4.1")
+  let id = @model.ModelId::new(provider="openai", model_id="gpt-4.1")
   assert_eq(id.provider(), "openai")
   assert_eq(id.model_id(), "gpt-4.1")
   assert_eq(id.key(), "openai:gpt-4.1")
-  match LanguageModelV4Reference::named(provider="openai", model_id="gpt-4.1") {
+  match
+    @model.LanguageModelV4Reference::named(
+      provider="openai",
+      model_id="gpt-4.1",
+    ) {
     Named(value) => assert_eq(value, id)
     Instance(_) => fail("expected a named model reference")
   }
@@ -13,21 +17,21 @@ test "model identities use provider-qualified keys" {
 ///|
 test "model identities parse canonical registry keys" {
   assert_eq(
-    ModelId::parse(" openai:gpt-4.1 "),
-    Some(ModelId::new(provider="openai", model_id="gpt-4.1")),
+    @model.ModelId::parse(" openai:gpt-4.1 "),
+    Some(@model.ModelId::new(provider="openai", model_id="gpt-4.1")),
   )
-  assert_eq(ModelId::parse("gpt-4.1"), None)
-  assert_eq(ModelId::parse(":"), None)
-  assert_eq(ModelId::parse("openai:"), None)
+  assert_eq(@model.ModelId::parse("gpt-4.1"), None)
+  assert_eq(@model.ModelId::parse(":"), None)
+  assert_eq(@model.ModelId::parse("openai:"), None)
   assert_eq(
-    ModelId::parse("gateway:model:version"),
-    Some(ModelId::new(provider="gateway", model_id="model:version")),
+    @model.ModelId::parse("gateway:model:version"),
+    Some(@model.ModelId::new(provider="gateway", model_id="model:version")),
   )
 }
 
 ///|
 test "invalid model keys raise a typed error" {
-  try parse_model_id("gpt-4.1") catch {
+  try @model.parse_model_id("gpt-4.1") catch {
     InvalidModelIdError(value~) => assert_eq(value, "gpt-4.1")
   } noraise {
     _ => fail("expected an invalid model id to fail")
@@ -42,10 +46,10 @@ test "registry resolves language models by their provider identity" {
     provider_name="test-provider",
     model_id="v4-model",
   )
-  let v4 = as_language_model_v4(chat)
-  let registry = ModelRegistry::new().with_language_model(v4)
-  let id = ModelId::new(provider="test-provider", model_id="v4-model")
-  assert_eq(model_id_of_language_model(v4), id)
+  let v4 = @model.as_language_model_v4(chat)
+  let registry = @model.ModelRegistry::new().with_language_model(v4)
+  let id = @model.ModelId::new(provider="test-provider", model_id="v4-model")
+  assert_eq(@model.model_id_of_language_model(v4), id)
   assert_true(registry.language_model(id) is Some(_))
   assert_true(
     registry.language_model_by_key("test-provider:v4-model") is Some(_),
@@ -53,7 +57,7 @@ test "registry resolves language models by their provider identity" {
   assert_eq(
     registry
     .resolve_language_model(
-      LanguageModelV4Reference::named(
+      @model.LanguageModelV4Reference::named(
         provider="test-provider",
         model_id="v4-model",
       ),
@@ -65,10 +69,10 @@ test "registry resolves language models by their provider identity" {
 
 ///|
 test "registry reports missing model identity" {
-  let registry = ModelRegistry::new()
+  let registry = @model.ModelRegistry::new()
   try
     registry.require_language_model(
-      ModelId::new(provider="missing", model_id="model"),
+      @model.ModelId::new(provider="missing", model_id="model"),
     )
   catch {
     NoSuchModelError(model_id~, model_type~) => {
@@ -97,13 +101,13 @@ test "registry resolves completion and image models" {
     provider_name="test-provider",
     model_id="image-model",
   )
-  let registry = ModelRegistry::new()
+  let registry = @model.ModelRegistry::new()
     .with_completion_model(completion)
     .with_image_model(image)
   assert_eq(
     registry
     .resolve_completion_model(
-      CompletionModelReference::named(
+      @model.CompletionModelReference::named(
         provider="test-provider",
         model_id="completion-model",
       ),
@@ -113,7 +117,7 @@ test "registry resolves completion and image models" {
   )
   assert_eq(
     registry
-    .resolve_image_model(ImageModelReference::instance(image))
+    .resolve_image_model(@model.ImageModelReference::instance(image))
     .model_id(),
     "image-model",
   )
@@ -127,15 +131,15 @@ test "registry resolves reranking models by provider-qualified identity" {
     provider_name="test-reranker-provider",
     model_id="test-reranker",
   )
-  let registry = ModelRegistry::new().with_reranking_model(model)
-  let id = ModelId::new(
+  let registry = @model.ModelRegistry::new().with_reranking_model(model)
+  let id = @model.ModelId::new(
     provider="test-reranker-provider",
     model_id="test-reranker",
   )
   let resolved = registry.require_reranking_model(id)
   assert_eq(resolved.model_id(), "test-reranker")
   match
-    RerankingModelReference::named(
+    @model.RerankingModelReference::named(
       provider="test-reranker-provider",
       model_id="test-reranker",
     ) {
@@ -143,7 +147,7 @@ test "registry resolves reranking models by provider-qualified identity" {
       assert_eq(
         registry
         .resolve_reranking_model(
-          RerankingModelReference::named(
+          @model.RerankingModelReference::named(
             provider="test-reranker-provider",
             model_id="test-reranker",
           ),
@@ -190,7 +194,7 @@ test "registry covers every provider model contract" {
     provider_name="test-provider",
     model_id="realtime-model",
   )
-  let registry = ModelRegistry::new()
+  let registry = @model.ModelRegistry::new()
     .with_embedding_model(embedding)
     .with_video_model(video)
     .with_speech_model(speech)
@@ -200,7 +204,7 @@ test "registry covers every provider model contract" {
   assert_eq(
     registry
     .resolve_embedding_model(
-      EmbeddingModelReference::named(
+      @model.EmbeddingModelReference::named(
         provider="test-provider",
         model_id="embedding-model",
       ),
@@ -211,7 +215,7 @@ test "registry covers every provider model contract" {
   assert_eq(
     registry
     .resolve_video_model(
-      VideoModelReference::named(
+      @model.VideoModelReference::named(
         provider="test-provider",
         model_id="video-model",
       ),
@@ -221,14 +225,14 @@ test "registry covers every provider model contract" {
   )
   assert_eq(
     registry
-    .resolve_speech_model(SpeechModelReference::instance(speech))
+    .resolve_speech_model(@model.SpeechModelReference::instance(speech))
     .model_id(),
     "speech-model",
   )
   assert_eq(
     registry
     .resolve_transcription_model(
-      TranscriptionModelReference::named(
+      @model.TranscriptionModelReference::named(
         provider="test-provider",
         model_id="transcription-model",
       ),
@@ -239,7 +243,7 @@ test "registry covers every provider model contract" {
   assert_eq(
     registry
     .resolve_speech_translation_model(
-      SpeechTranslationModelReference::instance(translation),
+      @model.SpeechTranslationModelReference::instance(translation),
     )
     .model_id(),
     "translation-model",
@@ -247,7 +251,7 @@ test "registry covers every provider model contract" {
   assert_eq(
     registry
     .resolve_realtime_model(
-      RealtimeModelReference::named(
+      @model.RealtimeModelReference::named(
         provider="test-provider",
         model_id="realtime-model",
       ),
@@ -260,7 +264,7 @@ test "registry covers every provider model contract" {
   )
   try
     registry.require_video_model(
-      ModelId::new(provider="missing", model_id="video"),
+      @model.ModelId::new(provider="missing", model_id="video"),
     )
   catch {
     NoSuchModelError(model_id~, model_type~) => {

@@ -1,6 +1,6 @@
 ///|
 test "Anthropic response metadata exposes typed usage iterations" {
-  let metadata = decode_anthropic_message_metadata({
+  let metadata = @anthropic.decode_anthropic_message_metadata({
     "usage": {
       "input_tokens": 12,
       "iterations": [
@@ -55,7 +55,7 @@ test "Anthropic response metadata exposes typed usage iterations" {
 
 ///|
 test "Anthropic metadata parser accepts event wrappers and camel case" {
-  let metadata = decodeAnthropicMessageMetadata({
+  let metadata = @anthropic.decodeAnthropicMessageMetadata({
     "message": {
       "usage": { "iterations": null },
       "stopSequence": "DONE",
@@ -69,5 +69,7 @@ test "Anthropic metadata parser accepts event wrappers and camel case" {
 
 ///|
 test "empty Anthropic metadata returns none" {
-  assert_true(decode_anthropic_message_metadata({ "id": "msg_1" }) is None)
+  assert_true(
+    @anthropic.decode_anthropic_message_metadata({ "id": "msg_1" }) is None,
+  )
 }

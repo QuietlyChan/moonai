@@ -66,7 +66,7 @@ fn openai_responses_v4_usage(
 fn openai_responses_item_metadata(
   provider_name : String,
   item_id : String,
-  extra_fields? : Map[String, Json] = Map([]),
+  extra_fields~ : Map[String, Json] = Map([]),
 ) -> Map[String, Json] {
   if item_id == "" && extra_fields.length() == 0 {
     return Map([])
@@ -181,9 +181,9 @@ fn openai_responses_tool_call(
   arguments : String,
   _provider_name : String,
   _item_id : String,
-  provider_executed? : Bool = false,
-  dynamic? : Bool = false,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = false,
+  dynamic~ : Bool = false,
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> @provider.LanguageModelV4ToolCall {
   {
     tool_call_id: id,
@@ -202,10 +202,10 @@ fn openai_responses_tool_result(
   result : Json,
   _provider_name : String,
   _item_id : String,
-  is_error? : Bool = false,
-  preliminary? : Bool = false,
-  dynamic? : Bool = false,
-  provider_metadata? : Map[String, Json] = Map([]),
+  is_error~ : Bool = false,
+  preliminary~ : Bool = false,
+  dynamic~ : Bool = false,
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> @provider.LanguageModelV4ToolResult {
   {
     tool_call_id,
@@ -348,7 +348,7 @@ fn openai_responses_file_search_output(queries : Json, item : Json) -> Json {
 fn openai_responses_source_contents(
   annotations : Array[Json],
   provider_name : String,
-  index : Int,
+  index : Int32,
   id_generator : @provider_utils.IdGenerator,
 ) -> Array[@provider.LanguageModelV4Content] {
   let sources : Array[@provider.LanguageModelV4Content] = []
@@ -509,7 +509,7 @@ fn openai_responses_output_content(
   shell_provider_executed : Bool,
   approval_tool_call_ids~ : Map[String, String],
   web_search_tool_name? : String,
-  stream_mode? : Bool = false,
+  stream_mode~ : Bool = false,
 ) -> (Array[@provider.LanguageModelV4Content], Bool) {
   let content : Array[@provider.LanguageModelV4Content] = []
   let mut has_function_call = false
