@@ -10,8 +10,8 @@ priv struct SequenceStreamLanguageModel {
 ///|
 fn SequenceStreamLanguageModel::new(
   streams : Array[Array[@provider.LanguageModelV4StreamPart]],
-  provider_name? : String = "test.stream-text",
-  model_name? : String = "sequence-stream-model",
+  provider_name~ : String = "test.stream-text",
+  model_name~ : String = "sequence-stream-model",
 ) -> SequenceStreamLanguageModel {
   {
     streams,
@@ -104,7 +104,7 @@ fn stream_tool_call(
   id : String,
   name : String,
   input : String,
-  provider_executed? : Bool = false,
+  provider_executed~ : Bool = false,
 ) -> @provider.LanguageModelV4StreamPart {
   @provider.V4ToolCallReady({
     tool_call_id: id,

@@ -94,7 +94,7 @@ pub fn BatchV4Status::new(
   error? : BatchV4Error,
   created_at? : String,
   expires_at? : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> BatchV4Status {
   {
     state,
@@ -119,8 +119,8 @@ pub(all) struct BatchV4CallOptions {
 ///|
 /// Construct batch call options.
 pub fn BatchV4CallOptions::new(
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4CallOptions {
   { provider_options, headers, cancellation_token, }
@@ -140,7 +140,7 @@ pub(all) struct BatchV4StartOptions {
 pub fn BatchV4StartOptions::new(
   requests~ : Array[BatchV4Request],
   webhook_url? : String,
-  call_options? : BatchV4CallOptions = BatchV4CallOptions::new(),
+  call_options~ : BatchV4CallOptions = BatchV4CallOptions::new(),
 ) -> BatchV4StartOptions {
   { requests, webhook_url, call_options, }
 }
@@ -222,7 +222,7 @@ pub(all) struct BatchV4StartResult {
 pub fn BatchV4StartResult::new(
   batch_id~ : String,
   status~ : BatchV4Status,
-  warnings? : Array[BatchV4RequestWarning] = [],
+  warnings~ : Array[BatchV4RequestWarning] = [],
 ) -> BatchV4StartResult {
   { batch_id, status, warnings: warnings.copy(), }
 }
@@ -239,7 +239,7 @@ pub(all) struct BatchV4OperationOptions {
 /// Construct batch operation options.
 pub fn BatchV4OperationOptions::new(
   batch_id~ : String,
-  call_options? : BatchV4CallOptions = BatchV4CallOptions::new(),
+  call_options~ : BatchV4CallOptions = BatchV4CallOptions::new(),
 ) -> BatchV4OperationOptions {
   { batch_id, call_options, }
 }
@@ -254,7 +254,7 @@ pub(all) struct BatchV4CancelResult {
 ///|
 /// Construct a batch cancel result.
 pub fn BatchV4CancelResult::new(
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> BatchV4CancelResult {
   { provider_metadata: copy_provider_metadata(provider_metadata), }
 }
@@ -273,7 +273,7 @@ pub(all) struct BatchV4ListOptions {
 pub fn BatchV4ListOptions::new(
   limit? : Int32,
   cursor? : String,
-  call_options? : BatchV4CallOptions = BatchV4CallOptions::new(),
+  call_options~ : BatchV4CallOptions = BatchV4CallOptions::new(),
 ) -> BatchV4ListOptions {
   { limit, cursor, call_options, }
 }
@@ -300,7 +300,7 @@ pub(all) struct BatchV4ListResult {
 pub fn BatchV4ListResult::new(
   batches~ : Array[BatchV4ListItem],
   next_cursor? : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> BatchV4ListResult {
   {
     batches: batches.copy(),

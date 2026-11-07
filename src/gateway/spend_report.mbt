@@ -1,5 +1,6 @@
 ///|
 /// Spend-report aggregation dimension.
+#derive(Debug, Eq)
 pub(all) enum GatewaySpendGroupBy {
   SpendDay
   SpendUser
@@ -7,7 +8,7 @@ pub(all) enum GatewaySpendGroupBy {
   SpendTag
   SpendProvider
   SpendCredentialType
-} derive(Debug, Eq)
+}
 
 ///|
 fn gateway_spend_group_by_name(group_by~ : GatewaySpendGroupBy) -> String {
@@ -23,6 +24,7 @@ fn gateway_spend_group_by_name(group_by~ : GatewaySpendGroupBy) -> String {
 
 ///|
 /// Parameters for the spend-report query. Dates are inclusive YYYY-MM-DD.
+#derive(Debug)
 pub(all) struct GatewaySpendReportParams {
   start_date : String
   end_date : String
@@ -33,11 +35,12 @@ pub(all) struct GatewaySpendReportParams {
   provider : String?
   credential_type : String?
   tags : Array[String]?
-} derive(Debug)
+}
 
 ///|
 /// One spend-report row. Only the fields relevant to the chosen group_by
 /// dimension are present.
+#derive(Debug)
 pub(all) struct GatewaySpendReportRow {
   day : String?
   hour : String?
@@ -48,13 +51,13 @@ pub(all) struct GatewaySpendReportRow {
   credential_type : String?
   total_cost : Double
   market_cost : Double?
-  input_tokens : Int?
-  output_tokens : Int?
-  cached_input_tokens : Int?
-  cache_creation_input_tokens : Int?
-  reasoning_tokens : Int?
-  request_count : Int?
-} derive(Debug)
+  input_tokens : Int32?
+  output_tokens : Int32?
+  cached_input_tokens : Int32?
+  cache_creation_input_tokens : Int32?
+  reasoning_tokens : Int32?
+  request_count : Int32?
+}
 
 ///|
 fn gateway_spend_origin(base_url~ : String) -> String? {
@@ -131,7 +134,7 @@ fn gateway_spend_row_string_field(value : Json, key~ : String) -> String? {
 }
 
 ///|
-fn gateway_spend_row_int_field(value : Json, key~ : String) -> Int? {
+fn gateway_spend_row_int_field(value : Json, key~ : String) -> Int32? {
   match value {
     Object(fields) =>
       match fields.get(key) {
@@ -194,7 +197,7 @@ pub struct GatewaySpendReport {
   priv api_key : String
   priv base_url : String
   priv headers : Map[String, String]
-  priv idle_timeout_ms : Int
+  priv idle_timeout_ms : Int32
   priv http_transport : &@provider_utils.HttpTransport
 }
 
@@ -204,7 +207,7 @@ pub fn GatewaySpendReport::new(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> GatewaySpendReport {
   { api_key, base_url, headers, idle_timeout_ms, http_transport, }

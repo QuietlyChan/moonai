@@ -31,7 +31,7 @@ pub fn OpenAIFilesOptions::new(
 /// Convert typed FilesV4 options into the OpenAI provider namespace.
 pub fn OpenAIFilesOptions::to_provider_options(
   self : OpenAIFilesOptions,
-  provider_name? : String = "openai",
+  provider_name~ : String = "openai",
 ) -> Map[String, Json] {
   let values : Map[String, Json] = Map([])
   if self.purpose is Some(value) {

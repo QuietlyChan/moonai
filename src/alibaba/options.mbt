@@ -152,9 +152,9 @@ pub fn AlibabaVideoModelOptions::new(
   shot_type? : String,
   watermark? : Bool,
   audio? : Bool,
-  reference_urls? : Array[String] = [],
+  reference_urls~ : Array[String] = [],
   ratio? : String,
-  media? : Array[AlibabaVideoMedia] = [],
+  media~ : Array[AlibabaVideoMedia] = [],
   poll_interval_ms? : Int32,
   poll_timeout_ms? : Int32,
 ) -> AlibabaVideoModelOptions raise {

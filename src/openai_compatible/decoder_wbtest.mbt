@@ -1,17 +1,17 @@
 ///|
 fn compatible_test_stream_decoder(
-  include_raw_chunks? : Bool = false,
-  provider_name? : String = "",
-  metadata_key? : String = "",
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
+  include_raw_chunks~ : Bool = false,
+  provider_name~ : String = "",
+  metadata_key~ : String = "",
+  error_structure~ : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
   metadata_extractor? : OpenAICompatibleMetadataExtractor,
-  convert_usage? : OpenAICompatibleUsageConverter = convert_openai_compatible_chat_usage,
-  id_generator? : @provider_utils.IdGenerator = @provider_utils.generate_id,
-  generate_reasoning_ids? : Bool = false,
-  text_stream_id? : String = "txt-0",
-  close_text_before_reasoning? : Bool = false,
-  close_text_before_tool_calls? : Bool = false,
-  validate_stream_chunk? : OpenAICompatibleJsonValidator = validate_openai_compatible_chat_chunk,
+  convert_usage~ : OpenAICompatibleUsageConverter = convert_openai_compatible_chat_usage,
+  id_generator~ : @provider_utils.IdGenerator = @provider_utils.generate_id,
+  generate_reasoning_ids~ : Bool = false,
+  text_stream_id~ : String = "txt-0",
+  close_text_before_reasoning~ : Bool = false,
+  close_text_before_tool_calls~ : Bool = false,
+  validate_stream_chunk~ : OpenAICompatibleJsonValidator = validate_openai_compatible_chat_chunk,
 ) -> OpenAICompatibleStreamDecoder {
   OpenAICompatibleStreamDecoder::new(
     include_raw_chunks, provider_name, metadata_key, error_structure, metadata_extractor,
@@ -23,11 +23,11 @@ fn compatible_test_stream_decoder(
 ///|
 fn decode_compatible_test_response(
   json : Json,
-  error_structure? : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
-  convert_usage? : OpenAICompatibleUsageConverter = convert_openai_compatible_chat_usage,
-  metadata_key? : String = "openai-compatible",
-  id_generator? : @provider_utils.IdGenerator = @provider_utils.generate_id,
-  validate_response? : OpenAICompatibleJsonValidator = validate_openai_compatible_chat_response,
+  error_structure~ : OpenAICompatibleErrorStructure = default_openai_compatible_error_structure(),
+  convert_usage~ : OpenAICompatibleUsageConverter = convert_openai_compatible_chat_usage,
+  metadata_key~ : String = "openai-compatible",
+  id_generator~ : @provider_utils.IdGenerator = @provider_utils.generate_id,
+  validate_response~ : OpenAICompatibleJsonValidator = validate_openai_compatible_chat_response,
 ) -> @provider.ChatResponse raise {
   let decoded = decode_chat_response(
     json, error_structure, convert_usage, metadata_key, id_generator, validate_response,

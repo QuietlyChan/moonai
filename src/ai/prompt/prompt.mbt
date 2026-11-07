@@ -125,7 +125,7 @@ fn normalize_instructions(
 pub fn Prompt::new(
   input : PromptInput,
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> Prompt raise {
   {
     input,
@@ -139,7 +139,7 @@ pub fn Prompt::new(
 pub fn Prompt::text(
   value : String,
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> Prompt raise {
   Prompt::new(
     PromptInput::Text(value),
@@ -153,7 +153,7 @@ pub fn Prompt::text(
 pub fn Prompt::messages(
   value : Array[@provider_utils.ModelMessage],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> Prompt raise {
   Prompt::new(
     PromptInput::Messages(copy_model_messages(value)),
@@ -211,7 +211,7 @@ pub fn standardize_prompt(
   prompt : String?,
   messages : Array[@provider_utils.ModelMessage],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> StandardizedPrompt raise {
   let input = match prompt {
     Some(value) => {
@@ -240,7 +240,7 @@ pub fn standardizePrompt(
   prompt : String?,
   messages : Array[@provider_utils.ModelMessage],
   instructions? : Instructions,
-  allow_system_in_messages? : Bool = false,
+  allow_system_in_messages~ : Bool = false,
 ) -> StandardizedPrompt raise {
   standardize_prompt(prompt, messages, instructions?, allow_system_in_messages~)
 }

@@ -12,7 +12,7 @@ pub(all) struct SandboxProcessOptions {
 pub fn SandboxProcessOptions::new(
   command~ : String,
   working_directory? : String,
-  env? : Map[String, String] = Map([]),
+  env~ : Map[String, String] = Map([]),
   cancellation_token? : @provider.CancellationToken,
 ) -> SandboxProcessOptions {
   { command, working_directory, env: copy_headers(env), cancellation_token, }
@@ -73,7 +73,7 @@ pub struct SandboxByteStream {
 /// Construct a sandbox byte stream from pull and cancellation callbacks.
 pub fn SandboxByteStream::new(
   read_next~ : async () -> Bytes?,
-  cancel? : () -> Unit = () => (),
+  cancel~ : () -> Unit = () => (),
 ) -> SandboxByteStream {
   { read_next_callback: read_next, cancel_callback: cancel, }
 }
@@ -159,8 +159,8 @@ pub(all) struct SandboxProcessResult {
 /// Construct a completed sandbox process result.
 pub fn SandboxProcessResult::new(
   exit_code~ : Int32,
-  stdout? : String = "",
-  stderr? : String = "",
+  stdout~ : String = "",
+  stderr~ : String = "",
 ) -> SandboxProcessResult {
   { exit_code, stdout, stderr, }
 }

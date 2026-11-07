@@ -141,8 +141,8 @@ pub fn LanguageModelContentPart::audio_data(
 /// Construct a URL-backed file content part.
 pub fn LanguageModelContentPart::file_url(
   url~ : String,
-  media_type? : String = "application/octet-stream",
-  filename? : String = "",
+  media_type~ : String = "application/octet-stream",
+  filename~ : String = "",
 ) -> LanguageModelContentPart {
   FileUrl(url~, media_type~, filename~)
 }
@@ -161,8 +161,8 @@ pub fn LanguageModelContentPart::file_data(
 /// Construct a provider-reference-backed file content part.
 pub fn LanguageModelContentPart::file_reference(
   reference~ : ProviderReference,
-  media_type? : String = "application/octet-stream",
-  filename? : String = "",
+  media_type~ : String = "application/octet-stream",
+  filename~ : String = "",
 ) -> LanguageModelContentPart {
   FileReference(reference~, media_type~, filename~)
 }
@@ -324,10 +324,10 @@ pub type LanguageModelPrompt = Array[LanguageModelMessage]
 pub fn LanguageModelMessage::new(
   role : LanguageModelMessageRole,
   content~ : String,
-  parts? : Array[LanguageModelContentPart] = [],
-  tool_calls? : Array[ToolCall] = [],
+  parts~ : Array[LanguageModelContentPart] = [],
+  tool_calls~ : Array[ToolCall] = [],
   reasoning_content? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   { role, content, parts, tool_calls, reasoning_content, provider_options, }
 }
@@ -336,7 +336,7 @@ pub fn LanguageModelMessage::new(
 /// Construct a system message.
 pub fn LanguageModelMessage::system(
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(System, content~, provider_options~)
 }
@@ -345,7 +345,7 @@ pub fn LanguageModelMessage::system(
 /// Construct a user message.
 pub fn LanguageModelMessage::user(
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(User, content~, provider_options~)
 }
@@ -354,7 +354,7 @@ pub fn LanguageModelMessage::user(
 /// Construct a user message from multimodal content parts.
 pub fn LanguageModelMessage::user_parts(
   parts : Array[LanguageModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(User, content="", parts~, provider_options~)
 }
@@ -363,9 +363,9 @@ pub fn LanguageModelMessage::user_parts(
 /// Construct an assistant message.
 pub fn LanguageModelMessage::assistant(
   content : String,
-  tool_calls? : Array[ToolCall] = [],
+  tool_calls~ : Array[ToolCall] = [],
   reasoning_content? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(
     Assistant,
@@ -380,9 +380,9 @@ pub fn LanguageModelMessage::assistant(
 /// Construct an assistant message from multimodal content parts.
 pub fn LanguageModelMessage::assistant_parts(
   parts : Array[LanguageModelContentPart],
-  tool_calls? : Array[ToolCall] = [],
+  tool_calls~ : Array[ToolCall] = [],
   reasoning_content? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(
     Assistant,
@@ -399,7 +399,7 @@ pub fn LanguageModelMessage::assistant_parts(
 pub fn LanguageModelMessage::tool(
   tool_call_id : String,
   content : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(Tool(tool_call_id), content~, provider_options~)
 }
@@ -409,7 +409,7 @@ pub fn LanguageModelMessage::tool(
 pub fn LanguageModelMessage::tool_parts(
   tool_call_id : String,
   parts : Array[LanguageModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(
     Tool(tool_call_id),
@@ -424,7 +424,7 @@ pub fn LanguageModelMessage::tool_parts(
 /// parts without forcing a synthetic shared call id.
 pub fn LanguageModelMessage::tool_content(
   parts : Array[LanguageModelContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelMessage {
   LanguageModelMessage::new(Tool(""), content="", parts~, provider_options~)
 }
@@ -495,9 +495,9 @@ pub fn Usage::new(
   input_tokens~ : Int32,
   output_tokens~ : Int32,
   total_tokens? : Int32,
-  reasoning_tokens? : Int32 = 0,
-  cached_input_tokens? : Int32 = 0,
-  cache_write_input_tokens? : Int32 = 0,
+  reasoning_tokens~ : Int32 = 0,
+  cached_input_tokens~ : Int32 = 0,
+  cache_write_input_tokens~ : Int32 = 0,
 ) -> Usage {
   {
     input_tokens,
@@ -648,10 +648,10 @@ pub(all) struct ChatCallOptions {
 /// Construct normalized chat call options.
 pub fn ChatCallOptions::new(
   messages : LanguageModelPrompt,
-  tools? : Array[ToolDefinition] = [],
+  tools~ : Array[ToolDefinition] = [],
   tool_choice? : ToolChoice,
-  response_format? : ResponseFormat = Text,
-  reasoning_effort? : ReasoningEffort = ProviderDefault,
+  response_format~ : ResponseFormat = Text,
+  reasoning_effort~ : ReasoningEffort = ProviderDefault,
   max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
@@ -659,11 +659,11 @@ pub fn ChatCallOptions::new(
   frequency_penalty? : Double,
   presence_penalty? : Double,
   seed? : Int32,
-  stop_sequences? : Array[String] = [],
-  include_raw_chunks? : Bool = false,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  stop_sequences~ : Array[String] = [],
+  include_raw_chunks~ : Bool = false,
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ChatCallOptions {
   {

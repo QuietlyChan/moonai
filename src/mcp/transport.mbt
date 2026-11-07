@@ -62,7 +62,7 @@ pub struct MockMCPTransport {
 ///|
 /// Construct a mock transport with one response batch per send.
 pub fn MockMCPTransport::new(
-  responses? : Array[Array[JSONRPCMessage]] = [],
+  responses~ : Array[Array[JSONRPCMessage]] = [],
 ) -> MockMCPTransport {
   {
     responses,
@@ -223,12 +223,12 @@ pub struct HttpMCPTransport {
 /// Construct a Streamable HTTP MCP transport.
 pub fn HttpMCPTransport::new(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   initial_session_id? : String,
   initial_protocol_version? : String,
   on_session_id_change? : (String?) -> Unit,
   on_session_expired? : (String) -> Unit,
-  terminate_session_on_close? : Bool = true,
+  terminate_session_on_close~ : Bool = true,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> HttpMCPTransport {
   {
@@ -457,7 +457,7 @@ pub struct SseMCPTransport {
 /// Construct a legacy SSE MCP transport.
 pub fn SseMCPTransport::new(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   http_transport? : &@provider_utils.HttpTransport,
 ) -> SseMCPTransport {
   {
@@ -613,9 +613,9 @@ pub(all) struct StdioConfig {
 /// Construct stdio server configuration.
 pub fn StdioConfig::new(
   command~ : String,
-  args? : Array[String] = [],
-  env? : Map[String, String] = Map([]),
-  inherit_env? : Bool = true,
+  args~ : Array[String] = [],
+  env~ : Map[String, String] = Map([]),
+  inherit_env~ : Bool = true,
   cwd? : String,
 ) -> StdioConfig {
   { command, args, env, inherit_env, cwd, }

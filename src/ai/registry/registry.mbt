@@ -14,7 +14,7 @@ pub struct ProviderRegistry {
 ///|
 /// Create an empty provider registry.
 pub fn ProviderRegistry::new(
-  separator? : String = ":",
+  separator~ : String = ":",
   language_model_middleware? : @provider.LanguageModelV4Middleware,
   image_model_middleware? : @provider.ImageModelV4Middleware,
 ) -> ProviderRegistry raise @provider.InvalidArgumentError {
@@ -233,7 +233,7 @@ pub fn ProviderRegistry::skills(
 /// Construct a registry from a provider map.
 pub fn create_provider_registry(
   providers : Map[String, &@provider.ProviderV4],
-  separator? : String = ":",
+  separator~ : String = ":",
   language_model_middleware? : @provider.LanguageModelV4Middleware,
   image_model_middleware? : @provider.ImageModelV4Middleware,
 ) -> ProviderRegistry raise @provider.InvalidArgumentError {
@@ -253,7 +253,7 @@ pub fn create_provider_registry(
 /// AI SDK-style camel-case spelling for `create_provider_registry`.
 pub fn createProviderRegistry(
   providers : Map[String, &@provider.ProviderV4],
-  separator? : String = ":",
+  separator~ : String = ":",
   language_model_middleware? : @provider.LanguageModelV4Middleware,
   image_model_middleware? : @provider.ImageModelV4Middleware,
 ) -> ProviderRegistry raise @provider.InvalidArgumentError {

@@ -213,7 +213,7 @@ fn OpenAIResponsesHostedStreamDecoder::emit_parts(
   emit_call : Bool,
   emit_result : Bool,
   emit_input_end : Bool,
-  emit_input_delta? : Bool = false,
+  emit_input_delta~ : Bool = false,
 ) -> Unit {
   for part in self.hosted_generated_parts(item) {
     match part {

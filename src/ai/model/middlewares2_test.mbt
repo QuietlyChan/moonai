@@ -6,7 +6,7 @@ priv struct CapturingV4Model {
 
 ///|
 fn CapturingV4Model::new(
-  stream_events? : Array[@provider.LanguageModelV4StreamPart] = [],
+  stream_events~ : Array[@provider.LanguageModelV4StreamPart] = [],
 ) -> CapturingV4Model {
   { captured_options: Ref(None), stream_events, }
 }

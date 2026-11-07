@@ -88,7 +88,7 @@ impl @provider.LanguageModelV4 for FlakyStreamLanguageModel with fn do_stream(
 ///|
 fn flaky_stream_model(
   failures : Array[Error],
-  streams_a_delta_first? : Bool = false,
+  streams_a_delta_first~ : Bool = false,
 ) -> FlakyStreamLanguageModel {
   { failures, call_count: Ref(0), streams_a_delta_first, }
 }

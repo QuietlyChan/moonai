@@ -33,10 +33,10 @@ pub fn HarnessV1NetworkSandboxSession::new(
   restricted~ : @provider_utils.SandboxSession,
   get_port_url~ : async (Int32, String?) -> String,
   stop~ : async () -> Unit,
-  ports? : Array[Int32] = [],
-  destroy? : async () -> Unit = () => (),
-  set_network_policy? : async (HarnessV1NetworkPolicy) -> Unit = _ => (),
-  set_ports? : async (Array[Int32], @provider.CancellationToken?) -> Unit = (
+  ports~ : Array[Int32] = [],
+  destroy~ : async () -> Unit = () => (),
+  set_network_policy~ : async (HarnessV1NetworkPolicy) -> Unit = _ => (),
+  set_ports~ : async (Array[Int32], @provider.CancellationToken?) -> Unit = (
     _,
     _,
   ) => (),
@@ -174,8 +174,8 @@ pub struct CallbackHarnessV1SandboxProvider {
 pub fn CallbackHarnessV1SandboxProvider::new(
   provider_id~ : String,
   create_session~ : async (HarnessV1SandboxCreateOptions) -> HarnessV1NetworkSandboxSession,
-  bridge_ports? : Array[Int32] = [],
-  resume_session? : async (String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession = (
+  bridge_ports~ : Array[Int32] = [],
+  resume_session~ : async (String, @provider.CancellationToken?) -> HarnessV1NetworkSandboxSession = (
     _,
     _,
   ) => {

@@ -44,9 +44,9 @@ pub struct SseStreamStartPolicy {
 pub fn SseStreamStartPolicy::new(
   is_accepted~ : () -> Bool,
   is_output~ : () -> Bool,
-  accepted_grace_ms? : Int32 = 50,
-  on_started? : () -> Unit = empty_sse_lifecycle_callback,
-  on_retry? : () -> Unit = empty_sse_lifecycle_callback,
+  accepted_grace_ms~ : Int32 = 50,
+  on_started~ : () -> Unit = empty_sse_lifecycle_callback,
+  on_retry~ : () -> Unit = empty_sse_lifecycle_callback,
 ) -> SseStreamStartPolicy raise {
   guard accepted_grace_ms >= 0 else {
     fail("SSE accepted grace period must not be negative")

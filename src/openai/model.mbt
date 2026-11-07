@@ -52,13 +52,13 @@ fn load_openai_api_key(
 ///|
 /// Create an official OpenAI provider factory.
 pub fn create_openai(
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  provider_name? : String = "openai",
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  provider_name~ : String = "openai",
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   websocket_connector? : &@provider_utils.WebSocketConnector,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
@@ -90,13 +90,13 @@ pub fn create_openai(
 ///|
 /// AI SDK-style camel-case provider factory.
 pub fn createOpenAI(
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  provider_name? : String = "openai",
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  provider_name~ : String = "openai",
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   websocket_connector? : &@provider_utils.WebSocketConnector,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
@@ -609,12 +609,12 @@ pub fn OpenAIProvider::languageModel(
 /// Construct the default official OpenAI model using the Responses API.
 pub fn openai(
   model_id : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError {
@@ -634,12 +634,12 @@ pub fn openai(
 /// Construct an official OpenAI Chat Completions language model explicitly.
 pub fn openai_chat(
   model_id : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError {
@@ -659,12 +659,12 @@ pub fn openai_chat(
 /// Construct an official OpenAI text embedding model.
 pub fn openai_embedding(
   model_id : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.EmbeddingModelV4 raise @provider.InvalidArgumentError {
   create_openai(
@@ -682,12 +682,12 @@ pub fn openai_embedding(
 /// Construct an official OpenAI `/completions` language model.
 pub fn openai_completion(
   model_id : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.LanguageModelV4 raise @provider.InvalidArgumentError {
   create_openai(
@@ -705,12 +705,12 @@ pub fn openai_completion(
 /// Construct an official OpenAI image generation model.
 pub fn openai_image(
   model_id : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.ImageModelV4 raise @provider.InvalidArgumentError {
   create_openai(
@@ -728,12 +728,12 @@ pub fn openai_image(
 /// Construct an official OpenAI text-to-speech model.
 pub fn openai_speech(
   model_id : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.SpeechModelV4 raise @provider.InvalidArgumentError {
   create_openai(
@@ -751,12 +751,12 @@ pub fn openai_speech(
 /// Construct an official OpenAI transcription model.
 pub fn openai_transcription(
   model_id : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   websocket_connector? : &@provider_utils.WebSocketConnector,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.TranscriptionModelV4 raise @provider.InvalidArgumentError {
@@ -776,11 +776,11 @@ pub fn openai_transcription(
 /// Construct an official OpenAI Realtime speech translation model.
 pub fn openai_translation(
   model_id : OpenAITranslationModelId,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
   websocket_connector? : &@provider_utils.WebSocketConnector,
 ) -> &@provider.SpeechTranslationModelV4 raise @provider.InvalidArgumentError {
   create_openai(
@@ -797,12 +797,12 @@ pub fn openai_translation(
 /// Construct an official OpenAI Realtime model.
 pub fn openai_realtime(
   model_id : String,
-  api_key? : String = "",
+  api_key~ : String = "",
   base_url? : String,
-  organization? : String = "",
-  project? : String = "",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  organization~ : String = "",
+  project~ : String = "",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> OpenAIRealtimeModel raise @provider.InvalidArgumentError {
   create_openai(

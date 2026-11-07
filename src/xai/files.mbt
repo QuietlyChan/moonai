@@ -6,7 +6,7 @@ struct XaiFiles {
   api_key : String
   base_url : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
+  idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -15,7 +15,7 @@ fn xai_files_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> XaiFiles {
   {
@@ -70,7 +70,7 @@ fn XaiFiles::file_headers(
 /// expires_at}).
 fn decode_xai_file_resource(
   value : Json,
-) -> (String, String?, Int?, Int?) raise {
+) -> (String, String?, Int32?, Int32?) raise {
   // Adapt the pure built-in parser to the fallible transport hook contract.
   @provider.check_cancellation(None)
   match value {

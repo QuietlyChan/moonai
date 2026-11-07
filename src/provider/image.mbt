@@ -20,7 +20,7 @@ pub(all) enum ImageFile {
 pub fn ImageFile::base64(
   data~ : String,
   media_type~ : String,
-  filename? : String = "image",
+  filename~ : String = "image",
 ) -> ImageFile {
   ImageFileBase64(data~, media_type~, filename~)
 }
@@ -30,14 +30,14 @@ pub fn ImageFile::base64(
 pub fn ImageFile::bytes(
   data~ : Bytes,
   media_type~ : String,
-  filename? : String = "image",
+  filename~ : String = "image",
 ) -> ImageFile {
   ImageFileBytes(data~, media_type~, filename~)
 }
 
 ///|
 /// Construct a URL-backed image input file.
-pub fn ImageFile::url(url~ : String, filename? : String = "image") -> ImageFile {
+pub fn ImageFile::url(url~ : String, filename~ : String = "image") -> ImageFile {
   ImageFileUrl(url~, filename~)
 }
 
@@ -79,15 +79,15 @@ pub(all) struct ImageCallOptions {
 /// Construct normalized image generation options.
 pub fn ImageCallOptions::new(
   prompt : String,
-  n? : Int32 = 1,
+  n~ : Int32 = 1,
   size? : String,
   aspect_ratio? : String,
   seed? : Int32,
-  files? : Array[ImageFile] = [],
+  files~ : Array[ImageFile] = [],
   mask? : ImageFile,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ImageCallOptions {
   {

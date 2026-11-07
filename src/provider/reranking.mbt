@@ -70,9 +70,9 @@ pub fn RerankingModelV4CallOptions::new(
   documents : RerankingModelV4Documents,
   query : String,
   top_n? : Int32,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> RerankingModelV4CallOptions {
   {
@@ -101,8 +101,8 @@ pub(all) struct RerankingModelV4Result {
 pub fn RerankingModelV4Result::new(
   ranking : Array[RerankingModelV4Ranking],
   response? : ResponseMetadata,
-  provider_metadata? : Map[String, Json] = Map([]),
-  warnings? : Array[Warning] = [],
+  provider_metadata~ : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
 ) -> RerankingModelV4Result {
   {
     ranking: ranking.copy(),

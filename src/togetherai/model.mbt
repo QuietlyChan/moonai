@@ -25,10 +25,10 @@ pub fn getModelStructuredOutputSupport(model_id : String) -> Bool {
 /// Create a TogetherAI provider. The API key defaults to the
 /// `TOGETHER_API_KEY` environment variable.
 pub fn create_togetherai(
-  api_key? : String = "",
-  base_url? : String = "https://api.together.xyz/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.together.xyz/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> TogetherAIProvider {
@@ -47,10 +47,10 @@ pub fn create_togetherai(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createTogetherAI(
-  api_key? : String = "",
-  base_url? : String = "https://api.together.xyz/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.together.xyz/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> TogetherAIProvider {
@@ -339,10 +339,10 @@ pub impl @provider.ProviderV4 for TogetherAIProvider with fn skills(_self) {
 /// Construct the default V4 TogetherAI language model directly.
 pub fn togetherai(
   model_id : TogetherAIChatModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.together.xyz/v1",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.together.xyz/v1",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

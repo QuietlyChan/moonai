@@ -114,8 +114,8 @@ pub fn RealtimeSessionConfig::new(
   output_audio_transcription? : RealtimeAudioTranscriptionConfig,
   output_audio_format? : AudioFormat,
   turn_detection? : RealtimeTurnDetection,
-  tools? : Array[RealtimeToolDefinition] = [],
-  provider_options? : Map[String, Json] = Map([]),
+  tools~ : Array[RealtimeToolDefinition] = [],
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> RealtimeSessionConfig {
   {
     instructions,
@@ -309,7 +309,7 @@ pub(all) struct RealtimeWebSocketConfig {
 /// Construct a realtime WebSocket configuration.
 pub fn RealtimeWebSocketConfig::new(
   url~ : String,
-  protocols? : Array[String] = [],
+  protocols~ : Array[String] = [],
 ) -> RealtimeWebSocketConfig {
   { url, protocols, }
 }

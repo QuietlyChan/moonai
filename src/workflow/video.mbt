@@ -32,8 +32,8 @@ pub async fn workflow_generate_video(
   model~ : &@provider.VideoModelV4,
   options~ : @provider.VideoModelV4CallOptions,
   step_id~ : String,
-  poll_interval_ms? : Int32 = 5000,
-  poll_timeout_ms? : Int32 = 600_000,
+  poll_interval_ms~ : Int32 = 5000,
+  poll_timeout_ms~ : Int32 = 600_000,
 ) -> @provider.VideoModelV4Result {
   let headers = @provider_utils.copy_headers(options.headers)
   let mut has_idempotency_key = false

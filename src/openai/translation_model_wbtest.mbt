@@ -48,7 +48,7 @@ priv struct MockTranslationWebSocketConnection {
 ///|
 fn MockTranslationWebSocketConnection::new(
   incoming : Array[@provider_utils.WebSocketReceive],
-  expected_sends_before_receive? : Int32 = 3,
+  expected_sends_before_receive~ : Int32 = 3,
 ) -> MockTranslationWebSocketConnection {
   {
     sent: [],

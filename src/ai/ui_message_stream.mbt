@@ -99,7 +99,7 @@ pub fn UiMessageStream::close(self : UiMessageStream) -> Unit {
 
 ///|
 /// Number of enqueued chunks.
-pub fn UiMessageStream::length(self : UiMessageStream) -> Int {
+pub fn UiMessageStream::length(self : UiMessageStream) -> Int32 {
   self.chunks.length()
 }
 

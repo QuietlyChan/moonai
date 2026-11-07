@@ -62,7 +62,7 @@ fn double_sqrt(value : Double) -> Double {
 /// Raises `InvalidArgumentError` when the chunk size is not positive.
 pub fn split_array(
   array~ : Array[String],
-  chunk_size~ : Int,
+  chunk_size~ : Int32,
 ) -> Array[Array[String]] raise InvalidArgumentError {
   guard chunk_size > 0 else {
     raise invalid_argument(

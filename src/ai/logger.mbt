@@ -24,11 +24,12 @@ pub fn format_warning(
 
 ///|
 /// Options passed to a warning logger.
+#derive(Debug)
 pub(all) struct LogWarningsOptions {
   warnings : Array[@provider.Warning]
   provider : String?
   model : String?
-} derive(Debug)
+}
 
 ///|
 /// Log model-provider warnings through the default logger: warnings go to

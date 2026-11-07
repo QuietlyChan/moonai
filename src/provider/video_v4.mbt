@@ -28,7 +28,7 @@ pub(all) enum VideoModelV4File {
 pub fn VideoModelV4File::base64(
   data~ : String,
   media_type~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> VideoModelV4File {
   VideoV4Data(data~, media_type~, provider_options~)
 }
@@ -38,7 +38,7 @@ pub fn VideoModelV4File::base64(
 pub fn VideoModelV4File::bytes(
   data~ : Bytes,
   media_type~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> VideoModelV4File {
   VideoV4Bytes(data~, media_type~, provider_options~)
 }
@@ -48,7 +48,7 @@ pub fn VideoModelV4File::bytes(
 pub fn VideoModelV4File::url(
   url : String,
   media_type? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> VideoModelV4File {
   VideoV4Url(url~, media_type~, provider_options~)
 }
@@ -124,7 +124,7 @@ pub(all) struct VideoModelV4CallOptions {
 /// endpoint when generation completes.
 pub fn VideoModelV4CallOptions::new(
   prompt? : String,
-  n? : Int32 = 1,
+  n~ : Int32 = 1,
   aspect_ratio? : String,
   resolution? : String,
   duration? : Double,
@@ -135,9 +135,9 @@ pub fn VideoModelV4CallOptions::new(
   input_references? : Array[VideoModelV4File],
   generate_audio? : Bool,
   webhook_url? : String,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> VideoModelV4CallOptions {
   {
@@ -184,8 +184,8 @@ pub(all) struct VideoModelV4Result {
 /// Construct a V4 result.
 pub fn VideoModelV4Result::new(
   videos : Array[VideoModelV4VideoData],
-  warnings? : Array[Warning] = [],
-  provider_metadata? : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
+  provider_metadata~ : Map[String, Json] = Map([]),
   request? : RequestMetadata,
   response? : ResponseMetadata,
 ) -> VideoModelV4Result {
@@ -405,9 +405,9 @@ pub(all) struct VideoModelV4OperationStatusCallOptions {
 /// Construct one operation-status call.
 pub fn VideoModelV4OperationStatusCallOptions::new(
   operation_id~ : String,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> VideoModelV4OperationStatusCallOptions {
   { operation_id, provider_options, headers, retry_policy, cancellation_token, }
@@ -431,9 +431,9 @@ pub(all) struct VideoModelV4OperationStartResult {
 /// Construct one operation-start result.
 pub fn VideoModelV4OperationStartResult::new(
   operation_id~ : String,
-  state? : VideoModelV4OperationState = OperationSubmitted,
-  provider_metadata? : Map[String, Json] = Map([]),
-  warnings? : Array[Warning] = [],
+  state~ : VideoModelV4OperationState = OperationSubmitted,
+  provider_metadata~ : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
 ) -> VideoModelV4OperationStartResult {
   {
     operation_id,
@@ -461,8 +461,8 @@ pub fn VideoModelV4OperationStatusResult::new(
   operation_id~ : String,
   state~ : VideoModelV4OperationState,
   result? : VideoModelV4Result,
-  provider_metadata? : Map[String, Json] = Map([]),
-  warnings? : Array[Warning] = [],
+  provider_metadata~ : Map[String, Json] = Map([]),
+  warnings~ : Array[Warning] = [],
 ) -> VideoModelV4OperationStatusResult {
   {
     operation_id,

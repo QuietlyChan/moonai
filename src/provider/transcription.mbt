@@ -54,9 +54,9 @@ pub(all) struct TranscriptionCallOptions {
 pub fn TranscriptionCallOptions::new(
   audio~ : TranscriptionAudio,
   media_type~ : String,
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> TranscriptionCallOptions {
   {
@@ -85,9 +85,9 @@ pub struct TranscriptionStreamOptions {
 pub fn TranscriptionStreamOptions::new(
   audio~ : &AudioStream,
   input_audio_format~ : AudioFormat,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  include_raw_chunks? : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  include_raw_chunks~ : Bool = false,
   cancellation_token? : CancellationToken,
 ) -> TranscriptionStreamOptions {
   {
@@ -156,7 +156,7 @@ pub(all) struct TranscriptionResponse {
 /// Construct a transcription response without transport diagnostics.
 pub fn TranscriptionResponse::new(
   text~ : String,
-  segments? : Array[TranscriptionSegment] = [],
+  segments~ : Array[TranscriptionSegment] = [],
   language? : String,
   duration_seconds? : Double,
 ) -> TranscriptionResponse {

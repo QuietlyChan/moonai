@@ -43,7 +43,7 @@ pub fn OpenAICompatibleLanguageModelChatOptions::new(
 /// Convert chat options to a provider namespace.
 pub fn OpenAICompatibleLanguageModelChatOptions::to_provider_options(
   self : OpenAICompatibleLanguageModelChatOptions,
-  provider_name? : String = "openaiCompatible",
+  provider_name~ : String = "openaiCompatible",
 ) -> Map[String, Json] {
   compatible_namespaced_options(
     provider_name,
@@ -91,7 +91,7 @@ pub fn OpenAICompatibleLanguageModelCompletionOptions::new(
 /// Convert completion options to a provider namespace.
 pub fn OpenAICompatibleLanguageModelCompletionOptions::to_provider_options(
   self : OpenAICompatibleLanguageModelCompletionOptions,
-  provider_name? : String = "openaiCompatible",
+  provider_name~ : String = "openaiCompatible",
 ) -> Map[String, Json] {
   let bias_json = match self.logit_bias {
     Some(values) => {
@@ -145,7 +145,7 @@ pub fn OpenAICompatibleEmbeddingModelOptions::new(
 /// Convert embedding options to a provider namespace.
 pub fn OpenAICompatibleEmbeddingModelOptions::to_provider_options(
   self : OpenAICompatibleEmbeddingModelOptions,
-  provider_name? : String = "openaiCompatible",
+  provider_name~ : String = "openaiCompatible",
 ) -> Map[String, Json] {
   compatible_namespaced_options(
     provider_name,
@@ -185,7 +185,7 @@ pub fn OpenAICompatibleImageModelOptions::new(
   output_format? : String,
   output_compression? : Int32,
   background? : String,
-  extensions? : Map[String, Json] = Map([]),
+  extensions~ : Map[String, Json] = Map([]),
 ) -> OpenAICompatibleImageModelOptions raise {
   guard output_compression is None ||
     (output_compression.unwrap() >= 0 && output_compression.unwrap() <= 100) else {
@@ -198,7 +198,7 @@ pub fn OpenAICompatibleImageModelOptions::new(
 /// Convert image options to a provider namespace.
 pub fn OpenAICompatibleImageModelOptions::to_provider_options(
   self : OpenAICompatibleImageModelOptions,
-  provider_name? : String = "openaiCompatible",
+  provider_name~ : String = "openaiCompatible",
 ) -> Map[String, Json] {
   let values : Map[String, Json] = Map([])
   for entry in self.extensions.iter2() {

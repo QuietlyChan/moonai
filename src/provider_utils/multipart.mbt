@@ -55,8 +55,8 @@ pub(all) struct ResolvedImageFile {
 pub async fn resolve_image_file(
   file : @provider.ImageFile,
   provider_name~ : String,
-  timeout_ms? : Int32 = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   trusted_origin? : String,
   transport? : &HttpTransport,
@@ -91,10 +91,10 @@ pub async fn resolve_image_file(
 /// the V4 provider contract intentionally does not carry one.
 pub async fn resolve_image_model_v4_file(
   file : @provider.ImageModelV4File,
-  filename? : String = "image",
+  filename~ : String = "image",
   provider_name~ : String,
-  timeout_ms? : Int32 = 120_000,
-  retry_policy? : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
+  timeout_ms~ : Int32 = 120_000,
+  retry_policy~ : @provider.RetryPolicy = @provider.RetryPolicy::standard(),
   cancellation_token? : @provider.CancellationToken,
   trusted_origin? : String,
   transport? : &HttpTransport,
@@ -224,7 +224,7 @@ fn multipart_fields_contain_boundary(
 /// Encode ordered fields as an RFC 7578 multipart/form-data request body.
 pub fn encode_multipart_form_data(
   fields : Array[MultipartField],
-  boundary? : String = "moonai-7MA4YWxkTrZu0gW",
+  boundary~ : String = "moonai-7MA4YWxkTrZu0gW",
 ) -> MultipartFormData raise {
   validate_multipart_token(boundary, "boundary")
   let mut resolved_boundary = boundary
@@ -390,7 +390,7 @@ fn field_name_of_plan(field : MultipartFieldPlan) -> String {
 /// can avoid chunked encoding.
 pub fn plan_multipart_streaming(
   fields : Array[MultipartFieldPlan],
-  boundary? : String = "moonai-7MA4YWxkTrZu0gW",
+  boundary~ : String = "moonai-7MA4YWxkTrZu0gW",
 ) -> MultipartStreamingPlan raise {
   validate_multipart_token(boundary, "boundary")
   let prefix = @buffer.Buffer()

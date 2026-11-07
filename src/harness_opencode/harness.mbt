@@ -18,7 +18,7 @@ pub fn OpenCodeHarnessSettings::new(
   provider? : String,
   reasoning_variant? : String,
   port? : Int32,
-  startup_timeout_ms? : Int32 = 120_000,
+  startup_timeout_ms~ : Int32 = 120_000,
   transport? : @harness.HarnessV1BridgeTransportConfig,
 ) -> OpenCodeHarnessSettings {
   {
@@ -236,7 +236,7 @@ pub impl @harness.HarnessV1 for OpenCodeHarness with fn do_start(self, options) 
 ///|
 /// Create an OpenCode Harness V1 adapter.
 pub fn createOpenCode(
-  settings? : OpenCodeHarnessSettings = OpenCodeHarnessSettings::new(),
+  settings~ : OpenCodeHarnessSettings = OpenCodeHarnessSettings::new(),
 ) -> OpenCodeHarness {
   { settings, }
 }
@@ -244,7 +244,7 @@ pub fn createOpenCode(
 ///|
 /// Snake-case alias for `createOpenCode`.
 pub fn create_open_code(
-  settings? : OpenCodeHarnessSettings = OpenCodeHarnessSettings::new(),
+  settings~ : OpenCodeHarnessSettings = OpenCodeHarnessSettings::new(),
 ) -> OpenCodeHarness {
   createOpenCode(settings~)
 }

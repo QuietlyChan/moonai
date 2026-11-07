@@ -2,9 +2,9 @@
 fn alibaba_video(
   model_id : AlibabaVideoModelId,
   api_key~ : String,
-  base_url? : String = "https://dashscope-intl.aliyuncs.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  base_url~ : String = "https://dashscope-intl.aliyuncs.com",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> AlibabaVideoModel {
   alibaba_video_value(

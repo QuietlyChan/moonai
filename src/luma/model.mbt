@@ -14,12 +14,12 @@ pub struct LumaProvider {
 /// Create a Luma provider. The API key defaults to the `LUMAAI_API_KEY`
 /// environment variable.
 pub fn create_luma(
-  api_key? : String = "",
-  base_url? : String = "https://api.lumalabs.ai",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
-  poll_interval_ms? : Int32 = LUMA_POLL_INTERVAL_MS,
-  max_poll_attempts? : Int32 = LUMA_MAX_POLL_ATTEMPTS,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.lumalabs.ai",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
+  poll_interval_ms~ : Int32 = LUMA_POLL_INTERVAL_MS,
+  max_poll_attempts~ : Int32 = LUMA_MAX_POLL_ATTEMPTS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> LumaProvider {
   {
@@ -38,12 +38,12 @@ pub fn create_luma(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createLuma(
-  api_key? : String = "",
-  base_url? : String = "https://api.lumalabs.ai",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
-  poll_interval_ms? : Int32 = LUMA_POLL_INTERVAL_MS,
-  max_poll_attempts? : Int32 = LUMA_MAX_POLL_ATTEMPTS,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.lumalabs.ai",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
+  poll_interval_ms~ : Int32 = LUMA_POLL_INTERVAL_MS,
+  max_poll_attempts~ : Int32 = LUMA_MAX_POLL_ATTEMPTS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> LumaProvider {
   create_luma(
@@ -169,12 +169,12 @@ pub impl @provider.ProviderV4 for LumaProvider with fn skills(_self) {
 /// Construct the default V4 Luma image model directly.
 pub fn luma(
   model_id : LumaImageModelId,
-  api_key? : String = "",
-  base_url? : String = "https://api.lumalabs.ai",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
-  poll_interval_ms? : Int32 = LUMA_POLL_INTERVAL_MS,
-  max_poll_attempts? : Int32 = LUMA_MAX_POLL_ATTEMPTS,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.lumalabs.ai",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
+  poll_interval_ms~ : Int32 = LUMA_POLL_INTERVAL_MS,
+  max_poll_attempts~ : Int32 = LUMA_MAX_POLL_ATTEMPTS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.ImageModelV4 {
   create_luma(

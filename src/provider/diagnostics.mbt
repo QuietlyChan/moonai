@@ -57,7 +57,7 @@ pub fn ResponseMetadata::new(
   model_id? : String,
   created_at? : Int32,
   status_code? : Int32,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   body? : String,
 ) -> ResponseMetadata {
   { id, model_id, created_at, status_code, headers, body, }
@@ -221,7 +221,7 @@ pub(all) suberror EmptyResponseBodyError {
 ///|
 /// Construct an empty-body error with AI SDK's default message.
 pub fn EmptyResponseBodyError::new(
-  message? : String = "Empty response body",
+  message~ : String = "Empty response body",
 ) -> EmptyResponseBodyError {
   EmptyResponseBodyError(message~)
 }
@@ -236,7 +236,7 @@ pub(all) suberror NoContentGeneratedError {
 ///|
 /// Construct a no-content error with AI SDK's default message.
 pub fn NoContentGeneratedError::new(
-  message? : String = "No content generated.",
+  message~ : String = "No content generated.",
 ) -> NoContentGeneratedError {
   NoContentGeneratedError(message~)
 }
@@ -447,10 +447,10 @@ pub(all) struct RetryPolicy {
 ///|
 /// Construct a validated retry policy.
 pub fn RetryPolicy::new(
-  max_retries? : Int32 = 2,
-  initial_delay_ms? : Int32 = 200,
-  max_delay_ms? : Int32 = 10_000,
-  backoff_factor? : Double = 2.0,
+  max_retries~ : Int32 = 2,
+  initial_delay_ms~ : Int32 = 200,
+  max_delay_ms~ : Int32 = 10_000,
+  backoff_factor~ : Double = 2.0,
 ) -> RetryPolicy raise {
   guard max_retries >= 0 else { fail("retry max_retries must be >= 0") }
   guard initial_delay_ms >= 0 else {

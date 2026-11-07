@@ -11,8 +11,8 @@ pub struct MockRerankingModelV4 {
 /// Construct a deterministic reranking model.
 pub fn MockRerankingModelV4::new(
   result : @provider.RerankingModelV4Result,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-reranker",
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-reranker",
 ) -> MockRerankingModelV4 {
   { provider_name, model_id, result, captured_options: None, }
 }

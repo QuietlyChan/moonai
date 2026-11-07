@@ -234,7 +234,7 @@ pub impl @harness.HarnessV1 for PiHarness with fn do_start(self, options) {
 ///|
 /// Create a Pi Harness V1 adapter.
 pub fn createPi(
-  settings? : PiHarnessSettings = PiHarnessSettings::new(),
+  settings~ : PiHarnessSettings = PiHarnessSettings::new(),
 ) -> PiHarness {
   { settings, }
 }
@@ -242,7 +242,7 @@ pub fn createPi(
 ///|
 /// Snake-case alias for `createPi`.
 pub fn create_pi(
-  settings? : PiHarnessSettings = PiHarnessSettings::new(),
+  settings~ : PiHarnessSettings = PiHarnessSettings::new(),
 ) -> PiHarness {
   createPi(settings~)
 }

@@ -24,7 +24,7 @@ pub struct CallbackHarnessV1BridgeConnection {
 pub fn CallbackHarnessV1BridgeConnection::new(
   send~ : async (String) -> Unit,
   receive~ : async () -> String?,
-  close? : () -> Unit = () => (),
+  close~ : () -> Unit = () => (),
 ) -> CallbackHarnessV1BridgeConnection {
   { send_callback: send, receive_callback: receive, close_callback: close, }
 }
@@ -223,7 +223,7 @@ pub struct HarnessV1BridgeState {
 /// Construct a bridge state holder.
 pub fn HarnessV1BridgeState::new(
   connection : &HarnessV1BridgeConnection,
-  last_seen_event_id? : Int32 = 0,
+  last_seen_event_id~ : Int32 = 0,
   diagnostic_reporter? : HarnessV1DiagnosticReporter,
   session_id? : String,
 ) -> HarnessV1BridgeState {

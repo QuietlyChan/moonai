@@ -12,7 +12,7 @@ pub(all) struct HarnessV1ToolResultSubmission {
 pub fn HarnessV1ToolResultSubmission::new(
   tool_call_id~ : String,
   output~ : Json,
-  is_error? : Bool = false,
+  is_error~ : Bool = false,
 ) -> HarnessV1ToolResultSubmission {
   { tool_call_id, output, is_error, }
 }
@@ -54,12 +54,12 @@ pub struct HarnessV1PromptControl {
 pub fn HarnessV1PromptControl::new(
   submit_tool_result~ : async (HarnessV1ToolResultSubmission) -> Unit,
   done~ : async () -> Unit,
-  submit_tool_approval? : async (HarnessV1ToolApprovalSubmission) -> Unit = _ => {
+  submit_tool_approval~ : async (HarnessV1ToolApprovalSubmission) -> Unit = _ => {
     raise HarnessCapabilityUnsupportedError::new(
       message="This harness does not support built-in tool approvals",
     )
   },
-  submit_user_message? : async (String) -> Unit = _ => {
+  submit_user_message~ : async (String) -> Unit = _ => {
     raise HarnessCapabilityUnsupportedError::new(
       message="This harness does not support mid-turn user messages",
     )
@@ -156,7 +156,7 @@ pub fn HarnessV1StartOptions::new(
   session_id~ : String,
   sandbox_session~ : HarnessV1NetworkSandboxSession,
   session_work_dir~ : String,
-  skills? : Array[HarnessV1Skill] = [],
+  skills~ : Array[HarnessV1Skill] = [],
   resume_from? : HarnessV1ResumeSessionState,
   continue_from? : HarnessV1ContinueTurnState,
   permission_mode? : HarnessV1PermissionMode,
@@ -206,7 +206,7 @@ pub(all) struct HarnessV1PromptTurnOptions {
 pub fn HarnessV1PromptTurnOptions::new(
   prompt~ : HarnessV1Prompt,
   emit~ : (HarnessV1StreamPart) -> Unit,
-  tools? : Array[HarnessV1ToolSpec] = [],
+  tools~ : Array[HarnessV1ToolSpec] = [],
   instructions? : HarnessInstructions,
   cancellation_token? : @provider.CancellationToken,
 ) -> HarnessV1PromptTurnOptions {
@@ -230,7 +230,7 @@ pub(all) struct HarnessV1ContinueTurnOptions {
 /// Construct continue-turn options.
 pub fn HarnessV1ContinueTurnOptions::new(
   emit~ : (HarnessV1StreamPart) -> Unit,
-  tools? : Array[HarnessV1ToolSpec] = [],
+  tools~ : Array[HarnessV1ToolSpec] = [],
   cancellation_token? : @provider.CancellationToken,
 ) -> HarnessV1ContinueTurnOptions {
   { tools: tools.copy(), cancellation_token, emit, }

@@ -156,7 +156,7 @@ pub fn map_reasoning_to_provider_budget(
   max_output_tokens : Int32,
   max_reasoning_budget : Int32,
   warnings : Array[@provider.Warning],
-  min_reasoning_budget? : Int32 = 1024,
+  min_reasoning_budget~ : Int32 = 1024,
   budget_percentages? : Map[String, Double],
 ) -> Int32? {
   let key = reasoning_key(reasoning)
@@ -196,7 +196,7 @@ pub fn mapReasoningToProviderBudget(
   max_output_tokens : Int32,
   max_reasoning_budget : Int32,
   warnings : Array[@provider.Warning],
-  min_reasoning_budget? : Int32 = 1024,
+  min_reasoning_budget~ : Int32 = 1024,
   budget_percentages? : Map[String, Double],
 ) -> Int32? {
   map_reasoning_to_provider_budget(

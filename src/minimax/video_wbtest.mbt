@@ -2,9 +2,9 @@
 fn minimax_video(
   model_id : MiniMaxVideoModelId,
   api_key~ : String,
-  base_url? : String = "https://api.minimax.io",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
+  base_url~ : String = "https://api.minimax.io",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> MiniMaxVideoModel {
   minimax_video_value(

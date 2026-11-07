@@ -7,7 +7,7 @@ async fn bind_test_server() -> @http.Server {
 fn open_responses_test_model(
   provider_name : String,
   url~ : String,
-  api_key? : String = "",
+  api_key~ : String = "",
 ) -> &@provider.LanguageModelV4 {
   @open_responses.create_open_responses(
     provider_name~,

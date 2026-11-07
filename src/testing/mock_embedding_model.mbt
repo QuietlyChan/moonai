@@ -14,10 +14,10 @@ pub struct MockEmbeddingModel {
 /// Construct a deterministic embedding model.
 pub fn MockEmbeddingModel::new(
   result : @provider.EmbeddingBatchResponse,
-  provider_name? : String = "mock",
-  model_id? : String = "mock-embedding-model",
-  max_embeddings_per_call? : Int32 = 2048,
-  supports_parallel_calls? : Bool = false,
+  provider_name~ : String = "mock",
+  model_id~ : String = "mock-embedding-model",
+  max_embeddings_per_call~ : Int32 = 2048,
+  supports_parallel_calls~ : Bool = false,
 ) -> MockEmbeddingModel {
   {
     provider_name,

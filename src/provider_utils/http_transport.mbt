@@ -25,8 +25,8 @@ pub(all) struct HttpRequest {
 pub fn HttpRequest::new(
   meth~ : HttpMethod,
   url~ : String,
-  headers? : Map[String, String] = Map([]),
-  body? : Bytes = b"",
+  headers~ : Map[String, String] = Map([]),
+  body~ : Bytes = b"",
 ) -> HttpRequest {
   { meth, url, headers: copy_headers(headers), body, }
 }
@@ -35,7 +35,7 @@ pub fn HttpRequest::new(
 /// Construct a GET request.
 pub fn HttpRequest::get(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpGet, url~, headers~)
 }
@@ -44,7 +44,7 @@ pub fn HttpRequest::get(
 /// Construct a POST request.
 pub fn HttpRequest::post(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
   body~ : Bytes,
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpPost, url~, headers~, body~)
@@ -54,7 +54,7 @@ pub fn HttpRequest::post(
 /// Construct a DELETE request without a body.
 pub fn HttpRequest::delete(
   url~ : String,
-  headers? : Map[String, String] = Map([]),
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpRequest {
   HttpRequest::new(meth=HttpDelete, url~, headers~)
 }
@@ -80,8 +80,8 @@ pub(all) struct HttpResponse {
 pub fn HttpResponse::new(
   status_code~ : Int32,
   body~ : Bytes,
-  reason? : String = "",
-  headers? : Map[String, String] = Map([]),
+  reason~ : String = "",
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpResponse {
   { status_code, reason, headers: copy_headers(headers), body, }
 }
@@ -91,8 +91,8 @@ pub fn HttpResponse::new(
 pub fn HttpResponse::text(
   status_code~ : Int32,
   body~ : String,
-  reason? : String = "",
-  headers? : Map[String, String] = Map([]),
+  reason~ : String = "",
+  headers~ : Map[String, String] = Map([]),
 ) -> HttpResponse {
   HttpResponse::new(status_code~, body=@utf8.encode(body), reason~, headers~)
 }

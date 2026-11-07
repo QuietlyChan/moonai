@@ -43,7 +43,7 @@ priv struct ParsedOpenAIResponsesOptions {
 /// Azure selects its own namespace and falls back to `openai`.
 fn resolve_official_openai_provider_options(
   provider_options : Map[String, Json],
-  reserved_fields? : Array[String] = [],
+  reserved_fields~ : Array[String] = [],
 ) -> @provider_utils.ProviderOptionsResolution {
   @provider_utils.resolve_provider_options(
     provider_options,

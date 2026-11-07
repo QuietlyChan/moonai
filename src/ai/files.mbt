@@ -5,7 +5,7 @@ pub async fn upload_file(
   data~ : UploadFileData,
   media_type~ : String,
   filename? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> FilesV4UploadFileResult {
   guard media_type.trim() != "" else {
     fail("upload_file requires a non-empty media_type")
@@ -27,7 +27,7 @@ pub async fn uploadFile(
   data~ : UploadFileData,
   media_type~ : String,
   filename? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> FilesV4UploadFileResult {
   upload_file(files, data~, media_type~, filename?, provider_options~)
 }
@@ -40,7 +40,7 @@ pub async fn uploadFile(
 pub async fn get_file_metadata(
   files : &FilesV4,
   file_id~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> FilesV4FileMetadata {
   guard file_id.trim() != "" else {
     fail("get_file_metadata requires a non-empty file_id")
@@ -55,7 +55,7 @@ pub async fn get_file_metadata(
 pub async fn getFileMetadata(
   files : &FilesV4,
   file_id~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> FilesV4FileMetadata {
   get_file_metadata(files, file_id~, provider_options~)
 }
@@ -68,7 +68,7 @@ pub async fn getFileMetadata(
 pub async fn download_file(
   files : &FilesV4,
   file_id~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> FilesV4DownloadFileResult {
   guard file_id.trim() != "" else {
     fail("download_file requires a non-empty file_id")
@@ -83,7 +83,7 @@ pub async fn download_file(
 pub async fn downloadFile(
   files : &FilesV4,
   file_id~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> FilesV4DownloadFileResult {
   download_file(files, file_id~, provider_options~)
 }
@@ -96,7 +96,7 @@ pub async fn downloadFile(
 pub async fn delete_file(
   files : &FilesV4,
   file_id~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> FilesV4DeleteFileResult {
   guard file_id.trim() != "" else {
     fail("delete_file requires a non-empty file_id")
@@ -111,7 +111,7 @@ pub async fn delete_file(
 pub async fn deleteFile(
   files : &FilesV4,
   file_id~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> FilesV4DeleteFileResult {
   delete_file(files, file_id~, provider_options~)
 }

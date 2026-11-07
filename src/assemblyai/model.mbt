@@ -14,12 +14,12 @@ pub struct AssemblyAIProvider {
 /// Create an AssemblyAI provider. The API key defaults to the
 /// `ASSEMBLYAI_API_KEY` environment variable.
 pub fn create_assemblyai(
-  api_key? : String = "",
-  base_url? : String = "https://api.assemblyai.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
-  poll_interval_ms? : Int32 = ASSEMBLYAI_POLL_INTERVAL_MS,
-  poll_timeout_ms? : Int32 = ASSEMBLYAI_POLL_TIMEOUT_MS,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.assemblyai.com",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
+  poll_interval_ms~ : Int32 = ASSEMBLYAI_POLL_INTERVAL_MS,
+  poll_timeout_ms~ : Int32 = ASSEMBLYAI_POLL_TIMEOUT_MS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> AssemblyAIProvider {
   {
@@ -38,12 +38,12 @@ pub fn create_assemblyai(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createAssemblyAI(
-  api_key? : String = "",
-  base_url? : String = "https://api.assemblyai.com",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 120_000,
-  poll_interval_ms? : Int32 = ASSEMBLYAI_POLL_INTERVAL_MS,
-  poll_timeout_ms? : Int32 = ASSEMBLYAI_POLL_TIMEOUT_MS,
+  api_key~ : String = "",
+  base_url~ : String = "https://api.assemblyai.com",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 120_000,
+  poll_interval_ms~ : Int32 = ASSEMBLYAI_POLL_INTERVAL_MS,
+  poll_timeout_ms~ : Int32 = ASSEMBLYAI_POLL_TIMEOUT_MS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> AssemblyAIProvider {
   create_assemblyai(

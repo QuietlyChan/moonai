@@ -28,7 +28,7 @@ pub fn ByteDanceImageModelOptions::new(
   sequential_image_generation? : String,
   max_images? : Int32,
   optimize_prompt_mode? : String,
-  extensions? : Map[String, Json] = Map([]),
+  extensions~ : Map[String, Json] = Map([]),
 ) -> ByteDanceImageModelOptions raise {
   if output_format is Some(value) {
     guard value == "png" || value == "jpeg" else {
@@ -115,12 +115,12 @@ pub fn ByteDanceVideoModelOptions::new(
   service_tier? : String,
   draft? : Bool,
   last_frame_image? : String,
-  reference_images? : Array[String] = [],
-  reference_videos? : Array[String] = [],
-  reference_audio? : Array[String] = [],
+  reference_images~ : Array[String] = [],
+  reference_videos~ : Array[String] = [],
+  reference_audio~ : Array[String] = [],
   poll_interval_ms? : Int32,
   poll_timeout_ms? : Int32,
-  extensions? : Map[String, Json] = Map([]),
+  extensions~ : Map[String, Json] = Map([]),
 ) -> ByteDanceVideoModelOptions raise {
   if service_tier is Some(value) {
     guard value == "default" || value == "flex" else {

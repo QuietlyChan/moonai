@@ -12,10 +12,10 @@ priv struct MockHttpStreamResponse {
 ///|
 fn MockHttpStreamResponse::new(
   chunks : Array[String],
-  status? : Int32 = 200,
-  reason? : String = "OK",
-  headers? : Map[String, String] = Map([]),
-  delays_ms? : Array[Int32] = [],
+  status~ : Int32 = 200,
+  reason~ : String = "OK",
+  headers~ : Map[String, String] = Map([]),
+  delays_ms~ : Array[Int32] = [],
 ) -> MockHttpStreamResponse {
   {
     status,

@@ -12,10 +12,10 @@ pub struct ProdiaProvider {
 /// Create a Prodia provider. The API key defaults to the `PRODIA_TOKEN`
 /// environment variable.
 pub fn create_prodia(
-  api_key? : String = "",
-  base_url? : String = "https://inference.prodia.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 300_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://inference.prodia.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 300_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ProdiaProvider {
   {
@@ -32,10 +32,10 @@ pub fn create_prodia(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createProdia(
-  api_key? : String = "",
-  base_url? : String = "https://inference.prodia.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 300_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://inference.prodia.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 300_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ProdiaProvider {
   create_prodia(
@@ -215,10 +215,10 @@ pub impl @provider.ProviderV4 for ProdiaProvider with fn skills(_self) {
 /// Construct the default V4 Prodia image model directly.
 pub fn prodia(
   model_id : ProdiaImageModelId,
-  api_key? : String = "",
-  base_url? : String = "https://inference.prodia.com/v2",
-  headers? : Map[String, String] = Map([]),
-  idle_timeout_ms? : Int32 = 300_000,
+  api_key~ : String = "",
+  base_url~ : String = "https://inference.prodia.com/v2",
+  headers~ : Map[String, String] = Map([]),
+  idle_timeout_ms~ : Int32 = 300_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.ImageModelV4 {
   create_prodia(

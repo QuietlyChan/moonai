@@ -17,9 +17,9 @@ pub(all) struct EmbeddingModelV4CallOptions {
 /// Construct V4 embedding call options.
 pub fn EmbeddingModelV4CallOptions::new(
   values : Array[String],
-  headers? : Map[String, String] = Map([]),
-  provider_options? : Map[String, Json] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  headers~ : Map[String, String] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> EmbeddingModelV4CallOptions {
   {
@@ -63,10 +63,10 @@ pub(all) struct EmbeddingModelV4Result {
 pub fn EmbeddingModelV4Result::new(
   embeddings : Array[Array[Double]],
   usage? : EmbeddingModelV4Usage,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
   request? : RequestMetadata,
   response? : ResponseMetadata,
-  warnings? : Array[Warning] = [],
+  warnings~ : Array[Warning] = [],
 ) -> EmbeddingModelV4Result {
   {
     embeddings,

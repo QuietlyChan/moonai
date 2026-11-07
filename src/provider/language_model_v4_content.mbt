@@ -127,7 +127,7 @@ pub(all) enum LanguageModelV4Content {
 /// Construct generated V4 text content.
 pub fn LanguageModelV4Content::text(
   text : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
   V4TextOutput({ text, provider_metadata, })
 }
@@ -136,7 +136,7 @@ pub fn LanguageModelV4Content::text(
 /// Construct generated V4 reasoning content.
 pub fn LanguageModelV4Content::reasoning(
   text : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
   V4ReasoningOutput({ text, provider_metadata, })
 }
@@ -146,7 +146,7 @@ pub fn LanguageModelV4Content::reasoning(
 pub fn LanguageModelV4Content::file(
   media_type~ : String,
   data~ : LanguageModelV4GeneratedFileData,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
   V4FileOutput({ media_type, data, provider_metadata, })
 }
@@ -156,7 +156,7 @@ pub fn LanguageModelV4Content::file(
 pub fn LanguageModelV4Content::reasoning_file(
   media_type~ : String,
   data~ : LanguageModelV4GeneratedFileData,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
   V4ReasoningFileOutput({ media_type, data, provider_metadata, })
 }
@@ -167,7 +167,7 @@ pub fn LanguageModelV4Content::url_source(
   id~ : String,
   url~ : String,
   title? : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
   V4SourceOutput(V4UrlSource(id~, url~, title~, provider_metadata~))
 }
@@ -179,7 +179,7 @@ pub fn LanguageModelV4Content::document_source(
   media_type~ : String,
   title~ : String,
   filename? : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
   V4SourceOutput(
     V4DocumentSource(id~, media_type~, title~, filename~, provider_metadata~),
@@ -214,7 +214,7 @@ pub fn LanguageModelV4Content::tool_approval_request(
 /// Construct provider-specific V4 content.
 pub fn LanguageModelV4Content::custom(
   kind~ : String,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Content {
   V4CustomOutput({ kind, provider_metadata, })
 }

@@ -12,9 +12,9 @@ struct GoogleVideoModel {
   base_url : String
   model_id : String
   headers : Map[String, String]
-  idle_timeout_ms : Int
-  poll_interval_ms : Int
-  poll_timeout_ms : Int
+  idle_timeout_ms : Int32
+  poll_interval_ms : Int32
+  poll_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
 
@@ -24,9 +24,9 @@ fn google_video_value(
   api_key~ : String,
   base_url~ : String,
   headers~ : Map[String, String],
-  idle_timeout_ms~ : Int,
-  poll_interval_ms~ : Int,
-  poll_timeout_ms~ : Int,
+  idle_timeout_ms~ : Int32,
+  poll_interval_ms~ : Int32,
+  poll_timeout_ms~ : Int32,
   http_transport~ : &@provider_utils.HttpTransport,
 ) -> GoogleVideoModel {
   {
@@ -74,7 +74,7 @@ fn GoogleVideoModel::google_video_api_headers(
 /// parameters block (sampleCount / aspectRatio).
 fn google_video_request_body(
   prompt~ : String?,
-  n~ : Int,
+  n~ : Int32,
   aspect_ratio~ : String?,
   provider_options~ : Map[String, Json],
 ) -> Json {
@@ -164,7 +164,7 @@ pub impl @provider.VideoModelV4 for GoogleVideoModel with fn model_id(self) -> S
 ///|
 pub impl @provider.VideoModelV4 for GoogleVideoModel with fn max_videos_per_call(
   _self,
-) -> Int? {
+) -> Int32? {
   None
 }
 

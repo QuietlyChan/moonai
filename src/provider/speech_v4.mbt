@@ -26,9 +26,9 @@ pub fn SpeechModelV4CallOptions::new(
   instructions? : String,
   speed? : Double,
   language? : String,
-  provider_options? : Map[String, Json] = Map([]),
-  headers? : Map[String, String] = Map([]),
-  retry_policy? : RetryPolicy = RetryPolicy::standard(),
+  provider_options~ : Map[String, Json] = Map([]),
+  headers~ : Map[String, String] = Map([]),
+  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> SpeechModelV4CallOptions {
   {
@@ -98,10 +98,10 @@ pub(all) struct SpeechModelV4Result {
 /// Construct a V4 speech result.
 pub fn SpeechModelV4Result::new(
   audio~ : SpeechAudioData,
-  warnings? : Array[Warning] = [],
+  warnings~ : Array[Warning] = [],
   request? : RequestMetadata,
   response? : ResponseMetadata,
-  provider_metadata? : Map[String, Json] = Map([]),
+  provider_metadata~ : Map[String, Json] = Map([]),
 ) -> SpeechModelV4Result {
   {
     audio,

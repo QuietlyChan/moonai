@@ -32,8 +32,8 @@ pub fn LanguageModelV4ToolCallPart::new(
   tool_call_id~ : String,
   tool_name~ : String,
   input~ : Json,
-  provider_executed? : Bool = false,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_executed~ : Bool = false,
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolCallPart {
   {
     tool_call_id,
@@ -62,7 +62,7 @@ pub(all) enum LanguageModelV4ToolResultContentPart {
 /// Construct text content embedded in a V4 tool result.
 pub fn LanguageModelV4ToolResultContentPart::text(
   text : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultContentPart {
   V4ToolResultTextContent(
     text~,
@@ -76,7 +76,7 @@ pub fn LanguageModelV4ToolResultContentPart::file(
   data~ : LanguageModelV4FileData,
   media_type~ : String,
   filename? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultContentPart {
   V4ToolResultFileContent(
     data~,
@@ -89,7 +89,7 @@ pub fn LanguageModelV4ToolResultContentPart::file(
 ///|
 /// Construct provider-specific content embedded in a V4 tool result.
 pub fn LanguageModelV4ToolResultContentPart::custom(
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultContentPart {
   V4ToolResultCustomContent(
     provider_options=copy_provider_metadata(provider_options),
@@ -130,7 +130,7 @@ pub fn LanguageModelV4ToolResultPart::text(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -150,7 +150,7 @@ pub fn LanguageModelV4ToolResultPart::json(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -170,7 +170,7 @@ pub fn LanguageModelV4ToolResultPart::execution_denied(
   tool_call_id~ : String,
   tool_name~ : String,
   reason? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -190,7 +190,7 @@ pub fn LanguageModelV4ToolResultPart::content(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Array[LanguageModelV4ToolResultContentPart],
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -210,7 +210,7 @@ pub fn LanguageModelV4ToolResultPart::error_text(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -230,7 +230,7 @@ pub fn LanguageModelV4ToolResultPart::error_json(
   tool_call_id~ : String,
   tool_name~ : String,
   value~ : Json,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolResultPart {
   let options = copy_provider_metadata(provider_options)
   {
@@ -260,7 +260,7 @@ pub fn LanguageModelV4ToolApprovalResponsePart::new(
   approval_id~ : String,
   approved~ : Bool,
   reason? : String,
-  provider_options? : Map[String, Json] = Map([]),
+  provider_options~ : Map[String, Json] = Map([]),
 ) -> LanguageModelV4ToolApprovalResponsePart {
   {
     approval_id,
