@@ -44,7 +44,7 @@ pub fn json_int_field_opt(json : Json, field : String) -> Int32? {
 pub fn json_int_field(
   json : Json,
   field : String,
-  default~ : Int32 = 0,
+  default? : Int32 = 0,
 ) -> Int32 {
   json_int_field_opt(json, field).unwrap_or(default)
 }

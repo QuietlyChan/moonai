@@ -41,7 +41,7 @@ async fn anthropic_default_bash_execute(
 pub fn bash_20241022(
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
-  disable_default_execute~ : Bool = false,
+  disable_default_execute? : Bool = false,
   needs_approval? : @provider_utils.ToolNeedsApproval,
   to_model_output? : @provider_utils.ToolModelOutputFunction,
   on_input_start? : @provider_utils.ToolInputStartFunction,
@@ -72,7 +72,7 @@ pub fn bash_20241022(
 pub fn bash_20250124(
   output_schema? : Json,
   execute? : @provider_utils.ToolExecuteFunction,
-  disable_default_execute~ : Bool = false,
+  disable_default_execute? : Bool = false,
   needs_approval? : @provider_utils.ToolNeedsApproval,
   to_model_output? : @provider_utils.ToolModelOutputFunction,
   on_input_start? : @provider_utils.ToolInputStartFunction,

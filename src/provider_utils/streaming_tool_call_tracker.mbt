@@ -19,8 +19,8 @@ pub fn StreamingToolCallDelta::new(
   tool_type? : String,
   function_name? : String,
   arguments_delta? : String,
-  provider_metadata~ : Map[String, Json] = Map([]),
-  data~ : Json = Json::empty_object(),
+  provider_metadata? : Map[String, Json] = Map([]),
+  data? : Json = Json::empty_object(),
 ) -> StreamingToolCallDelta {
   {
     index,
@@ -152,7 +152,7 @@ fn identity_streaming_tool_call_metadata(
 /// Create an empty streaming tool-call tracker.
 pub fn StreamingToolCallTracker::new(
   id_generator? : IdGenerator,
-  type_validation~ : StreamingToolCallTypeValidation = NoToolCallTypeValidation,
+  type_validation? : StreamingToolCallTypeValidation = NoToolCallTypeValidation,
   extract_metadata? : StreamingToolCallMetadataExtractor,
   build_tool_call_provider_metadata? : StreamingToolCallMetadataBuilder,
 ) -> StreamingToolCallTracker {

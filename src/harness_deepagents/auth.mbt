@@ -14,7 +14,7 @@ pub(all) enum DeepAgentsAuthOptions {
 /// Resolve environment variables passed to the DeepAgents bridge.
 pub fn resolve_deep_agents_env(
   auth? : DeepAgentsAuthOptions,
-  environment~ : Map[String, String] = @env.get_env_vars(),
+  environment? : Map[String, String] = @env.get_env_vars(),
 ) -> Map[String, String] {
   match auth {
     Some(DeepAgentsAnthropicAuth(api_key~, auth_token~, base_url~)) =>
@@ -72,7 +72,7 @@ pub fn resolve_deep_agents_env(
 /// AI SDK-style spelling for `resolve_deep_agents_env`.
 pub fn resolveDeepAgentsEnv(
   auth? : DeepAgentsAuthOptions,
-  environment~ : Map[String, String] = @env.get_env_vars(),
+  environment? : Map[String, String] = @env.get_env_vars(),
 ) -> Map[String, String] {
   resolve_deep_agents_env(auth?, environment~)
 }

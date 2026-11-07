@@ -15,9 +15,9 @@ fn default_tool_example_format(
 /// serialized into the description text and (by default) removed from the
 /// typed field.
 pub fn add_tool_input_examples_middleware(
-  prefix~ : String = "Input Examples:",
+  prefix? : String = "Input Examples:",
   format? : (@provider.LanguageModelV4FunctionToolInputExample, Int32) -> String,
-  remove~ : Bool = true,
+  remove? : Bool = true,
 ) -> @provider.LanguageModelV4Middleware {
   let format = match format {
     Some(value) => value

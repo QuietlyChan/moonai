@@ -13,10 +13,10 @@ pub struct MistralProvider {
 /// Create a Mistral provider. The API key defaults to the `MISTRAL_API_KEY`
 /// environment variable.
 pub fn create_mistral(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.mistral.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.mistral.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> MistralProvider {
@@ -35,10 +35,10 @@ pub fn create_mistral(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createMistral(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.mistral.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.mistral.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> MistralProvider {
@@ -201,10 +201,10 @@ pub impl @provider.ProviderV4 for MistralProvider with fn skills(_self) {
 /// Construct the default V4 Mistral language model directly.
 pub fn mistral(
   model_id : MistralChatModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://api.mistral.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.mistral.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

@@ -10,15 +10,17 @@ async fn main {
   let result = @ai.stream_text(
     config.language_model(),
     prompt="Explain MoonAI in one sentence",
-    on_event=event => match @ai.ui_message_chunk(event) {
-      Some(chunk) => {
-        match chunk {
-          { "type": "finish", .. } => saw_finish = true
-          _ => ()
+    on_event=event => {
+      match @ai.ui_message_chunk(event) {
+        Some(chunk) => {
+          match chunk {
+            { "type": "finish", .. } => saw_finish = true
+            _ => ()
+          }
+          stream.enqueue(chunk)
         }
-        stream.enqueue(chunk)
+        None => ()
       }
-      None => ()
     },
   )
   if !saw_finish {

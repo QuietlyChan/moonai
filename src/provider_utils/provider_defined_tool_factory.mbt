@@ -21,7 +21,7 @@ pub fn ProviderDefinedToolFactory::new(
 /// Construct a provider-defined tool from provider-specific arguments.
 pub fn ProviderDefinedToolFactory::create(
   self : ProviderDefinedToolFactory,
-  args~ : Json = Json::empty_object(),
+  args? : Json = Json::empty_object(),
   output_schema? : Json,
   execute? : ToolExecuteFunction,
   needs_approval? : ToolNeedsApproval,

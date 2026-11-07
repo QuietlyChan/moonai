@@ -10,7 +10,7 @@ priv struct AgentSequenceModel {
 ///|
 fn AgentSequenceModel::new(
   results : Array[@provider.LanguageModelV4GenerateResult],
-  stream_steps~ : Array[Array[@provider.LanguageModelV4StreamPart]] = [],
+  stream_steps? : Array[Array[@provider.LanguageModelV4StreamPart]] = [],
 ) -> AgentSequenceModel {
   {
     results,

@@ -26,13 +26,13 @@ fn load_alibaba_api_key(
 ///|
 /// Create an Alibaba Cloud provider.
 pub fn create_alibaba(
-  api_key~ : String = "",
-  base_url~ : String = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-  embedding_base_url~ : String = "https://dashscope-intl.aliyuncs.com/api/v1",
-  video_base_url~ : String = "https://dashscope-intl.aliyuncs.com",
-  headers~ : Map[String, String] = Map([]),
-  include_usage~ : Bool = true,
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+  embedding_base_url? : String = "https://dashscope-intl.aliyuncs.com/api/v1",
+  video_base_url? : String = "https://dashscope-intl.aliyuncs.com",
+  headers? : Map[String, String] = Map([]),
+  include_usage? : Bool = true,
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> AlibabaProvider {
@@ -56,13 +56,13 @@ pub fn create_alibaba(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createAlibaba(
-  api_key~ : String = "",
-  base_url~ : String = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-  embedding_base_url~ : String = "https://dashscope-intl.aliyuncs.com/api/v1",
-  video_base_url~ : String = "https://dashscope-intl.aliyuncs.com",
-  headers~ : Map[String, String] = Map([]),
-  include_usage~ : Bool = true,
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+  embedding_base_url? : String = "https://dashscope-intl.aliyuncs.com/api/v1",
+  video_base_url? : String = "https://dashscope-intl.aliyuncs.com",
+  headers? : Map[String, String] = Map([]),
+  include_usage? : Bool = true,
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> AlibabaProvider {
@@ -217,11 +217,11 @@ pub fn AlibabaProvider::videoModel(
 /// Construct the default V4 Alibaba language model directly.
 pub fn alibaba(
   model_id : AlibabaChatModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-  headers~ : Map[String, String] = Map([]),
-  include_usage~ : Bool = true,
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+  headers? : Map[String, String] = Map([]),
+  include_usage? : Bool = true,
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

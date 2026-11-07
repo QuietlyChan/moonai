@@ -25,9 +25,9 @@ pub fn LanguageModelCallOptions::new(
   top_k? : Double,
   presence_penalty? : Double,
   frequency_penalty? : Double,
-  stop_sequences~ : Array[String] = [],
+  stop_sequences? : Array[String] = [],
   seed? : Int32,
-  reasoning_effort~ : @provider.ReasoningEffort = @provider.ProviderDefault,
+  reasoning_effort? : @provider.ReasoningEffort = @provider.ProviderDefault,
 ) -> LanguageModelCallOptions {
   {
     max_output_tokens,

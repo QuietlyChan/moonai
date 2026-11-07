@@ -14,12 +14,12 @@ pub struct BflProvider {
 /// Create a Black Forest Labs provider. The API key defaults to the
 /// `BFL_API_KEY` environment variable.
 pub fn create_bfl(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.bfl.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
-  poll_interval_ms~ : Int32 = BFL_POLL_INTERVAL_MS,
-  poll_timeout_ms~ : Int32 = BFL_POLL_TIMEOUT_MS,
+  api_key? : String = "",
+  base_url? : String = "https://api.bfl.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
+  poll_interval_ms? : Int32 = BFL_POLL_INTERVAL_MS,
+  poll_timeout_ms? : Int32 = BFL_POLL_TIMEOUT_MS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> BflProvider {
   {
@@ -38,12 +38,12 @@ pub fn create_bfl(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createBfl(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.bfl.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
-  poll_interval_ms~ : Int32 = BFL_POLL_INTERVAL_MS,
-  poll_timeout_ms~ : Int32 = BFL_POLL_TIMEOUT_MS,
+  api_key? : String = "",
+  base_url? : String = "https://api.bfl.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
+  poll_interval_ms? : Int32 = BFL_POLL_INTERVAL_MS,
+  poll_timeout_ms? : Int32 = BFL_POLL_TIMEOUT_MS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> BflProvider {
   create_bfl(
@@ -206,12 +206,12 @@ pub impl @provider.ProviderV4 for BflProvider with fn skills(_self) {
 /// Construct the default V4 Black Forest Labs image model directly.
 pub fn bfl(
   model_id : BflImageModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://api.bfl.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
-  poll_interval_ms~ : Int32 = BFL_POLL_INTERVAL_MS,
-  poll_timeout_ms~ : Int32 = BFL_POLL_TIMEOUT_MS,
+  api_key? : String = "",
+  base_url? : String = "https://api.bfl.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
+  poll_interval_ms? : Int32 = BFL_POLL_INTERVAL_MS,
+  poll_timeout_ms? : Int32 = BFL_POLL_TIMEOUT_MS,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> &@provider.ImageModelV4 {
   create_bfl(

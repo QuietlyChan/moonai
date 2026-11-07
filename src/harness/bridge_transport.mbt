@@ -45,8 +45,8 @@ impl HarnessV1BridgeConnection for WebSocketHarnessV1BridgeConnection with fn cl
 pub async fn connect_harness_v1_websocket(
   url : String,
   token? : String,
-  headers~ : Map[String, String] = Map([]),
-  connector~ : &@provider_utils.WebSocketConnector = @provider_utils.native_websocket_connector(),
+  headers? : Map[String, String] = Map([]),
+  connector? : &@provider_utils.WebSocketConnector = @provider_utils.native_websocket_connector(),
 ) -> &HarnessV1BridgeConnection {
   let request_headers = @provider_utils.copy_headers(headers)
   if token is Some(value) && value != "" {
@@ -71,9 +71,9 @@ pub(all) struct HarnessV1StdioConfig {
 /// Construct a persistent stdio bridge configuration.
 pub fn HarnessV1StdioConfig::new(
   command~ : String,
-  args~ : Array[String] = [],
-  env~ : Map[String, String] = Map([]),
-  inherit_env~ : Bool = true,
+  args? : Array[String] = [],
+  env? : Map[String, String] = Map([]),
+  inherit_env? : Bool = true,
   cwd? : String,
 ) -> HarnessV1StdioConfig {
   { command, args: args.copy(), env, inherit_env, cwd, }

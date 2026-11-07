@@ -13,10 +13,10 @@ pub struct GoogleProvider {
 /// Create a Google Gemini provider. The API key defaults to the
 /// `GOOGLE_GENERATIVE_AI_API_KEY` environment variable.
 pub fn create_google(
-  api_key~ : String = "",
-  base_url~ : String = "https://generativelanguage.googleapis.com/v1beta",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://generativelanguage.googleapis.com/v1beta",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> GoogleProvider {
@@ -35,10 +35,10 @@ pub fn create_google(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createGoogle(
-  api_key~ : String = "",
-  base_url~ : String = "https://generativelanguage.googleapis.com/v1beta",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://generativelanguage.googleapis.com/v1beta",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> GoogleProvider {
@@ -273,10 +273,10 @@ pub impl @provider.ProviderV4 for GoogleProvider with fn skills(_self) {
 /// Construct the default V4 Google language model directly.
 pub fn google(
   model_id : GoogleChatModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://generativelanguage.googleapis.com/v1beta",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://generativelanguage.googleapis.com/v1beta",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

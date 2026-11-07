@@ -131,7 +131,7 @@ pub struct OpenResponsesExtensionRegistry {
 ///|
 /// Build a validated extension registry.
 pub fn create_open_responses_extension_registry(
-  extensions~ : Array[OpenResponsesExtension] = [],
+  extensions? : Array[OpenResponsesExtension] = [],
 ) -> OpenResponsesExtensionRegistry raise {
   let registry = {
     by_event_type: {},

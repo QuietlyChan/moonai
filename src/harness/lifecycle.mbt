@@ -45,7 +45,7 @@ pub(all) struct HarnessV1ContinueTurnState {
 /// Construct a resumable between-turn state value.
 pub fn HarnessV1ResumeSessionState::new(
   harness_id~ : String,
-  data~ : Json = Json::empty_object(),
+  data? : Json = Json::empty_object(),
   continue_from? : HarnessV1ContinueTurnState,
 ) -> HarnessV1ResumeSessionState {
   {
@@ -60,9 +60,9 @@ pub fn HarnessV1ResumeSessionState::new(
 /// Construct a resumable suspended-turn state value.
 pub fn HarnessV1ContinueTurnState::new(
   harness_id~ : String,
-  data~ : Json = Json::empty_object(),
-  pending_tool_approvals~ : Array[HarnessV1PendingToolApproval] = [],
-  pending_tool_results~ : Array[HarnessV1PendingToolResult] = [],
+  data? : Json = Json::empty_object(),
+  pending_tool_approvals? : Array[HarnessV1PendingToolApproval] = [],
+  pending_tool_results? : Array[HarnessV1PendingToolResult] = [],
 ) -> HarnessV1ContinueTurnState {
   {
     harness_id,

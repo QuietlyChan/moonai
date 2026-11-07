@@ -112,7 +112,7 @@ pub fn resolve_open_code_env(
   auth? : OpenCodeAuthOptions,
   model? : String,
   provider? : String,
-  environment~ : Map[String, String] = @env.get_env_vars(),
+  environment? : Map[String, String] = @env.get_env_vars(),
 ) -> Map[String, String] {
   match auth {
     Some(OpenCodeCompatibleAuth(api_key~, base_url~, name~, query_params~)) => {
@@ -223,7 +223,7 @@ pub fn resolveOpenCodeEnv(
   auth? : OpenCodeAuthOptions,
   model? : String,
   provider? : String,
-  environment~ : Map[String, String] = @env.get_env_vars(),
+  environment? : Map[String, String] = @env.get_env_vars(),
 ) -> Map[String, String] {
   resolve_open_code_env(auth?, model?, provider?, environment~)
 }

@@ -1,11 +1,11 @@
 ///|
 fn decode_test_openai_responses_response(
   json : Json,
-  provider_name~ : String = "openai.responses",
-  shell_provider_executed~ : Bool = false,
+  provider_name? : String = "openai.responses",
+  shell_provider_executed? : Bool = false,
   tool_name_mapping? : @provider_utils.ToolNameMapping,
   id_generator? : @provider_utils.IdGenerator,
-  approval_tool_call_ids~ : Map[String, String] = Map([]),
+  approval_tool_call_ids? : Map[String, String] = Map([]),
   web_search_tool_name? : String,
 ) -> @provider.ChatResponse raise {
   let decoded = decode_openai_responses_response(

@@ -13,8 +13,8 @@ pub struct MockCompletionModel {
 pub fn MockCompletionModel::new(
   events : Array[@provider.StreamEvent],
   result : @provider.CompletionResponse,
-  provider_name~ : String = "mock",
-  model_id~ : String = "mock-completion-model",
+  provider_name? : String = "mock",
+  model_id? : String = "mock-completion-model",
 ) -> MockCompletionModel {
   { provider_name, model_id, events, result, captured_prompt: "", }
 }

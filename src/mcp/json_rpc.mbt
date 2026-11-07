@@ -48,7 +48,7 @@ pub fn JSONRPCMessage::notification(
 /// Construct a successful JSON-RPC response.
 pub fn JSONRPCMessage::response(
   id~ : JSONRPCId,
-  result~ : Json = Json::empty_object(),
+  result? : Json = Json::empty_object(),
 ) -> JSONRPCMessage {
   JSONRPCResponse(id~, result~)
 }

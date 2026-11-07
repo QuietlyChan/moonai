@@ -13,10 +13,10 @@ pub struct XaiProvider {
 /// Create an xAI provider. The API key defaults to the `XAI_API_KEY`
 /// environment variable.
 pub fn create_xai(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.x.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.x.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> XaiProvider {
@@ -35,10 +35,10 @@ pub fn create_xai(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createXai(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.x.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.x.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> XaiProvider {
@@ -252,10 +252,10 @@ pub impl @provider.ProviderV4 for XaiProvider with fn skills(_self) {
 /// Construct the default V4 xAI language model directly.
 pub fn xai(
   model_id : XaiChatModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://api.x.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.x.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

@@ -15,10 +15,7 @@ fn main raise {
   println("  -> returns text + segments + language + duration")
   println("\n[video] model.video(prompt, duration, aspect_ratio)")
   println("  -> do_start returns an operation id; poll do_status until done")
-  let similarity = @ai.cosine_similarity(
-    vector1=[0.1, 0.2],
-    vector2=[0.1, 0.2],
-  )
+  let similarity = @ai.cosine_similarity(vector1=[0.1, 0.2], vector2=[0.1, 0.2])
   println("\n[util] cosine_similarity(emb, emb) = \{similarity}")
   if config.is_demo() {
     println(

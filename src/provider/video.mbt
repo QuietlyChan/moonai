@@ -95,19 +95,19 @@ pub(all) struct VideoCallOptions {
 /// Construct normalized video generation options.
 pub fn VideoCallOptions::new(
   prompt : String,
-  n~ : Int32 = 1,
+  n? : Int32 = 1,
   aspect_ratio? : String,
   resolution? : String,
   duration? : Double,
   fps? : Int32,
   seed? : Int32,
   image? : VideoInput,
-  frame_images~ : Array[VideoFrameImage] = [],
-  input_references~ : Array[VideoInput] = [],
+  frame_images? : Array[VideoFrameImage] = [],
+  input_references? : Array[VideoInput] = [],
   generate_audio? : Bool,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> VideoCallOptions {
   {

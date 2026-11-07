@@ -126,7 +126,10 @@ fn DemoLanguageModel::next_output(
     let json_answer : String? = match options.response_format {
       @provider.V4ResponseJson(_) => {
         let answer : Map[String, Json] = Map([
-          ("answer", Json::string("MoonAI is a provider-neutral MoonBit AI SDK.")),
+          (
+            "answer",
+            Json::string("MoonAI is a provider-neutral MoonBit AI SDK."),
+          ),
           ("confidence", Json::number(0.98)),
         ])
         Some(Json::object(answer).stringify())

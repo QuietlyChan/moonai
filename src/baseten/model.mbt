@@ -16,11 +16,11 @@ pub struct BasetenProvider {
 /// chat (`/sync/v1`) or embeddings (`/sync` or `/sync/v1`); without it the
 /// Model APIs are used for chat.
 pub fn create_baseten(
-  api_key~ : String = "",
-  base_url~ : String = "https://inference.baseten.co/v1",
+  api_key? : String = "",
+  base_url? : String = "https://inference.baseten.co/v1",
   model_url? : String,
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> BasetenProvider {
@@ -40,11 +40,11 @@ pub fn create_baseten(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createBaseten(
-  api_key~ : String = "",
-  base_url~ : String = "https://inference.baseten.co/v1",
+  api_key? : String = "",
+  base_url? : String = "https://inference.baseten.co/v1",
   model_url? : String,
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> BasetenProvider {

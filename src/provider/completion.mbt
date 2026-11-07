@@ -31,11 +31,11 @@ pub fn CompletionOptions::new(
   frequency_penalty? : Double,
   presence_penalty? : Double,
   seed? : Int32,
-  stop_sequences~ : Array[String] = [],
-  include_raw_chunks~ : Bool = false,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  stop_sequences? : Array[String] = [],
+  include_raw_chunks? : Bool = false,
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> CompletionOptions {
   {

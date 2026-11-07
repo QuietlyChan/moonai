@@ -378,7 +378,7 @@ pub fn buildDiscoveryUrls(authorization_server_url : String) -> Array[String] {
 /// Discover and validate OAuth authorization server metadata.
 pub async fn discover_authorization_server_metadata(
   authorization_server_url~ : String,
-  protocol_version~ : String = LATEST_PROTOCOL_VERSION,
+  protocol_version? : String = LATEST_PROTOCOL_VERSION,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> OAuthAuthorizationServerMetadata? {
   let transport = http_transport.unwrap_or(
@@ -418,7 +418,7 @@ pub async fn discover_authorization_server_metadata(
 /// AI SDK-style spelling for `discover_authorization_server_metadata`.
 pub async fn discoverAuthorizationServerMetadata(
   authorization_server_url~ : String,
-  protocol_version~ : String = LATEST_PROTOCOL_VERSION,
+  protocol_version? : String = LATEST_PROTOCOL_VERSION,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> OAuthAuthorizationServerMetadata? {
   discover_authorization_server_metadata(

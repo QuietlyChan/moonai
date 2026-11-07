@@ -4,7 +4,7 @@ pub async fn upload_skill(
   skills : &SkillsV4,
   files~ : Array[SkillsV4File],
   display_title? : String,
-  provider_options~ : Map[String, Json] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
 ) -> SkillsV4UploadSkillResult {
   guard files.length() > 0 else {
     fail("upload_skill requires at least one file")
@@ -29,7 +29,7 @@ pub async fn uploadSkill(
   skills : &SkillsV4,
   files~ : Array[SkillsV4File],
   display_title? : String,
-  provider_options~ : Map[String, Json] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
 ) -> SkillsV4UploadSkillResult {
   upload_skill(skills, files~, display_title?, provider_options~)
 }

@@ -15,9 +15,9 @@ pub struct MockChatModel {
 pub fn MockChatModel::new(
   events : Array[@provider.StreamEvent],
   result : @provider.ChatResponse,
-  provider_name~ : String = "mock",
-  model_id~ : String = "mock-model",
-  supported_urls~ : Array[@provider.SupportedUrlRule] = [],
+  provider_name? : String = "mock",
+  model_id? : String = "mock-model",
+  supported_urls? : Array[@provider.SupportedUrlRule] = [],
 ) -> MockChatModel {
   {
     provider_name,

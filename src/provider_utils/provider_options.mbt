@@ -110,10 +110,10 @@ pub fn resolve_provider_options_key(
 /// behind the normalized API.
 pub fn resolve_provider_options(
   options : Map[String, Json],
-  provider_name~ : String = "",
-  aliases~ : Array[String] = [],
-  reserved_fields~ : Array[String] = [],
-  prefer_exact_provider_name~ : Bool = false,
+  provider_name? : String = "",
+  aliases? : Array[String] = [],
+  reserved_fields? : Array[String] = [],
+  prefer_exact_provider_name? : Bool = false,
 ) -> ProviderOptionsResolution {
   let warnings : Array[@provider.Warning] = []
   let exact_name = provider_name.trim().to_owned()
@@ -225,7 +225,7 @@ pub fn merge_provider_options_resolutions(
 /// Create a typed reader from a resolved provider namespace.
 pub fn ProviderOptionsReader::new(
   resolution : ProviderOptionsResolution,
-  path~ : String = "providerOptions",
+  path? : String = "providerOptions",
 ) -> ProviderOptionsReader {
   {
     values: copy_json_map(resolution.values),
@@ -327,7 +327,7 @@ pub fn ProviderOptionsReader::add_warning(
 pub fn ProviderOptionsReader::take_json(
   self : ProviderOptionsReader,
   field : String,
-  aliases~ : Array[String] = [],
+  aliases? : Array[String] = [],
 ) -> Json? {
   match self.take_value(field, aliases) {
     Some(Null) | None => None
@@ -340,8 +340,8 @@ pub fn ProviderOptionsReader::take_json(
 pub fn ProviderOptionsReader::take_string(
   self : ProviderOptionsReader,
   field : String,
-  aliases~ : Array[String] = [],
-  allowed~ : Array[String] = [],
+  aliases? : Array[String] = [],
+  allowed? : Array[String] = [],
 ) -> String? {
   match self.take_value(field, aliases) {
     Some(String(value)) =>
@@ -364,7 +364,7 @@ pub fn ProviderOptionsReader::take_string(
 pub fn ProviderOptionsReader::take_bool(
   self : ProviderOptionsReader,
   field : String,
-  aliases~ : Array[String] = [],
+  aliases? : Array[String] = [],
 ) -> Bool? {
   match self.take_value(field, aliases) {
     Some(True) => Some(true)
@@ -382,7 +382,7 @@ pub fn ProviderOptionsReader::take_bool(
 pub fn ProviderOptionsReader::take_int(
   self : ProviderOptionsReader,
   field : String,
-  aliases~ : Array[String] = [],
+  aliases? : Array[String] = [],
   min? : Int32,
   max? : Int32,
 ) -> Int32? {
@@ -415,7 +415,7 @@ pub fn ProviderOptionsReader::take_int(
 pub fn ProviderOptionsReader::take_double(
   self : ProviderOptionsReader,
   field : String,
-  aliases~ : Array[String] = [],
+  aliases? : Array[String] = [],
   min? : Double,
   max? : Double,
 ) -> Double? {
@@ -443,7 +443,7 @@ pub fn ProviderOptionsReader::take_double(
 pub fn ProviderOptionsReader::take_object(
   self : ProviderOptionsReader,
   field : String,
-  aliases~ : Array[String] = [],
+  aliases? : Array[String] = [],
 ) -> Map[String, Json]? {
   match self.take_value(field, aliases) {
     Some(Object(value)) => Some(copy_json_map(value))
@@ -460,7 +460,7 @@ pub fn ProviderOptionsReader::take_object(
 pub fn ProviderOptionsReader::take_array(
   self : ProviderOptionsReader,
   field : String,
-  aliases~ : Array[String] = [],
+  aliases? : Array[String] = [],
 ) -> Array[Json]? {
   match self.take_value(field, aliases) {
     Some(Array(value)) => Some(value.copy())

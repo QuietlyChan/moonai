@@ -16,9 +16,9 @@ pub struct OpenResponsesProvider {
 pub fn create_open_responses(
   provider_name~ : String,
   url~ : String,
-  api_key~ : String = "",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   id_generator? : @provider_utils.IdGenerator,
   http_transport? : &@provider_utils.HttpTransport,
   extensions? : @protocol.OpenResponsesExtensionRegistry,
@@ -42,9 +42,9 @@ pub fn create_open_responses(
 pub fn createOpenResponses(
   name~ : String,
   url~ : String,
-  api_key~ : String = "",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   id_generator? : @provider_utils.IdGenerator,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> OpenResponsesProvider {

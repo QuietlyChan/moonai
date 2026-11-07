@@ -15,9 +15,9 @@ pub(all) struct TranscriptionModelV4CallOptions {
 pub fn TranscriptionModelV4CallOptions::new(
   audio~ : TranscriptionAudio,
   media_type~ : String,
-  provider_options~ : Map[String, Json] = Map([]),
-  headers~ : Map[String, String] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> TranscriptionModelV4CallOptions {
   {
@@ -78,13 +78,13 @@ pub(all) struct TranscriptionModelV4Result {
 /// Construct a V4 transcription result.
 pub fn TranscriptionModelV4Result::new(
   text~ : String,
-  segments~ : Array[TranscriptionSegment] = [],
+  segments? : Array[TranscriptionSegment] = [],
   language? : String,
   duration_in_seconds? : Double,
-  warnings~ : Array[Warning] = [],
+  warnings? : Array[Warning] = [],
   request? : RequestMetadata,
   response? : ResponseMetadata,
-  provider_metadata~ : Map[String, Json] = Map([]),
+  provider_metadata? : Map[String, Json] = Map([]),
 ) -> TranscriptionModelV4Result {
   {
     text,
@@ -149,9 +149,9 @@ pub(all) struct TranscriptionModelV4StreamOptions {
 pub fn TranscriptionModelV4StreamOptions::new(
   audio~ : &AudioStream,
   input_audio_format~ : AudioFormat,
-  provider_options~ : Map[String, Json] = Map([]),
-  headers~ : Map[String, String] = Map([]),
-  include_raw_chunks~ : Bool = false,
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  include_raw_chunks? : Bool = false,
   cancellation_token? : CancellationToken,
 ) -> TranscriptionModelV4StreamOptions {
   {

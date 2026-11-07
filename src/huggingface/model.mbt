@@ -15,10 +15,10 @@ pub struct HuggingFaceProvider {
 /// OpenAI Responses wire protocol through the HF router, so the protocol
 /// implementation is shared with the OpenAI package.
 pub fn create_huggingface(
-  api_key~ : String = "",
-  base_url~ : String = "https://router.huggingface.co/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://router.huggingface.co/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> HuggingFaceProvider {
@@ -37,10 +37,10 @@ pub fn create_huggingface(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createHuggingFace(
-  api_key~ : String = "",
-  base_url~ : String = "https://router.huggingface.co/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://router.huggingface.co/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> HuggingFaceProvider {
@@ -166,10 +166,10 @@ pub impl @provider.ProviderV4 for HuggingFaceProvider with fn skills(_self) {
 /// Construct the default V4 Hugging Face language model directly.
 pub fn huggingface(
   model_id : HuggingFaceResponsesModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://router.huggingface.co/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://router.huggingface.co/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 raise {

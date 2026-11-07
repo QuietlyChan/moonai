@@ -48,9 +48,9 @@ pub fn LanguageModelV4Tool::function(
   name : String,
   input_schema : Json,
   description? : String,
-  input_examples~ : Array[Json] = [],
+  input_examples? : Array[Json] = [],
   strict? : Bool,
-  provider_options~ : Map[String, Json] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
 ) -> LanguageModelV4Tool {
   LanguageModelV4Tool::V4FunctionTool({
     name,
@@ -71,7 +71,7 @@ pub fn LanguageModelV4Tool::function(
 pub fn LanguageModelV4Tool::provider(
   id~ : String,
   name~ : String,
-  args~ : Json = Json::empty_object(),
+  args? : Json = Json::empty_object(),
 ) -> LanguageModelV4Tool {
   LanguageModelV4Tool::V4ProviderTool({ id, name, args, })
 }

@@ -17,13 +17,13 @@ async fn main {
     config.language_model(),
     prompt="What is MoonAI?",
     response_format=@provider.ResponseFormat::json(
-      schema=schema,
+      schema~,
       name="moonai-answer",
     ),
   )
   let text = result.text()
   println("raw: \{text}")
-  let value = try @json.parse(text) catch {
+  let value = @json.parse(text) catch {
     _ => {
       println("model output was not JSON")
       return

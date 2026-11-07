@@ -31,7 +31,7 @@ pub(all) struct AnthropicToolOptions {
 /// Construct typed Anthropic function-tool options.
 pub fn AnthropicToolOptions::new(
   defer_loading? : Bool,
-  allowed_callers~ : Array[AnthropicToolAllowedCaller] = [],
+  allowed_callers? : Array[AnthropicToolAllowedCaller] = [],
   eager_input_streaming? : Bool,
 ) -> AnthropicToolOptions {
   {
@@ -45,7 +45,7 @@ pub fn AnthropicToolOptions::new(
 /// Convert typed function-tool options to an Anthropic provider namespace.
 pub fn AnthropicToolOptions::to_provider_options(
   self : AnthropicToolOptions,
-  provider_name~ : String = "anthropic",
+  provider_name? : String = "anthropic",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map(
     [

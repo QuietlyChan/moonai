@@ -16,8 +16,8 @@ pub(all) struct CompletionPrompt {
 /// OpenAI and OpenAI-compatible completion converters.
 pub fn convert_to_completion_prompt(
   prompt : @provider.LanguageModelV4Prompt,
-  user~ : String = "user",
-  assistant~ : String = "assistant",
+  user? : String = "user",
+  assistant? : String = "assistant",
 ) -> CompletionPrompt raise {
   let text = StringBuilder()
   let mut start = 0

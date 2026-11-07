@@ -137,7 +137,7 @@ fn anthropic_provider_tool_json(
   wire_type : String,
   wire_name : String,
   fields : Array[String],
-  required_fields~ : Array[String] = [],
+  required_fields? : Array[String] = [],
 ) -> Json raise {
   let source = anthropic_provider_tool_fields(args, id)
   for field in required_fields {
@@ -479,7 +479,7 @@ fn prepare_anthropic_v4_tools(
 ///|
 /// Create Anthropic's code execution tool dated 2025-05-22.
 pub fn code_execution_20250522_tool(
-  name~ : String = "code_execution",
+  name? : String = "code_execution",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.code_execution_20250522",
@@ -490,7 +490,7 @@ pub fn code_execution_20250522_tool(
 ///|
 /// Create Anthropic's code execution tool dated 2025-08-25.
 pub fn code_execution_20250825_tool(
-  name~ : String = "code_execution",
+  name? : String = "code_execution",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.code_execution_20250825",
@@ -501,7 +501,7 @@ pub fn code_execution_20250825_tool(
 ///|
 /// Create Anthropic's current code execution tool.
 pub fn code_execution_20260120_tool(
-  name~ : String = "code_execution",
+  name? : String = "code_execution",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.code_execution_20260120",
@@ -513,7 +513,7 @@ pub fn code_execution_20260120_tool(
 /// Create an Anthropic computer-use provider tool.
 pub fn computer_20241022_tool(
   args : Json,
-  name~ : String = "computer",
+  name? : String = "computer",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.computer_20241022",
@@ -526,7 +526,7 @@ pub fn computer_20241022_tool(
 /// Create an Anthropic computer-use provider tool.
 pub fn computer_20250124_tool(
   args : Json,
-  name~ : String = "computer",
+  name? : String = "computer",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.computer_20250124",
@@ -539,7 +539,7 @@ pub fn computer_20250124_tool(
 /// Create the current Anthropic computer-use provider tool.
 pub fn computer_20251124_tool(
   args : Json,
-  name~ : String = "computer",
+  name? : String = "computer",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.computer_20251124",
@@ -551,7 +551,7 @@ pub fn computer_20251124_tool(
 ///|
 /// Create an Anthropic text-editor provider tool.
 pub fn text_editor_20241022_tool(
-  name~ : String = "str_replace_editor",
+  name? : String = "str_replace_editor",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(id="anthropic.text_editor_20241022", name~)
 }
@@ -559,7 +559,7 @@ pub fn text_editor_20241022_tool(
 ///|
 /// Create an Anthropic text-editor provider tool.
 pub fn text_editor_20250124_tool(
-  name~ : String = "str_replace_editor",
+  name? : String = "str_replace_editor",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(id="anthropic.text_editor_20250124", name~)
 }
@@ -567,7 +567,7 @@ pub fn text_editor_20250124_tool(
 ///|
 /// Create an Anthropic text-editor provider tool.
 pub fn text_editor_20250429_tool(
-  name~ : String = "str_replace_based_edit_tool",
+  name? : String = "str_replace_based_edit_tool",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(id="anthropic.text_editor_20250429", name~)
 }
@@ -575,8 +575,8 @@ pub fn text_editor_20250429_tool(
 ///|
 /// Create the current Anthropic text-editor provider tool.
 pub fn text_editor_20250728_tool(
-  args~ : Json = Json::empty_object(),
-  name~ : String = "str_replace_based_edit_tool",
+  args? : Json = Json::empty_object(),
+  name? : String = "str_replace_based_edit_tool",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.text_editor_20250728",
@@ -587,20 +587,20 @@ pub fn text_editor_20250728_tool(
 
 ///|
 /// Create an Anthropic bash provider tool.
-pub fn bash_20241022_tool(name~ : String = "bash") -> @provider.ToolDefinition {
+pub fn bash_20241022_tool(name? : String = "bash") -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(id="anthropic.bash_20241022", name~)
 }
 
 ///|
 /// Create an Anthropic bash provider tool.
-pub fn bash_20250124_tool(name~ : String = "bash") -> @provider.ToolDefinition {
+pub fn bash_20250124_tool(name? : String = "bash") -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(id="anthropic.bash_20250124", name~)
 }
 
 ///|
 /// Create Anthropic's memory provider tool.
 pub fn memory_20250818_tool(
-  name~ : String = "memory",
+  name? : String = "memory",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(id="anthropic.memory_20250818", name~)
 }
@@ -608,8 +608,8 @@ pub fn memory_20250818_tool(
 ///|
 /// Create an Anthropic web-fetch provider tool.
 pub fn web_fetch_20250910_tool(
-  args~ : Json = Json::empty_object(),
-  name~ : String = "web_fetch",
+  args? : Json = Json::empty_object(),
+  name? : String = "web_fetch",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.web_fetch_20250910",
@@ -621,8 +621,8 @@ pub fn web_fetch_20250910_tool(
 ///|
 /// Create the current Anthropic web-fetch provider tool.
 pub fn web_fetch_20260209_tool(
-  args~ : Json = Json::empty_object(),
-  name~ : String = "web_fetch",
+  args? : Json = Json::empty_object(),
+  name? : String = "web_fetch",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.web_fetch_20260209",
@@ -634,8 +634,8 @@ pub fn web_fetch_20260209_tool(
 ///|
 /// Create an Anthropic web-search provider tool.
 pub fn web_search_20250305_tool(
-  args~ : Json = Json::empty_object(),
-  name~ : String = "web_search",
+  args? : Json = Json::empty_object(),
+  name? : String = "web_search",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.web_search_20250305",
@@ -647,8 +647,8 @@ pub fn web_search_20250305_tool(
 ///|
 /// Create the current Anthropic web-search provider tool.
 pub fn web_search_20260209_tool(
-  args~ : Json = Json::empty_object(),
-  name~ : String = "web_search",
+  args? : Json = Json::empty_object(),
+  name? : String = "web_search",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.web_search_20260209",
@@ -660,7 +660,7 @@ pub fn web_search_20260209_tool(
 ///|
 /// Create Anthropic's regex tool-search provider tool.
 pub fn tool_search_regex_20251119_tool(
-  name~ : String = "tool_search_tool_regex",
+  name? : String = "tool_search_tool_regex",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.tool_search_regex_20251119",
@@ -671,7 +671,7 @@ pub fn tool_search_regex_20251119_tool(
 ///|
 /// Create Anthropic's BM25 tool-search provider tool.
 pub fn tool_search_bm25_20251119_tool(
-  name~ : String = "tool_search_tool_bm25",
+  name? : String = "tool_search_tool_bm25",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.tool_search_bm25_20251119",
@@ -683,7 +683,7 @@ pub fn tool_search_bm25_20251119_tool(
 /// Create Anthropic's advisor provider tool.
 pub fn advisor_20260301_tool(
   args : Json,
-  name~ : String = "advisor",
+  name? : String = "advisor",
 ) -> @provider.ToolDefinition {
   @provider.ToolDefinition::provider(
     id="anthropic.advisor_20260301",

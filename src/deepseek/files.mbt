@@ -27,7 +27,7 @@ pub fn DeepSeekFilesOptions::new(
 /// Convert typed FilesV4 options into the DeepSeek provider namespace.
 pub fn DeepSeekFilesOptions::to_provider_options(
   self : DeepSeekFilesOptions,
-  provider_name~ : String = "deepseek",
+  provider_name? : String = "deepseek",
 ) -> Map[String, Json] {
   let values : Map[String, Json] = Map([])
   if self.expires_after is Some(value) {
@@ -54,11 +54,11 @@ pub struct DeepSeekFiles {
 ///|
 /// Construct a DeepSeek Files API client directly.
 pub fn deepseek_files(
-  api_key~ : String = "",
+  api_key? : String = "",
   base_url? : String,
-  provider_name~ : String = "deepseek.files",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  provider_name? : String = "deepseek.files",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   streaming_http_transport? : &@provider_utils.StreamingBodyTransport,
 ) -> DeepSeekFiles {

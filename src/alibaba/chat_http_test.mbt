@@ -9,8 +9,8 @@ priv struct AlibabaChatMockStream {
 ///|
 fn AlibabaChatMockStream::new(
   chunks : Array[String],
-  status~ : Int32 = 200,
-  headers~ : Map[String, String] = Map([]),
+  status? : Int32 = 200,
+  headers? : Map[String, String] = Map([]),
 ) -> AlibabaChatMockStream {
   {
     status,

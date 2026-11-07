@@ -12,9 +12,9 @@ pub struct MockVideoModel {
 /// Construct a deterministic video model.
 pub fn MockVideoModel::new(
   result : @provider.VideoResponse,
-  max_videos_per_call~ : Int32 = 1,
-  provider_name~ : String = "mock",
-  model_id~ : String = "mock-video-model",
+  max_videos_per_call? : Int32 = 1,
+  provider_name? : String = "mock",
+  model_id? : String = "mock-video-model",
 ) -> MockVideoModel {
   {
     provider_name,

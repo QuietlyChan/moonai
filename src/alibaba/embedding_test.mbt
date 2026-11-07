@@ -220,7 +220,7 @@ priv struct AlibabaEmbeddingResponseTransport {
 ///|
 fn AlibabaEmbeddingResponseTransport::new(
   body : String,
-  status_code~ : Int32 = 200,
+  status_code? : Int32 = 200,
 ) -> AlibabaEmbeddingResponseTransport {
   { status_code, body, }
 }

@@ -508,7 +508,7 @@ fn download_response_header(
 pub fn read_response_with_size_limit(
   response : HttpResponse,
   url~ : String,
-  max_bytes~ : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
+  max_bytes? : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
 ) -> Bytes raise DownloadError {
   let content_length = match
     download_response_header(response.headers, "content-length") {
@@ -524,7 +524,7 @@ pub fn read_response_with_size_limit(
 pub fn readResponseWithSizeLimit(
   response : HttpResponse,
   url~ : String,
-  max_bytes~ : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
+  max_bytes? : Int64 = DEFAULT_MAX_DOWNLOAD_SIZE,
 ) -> Bytes raise DownloadError {
   read_response_with_size_limit(response, url~, max_bytes~)
 }

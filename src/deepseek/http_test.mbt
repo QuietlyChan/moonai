@@ -9,8 +9,8 @@ priv struct DeepSeekMockStream {
 ///|
 fn DeepSeekMockStream::new(
   chunks : Array[String],
-  status~ : Int32 = 200,
-  headers~ : Map[String, String] = Map([]),
+  status? : Int32 = 200,
+  headers? : Map[String, String] = Map([]),
 ) -> DeepSeekMockStream {
   {
     status,

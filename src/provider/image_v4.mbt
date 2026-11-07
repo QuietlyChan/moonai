@@ -39,7 +39,7 @@ pub fn ImageModelV4File::url(url : String) -> ImageModelV4File {
 /// Convert a V4 image file at the explicit protocol adapter boundary.
 pub fn ImageModelV4File::to_image_file(
   self : ImageModelV4File,
-  filename~ : String = "image",
+  filename? : String = "image",
 ) -> ImageFile {
   match self {
     ImageV4Data(data~, media_type~) =>
@@ -81,15 +81,15 @@ pub(all) struct ImageModelV4CallOptions {
 /// Construct V4 image generation options.
 pub fn ImageModelV4CallOptions::new(
   prompt? : String,
-  n~ : Int32 = 1,
+  n? : Int32 = 1,
   size? : String,
   aspect_ratio? : String,
   seed? : Int32,
   files? : Array[ImageModelV4File],
   mask? : ImageModelV4File,
-  provider_options~ : Map[String, Json] = Map([]),
-  headers~ : Map[String, String] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ImageModelV4CallOptions {
   {
@@ -174,8 +174,8 @@ pub(all) struct ImageModelV4Result {
 /// Construct a V4 image result.
 pub fn ImageModelV4Result::new(
   images : Array[GeneratedImage],
-  warnings~ : Array[Warning] = [],
-  provider_metadata~ : Map[String, Json] = Map([]),
+  warnings? : Array[Warning] = [],
+  provider_metadata? : Map[String, Json] = Map([]),
   request? : RequestMetadata,
   response? : ResponseMetadata,
   usage? : ImageModelV4Usage,

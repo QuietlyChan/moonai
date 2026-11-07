@@ -17,7 +17,7 @@ pub(all) enum HarnessV1BridgeTransportConfig {
 pub fn HarnessV1BridgeTransportConfig::websocket(
   url~ : String,
   token? : String,
-  headers~ : Map[String, String] = Map([]),
+  headers? : Map[String, String] = Map([]),
 ) -> HarnessV1BridgeTransportConfig {
   HarnessBridgeWebSocket(url~, token~, headers~)
 }
@@ -112,7 +112,7 @@ pub fn compact_harness_env(values : Map[String, String]) -> Map[String, String] 
 ///|
 /// Resolve ambient AI Gateway credentials used by all harness adapters.
 pub fn harness_ai_gateway_env(
-  environment~ : Map[String, String] = @env.get_env_vars(),
+  environment? : Map[String, String] = @env.get_env_vars(),
 ) -> Map[String, String] {
   let result : Map[String, String] = Map([])
   let api_key = match environment.get("AI_GATEWAY_API_KEY") {

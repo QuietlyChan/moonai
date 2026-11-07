@@ -100,7 +100,7 @@ impl AudioStream for ReaderAudioStream with fn cancel(self) {
 /// Adapt any async byte reader to a live audio stream.
 pub fn audio_reader(
   reader : &@io.Reader,
-  max_chunk_size~ : Int32 = 65_536,
+  max_chunk_size? : Int32 = 65_536,
 ) -> &AudioStream raise {
   guard max_chunk_size > 0 else {
     fail("audio stream max_chunk_size must be greater than zero")

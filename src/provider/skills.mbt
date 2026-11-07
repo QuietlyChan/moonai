@@ -29,7 +29,7 @@ pub(all) struct SkillsV4UploadSkillCallOptions {
 pub fn SkillsV4UploadSkillCallOptions::new(
   files~ : Array[SkillsV4File],
   display_title? : String,
-  provider_options~ : Map[String, Json] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
 ) -> SkillsV4UploadSkillCallOptions {
   { files, display_title, provider_options, }
 }
@@ -55,8 +55,8 @@ pub fn SkillsV4UploadSkillResult::new(
   name? : String,
   description? : String,
   latest_version? : String,
-  provider_metadata~ : Map[String, Json] = Map([]),
-  warnings~ : Array[Warning] = [],
+  provider_metadata? : Map[String, Json] = Map([]),
+  warnings? : Array[Warning] = [],
 ) -> SkillsV4UploadSkillResult {
   {
     provider_reference,

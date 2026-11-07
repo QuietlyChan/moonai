@@ -470,7 +470,7 @@ pub fn OpenAILanguageModelResponsesOptions::new(
 /// Convert typed Responses options to a provider-options namespace.
 pub fn OpenAILanguageModelResponsesOptions::to_provider_options(
   self : OpenAILanguageModelResponsesOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map(
     [
@@ -649,7 +649,7 @@ pub fn OpenAILanguageModelChatOptions::new(
 /// Convert typed Chat Completions options to a provider-options namespace.
 pub fn OpenAILanguageModelChatOptions::to_provider_options(
   self : OpenAILanguageModelChatOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   let logit_bias = match self.logit_bias {
     Some(value) => {
@@ -749,7 +749,7 @@ pub fn OpenAILanguageModelCompletionOptions::new(
 /// Convert typed Completion options to a provider-options namespace.
 pub fn OpenAILanguageModelCompletionOptions::to_provider_options(
   self : OpenAILanguageModelCompletionOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   let logit_bias = match self.logit_bias {
     Some(value) => {
@@ -807,7 +807,7 @@ pub fn OpenAIEmbeddingModelOptions::new(
 /// Convert typed embedding options to a provider-options namespace.
 pub fn OpenAIEmbeddingModelOptions::to_provider_options(
   self : OpenAIEmbeddingModelOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   openai_typed_namespace(
     provider_name,
@@ -1019,7 +1019,7 @@ pub fn OpenAIImageModelOptions::new(
 /// Convert common image options to a provider-options namespace.
 pub fn OpenAIImageModelOptions::to_provider_options(
   self : OpenAIImageModelOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   openai_image_option_namespace(
     provider_name,
@@ -1074,7 +1074,7 @@ pub fn OpenAIImageModelGenerationOptions::new(
 /// Convert typed image-generation options to a provider namespace.
 pub fn OpenAIImageModelGenerationOptions::to_provider_options(
   self : OpenAIImageModelGenerationOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   openai_image_option_namespace(
     provider_name,
@@ -1126,7 +1126,7 @@ pub fn OpenAIImageModelEditOptions::new(
 /// Convert typed image-edit options to a provider namespace.
 pub fn OpenAIImageModelEditOptions::to_provider_options(
   self : OpenAIImageModelEditOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   openai_image_option_namespace(
     provider_name,
@@ -1165,7 +1165,7 @@ pub fn OpenAISpeechModelOptions::new(
 /// Convert typed speech options to a provider-options namespace.
 pub fn OpenAISpeechModelOptions::to_provider_options(
   self : OpenAISpeechModelOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   openai_typed_namespace(
     provider_name,
@@ -1303,7 +1303,7 @@ pub fn OpenAITranscriptionModelOptions::new(
 /// Convert typed transcription options to a provider-options namespace.
 pub fn OpenAITranscriptionModelOptions::to_provider_options(
   self : OpenAITranscriptionModelOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   openai_typed_namespace(
     provider_name,

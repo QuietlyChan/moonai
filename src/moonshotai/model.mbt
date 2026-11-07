@@ -25,11 +25,11 @@ fn load_moonshot_api_key(
 ///|
 /// Create a Moonshot AI provider.
 pub fn create_moonshot_ai(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.moonshot.ai/v1",
-  provider_name~ : String = "moonshotai.chat",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.moonshot.ai/v1",
+  provider_name? : String = "moonshotai.chat",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> MoonshotAIProvider {
@@ -49,11 +49,11 @@ pub fn create_moonshot_ai(
 ///|
 /// AI SDK-style provider factory.
 pub fn createMoonshotAI(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.moonshot.ai/v1",
-  provider_name~ : String = "moonshotai.chat",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.moonshot.ai/v1",
+  provider_name? : String = "moonshotai.chat",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> MoonshotAIProvider {
@@ -137,10 +137,10 @@ pub fn MoonshotAIProvider::chat(
 /// Construct a default Moonshot AI language model directly.
 pub fn moonshotai(
   model_id : MoonshotAIChatModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://api.moonshot.ai/v1",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.moonshot.ai/v1",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

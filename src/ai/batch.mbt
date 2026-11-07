@@ -4,8 +4,8 @@ pub async fn start_batch(
   batch : &BatchV4,
   requests~ : Array[BatchV4Request],
   webhook_url? : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4StartResult {
   guard requests.length() > 0 else {
@@ -30,8 +30,8 @@ pub async fn startBatch(
   batch : &BatchV4,
   requests~ : Array[BatchV4Request],
   webhook_url? : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4StartResult {
   start_batch(
@@ -49,8 +49,8 @@ pub async fn startBatch(
 pub async fn get_batch_status(
   batch : &BatchV4,
   batch_id~ : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4Status {
   guard batch_id.trim() != "" else {
@@ -73,8 +73,8 @@ pub async fn get_batch_status(
 pub async fn getBatchStatus(
   batch : &BatchV4,
   batch_id~ : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4Status {
   get_batch_status(
@@ -91,8 +91,8 @@ pub async fn getBatchStatus(
 pub async fn get_batch_results(
   batch : &BatchV4,
   batch_id~ : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> Array[BatchV4ItemResult] {
   guard batch_id.trim() != "" else {
@@ -115,8 +115,8 @@ pub async fn get_batch_results(
 pub async fn getBatchResults(
   batch : &BatchV4,
   batch_id~ : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> Array[BatchV4ItemResult] {
   get_batch_results(
@@ -133,8 +133,8 @@ pub async fn getBatchResults(
 pub async fn cancel_batch(
   batch : &BatchV4,
   batch_id~ : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4CancelResult {
   guard batch_id.trim() != "" else {
@@ -157,8 +157,8 @@ pub async fn cancel_batch(
 pub async fn cancelBatch(
   batch : &BatchV4,
   batch_id~ : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4CancelResult {
   cancel_batch(
@@ -176,8 +176,8 @@ pub async fn list_batches(
   batch : &BatchV4,
   limit? : Int32,
   cursor? : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4ListResult {
   batch.do_list_batches(
@@ -199,8 +199,8 @@ pub async fn listBatches(
   batch : &BatchV4,
   limit? : Int32,
   cursor? : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
   cancellation_token? : CancellationToken,
 ) -> BatchV4ListResult {
   list_batches(

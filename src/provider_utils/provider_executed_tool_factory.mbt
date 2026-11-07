@@ -17,7 +17,7 @@ pub fn ProviderExecutedToolFactory::new(
   id~ : String,
   input_schema~ : Json,
   output_schema~ : Json,
-  supports_deferred_results~ : Bool = false,
+  supports_deferred_results? : Bool = false,
 ) -> ProviderExecutedToolFactory {
   { id, input_schema, output_schema, supports_deferred_results, }
 }
@@ -26,7 +26,7 @@ pub fn ProviderExecutedToolFactory::new(
 /// Construct a provider-executed tool from provider-specific arguments.
 pub fn ProviderExecutedToolFactory::create(
   self : ProviderExecutedToolFactory,
-  args~ : Json = Json::empty_object(),
+  args? : Json = Json::empty_object(),
   on_input_start? : ToolInputStartFunction,
   on_input_delta? : ToolInputDeltaFunction,
   on_input_available? : ToolInputAvailableFunction,
@@ -50,7 +50,7 @@ pub fn create_provider_executed_tool_factory(
   id~ : String,
   input_schema~ : Json,
   output_schema~ : Json,
-  supports_deferred_results~ : Bool = false,
+  supports_deferred_results? : Bool = false,
 ) -> ProviderExecutedToolFactory {
   ProviderExecutedToolFactory::new(
     id~,
@@ -66,7 +66,7 @@ pub fn createProviderExecutedToolFactory(
   id~ : String,
   input_schema~ : Json,
   output_schema~ : Json,
-  supports_deferred_results~ : Bool = false,
+  supports_deferred_results? : Bool = false,
 ) -> ProviderExecutedToolFactory {
   create_provider_executed_tool_factory(
     id~,

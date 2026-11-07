@@ -69,7 +69,7 @@ pub type ProviderErrorStructure = OpenAICompatibleErrorStructure
 /// Create a provider error structure.
 pub fn OpenAICompatibleErrorStructure::new(
   error_to_message~ : (Json) -> String? raise,
-  is_retryable~ : (Int32, Json?) -> Bool? raise = default_retryable_override,
+  is_retryable? : (Int32, Json?) -> Bool? raise = default_retryable_override,
 ) -> OpenAICompatibleErrorStructure {
   {
     error_to_message_callback: error_to_message,

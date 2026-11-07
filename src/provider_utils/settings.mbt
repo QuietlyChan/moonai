@@ -7,7 +7,7 @@
 pub fn load_api_key(
   api_key : String,
   environment_variable_name~ : String,
-  api_key_parameter_name~ : String = "api_key",
+  api_key_parameter_name? : String = "api_key",
   description~ : String,
 ) -> String raise @provider.LoadAPIKeyError {
   if api_key != "" {
@@ -33,7 +33,7 @@ pub fn load_api_key(
 pub fn loadApiKey(
   api_key : String?,
   environment_variable_name~ : String,
-  api_key_parameter_name~ : String = "apiKey",
+  api_key_parameter_name? : String = "apiKey",
   description~ : String,
 ) -> String raise @provider.LoadAPIKeyError {
   match api_key {

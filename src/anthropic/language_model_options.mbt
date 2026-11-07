@@ -67,7 +67,7 @@ pub fn AnthropicFilePartProviderOptions::new(
 /// Convert typed file-part settings to an Anthropic provider namespace.
 pub fn AnthropicFilePartProviderOptions::to_provider_options(
   self : AnthropicFilePartProviderOptions,
-  provider_name~ : String = "anthropic",
+  provider_name? : String = "anthropic",
 ) -> Map[String, Json] {
   anthropic_typed_namespace(
     provider_name,
@@ -130,7 +130,7 @@ pub(all) struct AnthropicSystemMessageProviderOptions {
 ///|
 /// Construct typed options for an Anthropic system message.
 pub fn AnthropicSystemMessageProviderOptions::new(
-  tool_changes~ : Array[AnthropicToolChange] = [],
+  tool_changes? : Array[AnthropicToolChange] = [],
 ) -> AnthropicSystemMessageProviderOptions {
   { tool_changes: tool_changes.copy(), }
 }
@@ -139,7 +139,7 @@ pub fn AnthropicSystemMessageProviderOptions::new(
 /// Convert typed system-message settings to an Anthropic provider namespace.
 pub fn AnthropicSystemMessageProviderOptions::to_provider_options(
   self : AnthropicSystemMessageProviderOptions,
-  provider_name~ : String = "anthropic",
+  provider_name? : String = "anthropic",
 ) -> Map[String, Json] {
   anthropic_typed_namespace(
     provider_name,
@@ -474,7 +474,7 @@ pub(all) struct AnthropicContainer {
 /// Construct Anthropic container reuse and skill-mount settings.
 pub fn AnthropicContainer::new(
   id? : String,
-  skills~ : Array[AnthropicContainerSkill] = [],
+  skills? : Array[AnthropicContainerSkill] = [],
 ) -> AnthropicContainer {
   { id, skills: skills.copy(), }
 }
@@ -828,7 +828,7 @@ pub fn AnthropicContextManagementEdit::clear_tool_uses(
   keep? : AnthropicToolUseKeep,
   clear_at_least? : AnthropicInputTokenClearAtLeast,
   clear_tool_inputs? : Bool,
-  exclude_tools~ : Array[String] = [],
+  exclude_tools? : Array[String] = [],
 ) -> AnthropicContextManagementEdit {
   AnthropicClearToolUses(
     trigger~,
@@ -975,7 +975,7 @@ pub fn AnthropicLanguageModelOptions::new(
   disable_parallel_tool_use? : Bool,
   cache_control? : AnthropicCacheControl,
   metadata? : AnthropicMetadata,
-  mcp_servers~ : Array[AnthropicMcpServer] = [],
+  mcp_servers? : Array[AnthropicMcpServer] = [],
   container? : AnthropicContainer,
   tool_streaming? : Bool,
   effort? : AnthropicEffort,
@@ -983,7 +983,7 @@ pub fn AnthropicLanguageModelOptions::new(
   speed? : AnthropicSpeed,
   inference_geo? : AnthropicInferenceGeo,
   fallbacks? : AnthropicFallbacks,
-  anthropic_beta~ : Array[String] = [],
+  anthropic_beta? : Array[String] = [],
   context_management? : AnthropicContextManagement,
 ) -> AnthropicLanguageModelOptions {
   {
@@ -1010,7 +1010,7 @@ pub fn AnthropicLanguageModelOptions::new(
 /// Convert typed Anthropic settings to a provider-options namespace.
 pub fn AnthropicLanguageModelOptions::to_provider_options(
   self : AnthropicLanguageModelOptions,
-  provider_name~ : String = "anthropic",
+  provider_name? : String = "anthropic",
 ) -> Map[String, Json] {
   anthropic_typed_namespace(
     provider_name,

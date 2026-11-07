@@ -142,10 +142,10 @@ pub(all) struct LanguageModelV4CallOptions {
 /// Construct V4 language-model call options.
 pub fn LanguageModelV4CallOptions::new(
   prompt : LanguageModelV4Prompt,
-  tools~ : Array[LanguageModelV4Tool] = [],
+  tools? : Array[LanguageModelV4Tool] = [],
   tool_choice? : LanguageModelV4ToolChoice,
-  response_format~ : LanguageModelV4ResponseFormat = V4ResponseText,
-  reasoning~ : LanguageModelV4ReasoningEffort = V4ReasoningProviderDefault,
+  response_format? : LanguageModelV4ResponseFormat = V4ResponseText,
+  reasoning? : LanguageModelV4ReasoningEffort = V4ReasoningProviderDefault,
   max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
@@ -153,11 +153,11 @@ pub fn LanguageModelV4CallOptions::new(
   frequency_penalty? : Double,
   presence_penalty? : Double,
   seed? : Int32,
-  stop_sequences~ : Array[String] = [],
-  include_raw_chunks~ : Bool = false,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  stop_sequences? : Array[String] = [],
+  include_raw_chunks? : Bool = false,
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> LanguageModelV4CallOptions {
   {
@@ -252,10 +252,10 @@ fn copy_v4_headers(headers : Map[String, String]) -> Map[String, String] {
 /// adapters. New provider-facing code should call `new` with V4 values.
 pub fn LanguageModelV4CallOptions::from_language_model_prompt(
   prompt : LanguageModelPrompt,
-  tools~ : Array[ToolDefinition] = [],
+  tools? : Array[ToolDefinition] = [],
   tool_choice? : ToolChoice,
-  response_format~ : ResponseFormat = Text,
-  reasoning_effort~ : ReasoningEffort = ProviderDefault,
+  response_format? : ResponseFormat = Text,
+  reasoning_effort? : ReasoningEffort = ProviderDefault,
   max_output_tokens? : Int32,
   temperature? : Double,
   top_p? : Double,
@@ -263,11 +263,11 @@ pub fn LanguageModelV4CallOptions::from_language_model_prompt(
   frequency_penalty? : Double,
   presence_penalty? : Double,
   seed? : Int32,
-  stop_sequences~ : Array[String] = [],
-  include_raw_chunks~ : Bool = false,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  stop_sequences? : Array[String] = [],
+  include_raw_chunks? : Bool = false,
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> LanguageModelV4CallOptions {
   LanguageModelV4CallOptions::new(

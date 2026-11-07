@@ -1,6 +1,6 @@
 ///|
 fn compatible_test_completion_decoder(
-  include_raw_chunks~ : Bool = false,
+  include_raw_chunks? : Bool = false,
 ) -> OpenAICompatibleCompletionStreamDecoder {
   OpenAICompatibleCompletionStreamDecoder::new(
     include_raw_chunks,

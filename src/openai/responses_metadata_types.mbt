@@ -57,7 +57,7 @@ pub fn OpenaiResponsesProviderMetadata::new(
 /// Convert typed response metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesProviderMetadata,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   Map([(provider_name, self.openai.to_json())])
 }
@@ -90,7 +90,7 @@ pub fn OpenaiResponsesReasoningProviderMetadata::new(
 /// Convert reasoning metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesReasoningProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesReasoningProviderMetadata,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map([
     ("itemId", Json::string(self.openai.item_id)),
@@ -129,7 +129,7 @@ pub fn OpenaiResponsesCompactionProviderMetadata::new(
 /// Convert compaction metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesCompactionProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesCompactionProviderMetadata,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map([
     ("type", Json::string("compaction")),
@@ -189,7 +189,7 @@ pub fn OpenaiResponsesTextProviderMetadata::new(
 /// Convert output-text metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesTextProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesTextProviderMetadata,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   let fields : Map[String, Json] = Map([
     ("itemId", Json::string(self.openai.item_id)),
@@ -249,7 +249,7 @@ pub fn OpenaiResponsesSourceDocumentProviderMetadata::new(
 /// Convert source-document metadata to the provider-neutral metadata map.
 pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_provider_metadata(
   self : OpenaiResponsesSourceDocumentProviderMetadata,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   Map([(provider_name, self.openai.to_json())])
 }

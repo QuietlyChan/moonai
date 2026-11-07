@@ -19,10 +19,10 @@ pub(all) struct MCPClientConfig {
 pub fn MCPClientConfig::new(
   transport~ : &MCPTransport,
   initialization_options? : MCPRequestOptions,
-  max_retries~ : Int32 = 0,
-  client_name~ : String = "ai-sdk-mcp-client",
-  client_version~ : String = VERSION,
-  capabilities~ : MCPClientCapabilities = Json::empty_object(),
+  max_retries? : Int32 = 0,
+  client_name? : String = "ai-sdk-mcp-client",
+  client_version? : String = VERSION,
+  capabilities? : MCPClientCapabilities = Json::empty_object(),
   initial_initialize_result? : InitializeResult,
 ) -> MCPClientConfig raise MCPClientError {
   guard max_retries >= 0 else { raise mcp_error("maxRetries must be >= 0") }
@@ -373,7 +373,7 @@ fn retryable_mcp_error(error : Error) -> Bool {
 pub async fn MCPClient::call_tool(
   self : MCPClient,
   name~ : String,
-  arguments~ : Json = Json::empty_object(),
+  arguments? : Json = Json::empty_object(),
   options? : MCPRequestOptions,
 ) -> CallToolResult {
   guard arguments is Object(_) else {
@@ -405,7 +405,7 @@ pub async fn MCPClient::call_tool(
 pub async fn MCPClient::callTool(
   self : MCPClient,
   name~ : String,
-  arguments~ : Json = Json::empty_object(),
+  arguments? : Json = Json::empty_object(),
   options? : MCPRequestOptions,
 ) -> CallToolResult {
   self.call_tool(name~, arguments~, options?)
@@ -498,7 +498,7 @@ pub async fn MCPClient::experimental_list_prompts(
 pub async fn MCPClient::experimental_get_prompt(
   self : MCPClient,
   name~ : String,
-  arguments~ : Json = Json::empty_object(),
+  arguments? : Json = Json::empty_object(),
   options? : MCPRequestOptions,
 ) -> GetPromptResult {
   guard arguments is Object(_) else {
@@ -574,7 +574,7 @@ pub fn MCPClient::onElicitationRequest(
 /// Close the MCP client and its transport.
 pub async fn MCPClient::close(
   self : MCPClient,
-  options~ : MCPTransportCloseOptions = MCPTransportCloseOptions::new(),
+  options? : MCPTransportCloseOptions = MCPTransportCloseOptions::new(),
 ) -> Unit {
   guard !self.closed.val else { return }
   self.closed.val = true

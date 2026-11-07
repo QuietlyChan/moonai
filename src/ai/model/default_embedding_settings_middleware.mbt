@@ -6,8 +6,8 @@
 /// already present on the call win, unset fields fall back to the
 /// configured defaults.
 pub fn default_embedding_settings_middleware(
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
 ) -> @provider.EmbeddingModelV4Middleware {
   @provider.EmbeddingModelV4Middleware::new(transform_params=fn(
     params,

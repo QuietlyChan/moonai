@@ -39,7 +39,7 @@ pub fn OpenResponsesLanguageModelOptions::new(
 /// The provider name must match the name passed to createOpenResponses.
 pub fn OpenResponsesLanguageModelOptions::to_provider_options(
   self : OpenResponsesLanguageModelOptions,
-  provider_name~ : String = "openResponses",
+  provider_name? : String = "openResponses",
 ) -> Map[String, Json] {
   let values : Map[String, Json] = Map(
     [

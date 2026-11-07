@@ -135,7 +135,7 @@ async fn execute_moonai_search(
 ///|
 /// Create the local tools used by both CLI and browser examples.
 pub fn example_tools(
-  sink~ : ToolEventSink = _event => (),
+  sink? : ToolEventSink = _event => (),
 ) -> @provider_utils.ToolSet {
   @provider_utils.tool_set([
     (

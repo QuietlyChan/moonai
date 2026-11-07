@@ -11,8 +11,8 @@ pub struct OpenResponsesV4StreamDecoder {
 ///|
 /// Create a V4 decoder for the base Open Responses protocol.
 pub fn OpenResponsesV4StreamDecoder::new(
-  include_raw_chunks~ : Bool = false,
-  provider_name~ : String = "",
+  include_raw_chunks? : Bool = false,
+  provider_name? : String = "",
   id_generator? : @provider_utils.IdGenerator,
   extensions? : OpenResponsesExtensionRegistry,
 ) -> OpenResponsesV4StreamDecoder {

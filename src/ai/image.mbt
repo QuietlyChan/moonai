@@ -3,16 +3,16 @@
 pub async fn generate_image(
   model : &@provider.ImageModelV4,
   prompt : String,
-  n~ : Int32 = 1,
+  n? : Int32 = 1,
   max_images_per_call? : Int32,
   size? : String,
   aspect_ratio? : String,
   seed? : Int32,
-  files~ : Array[@provider.ImageModelV4File] = [],
+  files? : Array[@provider.ImageModelV4File] = [],
   mask? : @provider.ImageModelV4File,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ImageResponse {
   check_cancellation(cancellation_token)
@@ -110,16 +110,16 @@ pub async fn generate_image(
 pub async fn generateImage(
   model : &@provider.ImageModelV4,
   prompt : String,
-  n~ : Int32 = 1,
+  n? : Int32 = 1,
   max_images_per_call? : Int32,
   size? : String,
   aspect_ratio? : String,
   seed? : Int32,
-  files~ : Array[@provider.ImageModelV4File] = [],
+  files? : Array[@provider.ImageModelV4File] = [],
   mask? : @provider.ImageModelV4File,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> ImageResponse {
   generate_image(

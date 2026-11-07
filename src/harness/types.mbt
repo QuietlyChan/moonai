@@ -258,7 +258,7 @@ pub fn HarnessV1Skill::new(
   name~ : String,
   description~ : String,
   content~ : String,
-  files~ : Array[HarnessV1SkillFile] = [],
+  files? : Array[HarnessV1SkillFile] = [],
 ) -> HarnessV1Skill {
   { name, description, content, files, }
 }

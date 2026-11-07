@@ -158,25 +158,25 @@ fn anthropic_authentication_headers(
 ///|
 /// Create a reusable Anthropic provider factory.
 pub fn create_anthropic(
-  api_key~ : String = "",
-  auth_token~ : String = "",
+  api_key? : String = "",
+  auth_token? : String = "",
   base_url? : String,
-  provider_name~ : String = "anthropic.messages",
-  headers~ : Map[String, String] = Map([]),
-  anthropic_version~ : String = "2023-06-01",
-  beta_features~ : Array[String] = [],
-  supported_urls~ : Array[@provider.SupportedUrlRule] = [
+  provider_name? : String = "anthropic.messages",
+  headers? : Map[String, String] = Map([]),
+  anthropic_version? : String = "2023-06-01",
+  beta_features? : Array[String] = [],
+  supported_urls? : Array[@provider.SupportedUrlRule] = [
     @provider.SupportedUrlRule::http("image/*"),
     @provider.SupportedUrlRule::http("application/pdf"),
   ],
-  supports_native_structured_output~ : Bool = true,
-  supports_strict_tools~ : Bool = true,
-  idle_timeout_ms~ : Int32 = 120_000,
+  supports_native_structured_output? : Bool = true,
+  supports_strict_tools? : Bool = true,
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   api_key_environment_variable? : String,
   id_generator? : @provider_utils.IdGenerator,
-  transform_request_body~ : (Json, Array[String]) -> Json = identity_anthropic_request_body,
-  build_request_url~ : AnthropicRequestUrlBuilder = default_anthropic_request_url,
+  transform_request_body? : (Json, Array[String]) -> Json = identity_anthropic_request_body,
+  build_request_url? : AnthropicRequestUrlBuilder = default_anthropic_request_url,
 ) -> AnthropicProvider raise {
   guard api_key == "" || auth_token == "" else {
     raise @provider.InvalidArgumentError(
@@ -209,25 +209,25 @@ pub fn create_anthropic(
 ///|
 /// AI SDK-style camel-case spelling for `create_anthropic`.
 pub fn createAnthropic(
-  api_key~ : String = "",
-  auth_token~ : String = "",
+  api_key? : String = "",
+  auth_token? : String = "",
   base_url? : String,
-  provider_name~ : String = "anthropic.messages",
-  headers~ : Map[String, String] = Map([]),
-  anthropic_version~ : String = "2023-06-01",
-  beta_features~ : Array[String] = [],
-  supported_urls~ : Array[@provider.SupportedUrlRule] = [
+  provider_name? : String = "anthropic.messages",
+  headers? : Map[String, String] = Map([]),
+  anthropic_version? : String = "2023-06-01",
+  beta_features? : Array[String] = [],
+  supported_urls? : Array[@provider.SupportedUrlRule] = [
     @provider.SupportedUrlRule::http("image/*"),
     @provider.SupportedUrlRule::http("application/pdf"),
   ],
-  supports_native_structured_output~ : Bool = true,
-  supports_strict_tools~ : Bool = true,
-  idle_timeout_ms~ : Int32 = 120_000,
+  supports_native_structured_output? : Bool = true,
+  supports_strict_tools? : Bool = true,
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   api_key_environment_variable? : String,
   id_generator? : @provider_utils.IdGenerator,
-  transform_request_body~ : (Json, Array[String]) -> Json = identity_anthropic_request_body,
-  build_request_url~ : AnthropicRequestUrlBuilder = default_anthropic_request_url,
+  transform_request_body? : (Json, Array[String]) -> Json = identity_anthropic_request_body,
+  build_request_url? : AnthropicRequestUrlBuilder = default_anthropic_request_url,
 ) -> AnthropicProvider raise {
   create_anthropic(
     api_key~,
@@ -339,24 +339,24 @@ priv struct AnthropicLanguageModel {
 /// Construct the default V4 Anthropic language model directly.
 pub fn anthropic(
   model_id : String,
-  api_key~ : String = "",
-  auth_token~ : String = "",
+  api_key? : String = "",
+  auth_token? : String = "",
   base_url? : String,
-  headers~ : Map[String, String] = Map([]),
-  anthropic_version~ : String = "2023-06-01",
-  beta_features~ : Array[String] = [],
-  supported_urls~ : Array[@provider.SupportedUrlRule] = [
+  headers? : Map[String, String] = Map([]),
+  anthropic_version? : String = "2023-06-01",
+  beta_features? : Array[String] = [],
+  supported_urls? : Array[@provider.SupportedUrlRule] = [
     @provider.SupportedUrlRule::http("image/*"),
     @provider.SupportedUrlRule::http("application/pdf"),
   ],
-  supports_native_structured_output~ : Bool = true,
-  supports_strict_tools~ : Bool = true,
-  idle_timeout_ms~ : Int32 = 120_000,
+  supports_native_structured_output? : Bool = true,
+  supports_strict_tools? : Bool = true,
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   api_key_environment_variable? : String,
   id_generator? : @provider_utils.IdGenerator,
-  transform_request_body~ : (Json, Array[String]) -> Json = identity_anthropic_request_body,
-  build_request_url~ : AnthropicRequestUrlBuilder = default_anthropic_request_url,
+  transform_request_body? : (Json, Array[String]) -> Json = identity_anthropic_request_body,
+  build_request_url? : AnthropicRequestUrlBuilder = default_anthropic_request_url,
 ) -> &@provider.LanguageModelV4 raise {
   create_anthropic(
     api_key~,

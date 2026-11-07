@@ -68,8 +68,8 @@ pub fn FilesV4UploadFileCallOptions::new(
   data~ : UploadFileData,
   media_type~ : String,
   filename? : String,
-  provider_options~ : Map[String, Json] = Map([]),
-  headers~ : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
 ) -> FilesV4UploadFileCallOptions {
   { data, media_type, filename, provider_options, headers, }
 }
@@ -97,8 +97,8 @@ pub fn FilesV4UploadFileResult::new(
   byte_size? : Int32,
   created_at? : Int32,
   expires_at? : Int32,
-  provider_metadata~ : Map[String, Json] = Map([]),
-  warnings~ : Array[Warning] = [],
+  provider_metadata? : Map[String, Json] = Map([]),
+  warnings? : Array[Warning] = [],
 ) -> FilesV4UploadFileResult {
   {
     provider_reference,
@@ -125,8 +125,8 @@ pub(all) struct FilesV4GetFileMetadataCallOptions {
 /// Construct one file-metadata call.
 pub fn FilesV4GetFileMetadataCallOptions::new(
   file_id~ : String,
-  provider_options~ : Map[String, Json] = Map([]),
-  headers~ : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
 ) -> FilesV4GetFileMetadataCallOptions {
   { file_id, provider_options, headers, }
 }
@@ -154,8 +154,8 @@ pub fn FilesV4FileMetadata::new(
   byte_size? : Int32,
   created_at? : Int32,
   expires_at? : Int32,
-  provider_metadata~ : Map[String, Json] = Map([]),
-  warnings~ : Array[Warning] = [],
+  provider_metadata? : Map[String, Json] = Map([]),
+  warnings? : Array[Warning] = [],
 ) -> FilesV4FileMetadata {
   {
     file_id,
@@ -182,8 +182,8 @@ pub(all) struct FilesV4DownloadFileCallOptions {
 /// Construct one file-download call.
 pub fn FilesV4DownloadFileCallOptions::new(
   file_id~ : String,
-  provider_options~ : Map[String, Json] = Map([]),
-  headers~ : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
 ) -> FilesV4DownloadFileCallOptions {
   { file_id, provider_options, headers, }
 }
@@ -207,8 +207,8 @@ pub fn FilesV4DownloadFileResult::new(
   data~ : Bytes,
   media_type? : String,
   filename? : String,
-  provider_metadata~ : Map[String, Json] = Map([]),
-  warnings~ : Array[Warning] = [],
+  provider_metadata? : Map[String, Json] = Map([]),
+  warnings? : Array[Warning] = [],
 ) -> FilesV4DownloadFileResult {
   {
     file_id,
@@ -233,8 +233,8 @@ pub(all) struct FilesV4DeleteFileCallOptions {
 /// Construct one file-delete call.
 pub fn FilesV4DeleteFileCallOptions::new(
   file_id~ : String,
-  provider_options~ : Map[String, Json] = Map([]),
-  headers~ : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
 ) -> FilesV4DeleteFileCallOptions {
   { file_id, provider_options, headers, }
 }
@@ -254,8 +254,8 @@ pub(all) struct FilesV4DeleteFileResult {
 pub fn FilesV4DeleteFileResult::new(
   file_id~ : String,
   deleted~ : Bool,
-  provider_metadata~ : Map[String, Json] = Map([]),
-  warnings~ : Array[Warning] = [],
+  provider_metadata? : Map[String, Json] = Map([]),
+  warnings? : Array[Warning] = [],
 ) -> FilesV4DeleteFileResult {
   {
     file_id,

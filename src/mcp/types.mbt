@@ -204,7 +204,7 @@ pub fn CompleteRequestParams::new(
   reference~ : MCPCompletionReference,
   argument_name~ : String,
   argument_value~ : String,
-  context_arguments~ : Map[String, String] = Map([]),
+  context_arguments? : Map[String, String] = Map([]),
 ) -> CompleteRequestParams {
   { reference, argument_name, argument_value, context_arguments, }
 }

@@ -32,7 +32,7 @@ pub struct SmoothTextTransformer {
 ///|
 /// Create a smoother for the requested chunking mode.
 pub fn SmoothTextTransformer::new(
-  chunking~ : SmoothChunking = SmoothWord,
+  chunking? : SmoothChunking = SmoothWord,
 ) -> SmoothTextTransformer raise {
   let pattern = match chunking {
     SmoothWord => Regex("[^[:space:]]+[[:space:]]+")

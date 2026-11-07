@@ -20,9 +20,9 @@ pub fn SpeechTranslationCallOptions::new(
   target_language~ : String,
   source_language? : String,
   output_audio_format? : AudioFormat,
-  provider_options~ : Map[String, Json] = Map([]),
-  headers~ : Map[String, String] = Map([]),
-  include_raw_chunks~ : Bool = false,
+  provider_options? : Map[String, Json] = Map([]),
+  headers? : Map[String, String] = Map([]),
+  include_raw_chunks? : Bool = false,
   cancellation_token? : CancellationToken,
 ) -> SpeechTranslationCallOptions {
   {

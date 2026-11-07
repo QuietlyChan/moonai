@@ -19,13 +19,13 @@ pub struct CustomProvider {
 ///|
 /// Construct a custom provider from model maps and optional provider services.
 pub fn custom_provider(
-  language_models~ : Map[String, &@provider.LanguageModelV4] = Map([]),
-  embedding_models~ : Map[String, &@provider.EmbeddingModelV4] = Map([]),
-  image_models~ : Map[String, &@provider.ImageModelV4] = Map([]),
-  transcription_models~ : Map[String, &@provider.TranscriptionModelV4] = Map([]),
-  speech_models~ : Map[String, &@provider.SpeechModelV4] = Map([]),
-  reranking_models~ : Map[String, &@provider.RerankingModelV4] = Map([]),
-  video_models~ : Map[String, &@provider.VideoModelV4] = Map([]),
+  language_models? : Map[String, &@provider.LanguageModelV4] = Map([]),
+  embedding_models? : Map[String, &@provider.EmbeddingModelV4] = Map([]),
+  image_models? : Map[String, &@provider.ImageModelV4] = Map([]),
+  transcription_models? : Map[String, &@provider.TranscriptionModelV4] = Map([]),
+  speech_models? : Map[String, &@provider.SpeechModelV4] = Map([]),
+  reranking_models? : Map[String, &@provider.RerankingModelV4] = Map([]),
+  video_models? : Map[String, &@provider.VideoModelV4] = Map([]),
   files? : &@provider.FilesV4,
   skills? : &@provider.SkillsV4,
   fallback_provider? : &@provider.ProviderV4,
@@ -47,13 +47,13 @@ pub fn custom_provider(
 ///|
 /// AI SDK-style camel-case spelling for `custom_provider`.
 pub fn customProvider(
-  language_models~ : Map[String, &@provider.LanguageModelV4] = Map([]),
-  embedding_models~ : Map[String, &@provider.EmbeddingModelV4] = Map([]),
-  image_models~ : Map[String, &@provider.ImageModelV4] = Map([]),
-  transcription_models~ : Map[String, &@provider.TranscriptionModelV4] = Map([]),
-  speech_models~ : Map[String, &@provider.SpeechModelV4] = Map([]),
-  reranking_models~ : Map[String, &@provider.RerankingModelV4] = Map([]),
-  video_models~ : Map[String, &@provider.VideoModelV4] = Map([]),
+  language_models? : Map[String, &@provider.LanguageModelV4] = Map([]),
+  embedding_models? : Map[String, &@provider.EmbeddingModelV4] = Map([]),
+  image_models? : Map[String, &@provider.ImageModelV4] = Map([]),
+  transcription_models? : Map[String, &@provider.TranscriptionModelV4] = Map([]),
+  speech_models? : Map[String, &@provider.SpeechModelV4] = Map([]),
+  reranking_models? : Map[String, &@provider.RerankingModelV4] = Map([]),
+  video_models? : Map[String, &@provider.VideoModelV4] = Map([]),
   files? : &@provider.FilesV4,
   skills? : &@provider.SkillsV4,
   fallback_provider? : &@provider.ProviderV4,

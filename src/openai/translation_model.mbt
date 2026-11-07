@@ -20,7 +20,7 @@ pub fn OpenAITranslationModelOptions::new() -> OpenAITranslationModelOptions {
 /// Convert translation options to the OpenAI provider namespace.
 pub fn OpenAITranslationModelOptions::to_provider_options(
   _self : OpenAITranslationModelOptions,
-  provider_name~ : String = "openai",
+  provider_name? : String = "openai",
 ) -> Map[String, Json] {
   openai_typed_namespace(provider_name, Map([]))
 }

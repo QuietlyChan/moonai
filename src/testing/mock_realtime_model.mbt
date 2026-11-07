@@ -11,11 +11,11 @@ pub struct MockRealtimeModel {
 ///|
 /// Construct a deterministic realtime model.
 pub fn MockRealtimeModel::new(
-  provider_name~ : String = "mock",
-  model_id~ : String = "mock-realtime-model",
+  provider_name? : String = "mock",
+  model_id? : String = "mock-realtime-model",
   client_secret? : @provider.RealtimeClientSecretResult,
   websocket_config? : @provider.RealtimeWebSocketConfig,
-  parsed_events~ : Array[@provider.RealtimeServerEvent] = [],
+  parsed_events? : Array[@provider.RealtimeServerEvent] = [],
 ) -> MockRealtimeModel {
   {
     provider_name,

@@ -13,10 +13,10 @@ pub struct PerplexityProvider {
 /// Create a Perplexity provider. The API key defaults to the
 /// `PERPLEXITY_API_KEY` environment variable.
 pub fn create_perplexity(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.perplexity.ai",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.perplexity.ai",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> PerplexityProvider {
@@ -35,10 +35,10 @@ pub fn create_perplexity(
 ///|
 /// Camel-case provider factory matching AI SDK naming.
 pub fn createPerplexity(
-  api_key~ : String = "",
-  base_url~ : String = "https://api.perplexity.ai",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.perplexity.ai",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> PerplexityProvider {
@@ -192,10 +192,10 @@ pub impl @provider.ProviderV4 for PerplexityProvider with fn skills(_self) {
 /// Construct the default V4 Perplexity language model directly.
 pub fn perplexity(
   model_id : PerplexityLanguageModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://api.perplexity.ai",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://api.perplexity.ai",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   id_generator? : @provider_utils.IdGenerator,
 ) -> &@provider.LanguageModelV4 {

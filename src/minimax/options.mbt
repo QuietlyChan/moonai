@@ -63,7 +63,7 @@ pub(all) struct MiniMaxVideoModelOptions {
 pub fn MiniMaxVideoModelOptions::new(
   resolution? : String,
   ratio? : String,
-  reference_audio_urls~ : Array[String] = [],
+  reference_audio_urls? : Array[String] = [],
   aigc_watermark? : Bool,
   poll_interval_ms? : Int32,
   poll_timeout_ms? : Int32,

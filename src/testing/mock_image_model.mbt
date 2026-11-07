@@ -12,9 +12,9 @@ pub struct MockImageModel {
 /// Construct a deterministic image model.
 pub fn MockImageModel::new(
   result : @provider.ImageResponse,
-  max_images_per_call~ : Int32 = 10,
-  provider_name~ : String = "mock",
-  model_id~ : String = "mock-image-model",
+  max_images_per_call? : Int32 = 10,
+  provider_name? : String = "mock",
+  model_id? : String = "mock-image-model",
 ) -> MockImageModel {
   {
     provider_name,

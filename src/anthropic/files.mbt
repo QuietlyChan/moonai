@@ -16,13 +16,13 @@ pub struct AnthropicFiles {
 ///|
 /// Construct an Anthropic Files API client directly.
 pub fn anthropic_files(
-  api_key~ : String = "",
-  auth_token~ : String = "",
+  api_key? : String = "",
+  auth_token? : String = "",
   base_url? : String,
-  provider_name~ : String = "anthropic.files",
-  headers~ : Map[String, String] = Map([]),
-  anthropic_version~ : String = "2023-06-01",
-  idle_timeout_ms~ : Int32 = 120_000,
+  provider_name? : String = "anthropic.files",
+  headers? : Map[String, String] = Map([]),
+  anthropic_version? : String = "2023-06-01",
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
   streaming_http_transport? : &@provider_utils.StreamingBodyTransport,
   api_key_environment_variable? : String,

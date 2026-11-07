@@ -15,9 +15,9 @@ pub(all) struct EmbeddingOptions {
 pub fn EmbeddingOptions::new(
   dimensions? : Int32,
   user? : String,
-  headers~ : Map[String, String] = Map([]),
-  provider_options~ : Map[String, Json] = Map([]),
-  retry_policy~ : RetryPolicy = RetryPolicy::standard(),
+  headers? : Map[String, String] = Map([]),
+  provider_options? : Map[String, Json] = Map([]),
+  retry_policy? : RetryPolicy = RetryPolicy::standard(),
   cancellation_token? : CancellationToken,
 ) -> EmbeddingOptions {
   {

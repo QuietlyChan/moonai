@@ -10,8 +10,8 @@ priv struct SequenceLanguageModel {
 ///|
 fn SequenceLanguageModel::new(
   results : Array[@provider.LanguageModelV4GenerateResult],
-  provider_name~ : String = "test.generate-text",
-  model_name~ : String = "sequence-model",
+  provider_name? : String = "test.generate-text",
+  model_name? : String = "sequence-model",
 ) -> SequenceLanguageModel {
   {
     results,
@@ -94,8 +94,8 @@ fn generated_tool_call(
   id : String,
   name : String,
   input : String,
-  provider_executed~ : Bool = false,
-  dynamic~ : Bool = false,
+  provider_executed? : Bool = false,
+  dynamic? : Bool = false,
 ) -> @provider.LanguageModelV4Content {
   @provider.LanguageModelV4Content::tool_call({
     tool_call_id: id,

@@ -14,10 +14,10 @@ pub struct ByteDanceImageModel {
 /// Construct a Seedream image model.
 pub fn ByteDanceImageModel::new(
   model_id : ByteDanceImageModelId,
-  api_key~ : String = "",
-  base_url~ : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
-  headers~ : Map[String, String] = Map([]),
-  idle_timeout_ms~ : Int32 = 120_000,
+  api_key? : String = "",
+  base_url? : String = "https://ark.ap-southeast.bytepluses.com/api/v3",
+  headers? : Map[String, String] = Map([]),
+  idle_timeout_ms? : Int32 = 120_000,
   http_transport? : &@provider_utils.HttpTransport,
 ) -> ByteDanceImageModel {
   {
