@@ -494,3 +494,7 @@ pub fn ProviderOptionsReader::diagnostics(
 ) -> Array[@provider.Warning] {
   self.warnings.copy()
 }
+
+///|
+#deprecated
+pub extend ProviderOptionsResolution with Debug::{to_repr}

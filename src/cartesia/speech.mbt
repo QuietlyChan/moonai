@@ -169,3 +169,11 @@ fn cartesia_error_to_message(json : Json) -> String? raise {
     _ => None
   }
 }
+
+///|
+pub extend CartesiaSpeechModel with @QuietlyChan/moonai/provider.SpeechModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+}

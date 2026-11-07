@@ -787,3 +787,47 @@ pub fn experimental_stdio_mcp_transport(
 ) -> StdioMCPTransport {
   StdioMCPTransport::new(config)
 }
+
+///|
+#deprecated
+pub extend MCPTransportSendOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPTransportCloseOptions with Debug::{to_repr}
+
+///|
+pub extend MockMCPTransport with MCPTransport::{
+  start,
+  close,
+  protocol_version,
+  send,
+  set_protocol_version,
+}
+
+///|
+pub extend HttpMCPTransport with MCPTransport::{
+  start,
+  close,
+  protocol_version,
+  send,
+  set_protocol_version,
+}
+
+///|
+pub extend SseMCPTransport with MCPTransport::{
+  start,
+  close,
+  protocol_version,
+  send,
+  set_protocol_version,
+}
+
+///|
+pub extend StdioMCPTransport with MCPTransport::{
+  start,
+  close,
+  protocol_version,
+  send,
+  set_protocol_version,
+}

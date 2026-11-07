@@ -24,15 +24,29 @@ pub fn minimax(String, api_key? : String, base_url? : String, headers? : Map[Str
 pub(all) struct MiniMaxLanguageModelOptions {
   thinking : MiniMaxThinkingMode?
 }
+#deprecated
+pub fn MiniMaxLanguageModelOptions::equal(Self, Self) -> Bool
 pub fn MiniMaxLanguageModelOptions::new(thinking? : MiniMaxThinkingMode) -> Self
+#deprecated
+pub fn MiniMaxLanguageModelOptions::not_equal(Self, Self) -> Bool
 pub fn MiniMaxLanguageModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
+#deprecated
+pub fn MiniMaxLanguageModelOptions::to_repr(Self) -> @debug.Repr
 
 pub struct MiniMaxProvider {
   // private fields
 }
 pub fn MiniMaxProvider::chat(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn MiniMaxProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn MiniMaxProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn MiniMaxProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn MiniMaxProvider::languageModel(Self, String) -> &@provider.LanguageModelV4 raise
 pub fn MiniMaxProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn MiniMaxProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn MiniMaxProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn MiniMaxProvider::specification_version(Self) -> String
+pub fn MiniMaxProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn MiniMaxProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub fn MiniMaxProvider::video(Self, String) -> &@provider.VideoModelV4
 pub fn MiniMaxProvider::videoModel(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for MiniMaxProvider
@@ -42,6 +56,12 @@ pub(all) enum MiniMaxThinkingMode {
   AdaptiveThinking
   DisabledThinking
 }
+#deprecated
+pub fn MiniMaxThinkingMode::equal(Self, Self) -> Bool
+#deprecated
+pub fn MiniMaxThinkingMode::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn MiniMaxThinkingMode::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct MiniMaxVideoModelOptions {
@@ -52,8 +72,14 @@ pub(all) struct MiniMaxVideoModelOptions {
   poll_interval_ms : Int32?
   poll_timeout_ms : Int32?
 }
+#deprecated
+pub fn MiniMaxVideoModelOptions::equal(Self, Self) -> Bool
 pub fn MiniMaxVideoModelOptions::new(resolution? : String, ratio? : String, reference_audio_urls? : Array[String], aigc_watermark? : Bool, poll_interval_ms? : Int32, poll_timeout_ms? : Int32) -> Self raise
+#deprecated
+pub fn MiniMaxVideoModelOptions::not_equal(Self, Self) -> Bool
 pub fn MiniMaxVideoModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
+#deprecated
+pub fn MiniMaxVideoModelOptions::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type MiniMaxChatModelId = String

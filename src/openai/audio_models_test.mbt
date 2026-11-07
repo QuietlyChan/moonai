@@ -70,7 +70,7 @@ async test "official OpenAI speech and transcription own their transports" {
         max_connections=2,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -154,7 +154,7 @@ async test "official OpenAI speech surfaces typed binary API errors" {
         max_connections=1,
       )
     }
-    let model = create_openai(
+    let model = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,

@@ -14,7 +14,7 @@ async test "embed attributes runtime context through lifecycle events (#20583)" 
   )
   let started : Array[(String, String, String, Json)] = []
   let ended : Array[(String, Int32, Int32)] = []
-  let response = embed(
+  let response = @ai.embed(
     model as &@provider.EmbeddingModelV4,
     "hello world",
     runtime_context={ "requestId": "req-embed-1" },
@@ -57,7 +57,7 @@ async test "embedMany keeps the same runtime context contract (#20583)" {
     provider_name="test.embed",
   )
   let started : Array[(String, Int32, Json)] = []
-  let response = embed_many(
+  let response = @ai.embed_many(
     model as &@provider.EmbeddingModelV4,
     ["one", "two"],
     runtime_context={ "requestId": "req-embed-many" },
@@ -78,7 +78,7 @@ async test "embedMany rejects a non-positive max_parallel_calls (#20304)" {
     provider_name="test.embed",
   )
   try
-    embed_many(
+    @ai.embed_many(
       model as &@provider.EmbeddingModelV4,
       ["one"],
       max_parallel_calls=0,
@@ -105,7 +105,7 @@ async test "embed lifecycle callback failures never break the operation" {
     lifecycle_test_embedding_response(),
     provider_name="test.embed",
   )
-  let response = embed(
+  let response = @ai.embed(
     model as &@provider.EmbeddingModelV4,
     "resilient",
     on_start=_ => fail("callback start failure"),
@@ -130,7 +130,7 @@ async test "rerank attributes runtime context through lifecycle events (#20583)"
   )
   let started : Array[(String, Json, Int32, String)] = []
   let ended : Array[(String, Int32)] = []
-  let result = rerank(
+  let result = @ai.rerank(
     model as &@provider.RerankingModelV4,
     @provider.RerankingModelV4Documents::TextDocuments(["a", "b"]),
     "query",

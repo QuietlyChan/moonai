@@ -191,3 +191,15 @@ pub fn gmicloud(
     id_generator?,
   ).language_model(model_id)
 }
+
+///|
+pub extend GmicloudProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

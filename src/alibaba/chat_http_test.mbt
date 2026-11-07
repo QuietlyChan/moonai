@@ -249,7 +249,7 @@ async test "Alibaba drives a V4 JSON request with native options and usage" {
     ),
     AlibabaChatMockStream::new([]),
   )
-  let model = alibaba(
+  let model = @alibaba.alibaba(
     "qwen-plus",
     api_key="test-key",
     base_url="https://alibaba.test/compatible-mode/v1",
@@ -269,7 +269,7 @@ async test "Alibaba drives a V4 JSON request with native options and usage" {
     ),
     top_k=7.0,
     frequency_penalty=0.5,
-    provider_options=AlibabaLanguageModelChatOptions::new(
+    provider_options=@alibaba.AlibabaLanguageModelChatOptions::new(
       enable_thinking=true,
       thinking_budget=2048,
       parallel_tool_calls=false,
@@ -353,7 +353,7 @@ async test "Alibaba SSE preserves reasoning text tools and cache usage" {
       "x-request-id": "ali-stream-request",
     }),
   )
-  let model = alibaba(
+  let model = @alibaba.alibaba(
     "qwen-plus",
     api_key="test-key",
     base_url="https://alibaba.test/compatible-mode/v1",

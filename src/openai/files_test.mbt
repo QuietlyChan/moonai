@@ -47,7 +47,7 @@ async test "official OpenAI Files uploads multipart data and returns a reference
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       organization="org-test",
@@ -62,7 +62,7 @@ async test "official OpenAI Files uploads multipart data and returns a reference
       data=@provider.UploadFileData::text("MoonBit file"),
       media_type="text/plain",
       filename="moonbit.txt",
-      provider_options=OpenAIFilesOptions::new(
+      provider_options=@openai.OpenAIFilesOptions::new(
         purpose="fine-tune",
         expires_after=3600.0,
       ).to_provider_options(),
@@ -106,7 +106,7 @@ async test "official OpenAI Files accepts Base64 and defaults upload fields" {
         max_connections=1,
       )
     }
-    let files = create_openai(
+    let files = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -147,7 +147,7 @@ async test "official OpenAI Files reads metadata with lifecycle fields" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -180,7 +180,7 @@ async test "official OpenAI Files downloads raw content" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -208,7 +208,7 @@ async test "official OpenAI Files deletes a file and reports state" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -280,7 +280,7 @@ async test "official OpenAI Files uploads streamed data incrementally" {
         max_connections=1,
       )
     }
-    let provider = create_openai(
+    let provider = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,

@@ -31,13 +31,17 @@ impl @provider_utils.HttpTransport for MiniMaxReasoningMockTransport with fn fet
 ///|
 async test "MiniMax forwards typed thinking options through Anthropic Messages" {
   let transport = MiniMaxReasoningMockTransport::new()
-  let model = create_minimax(api_key="test-key", http_transport=transport, id_generator=() => {
-    "minimax-source-id"
-  }).chat("minimax-m3")
+  let model = @minimax.create_minimax(
+    api_key="test-key",
+    http_transport=transport,
+    id_generator=() => "minimax-source-id",
+  ).chat("minimax-m3")
   let result = @ai.generate_text(
     model,
     prompt="Count the letter r.",
-    provider_options=MiniMaxLanguageModelOptions::new(thinking=AdaptiveThinking).to_provider_options(),
+    provider_options=@minimax.MiniMaxLanguageModelOptions::new(
+      thinking=AdaptiveThinking,
+    ).to_provider_options(),
     retry_policy=@provider.RetryPolicy::none(),
   )
   assert_eq(result.reasoning(), "Counting the letters...")
@@ -78,7 +82,9 @@ async test "MiniMax uses MINIMAX_API_KEY for its Anthropic-compatible model" {
   })
   @env.set_env_var(environment_name, "environment-key")
   let transport = MiniMaxReasoningMockTransport::new()
-  let model = create_minimax(http_transport=transport).chat("minimax-m3")
+  let model = @minimax.create_minimax(http_transport=transport).chat(
+    "minimax-m3",
+  )
   let result = @ai.generate_text(
     model,
     prompt="Count the letter r.",

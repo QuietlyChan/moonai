@@ -1,7 +1,4 @@
 ///|
-extend HttpMCPTransport with MCPTransport::{start, send, close}
-
-///|
 test "JSON-RPC validation distinguishes requests, notifications, and errors" {
   assert_eq(
     validate_json_rpc_message({

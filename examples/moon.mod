@@ -6,7 +6,7 @@ source = "."
 
 import {
   "QuietlyChan/moonai@0.1.0",
-  "moonbitlang/async@0.20.2",
+  "moonbitlang/async@0.22.7",
 }
 
 license = "Apache-2.0"

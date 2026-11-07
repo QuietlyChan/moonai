@@ -70,3 +70,11 @@ fn alibaba_text_block(text : String, cache_control : Json?) -> Json {
     ),
   )
 }
+
+///|
+#deprecated
+pub extend AlibabaCacheControl with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AlibabaCacheControl with Eq::{not_equal, equal}

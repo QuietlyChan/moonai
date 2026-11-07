@@ -329,3 +329,13 @@ pub impl @provider.LanguageModelV4 for OpenAICompatibleChatLanguageModel with fn
     Some(response_metadata),
   )
 }
+
+///|
+pub extend OpenAICompatibleChatLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

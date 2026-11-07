@@ -95,3 +95,16 @@ pub impl @provider.RealtimeModelV4 for MockRealtimeModel with fn get_health_chec
 ) {
   None
 }
+
+///|
+pub extend MockRealtimeModel with @QuietlyChan/moonai/provider.RealtimeModelV4::{
+  specification_version,
+  provider,
+  get_health_check_response,
+  get_websocket_config,
+  do_create_client_secret,
+  serialize_client_event,
+  build_session_config,
+  parse_server_event,
+  model_id,
+}

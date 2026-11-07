@@ -47,8 +47,14 @@ pub(all) struct MoonshotAILanguageModelOptions {
   prompt_cache_key : String?
   safety_identifier : String?
 }
+#deprecated
+pub fn MoonshotAILanguageModelOptions::equal(Self, Self) -> Bool
 pub fn MoonshotAILanguageModelOptions::new(strict_json_schema? : Bool, logprobs? : Bool, top_logprobs? : Int32, reasoning_effort? : String, prediction? : @json.Json, thinking_type? : String, thinking_budget_tokens? : Int32, reasoning_history? : String, prompt_cache_key? : String, safety_identifier? : String) -> Self raise
+#deprecated
+pub fn MoonshotAILanguageModelOptions::not_equal(Self, Self) -> Bool
 pub fn MoonshotAILanguageModelOptions::to_provider_options(Self) -> Map[String, @json.Json]
+#deprecated
+pub fn MoonshotAILanguageModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum MoonshotAIModelFamily {
@@ -59,6 +65,12 @@ pub(all) enum MoonshotAIModelFamily {
   MoonshotV1
   Unknown
 }
+#deprecated
+pub fn MoonshotAIModelFamily::equal(Self, Self) -> Bool
+#deprecated
+pub fn MoonshotAIModelFamily::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn MoonshotAIModelFamily::to_repr(Self) -> @debug.Repr
 
 pub struct MoonshotAIProvider {
   // private fields
@@ -66,14 +78,28 @@ pub struct MoonshotAIProvider {
 pub fn MoonshotAIProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn MoonshotAIProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn MoonshotAIProvider::chat_model(Self, String) -> &@provider.LanguageModelV4
+pub fn MoonshotAIProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn MoonshotAIProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn MoonshotAIProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn MoonshotAIProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn MoonshotAIProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn MoonshotAIProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn MoonshotAIProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn MoonshotAIProvider::specification_version(Self) -> String
+pub fn MoonshotAIProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn MoonshotAIProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for MoonshotAIProvider
 
 #derive(Eq, @debug.Debug)
 pub(all) struct MoonshotErrorData {
   error : MoonshotErrorDetail
 }
+#deprecated
+pub fn MoonshotErrorData::equal(Self, Self) -> Bool
+#deprecated
+pub fn MoonshotErrorData::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn MoonshotErrorData::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct MoonshotErrorDetail {
@@ -81,6 +107,12 @@ pub(all) struct MoonshotErrorDetail {
   error_type : String?
   code : String?
 }
+#deprecated
+pub fn MoonshotErrorDetail::equal(Self, Self) -> Bool
+#deprecated
+pub fn MoonshotErrorDetail::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn MoonshotErrorDetail::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type MoonshotAIChatModelId = String

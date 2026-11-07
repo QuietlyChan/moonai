@@ -33,8 +33,13 @@ pub fn AgentCallOptions::new(prompt? : String, messages? : Array[@provider_utils
 pub struct ToolLoopAgent {
   // private fields
 }
+pub async fn ToolLoopAgent::generate(Self, AgentCallOptions) -> @generate_text.GenerateTextResult
+pub fn ToolLoopAgent::id(Self) -> String?
 pub fn ToolLoopAgent::new(settings~ : ToolLoopAgentSettings) -> Self
 pub fn ToolLoopAgent::settings(Self) -> ToolLoopAgentSettings
+pub async fn ToolLoopAgent::stream(Self, AgentCallOptions) -> @generate_text.StreamTextResult
+pub fn ToolLoopAgent::tools(Self) -> Map[String, @provider_utils.Tool]
+pub fn ToolLoopAgent::version(Self) -> String
 pub impl Agent for ToolLoopAgent
 
 pub(all) struct ToolLoopAgentSettings {

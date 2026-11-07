@@ -73,3 +73,19 @@ pub fn AnthropicToolOptions::to_provider_options(
   )
   Map([(provider_name, Json::object(fields))])
 }
+
+///|
+#deprecated
+pub extend AnthropicToolAllowedCaller with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicToolAllowedCaller with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AnthropicToolOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicToolOptions with Eq::{not_equal, equal}

@@ -23,6 +23,11 @@ pub fn togetherai(String, api_key? : String, base_url? : String, headers? : Map[
 
 // Types and methods
 type TogetherAIImageModel
+pub async fn TogetherAIImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn TogetherAIImageModel::max_images_per_call(Self) -> Int32?
+pub fn TogetherAIImageModel::model_id(Self) -> String
+pub fn TogetherAIImageModel::provider(Self) -> String
+pub fn TogetherAIImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for TogetherAIImageModel
 
 pub struct TogetherAIProvider {
@@ -34,6 +39,7 @@ pub fn TogetherAIProvider::completion_model(Self, String) -> &@provider.Language
 pub fn TogetherAIProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn TogetherAIProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn TogetherAIProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn TogetherAIProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn TogetherAIProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn TogetherAIProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn TogetherAIProvider::image_model(Self, String) -> &@provider.ImageModelV4
@@ -41,9 +47,17 @@ pub fn TogetherAIProvider::language_model(Self, String) -> &@provider.LanguageMo
 pub fn TogetherAIProvider::reranking(Self, String) -> &@provider.RerankingModelV4
 pub fn TogetherAIProvider::rerankingModel(Self, String) -> &@provider.RerankingModelV4
 pub fn TogetherAIProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4
+pub fn TogetherAIProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn TogetherAIProvider::specification_version(Self) -> String
+pub fn TogetherAIProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn TogetherAIProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for TogetherAIProvider
 
 type TogetherAIRerankingModel
+pub async fn TogetherAIRerankingModel::do_rerank(Self, @provider.RerankingModelV4CallOptions) -> @provider.RerankingModelV4Result
+pub fn TogetherAIRerankingModel::model_id(Self) -> String
+pub fn TogetherAIRerankingModel::provider(Self) -> String
+pub fn TogetherAIRerankingModel::specification_version(Self) -> String
 pub impl @provider.RerankingModelV4 for TogetherAIRerankingModel
 
 // Type aliases

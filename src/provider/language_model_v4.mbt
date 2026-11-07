@@ -309,3 +309,15 @@ pub(open) trait LanguageModelV4 {
     async (LanguageModelV4StreamPart) -> Unit,
   ) -> LanguageModelV4StreamResult
 }
+
+///|
+#deprecated
+pub extend LanguageModelV4GenerateResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4StreamPart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4StreamResult with Debug::{to_repr}

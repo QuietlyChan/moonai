@@ -4,7 +4,6 @@ import {
   "QuietlyChan/moonai/harness",
   "QuietlyChan/moonai/provider",
   "QuietlyChan/moonai/provider_utils",
-  "moonbitlang/core/debug",
   "moonbitlang/core/env",
   "moonbitlang/core/json",
 }
@@ -17,8 +16,10 @@ import {
   "QuietlyChan/moonai/provider_utils",
   "QuietlyChan/moonai/testing",
   "moonbitlang/async",
-  "moonbitlang/core/debug",
-  "moonbitlang/core/json",
 } for "test"
+
+import {
+  "moonbitlang/core/debug",
+} for "wbtest"
 
 supported_targets = "+native"

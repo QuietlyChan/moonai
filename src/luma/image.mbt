@@ -267,3 +267,12 @@ fn luma_error_to_message(json : Json) -> String? raise {
     _ => None
   }
 }
+
+///|
+pub extend LumaImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
+}

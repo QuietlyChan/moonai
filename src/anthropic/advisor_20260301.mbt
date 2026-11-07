@@ -97,3 +97,11 @@ pub fn advisor_20260301(
     on_input_available?,
   )
 }
+
+///|
+#deprecated
+pub extend AnthropicAdvisorCaching with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicAdvisorCaching with Eq::{not_equal, equal}

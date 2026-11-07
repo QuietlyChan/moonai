@@ -377,3 +377,7 @@ pub fn validateJsonSchema(
 pub fn jsonSchemaMatches(schema : Json, value : Json) -> Bool {
   json_schema_matches(schema, value)
 }
+
+///|
+#deprecated
+pub extend JsonSchemaValidationError with Debug::{to_repr}

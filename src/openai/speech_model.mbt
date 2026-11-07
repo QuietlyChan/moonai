@@ -193,3 +193,11 @@ pub impl @provider.SpeechModelV4 for OpenAISpeechModel with fn do_generate(
 ) {
   self.generate_speech_v4(options)
 }
+
+///|
+pub extend OpenAISpeechModel with @QuietlyChan/moonai/provider.SpeechModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+}

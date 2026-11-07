@@ -14,6 +14,18 @@ fn response_headers(content_type : String) -> Map[String, String] {
 }
 
 ///|
+fn http_headers(
+  headers : Map[String, String],
+) -> Map[@http.CaseInsensitiveString, String] {
+  let result : Map[@http.CaseInsensitiveString, String] = Map([])
+  for entry in headers.iter2() {
+    let (key, value) = entry
+    result[@http.CaseInsensitiveString(key)] = value
+  }
+  result
+}
+
+///|
 async fn send_json(
   conn : @http.ServerConnection,
   code : Int32,
@@ -23,7 +35,9 @@ async fn send_json(
   conn.send_response(
     code,
     reason,
-    extra_headers=response_headers("application/json; charset=utf-8"),
+    extra_headers=http_headers(
+      response_headers("application/json; charset=utf-8"),
+    ),
   )
   conn.write(value.stringify())
   conn.end_response()
@@ -43,7 +57,7 @@ async fn send_error(
 async fn send_options(conn : @http.ServerConnection) -> Unit {
   let headers = response_headers("text/plain; charset=utf-8")
   headers["Content-Length"] = "0"
-  conn.send_response(204, "No Content", extra_headers=headers)
+  conn.send_response(204, "No Content", extra_headers=http_headers(headers))
   conn.end_response()
 }
 
@@ -403,7 +417,9 @@ async fn handle_chat_stream(
   conn.send_response(
     200,
     "OK",
-    extra_headers=response_headers("application/x-ndjson; charset=utf-8"),
+    extra_headers=http_headers(
+      response_headers("application/x-ndjson; charset=utf-8"),
+    ),
   )
   write_ndjson(conn, {
     "type": "metadata",
@@ -588,7 +604,7 @@ async fn handle_use_chat(
   headers["Connection"] = "keep-alive"
   headers["X-Accel-Buffering"] = "no"
   headers["x-vercel-ai-ui-message-stream"] = "v1"
-  conn.send_response(200, "OK", extra_headers=headers)
+  conn.send_response(200, "OK", extra_headers=http_headers(headers))
   write_sse(conn, {
     "type": "start",
     "messageId": use_chat_message_id(request),
@@ -679,7 +695,7 @@ async fn serve_frontend(
   }
   let headers = response_headers(content_type)
   headers["Cache-Control"] = "no-cache"
-  conn.send_response(200, "OK", extra_headers=headers)
+  conn.send_response(200, "OK", extra_headers=http_headers(headers))
   conn.write(content)
   conn.end_response()
 }
@@ -716,7 +732,7 @@ async fn handle_request(
     (@http.Get, "/favicon.ico") => {
       let headers = response_headers("image/x-icon")
       headers["Content-Length"] = "0"
-      conn.send_response(204, "No Content", extra_headers=headers)
+      conn.send_response(204, "No Content", extra_headers=http_headers(headers))
       conn.end_response()
     }
     (@http.Get, _) | (@http.Post, _) =>

@@ -120,3 +120,13 @@ pub impl @provider.LanguageModelV4 for ChatModelV4Adapter with fn do_stream(
     response.response,
   )
 }
+
+///|
+pub extend ChatModelV4Adapter with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

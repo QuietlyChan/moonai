@@ -154,3 +154,19 @@ pub impl @provider.VideoModelV4 for MockVideoModel with fn do_status(
     result~,
   )
 }
+
+///|
+pub extend MockVideoModel with @QuietlyChan/moonai/provider.VideoWireModel::{
+  provider,
+  generate,
+  model_id,
+  max_videos_per_call,
+}
+
+///|
+pub extend MockVideoModel with @QuietlyChan/moonai/provider.VideoModelV4::{
+  do_generate,
+  do_status,
+  specification_version,
+  do_start,
+}

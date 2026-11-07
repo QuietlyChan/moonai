@@ -127,3 +127,11 @@ fn parse_deepseek_options(
   }
   { options, warnings: reader.diagnostics(), }
 }
+
+///|
+#deprecated
+pub extend DeepSeekLanguageModelChatOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend DeepSeekLanguageModelChatOptions with Eq::{not_equal, equal}

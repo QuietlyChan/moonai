@@ -30,3 +30,19 @@ pub fn HarnessCapabilityUnsupportedError::new(
 fn harness_error(message : String) -> HarnessError {
   HarnessError(message~, cause=None)
 }
+
+///|
+#deprecated
+pub extend HarnessError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessCapabilityUnsupportedError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessCapabilityUnsupportedError with Eq::{not_equal, equal}

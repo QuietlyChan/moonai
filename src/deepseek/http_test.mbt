@@ -231,7 +231,7 @@ async test "DeepSeek drives a JSON request and preserves diagnostics" {
     ),
     DeepSeekMockStream::new([]),
   )
-  let model = deepseek(
+  let model = @deepseek.deepseek(
     "deepseek-chat",
     api_key="test-key",
     base_url="https://deepseek.test",
@@ -291,7 +291,7 @@ async test "DeepSeek API errors retain structured HTTP diagnostics" {
     ),
     DeepSeekMockStream::new([]),
   )
-  let model = deepseek(
+  let model = @deepseek.deepseek(
     "deepseek-chat",
     api_key="bad-key",
     base_url="https://deepseek.test",
@@ -339,7 +339,7 @@ async test "DeepSeek SSE keeps reasoning, text, and tool transitions ordered" {
       "x-request-id": "ds-stream-request",
     }),
   )
-  let model = deepseek(
+  let model = @deepseek.deepseek(
     "deepseek-chat",
     api_key="test-key",
     base_url="https://deepseek.test",

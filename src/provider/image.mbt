@@ -168,3 +168,39 @@ pub fn ImageResponse::with_transport(
     warnings: copy_warnings(self.warnings),
   }
 }
+
+///|
+#deprecated
+pub extend ImageData with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ImageData with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ImageFile with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ImageFile with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GeneratedImage with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GeneratedImage with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ImageCallOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ImageResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ImageResponse with Eq::{not_equal, equal}

@@ -147,3 +147,15 @@ pub(open) trait SpeechModelV4 {
   fn model_id(Self) -> String
   async fn do_generate(Self, SpeechModelV4CallOptions) -> SpeechModelV4Result
 }
+
+///|
+#deprecated
+pub extend SpeechModelV4CallOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SpeechModelV4Result with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SpeechModelV4Result with Eq::{not_equal, equal}

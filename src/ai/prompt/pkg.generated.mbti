@@ -39,14 +39,26 @@ pub(all) struct DownloadRequest {
   url : String
   is_url_supported_by_model : Bool
 }
+#deprecated
+pub fn DownloadRequest::equal(Self, Self) -> Bool
 pub fn DownloadRequest::new(url~ : String, is_url_supported_by_model~ : Bool) -> Self
+#deprecated
+pub fn DownloadRequest::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn DownloadRequest::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct DownloadedAsset {
   data : Bytes
   media_type : String?
 }
+#deprecated
+pub fn DownloadedAsset::equal(Self, Self) -> Bool
 pub fn DownloadedAsset::new(data~ : Bytes, media_type? : String) -> Self
+#deprecated
+pub fn DownloadedAsset::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn DownloadedAsset::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum Instructions {
@@ -55,9 +67,15 @@ pub(all) enum Instructions {
   InstructionMessages(Array[@provider_utils.ModelMessage])
 }
 pub fn Instructions::as_messages(Self) -> Array[@provider_utils.ModelMessage] raise @provider.InvalidPromptError
+#deprecated
+pub fn Instructions::equal(Self, Self) -> Bool
 pub fn Instructions::message(@provider_utils.ModelMessage) -> Self raise @provider.InvalidPromptError
 pub fn Instructions::messages(Array[@provider_utils.ModelMessage]) -> Self raise @provider.InvalidPromptError
+#deprecated
+pub fn Instructions::not_equal(Self, Self) -> Bool
 pub fn Instructions::text(String) -> Self
+#deprecated
+pub fn Instructions::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct LanguageModelCallOptions {
@@ -72,6 +90,8 @@ pub(all) struct LanguageModelCallOptions {
   reasoning_effort : @provider.ReasoningEffort
 }
 pub fn LanguageModelCallOptions::new(max_output_tokens? : Int32, temperature? : Double, top_p? : Double, top_k? : Double, presence_penalty? : Double, frequency_penalty? : Double, stop_sequences? : Array[String], seed? : Int32, reasoning_effort? : @provider.ReasoningEffort) -> Self
+#deprecated
+pub fn LanguageModelCallOptions::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct Prompt {
@@ -83,6 +103,8 @@ pub fn Prompt::messages(Array[@provider_utils.ModelMessage], instructions? : Ins
 pub fn Prompt::new(PromptInput, instructions? : Instructions, allow_system_in_messages? : Bool) -> Self raise
 pub fn Prompt::standardize(Self) -> StandardizedPrompt raise
 pub fn Prompt::text(String, instructions? : Instructions, allow_system_in_messages? : Bool) -> Self raise
+#deprecated
+pub fn Prompt::to_repr(Self) -> @debug.Repr
 pub fn Prompt::with_instructions(Self, Instructions) -> Self raise
 
 #derive(@debug.Debug)
@@ -90,6 +112,8 @@ pub(all) enum PromptInput {
   Text(String)
   Messages(Array[@provider_utils.ModelMessage])
 }
+#deprecated
+pub fn PromptInput::to_repr(Self) -> @debug.Repr
 
 pub(all) struct PromptModelContext {
   provider_name : String
@@ -104,6 +128,8 @@ pub(all) struct StandardizedPrompt {
   instructions : Instructions?
   messages : Array[@provider_utils.ModelMessage]
 }
+#deprecated
+pub fn StandardizedPrompt::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type DownloadFunction = async (Array[DownloadRequest]) -> Array[DownloadedAsset?]

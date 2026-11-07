@@ -172,3 +172,15 @@ pub fn workflow_snapshot_from_json(
   }
   { agent_id, messages, steps, }
 }
+
+///|
+#deprecated
+pub extend WorkflowError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend WorkflowError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend WorkflowSessionSnapshot with Debug::{to_repr}

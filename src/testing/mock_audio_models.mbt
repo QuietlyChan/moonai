@@ -294,3 +294,44 @@ pub impl @provider.SpeechTranslationModelV4 for MockSpeechTranslationModel with 
     response?=self.result.response,
   )
 }
+
+///|
+pub extend MockSpeechModel with @QuietlyChan/moonai/provider.SpeechWireModel::{
+  provider,
+  generate,
+  model_id,
+}
+
+///|
+pub extend MockSpeechModel with @QuietlyChan/moonai/provider.SpeechModelV4::{
+  do_generate,
+  specification_version,
+}
+
+///|
+pub extend MockTranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionWireModel::{
+  provider,
+  generate,
+  stream,
+  model_id,
+}
+
+///|
+pub extend MockTranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  do_stream,
+}
+
+///|
+pub extend MockSpeechTranslationModel with @QuietlyChan/moonai/provider.SpeechTranslationWireModel::{
+  provider,
+  stream,
+  model_id,
+}
+
+///|
+pub extend MockSpeechTranslationModel with @QuietlyChan/moonai/provider.SpeechTranslationModelV4::{
+  specification_version,
+  do_stream,
+}

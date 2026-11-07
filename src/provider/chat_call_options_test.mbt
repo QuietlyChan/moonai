@@ -1,12 +1,12 @@
 ///|
 test "chat call options preserve an unspecified tool choice" {
-  let default_options = ChatCallOptions::new([
-    LanguageModelMessage::user("hello"),
+  let default_options = @provider.ChatCallOptions::new([
+    @provider.LanguageModelMessage::user("hello"),
   ])
   assert_eq(default_options.tool_choice, None)
 
-  let explicit_options = ChatCallOptions::new(
-    [LanguageModelMessage::user("hello")],
+  let explicit_options = @provider.ChatCallOptions::new(
+    [@provider.LanguageModelMessage::user("hello")],
     tool_choice=Auto,
   )
   assert_eq(explicit_options.tool_choice, Some(Auto))
@@ -14,10 +14,11 @@ test "chat call options preserve an unspecified tool choice" {
 
 ///|
 test "messages and content parts retain provider-specific options" {
-  let part = LanguageModelContentPart::text("cached").with_provider_options({
-    "anthropic": { "cacheControl": { "type": "ephemeral" } },
-  })
-  let message = LanguageModelMessage::user_parts([part], provider_options={
+  let part = @provider.LanguageModelContentPart::text("cached").with_provider_options({
+      "anthropic": { "cacheControl": { "type": "ephemeral" } },
+    },
+  )
+  let message = @provider.LanguageModelMessage::user_parts([part], provider_options={
     "anthropic": { "cacheControl": { "type": "ephemeral" } },
   })
   assert_true(message.parts[0].provider_options().get("anthropic") is Some(_))
@@ -31,9 +32,10 @@ test "messages and content parts retain provider-specific options" {
 
 ///|
 test "chat call options merge provider values without mutating the source" {
-  let original = ChatCallOptions::new([LanguageModelMessage::user("hello")], provider_options={
-    "alibaba": { "enableThinking": true, "custom": "keep" },
-  })
+  let original = @provider.ChatCallOptions::new(
+    [@provider.LanguageModelMessage::user("hello")],
+    provider_options={ "alibaba": { "enableThinking": true, "custom": "keep" } },
+  )
   let derived = original.with_provider_options({
     "alibaba": { "thinkingBudget": 1024 },
   })
@@ -57,9 +59,9 @@ test "chat call options merge provider values without mutating the source" {
 
 ///|
 test "assistant tool calls are normalized from content parts without duplicates" {
-  let call = ToolCall::new(id="call-1", name="lookup", arguments="{}")
-  let message = LanguageModelMessage::assistant_parts(
-    [LanguageModelContentPart::tool_call(call)],
+  let call = @provider.ToolCall::new(id="call-1", name="lookup", arguments="{}")
+  let message = @provider.LanguageModelMessage::assistant_parts(
+    [@provider.LanguageModelContentPart::tool_call(call)],
     tool_calls=[call],
   )
   let calls = message.effective_tool_calls()

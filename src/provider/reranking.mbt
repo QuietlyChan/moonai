@@ -111,3 +111,31 @@ pub fn RerankingModelV4Result::new(
     warnings: copy_warnings(warnings),
   }
 }
+
+///|
+#deprecated
+pub extend RerankingModelV4Documents with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RerankingModelV4Documents with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RerankingModelV4Ranking with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RerankingModelV4Ranking with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RerankingModelV4CallOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RerankingModelV4Result with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RerankingModelV4Result with Eq::{not_equal, equal}

@@ -43,3 +43,11 @@ pub fn extract_reasoning_middleware(
     context.model.do_stream(context.params, converted_emit)
   })
 }
+
+///|
+#deprecated
+pub extend ExtractReasoningMode with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ExtractReasoningMode with Eq::{not_equal, equal}

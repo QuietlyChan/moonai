@@ -47,13 +47,25 @@ pub(all) struct OpenAIAllowedTools {
   tool_names : Array[String]
   mode : OpenAIAllowedToolsMode?
 }
+#deprecated
+pub fn OpenAIAllowedTools::equal(Self, Self) -> Bool
 pub fn OpenAIAllowedTools::new(tool_names~ : Array[String], mode? : OpenAIAllowedToolsMode) -> Self raise
+#deprecated
+pub fn OpenAIAllowedTools::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIAllowedTools::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIAllowedToolsMode {
   OpenAIAllowedToolsAuto
   OpenAIAllowedToolsRequired
 }
+#deprecated
+pub fn OpenAIAllowedToolsMode::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIAllowedToolsMode::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIAllowedToolsMode::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAICodeInterpreterContainer {
@@ -61,7 +73,13 @@ pub(all) enum OpenAICodeInterpreterContainer {
   AutoContainer(file_ids~ : Array[String]?)
 }
 pub fn OpenAICodeInterpreterContainer::auto(file_ids? : Array[String]) -> Self
+#deprecated
+pub fn OpenAICodeInterpreterContainer::equal(Self, Self) -> Bool
 pub fn OpenAICodeInterpreterContainer::existing(String) -> Self
+#deprecated
+pub fn OpenAICodeInterpreterContainer::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAICodeInterpreterContainer::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIComputerAction {
@@ -75,7 +93,13 @@ pub(all) enum OpenAIComputerAction {
   ComputerTypeText(String)
   ComputerWait
 }
+#deprecated
+pub fn OpenAIComputerAction::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIComputerAction::not_equal(Self, Self) -> Bool
 pub fn OpenAIComputerAction::to_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAIComputerAction::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIComputerButton {
@@ -85,13 +109,25 @@ pub(all) enum OpenAIComputerButton {
   ComputerButtonBack
   ComputerButtonForward
 }
+#deprecated
+pub fn OpenAIComputerButton::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIComputerButton::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIComputerButton::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIComputerPoint {
   x : Double
   y : Double
 }
+#deprecated
+pub fn OpenAIComputerPoint::equal(Self, Self) -> Bool
 pub fn OpenAIComputerPoint::new(x~ : Double, y~ : Double) -> Self
+#deprecated
+pub fn OpenAIComputerPoint::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIComputerPoint::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIComputerSafetyCheck {
@@ -99,42 +135,78 @@ pub(all) struct OpenAIComputerSafetyCheck {
   code : String?
   message : String?
 }
+#deprecated
+pub fn OpenAIComputerSafetyCheck::equal(Self, Self) -> Bool
 pub fn OpenAIComputerSafetyCheck::new(id~ : String, code? : String, message? : String) -> Self
+#deprecated
+pub fn OpenAIComputerSafetyCheck::not_equal(Self, Self) -> Bool
 pub fn OpenAIComputerSafetyCheck::to_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAIComputerSafetyCheck::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIContextManagement {
   OpenAIContextCompaction(compact_threshold~ : Double)
 }
 pub fn OpenAIContextManagement::compaction(compact_threshold~ : Double) -> Self raise
+#deprecated
+pub fn OpenAIContextManagement::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIContextManagement::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIContextManagement::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAICustomToolFormat {
   CustomTextFormat
   CustomGrammarFormat(syntax~ : OpenAICustomToolGrammarSyntax, definition~ : String)
 }
+#deprecated
+pub fn OpenAICustomToolFormat::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAICustomToolFormat::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAICustomToolFormat::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAICustomToolGrammarSyntax {
   CustomGrammarRegex
   CustomGrammarLark
 }
+#deprecated
+pub fn OpenAICustomToolGrammarSyntax::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAICustomToolGrammarSyntax::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAICustomToolGrammarSyntax::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAICustomToolOptions {
   description : String?
   format : OpenAICustomToolFormat?
 }
+#deprecated
+pub fn OpenAICustomToolOptions::equal(Self, Self) -> Bool
 pub fn OpenAICustomToolOptions::new(description? : String, format? : OpenAICustomToolFormat) -> Self
+#deprecated
+pub fn OpenAICustomToolOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAICustomToolOptions::to_args_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAICustomToolOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIEmbeddingModelOptions {
   dimensions : Int32?
   user : String?
 }
+#deprecated
+pub fn OpenAIEmbeddingModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAIEmbeddingModelOptions::new(dimensions? : Int32, user? : String) -> Self raise
+#deprecated
+pub fn OpenAIEmbeddingModelOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIEmbeddingModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAIEmbeddingModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIFileSearchComparisonOperator {
@@ -147,6 +219,12 @@ pub(all) enum OpenAIFileSearchComparisonOperator {
   FileSearchIn
   FileSearchNin
 }
+#deprecated
+pub fn OpenAIFileSearchComparisonOperator::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIFileSearchComparisonOperator::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIFileSearchComparisonOperator::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIFileSearchFilter {
@@ -157,6 +235,12 @@ pub(all) enum OpenAIFileSearchFilter {
 pub fn OpenAIFileSearchFilter::all(Array[Self]) -> Self
 pub fn OpenAIFileSearchFilter::any(Array[Self]) -> Self
 pub fn OpenAIFileSearchFilter::comparison(key~ : String, operator~ : OpenAIFileSearchComparisonOperator, value~ : @json.Json) -> Self raise
+#deprecated
+pub fn OpenAIFileSearchFilter::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIFileSearchFilter::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIFileSearchFilter::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIFileSearchOptions {
@@ -165,23 +249,41 @@ pub(all) struct OpenAIFileSearchOptions {
   ranking : OpenAIFileSearchRanking?
   filters : OpenAIFileSearchFilter?
 }
+#deprecated
+pub fn OpenAIFileSearchOptions::equal(Self, Self) -> Bool
 pub fn OpenAIFileSearchOptions::new(vector_store_ids~ : Array[String], max_num_results? : Int32, ranking? : OpenAIFileSearchRanking, filters? : OpenAIFileSearchFilter) -> Self raise
+#deprecated
+pub fn OpenAIFileSearchOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIFileSearchOptions::to_args_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAIFileSearchOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIFileSearchRanking {
   ranker : String?
   score_threshold : Double?
 }
+#deprecated
+pub fn OpenAIFileSearchRanking::equal(Self, Self) -> Bool
 pub fn OpenAIFileSearchRanking::new(ranker? : String, score_threshold? : Double) -> Self raise
+#deprecated
+pub fn OpenAIFileSearchRanking::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIFileSearchRanking::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIFilesOptions {
   purpose : String?
   expires_after : Double?
 }
+#deprecated
+pub fn OpenAIFilesOptions::equal(Self, Self) -> Bool
 pub fn OpenAIFilesOptions::new(purpose? : String, expires_after? : Double) -> Self
+#deprecated
+pub fn OpenAIFilesOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIFilesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAIFilesOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageBackground {
@@ -189,6 +291,12 @@ pub(all) enum OpenAIImageBackground {
   OpenAIImageBackgroundOpaque
   OpenAIImageBackgroundAuto
 }
+#deprecated
+pub fn OpenAIImageBackground::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageBackground::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageBackground::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationBackground {
@@ -196,24 +304,48 @@ pub(all) enum OpenAIImageGenerationBackground {
   ImageBackgroundOpaque
   ImageBackgroundTransparent
 }
+#deprecated
+pub fn OpenAIImageGenerationBackground::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationBackground::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationBackground::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationInputFidelity {
   ImageFidelityLow
   ImageFidelityHigh
 }
+#deprecated
+pub fn OpenAIImageGenerationInputFidelity::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationInputFidelity::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationInputFidelity::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageGenerationMask {
   file_id : String?
   image_url : String?
 }
+#deprecated
+pub fn OpenAIImageGenerationMask::equal(Self, Self) -> Bool
 pub fn OpenAIImageGenerationMask::new(file_id? : String, image_url? : String) -> Self
+#deprecated
+pub fn OpenAIImageGenerationMask::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationMask::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationModeration {
   ImageModerationAuto
 }
+#deprecated
+pub fn OpenAIImageGenerationModeration::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationModeration::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationModeration::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageGenerationOptions {
@@ -228,8 +360,14 @@ pub(all) struct OpenAIImageGenerationOptions {
   quality : OpenAIImageGenerationQuality?
   size : OpenAIImageGenerationSize?
 }
+#deprecated
+pub fn OpenAIImageGenerationOptions::equal(Self, Self) -> Bool
 pub fn OpenAIImageGenerationOptions::new(background? : OpenAIImageGenerationBackground, input_fidelity? : OpenAIImageGenerationInputFidelity, input_image_mask? : OpenAIImageGenerationMask, model? : String, moderation? : OpenAIImageGenerationModeration, output_compression? : Int32, output_format? : OpenAIImageGenerationOutputFormat, partial_images? : Int32, quality? : OpenAIImageGenerationQuality, size? : OpenAIImageGenerationSize) -> Self raise
+#deprecated
+pub fn OpenAIImageGenerationOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIImageGenerationOptions::to_args_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAIImageGenerationOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationOutputFormat {
@@ -237,6 +375,12 @@ pub(all) enum OpenAIImageGenerationOutputFormat {
   ImageFormatJpeg
   ImageFormatWebp
 }
+#deprecated
+pub fn OpenAIImageGenerationOutputFormat::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationOutputFormat::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationOutputFormat::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationQuality {
@@ -247,6 +391,12 @@ pub(all) enum OpenAIImageGenerationQuality {
   ImageQualityXHigh
   ImageQualityMax
 }
+#deprecated
+pub fn OpenAIImageGenerationQuality::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationQuality::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationQuality::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageGenerationSize {
@@ -255,12 +405,24 @@ pub(all) enum OpenAIImageGenerationSize {
   ImageSize1024x1536
   ImageSize1536x1024
 }
+#deprecated
+pub fn OpenAIImageGenerationSize::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationSize::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageGenerationSize::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageInputFidelity {
   OpenAIImageInputFidelityHigh
   OpenAIImageInputFidelityLow
 }
+#deprecated
+pub fn OpenAIImageInputFidelity::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageInputFidelity::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageInputFidelity::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageModelEditOptions {
@@ -271,8 +433,14 @@ pub(all) struct OpenAIImageModelEditOptions {
   user : String?
   input_fidelity : OpenAIImageInputFidelity?
 }
+#deprecated
+pub fn OpenAIImageModelEditOptions::equal(Self, Self) -> Bool
 pub fn OpenAIImageModelEditOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int32, user? : String, input_fidelity? : OpenAIImageInputFidelity) -> Self raise
+#deprecated
+pub fn OpenAIImageModelEditOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIImageModelEditOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAIImageModelEditOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageModelGenerationOptions {
@@ -284,8 +452,14 @@ pub(all) struct OpenAIImageModelGenerationOptions {
   style : OpenAIImageStyle?
   moderation : OpenAIImageModeration?
 }
+#deprecated
+pub fn OpenAIImageModelGenerationOptions::equal(Self, Self) -> Bool
 pub fn OpenAIImageModelGenerationOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int32, user? : String, style? : OpenAIImageStyle, moderation? : OpenAIImageModeration) -> Self raise
+#deprecated
+pub fn OpenAIImageModelGenerationOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIImageModelGenerationOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAIImageModelGenerationOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIImageModelOptions {
@@ -295,14 +469,26 @@ pub(all) struct OpenAIImageModelOptions {
   output_compression : Int32?
   user : String?
 }
+#deprecated
+pub fn OpenAIImageModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAIImageModelOptions::new(quality? : OpenAIImageQuality, background? : OpenAIImageBackground, output_format? : OpenAIImageOutputFormat, output_compression? : Int32, user? : String) -> Self raise
+#deprecated
+pub fn OpenAIImageModelOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIImageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAIImageModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageModeration {
   OpenAIImageModerationAuto
   OpenAIImageModerationLow
 }
+#deprecated
+pub fn OpenAIImageModeration::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageModeration::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageModeration::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageOutputFormat {
@@ -310,6 +496,12 @@ pub(all) enum OpenAIImageOutputFormat {
   OpenAIImageOutputJpeg
   OpenAIImageOutputWebp
 }
+#deprecated
+pub fn OpenAIImageOutputFormat::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageOutputFormat::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageOutputFormat::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageQuality {
@@ -322,12 +514,24 @@ pub(all) enum OpenAIImageQuality {
   OpenAIImageQualityMax
   OpenAIImageQualityAuto
 }
+#deprecated
+pub fn OpenAIImageQuality::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageQuality::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageQuality::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIImageStyle {
   OpenAIImageStyleVivid
   OpenAIImageStyleNatural
 }
+#deprecated
+pub fn OpenAIImageStyle::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageStyle::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIImageStyle::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct OpenAILanguageModelChatOptions {
@@ -352,6 +556,8 @@ pub(all) struct OpenAILanguageModelChatOptions {
 }
 pub fn OpenAILanguageModelChatOptions::new(logit_bias? : Map[String, Double], logprobs? : OpenAILogprobs, parallel_tool_calls? : Bool, user? : String, reasoning_effort? : String, max_completion_tokens? : Int32, store? : Bool, metadata? : Map[String, String], prediction? : @json.Json, service_tier? : OpenAIServiceTier, strict_json_schema? : Bool, text_verbosity? : OpenAITextVerbosity, prompt_cache_key? : String, prompt_cache_options? : OpenAIPromptCacheOptions, prompt_cache_retention? : OpenAIPromptCacheRetention, safety_identifier? : String, system_message_mode? : OpenAISystemMessageMode, force_reasoning? : Bool) -> Self raise
 pub fn OpenAILanguageModelChatOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAILanguageModelChatOptions::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct OpenAILanguageModelCompletionOptions {
@@ -363,6 +569,8 @@ pub(all) struct OpenAILanguageModelCompletionOptions {
 }
 pub fn OpenAILanguageModelCompletionOptions::new(echo? : Bool, logit_bias? : Map[String, Double], suffix? : String, user? : String, logprobs? : OpenAILogprobs) -> Self
 pub fn OpenAILanguageModelCompletionOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAILanguageModelCompletionOptions::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct OpenAILanguageModelResponsesOptions {
@@ -396,6 +604,8 @@ pub(all) struct OpenAILanguageModelResponsesOptions {
 }
 pub fn OpenAILanguageModelResponsesOptions::new(conversation? : String, include_values? : Array[OpenAIResponsesInclude], instructions? : String, logprobs? : OpenAILogprobs, max_tool_calls? : Int32, metadata? : @json.Json, parallel_tool_calls? : Bool, previous_response_id? : String, prompt_cache_key? : String, prompt_cache_options? : OpenAIPromptCacheOptions, prompt_cache_retention? : OpenAIPromptCacheRetention, reasoning_effort? : String, reasoning_mode? : OpenAIReasoningMode, reasoning_context? : OpenAIReasoningContext, reasoning_summary? : String, safety_identifier? : String, service_tier? : OpenAIServiceTier, store? : Bool, pass_through_unsupported_files? : Bool, strict_json_schema? : Bool, text_verbosity? : OpenAITextVerbosity, truncation? : OpenAITruncation, user? : String, system_message_mode? : OpenAISystemMessageMode, force_reasoning? : Bool, context_management? : Array[OpenAIContextManagement], allowed_tools? : OpenAIAllowedTools) -> Self raise
 pub fn OpenAILanguageModelResponsesOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAILanguageModelResponsesOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAILocalShellSkill {
@@ -403,7 +613,13 @@ pub(all) struct OpenAILocalShellSkill {
   description : String
   path : String
 }
+#deprecated
+pub fn OpenAILocalShellSkill::equal(Self, Self) -> Bool
 pub fn OpenAILocalShellSkill::new(name~ : String, description~ : String, path~ : String) -> Self
+#deprecated
+pub fn OpenAILocalShellSkill::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAILocalShellSkill::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAILogprobs {
@@ -413,6 +629,12 @@ pub(all) enum OpenAILogprobs {
 }
 pub fn OpenAILogprobs::disabled() -> Self
 pub fn OpenAILogprobs::enabled() -> Self
+#deprecated
+pub fn OpenAILogprobs::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAILogprobs::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAILogprobs::to_repr(Self) -> @debug.Repr
 pub fn OpenAILogprobs::top(Int32) -> Self raise
 
 #derive(Eq, @debug.Debug)
@@ -420,8 +642,14 @@ pub(all) enum OpenAIMCPAllowedTools {
   MCPAllowedNames(Array[String])
   MCPAllowedFilter(read_only~ : Bool?, tool_names~ : Array[String]?)
 }
+#deprecated
+pub fn OpenAIMCPAllowedTools::equal(Self, Self) -> Bool
 pub fn OpenAIMCPAllowedTools::filter(read_only? : Bool, tool_names? : Array[String]) -> Self
 pub fn OpenAIMCPAllowedTools::names(Array[String]) -> Self
+#deprecated
+pub fn OpenAIMCPAllowedTools::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIMCPAllowedTools::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIMCPApprovalPolicy {
@@ -429,7 +657,13 @@ pub(all) enum OpenAIMCPApprovalPolicy {
   MCPApprovalNever
   MCPApprovalNeverFor(tool_names~ : Array[String]?)
 }
+#deprecated
+pub fn OpenAIMCPApprovalPolicy::equal(Self, Self) -> Bool
 pub fn OpenAIMCPApprovalPolicy::never_for(tool_names? : Array[String]) -> Self
+#deprecated
+pub fn OpenAIMCPApprovalPolicy::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIMCPApprovalPolicy::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIMCPOptions {
@@ -442,32 +676,62 @@ pub(all) struct OpenAIMCPOptions {
   server_description : String?
   server_url : String?
 }
+#deprecated
+pub fn OpenAIMCPOptions::equal(Self, Self) -> Bool
 pub fn OpenAIMCPOptions::new(server_label~ : String, allowed_tools? : OpenAIMCPAllowedTools, authorization? : String, connector_id? : String, headers? : Map[String, String], require_approval? : OpenAIMCPApprovalPolicy, server_description? : String, server_url? : String) -> Self raise
+#deprecated
+pub fn OpenAIMCPOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIMCPOptions::to_args_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAIMCPOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIPromptCacheMode {
   OpenAIPromptCacheImplicit
   OpenAIPromptCacheExplicit
 }
+#deprecated
+pub fn OpenAIPromptCacheMode::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIPromptCacheMode::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIPromptCacheMode::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIPromptCacheOptions {
   mode : OpenAIPromptCacheMode?
   ttl : OpenAIPromptCacheTtl?
 }
+#deprecated
+pub fn OpenAIPromptCacheOptions::equal(Self, Self) -> Bool
 pub fn OpenAIPromptCacheOptions::new(mode? : OpenAIPromptCacheMode, ttl? : OpenAIPromptCacheTtl) -> Self
+#deprecated
+pub fn OpenAIPromptCacheOptions::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIPromptCacheOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIPromptCacheRetention {
   OpenAIPromptCacheInMemory
   OpenAIPromptCacheTwentyFourHours
 }
+#deprecated
+pub fn OpenAIPromptCacheRetention::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIPromptCacheRetention::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIPromptCacheRetention::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIPromptCacheTtl {
   OpenAIPromptCacheThirtyMinutes
 }
+#deprecated
+pub fn OpenAIPromptCacheTtl::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIPromptCacheTtl::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIPromptCacheTtl::to_repr(Self) -> @debug.Repr
 
 pub struct OpenAIProvider {
   // private fields
@@ -493,10 +757,12 @@ pub fn OpenAIProvider::language_model(Self, String) -> &@provider.LanguageModelV
 pub fn OpenAIProvider::realtime(Self, String) -> OpenAIRealtimeModel
 pub fn OpenAIProvider::realtimeModel(Self, String) -> OpenAIRealtimeModel
 pub fn OpenAIProvider::realtime_model(Self, String) -> OpenAIRealtimeModel
+pub fn OpenAIProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
 pub fn OpenAIProvider::responses(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::responsesModel(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::responses_model(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAIProvider::skills(Self) -> &@provider.SkillsV4
+pub fn OpenAIProvider::specification_version(Self) -> String
 pub fn OpenAIProvider::speech(Self, String) -> &@provider.SpeechModelV4
 pub fn OpenAIProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
 pub fn OpenAIProvider::speechTranslationModel(Self, String) -> &@provider.SpeechTranslationModelV4
@@ -519,11 +785,21 @@ pub struct OpenAIRealtimeFactory {
 pub async fn OpenAIRealtimeFactory::getToken(Self, @provider.RealtimeFactoryTokenOptions) -> @provider.RealtimeClientSecretResult
 pub async fn OpenAIRealtimeFactory::get_token(Self, @provider.RealtimeFactoryTokenOptions) -> @provider.RealtimeClientSecretResult
 pub fn OpenAIRealtimeFactory::model(Self, String) -> OpenAIRealtimeModel
+pub fn OpenAIRealtimeFactory::provider(Self) -> String
 pub impl @provider.RealtimeFactoryV4 for OpenAIRealtimeFactory
 
 pub struct OpenAIRealtimeModel {
   // private fields
 }
+pub fn OpenAIRealtimeModel::build_session_config(Self, @provider.RealtimeSessionConfig) -> @json.Json
+pub async fn OpenAIRealtimeModel::do_create_client_secret(Self, @provider.RealtimeClientSecretOptions) -> @provider.RealtimeClientSecretResult
+pub fn OpenAIRealtimeModel::get_health_check_response(Self, @json.Json) -> @json.Json?
+pub fn OpenAIRealtimeModel::get_websocket_config(Self, String, String) -> @provider.RealtimeWebSocketConfig
+pub fn OpenAIRealtimeModel::model_id(Self) -> String
+pub fn OpenAIRealtimeModel::parse_server_event(Self, @json.Json) -> Array[@provider.RealtimeServerEvent]
+pub fn OpenAIRealtimeModel::provider(Self) -> String
+pub fn OpenAIRealtimeModel::serialize_client_event(Self, @provider.RealtimeClientEvent) -> @json.Json
+pub fn OpenAIRealtimeModel::specification_version(Self) -> String
 pub impl @provider.RealtimeModelV4 for OpenAIRealtimeModel
 
 #derive(Eq, @debug.Debug)
@@ -532,18 +808,36 @@ pub(all) enum OpenAIReasoningContext {
   OpenAIReasoningContextCurrentTurn
   OpenAIReasoningContextAllTurns
 }
+#deprecated
+pub fn OpenAIReasoningContext::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIReasoningContext::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIReasoningContext::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIReasoningMode {
   OpenAIReasoningStandard
   OpenAIReasoningPro
 }
+#deprecated
+pub fn OpenAIReasoningMode::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIReasoningMode::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIReasoningMode::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIResponsesCompactionMetadata {
   item_id : String
   encrypted_content : String?
 }
+#deprecated
+pub fn OpenAIResponsesCompactionMetadata::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesCompactionMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesCompactionMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIResponsesInclude {
@@ -556,6 +850,12 @@ pub(all) enum OpenAIResponsesInclude {
   OpenAIIncludeMessageInputImageImageUrl
   OpenAIIncludeMessageOutputTextLogprobs
 }
+#deprecated
+pub fn OpenAIResponsesInclude::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesInclude::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesInclude::to_repr(Self) -> @debug.Repr
 
 pub struct OpenAIResponsesLanguageModelV4 {
   model : OpenAIResponsesModel
@@ -569,7 +869,13 @@ pub(all) struct OpenAIResponsesMetadata {
   service_tier : String?
   reasoning_context : String?
 }
+#deprecated
+pub fn OpenAIResponsesMetadata::equal(Self, Self) -> Bool
 pub fn OpenAIResponsesMetadata::new(response_id? : String, logprobs? : Array[@json.Json], service_tier? : String, reasoning_context? : String) -> Self
+#deprecated
+pub fn OpenAIResponsesMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesMetadata::to_repr(Self) -> @debug.Repr
 
 pub(all) struct OpenAIResponsesModel {
   provider_name : String
@@ -587,6 +893,12 @@ pub(all) struct OpenAIResponsesReasoningMetadata {
   item_id : String
   reasoning_encrypted_content : String?
 }
+#deprecated
+pub fn OpenAIResponsesReasoningMetadata::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesReasoningMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesReasoningMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIResponsesSourceDocumentMetadata {
@@ -594,6 +906,12 @@ pub(all) enum OpenAIResponsesSourceDocumentMetadata {
   ResponsesContainerFileCitation(file_id~ : String, container_id~ : String)
   ResponsesFilePath(file_id~ : String, index~ : Int32)
 }
+#deprecated
+pub fn OpenAIResponsesSourceDocumentMetadata::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesSourceDocumentMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesSourceDocumentMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIResponsesTextMetadata {
@@ -601,12 +919,24 @@ pub(all) struct OpenAIResponsesTextMetadata {
   phase : OpenAIResponsesTextPhase?
   annotations : Array[@json.Json]?
 }
+#deprecated
+pub fn OpenAIResponsesTextMetadata::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesTextMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesTextMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIResponsesTextPhase {
   ResponsesTextCommentary
   ResponsesTextFinalAnswer
 }
+#deprecated
+pub fn OpenAIResponsesTextPhase::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesTextPhase::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIResponsesTextPhase::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIServiceTier {
@@ -617,6 +947,12 @@ pub(all) enum OpenAIServiceTier {
   OpenAIServiceTierUltrafast
   OpenAIServiceTierDefault
 }
+#deprecated
+pub fn OpenAIServiceTier::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIServiceTier::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIServiceTier::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIShellDomainSecret {
@@ -624,7 +960,13 @@ pub(all) struct OpenAIShellDomainSecret {
   name : String
   value : String
 }
+#deprecated
+pub fn OpenAIShellDomainSecret::equal(Self, Self) -> Bool
 pub fn OpenAIShellDomainSecret::new(domain~ : String, name~ : String, value~ : String) -> Self
+#deprecated
+pub fn OpenAIShellDomainSecret::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIShellDomainSecret::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIShellEnvironment {
@@ -634,7 +976,13 @@ pub(all) enum OpenAIShellEnvironment {
 }
 pub fn OpenAIShellEnvironment::container_auto(file_ids? : Array[String], memory_limit? : OpenAIShellMemoryLimit, network_policy? : OpenAIShellNetworkPolicy, skills? : Array[OpenAIShellSkill]) -> Self
 pub fn OpenAIShellEnvironment::container_reference(String) -> Self
+#deprecated
+pub fn OpenAIShellEnvironment::equal(Self, Self) -> Bool
 pub fn OpenAIShellEnvironment::local_environment(skills? : Array[OpenAILocalShellSkill]) -> Self
+#deprecated
+pub fn OpenAIShellEnvironment::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIShellEnvironment::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIShellMemoryLimit {
@@ -643,6 +991,12 @@ pub(all) enum OpenAIShellMemoryLimit {
   Memory16G
   Memory64G
 }
+#deprecated
+pub fn OpenAIShellMemoryLimit::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIShellMemoryLimit::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIShellMemoryLimit::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIShellNetworkPolicy {
@@ -651,14 +1005,26 @@ pub(all) enum OpenAIShellNetworkPolicy {
 }
 pub fn OpenAIShellNetworkPolicy::allowlist(Array[String], domain_secrets? : Array[OpenAIShellDomainSecret]) -> Self
 pub fn OpenAIShellNetworkPolicy::disabled() -> Self
+#deprecated
+pub fn OpenAIShellNetworkPolicy::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIShellNetworkPolicy::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIShellNetworkPolicy::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIShellSkill {
   ShellSkillReference(provider_reference~ : @provider.ProviderReference, version~ : String?)
   ShellInlineSkill(name~ : String, description~ : String, data~ : String)
 }
+#deprecated
+pub fn OpenAIShellSkill::equal(Self, Self) -> Bool
 pub fn OpenAIShellSkill::inline(name~ : String, description~ : String, data~ : String) -> Self
+#deprecated
+pub fn OpenAIShellSkill::not_equal(Self, Self) -> Bool
 pub fn OpenAIShellSkill::reference(@provider.ProviderReference, version? : String) -> Self
+#deprecated
+pub fn OpenAIShellSkill::to_repr(Self) -> @debug.Repr
 
 pub(all) struct OpenAISpeechModel {
   provider_name : String
@@ -669,6 +1035,10 @@ pub(all) struct OpenAISpeechModel {
   idle_timeout_ms : Int32
   http_transport : &@provider_utils.HttpTransport
 }
+pub async fn OpenAISpeechModel::do_generate(Self, @provider.SpeechModelV4CallOptions) -> @provider.SpeechModelV4Result
+pub fn OpenAISpeechModel::model_id(Self) -> String
+pub fn OpenAISpeechModel::provider(Self) -> String
+pub fn OpenAISpeechModel::specification_version(Self) -> String
 pub impl @provider.SpeechModelV4 for OpenAISpeechModel
 
 #derive(Eq, @debug.Debug)
@@ -676,8 +1046,14 @@ pub(all) struct OpenAISpeechModelOptions {
   instructions : String?
   speed : Double?
 }
+#deprecated
+pub fn OpenAISpeechModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAISpeechModelOptions::new(instructions? : String, speed? : Double) -> Self raise
+#deprecated
+pub fn OpenAISpeechModelOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAISpeechModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAISpeechModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAISystemMessageMode {
@@ -685,6 +1061,12 @@ pub(all) enum OpenAISystemMessageMode {
   OpenAISystemMessageDeveloper
   OpenAISystemMessageRemove
 }
+#deprecated
+pub fn OpenAISystemMessageMode::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAISystemMessageMode::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAISystemMessageMode::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAITextVerbosity {
@@ -692,19 +1074,37 @@ pub(all) enum OpenAITextVerbosity {
   OpenAITextVerbosityMedium
   OpenAITextVerbosityHigh
 }
+#deprecated
+pub fn OpenAITextVerbosity::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITextVerbosity::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITextVerbosity::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIToolCaller {
   Direct
   Programmatic
 }
+#deprecated
+pub fn OpenAIToolCaller::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIToolCaller::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIToolCaller::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIToolNamespace {
   name : String
   description : String
 }
+#deprecated
+pub fn OpenAIToolNamespace::equal(Self, Self) -> Bool
 pub fn OpenAIToolNamespace::new(name~ : String, description~ : String) -> Self
+#deprecated
+pub fn OpenAIToolNamespace::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIToolNamespace::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIToolOptions {
@@ -713,14 +1113,26 @@ pub(all) struct OpenAIToolOptions {
   output_schema : @json.Json?
   tool_namespace : OpenAIToolNamespace?
 }
+#deprecated
+pub fn OpenAIToolOptions::equal(Self, Self) -> Bool
 pub fn OpenAIToolOptions::new(allowed_callers? : Array[OpenAIToolCaller], defer_loading? : Bool, output_schema? : @json.Json, tool_namespace? : OpenAIToolNamespace) -> Self
+#deprecated
+pub fn OpenAIToolOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIToolOptions::to_provider_options(Self) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAIToolOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIToolSearchExecution {
   ToolSearchServer
   ToolSearchClient
 }
+#deprecated
+pub fn OpenAIToolSearchExecution::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIToolSearchExecution::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIToolSearchExecution::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIToolSearchOptions {
@@ -728,8 +1140,14 @@ pub(all) struct OpenAIToolSearchOptions {
   description : String?
   parameters : @json.Json?
 }
+#deprecated
+pub fn OpenAIToolSearchOptions::equal(Self, Self) -> Bool
 pub fn OpenAIToolSearchOptions::new(execution? : OpenAIToolSearchExecution, description? : String, parameters? : @json.Json) -> Self raise
+#deprecated
+pub fn OpenAIToolSearchOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIToolSearchOptions::to_args_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAIToolSearchOptions::to_repr(Self) -> @debug.Repr
 
 pub struct OpenAITools {
 }
@@ -767,6 +1185,11 @@ pub(all) struct OpenAITranscriptionModel {
   http_transport : &@provider_utils.HttpTransport
   websocket_connector : &@provider_utils.WebSocketConnector
 }
+pub async fn OpenAITranscriptionModel::do_generate(Self, @provider.TranscriptionModelV4CallOptions) -> @provider.TranscriptionModelV4Result
+pub async fn OpenAITranscriptionModel::do_stream(Self, @provider.TranscriptionModelV4StreamOptions, async (@provider.TranscriptionModelV4StreamPart) -> Unit) -> @provider.TranscriptionModelV4StreamResult
+pub fn OpenAITranscriptionModel::model_id(Self) -> String
+pub fn OpenAITranscriptionModel::provider(Self) -> String
+pub fn OpenAITranscriptionModel::specification_version(Self) -> String
 pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel
 
 #derive(Eq, @debug.Debug)
@@ -778,8 +1201,14 @@ pub(all) struct OpenAITranscriptionModelOptions {
   timestamp_granularities : Array[OpenAITranscriptionTimestampGranularity]?
   streaming : OpenAITranscriptionStreamingOptions?
 }
+#deprecated
+pub fn OpenAITranscriptionModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAITranscriptionModelOptions::new(include_values? : Array[String], language? : String, prompt? : String, temperature? : Double, timestamp_granularities? : Array[OpenAITranscriptionTimestampGranularity], streaming? : OpenAITranscriptionStreamingOptions) -> Self raise
+#deprecated
+pub fn OpenAITranscriptionModelOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAITranscriptionModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAITranscriptionModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAITranscriptionStreamingDelay {
@@ -789,38 +1218,70 @@ pub(all) enum OpenAITranscriptionStreamingDelay {
   OpenAITranscriptionDelayHigh
   OpenAITranscriptionDelayXHigh
 }
+#deprecated
+pub fn OpenAITranscriptionStreamingDelay::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITranscriptionStreamingDelay::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITranscriptionStreamingDelay::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAITranscriptionStreamingOptions {
   delay : OpenAITranscriptionStreamingDelay?
   include_values : Array[String]?
 }
+#deprecated
+pub fn OpenAITranscriptionStreamingOptions::equal(Self, Self) -> Bool
 pub fn OpenAITranscriptionStreamingOptions::new(delay? : OpenAITranscriptionStreamingDelay, include_values? : Array[String]) -> Self
+#deprecated
+pub fn OpenAITranscriptionStreamingOptions::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITranscriptionStreamingOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAITranscriptionTimestampGranularity {
   OpenAITranscriptionWord
   OpenAITranscriptionSegment
 }
+#deprecated
+pub fn OpenAITranscriptionTimestampGranularity::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITranscriptionTimestampGranularity::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITranscriptionTimestampGranularity::to_repr(Self) -> @debug.Repr
 
 pub struct OpenAITranslationModel {
   // private fields
 }
+pub async fn OpenAITranslationModel::do_stream(Self, @provider.SpeechTranslationModelV4StreamOptions, async (@provider.SpeechTranslationModelV4StreamPart) -> Unit) -> @provider.SpeechTranslationModelV4StreamResult
 pub fn OpenAITranslationModel::model_id(Self) -> String
 pub fn OpenAITranslationModel::provider(Self) -> String
+pub fn OpenAITranslationModel::specification_version(Self) -> String
 pub impl @provider.SpeechTranslationModelV4 for OpenAITranslationModel
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAITranslationModelOptions {
 }
+#deprecated
+pub fn OpenAITranslationModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAITranslationModelOptions::new() -> Self
+#deprecated
+pub fn OpenAITranslationModelOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAITranslationModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAITranslationModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAITruncation {
   OpenAITruncationAuto
   OpenAITruncationDisabled
 }
+#deprecated
+pub fn OpenAITruncation::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITruncation::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAITruncation::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum OpenAIWebSearchContextSize {
@@ -828,13 +1289,25 @@ pub(all) enum OpenAIWebSearchContextSize {
   WebSearchMedium
   WebSearchHigh
 }
+#deprecated
+pub fn OpenAIWebSearchContextSize::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIWebSearchContextSize::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIWebSearchContextSize::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIWebSearchFilters {
   allowed_domains : Array[String]?
   blocked_domains : Array[String]?
 }
+#deprecated
+pub fn OpenAIWebSearchFilters::equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchFilters::new(allowed_domains? : Array[String], blocked_domains? : Array[String]) -> Self raise
+#deprecated
+pub fn OpenAIWebSearchFilters::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIWebSearchFilters::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIWebSearchOptions {
@@ -843,16 +1316,28 @@ pub(all) struct OpenAIWebSearchOptions {
   search_context_size : OpenAIWebSearchContextSize?
   user_location : OpenAIWebSearchUserLocation?
 }
+#deprecated
+pub fn OpenAIWebSearchOptions::equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchOptions::new(external_web_access? : Bool, filters? : OpenAIWebSearchFilters, search_context_size? : OpenAIWebSearchContextSize, user_location? : OpenAIWebSearchUserLocation) -> Self
+#deprecated
+pub fn OpenAIWebSearchOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchOptions::to_args_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAIWebSearchOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIWebSearchPreviewOptions {
   search_context_size : OpenAIWebSearchContextSize?
   user_location : OpenAIWebSearchUserLocation?
 }
+#deprecated
+pub fn OpenAIWebSearchPreviewOptions::equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchPreviewOptions::new(search_context_size? : OpenAIWebSearchContextSize, user_location? : OpenAIWebSearchUserLocation) -> Self
+#deprecated
+pub fn OpenAIWebSearchPreviewOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchPreviewOptions::to_args_json(Self) -> @json.Json
+#deprecated
+pub fn OpenAIWebSearchPreviewOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAIWebSearchUserLocation {
@@ -861,42 +1346,78 @@ pub(all) struct OpenAIWebSearchUserLocation {
   region : String?
   timezone : String?
 }
+#deprecated
+pub fn OpenAIWebSearchUserLocation::equal(Self, Self) -> Bool
 pub fn OpenAIWebSearchUserLocation::new(country? : String, city? : String, region? : String, timezone? : String) -> Self
+#deprecated
+pub fn OpenAIWebSearchUserLocation::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAIWebSearchUserLocation::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesCompactionProviderMetadata {
   openai : OpenAIResponsesCompactionMetadata
 }
+#deprecated
+pub fn OpenaiResponsesCompactionProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesCompactionProviderMetadata::new(item_id~ : String, encrypted_content? : String) -> Self
+#deprecated
+pub fn OpenaiResponsesCompactionProviderMetadata::not_equal(Self, Self) -> Bool
 pub fn OpenaiResponsesCompactionProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenaiResponsesCompactionProviderMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesProviderMetadata {
   openai : OpenAIResponsesMetadata
 }
+#deprecated
+pub fn OpenaiResponsesProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesProviderMetadata::new(openai~ : OpenAIResponsesMetadata) -> Self
+#deprecated
+pub fn OpenaiResponsesProviderMetadata::not_equal(Self, Self) -> Bool
 pub fn OpenaiResponsesProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenaiResponsesProviderMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesReasoningProviderMetadata {
   openai : OpenAIResponsesReasoningMetadata
 }
+#deprecated
+pub fn OpenaiResponsesReasoningProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesReasoningProviderMetadata::new(item_id~ : String, reasoning_encrypted_content? : String) -> Self
+#deprecated
+pub fn OpenaiResponsesReasoningProviderMetadata::not_equal(Self, Self) -> Bool
 pub fn OpenaiResponsesReasoningProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenaiResponsesReasoningProviderMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesSourceDocumentProviderMetadata {
   openai : OpenAIResponsesSourceDocumentMetadata
 }
+#deprecated
+pub fn OpenaiResponsesSourceDocumentProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesSourceDocumentProviderMetadata::new(openai~ : OpenAIResponsesSourceDocumentMetadata) -> Self
+#deprecated
+pub fn OpenaiResponsesSourceDocumentProviderMetadata::not_equal(Self, Self) -> Bool
 pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenaiResponsesSourceDocumentProviderMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenaiResponsesTextProviderMetadata {
   openai : OpenAIResponsesTextMetadata
 }
+#deprecated
+pub fn OpenaiResponsesTextProviderMetadata::equal(Self, Self) -> Bool
 pub fn OpenaiResponsesTextProviderMetadata::new(item_id~ : String, phase? : OpenAIResponsesTextPhase, annotations? : Array[@json.Json]) -> Self
+#deprecated
+pub fn OpenaiResponsesTextProviderMetadata::not_equal(Self, Self) -> Bool
 pub fn OpenaiResponsesTextProviderMetadata::to_provider_metadata(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenaiResponsesTextProviderMetadata::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type OpenAITranslationModelId = String

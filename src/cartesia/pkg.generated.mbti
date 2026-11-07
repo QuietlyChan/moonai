@@ -21,6 +21,13 @@ pub fn create_cartesia(api_key? : String, base_url? : String, api_version? : Str
 pub struct CartesiaProvider {
   // private fields
 }
+pub fn CartesiaProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn CartesiaProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn CartesiaProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
+pub fn CartesiaProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn CartesiaProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn CartesiaProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn CartesiaProvider::specification_version(Self) -> String
 pub fn CartesiaProvider::speech(Self, String) -> &@provider.SpeechModelV4
 pub fn CartesiaProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
 pub fn CartesiaProvider::speech_model(Self, String) -> &@provider.SpeechModelV4
@@ -30,9 +37,18 @@ pub fn CartesiaProvider::transcription_model(Self, String) -> &@provider.Transcr
 pub impl @provider.ProviderV4 for CartesiaProvider
 
 type CartesiaSpeechModel
+pub async fn CartesiaSpeechModel::do_generate(Self, @provider.SpeechModelV4CallOptions) -> @provider.SpeechModelV4Result
+pub fn CartesiaSpeechModel::model_id(Self) -> String
+pub fn CartesiaSpeechModel::provider(Self) -> String
+pub fn CartesiaSpeechModel::specification_version(Self) -> String
 pub impl @provider.SpeechModelV4 for CartesiaSpeechModel
 
 type CartesiaTranscriptionModel
+pub async fn CartesiaTranscriptionModel::do_generate(Self, @provider.TranscriptionModelV4CallOptions) -> @provider.TranscriptionModelV4Result
+pub async fn CartesiaTranscriptionModel::do_stream(Self, @provider.TranscriptionModelV4StreamOptions, async (@provider.TranscriptionModelV4StreamPart) -> Unit) -> @provider.TranscriptionModelV4StreamResult
+pub fn CartesiaTranscriptionModel::model_id(Self) -> String
+pub fn CartesiaTranscriptionModel::provider(Self) -> String
+pub fn CartesiaTranscriptionModel::specification_version(Self) -> String
 pub impl @provider.TranscriptionModelV4 for CartesiaTranscriptionModel
 
 // Type aliases

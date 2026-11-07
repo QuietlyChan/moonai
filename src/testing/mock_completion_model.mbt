@@ -62,3 +62,11 @@ pub impl @provider.CompletionModel for MockCompletionModel with fn stream(
   }
   self.result
 }
+
+///|
+pub extend MockCompletionModel with @QuietlyChan/moonai/provider.CompletionModel::{
+  provider,
+  generate,
+  stream,
+  model_id,
+}

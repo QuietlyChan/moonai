@@ -355,3 +355,12 @@ pub fn togetherai(
     id_generator?,
   ).language_model(model_id)
 }
+
+///|
+pub extend TogetherAIProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

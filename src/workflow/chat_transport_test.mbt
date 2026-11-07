@@ -24,8 +24,8 @@ async test "workflow chat transport emits ui chunks and persists snapshot" {
       id="chat-agent",
     ),
   )
-  let workflow = WorkflowAgent::new(agent=inner as &@agent.Agent)
-  let transport = WorkflowChatTransport::new(agent=workflow)
+  let workflow = @workflow.WorkflowAgent::new(agent=inner as &@agent.Agent)
+  let transport = @workflow.WorkflowChatTransport::new(agent=workflow)
   let response = transport.send_messages(prompt="go")
   let types : Array[String] = []
   for chunk in response.chunks {
@@ -54,7 +54,7 @@ async test "workflow chat transport emits ui chunks and persists snapshot" {
 
 ///|
 test "workflow tool approval secret resolves from the environment" {
-  let resolved = resolve_workflow_tool_approval_secret(secret={
+  let resolved = @workflow.resolve_workflow_tool_approval_secret(secret={
     environment_variable: "PATH",
   })
   assert_true(resolved != "")

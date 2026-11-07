@@ -241,8 +241,10 @@ pub async fn create_mcp_client(config : MCPClientConfig) -> MCPClient {
   }
   // Close the transport on any initialization failure; on success the
   // client keeps ownership.
-  errdefer (config.transport.close(MCPTransportCloseOptions::new()) catch {
-    _ => ()
+  errdefer @async.protect_from_cancel(() => {
+    config.transport.close(MCPTransportCloseOptions::new()) catch {
+      _ => ()
+    }
   })
   run_mcp_with_options(config.initialization_options, () => {
     config.transport.start()

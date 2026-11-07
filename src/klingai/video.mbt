@@ -307,3 +307,14 @@ fn klingai_error_to_message(json : Json) -> String? raise {
     _ => None
   }
 }
+
+///|
+pub extend KlingaiVideoModel with @QuietlyChan/moonai/provider.VideoModelV4::{
+  do_generate,
+  do_status,
+  specification_version,
+  provider,
+  do_start,
+  model_id,
+  max_videos_per_call,
+}

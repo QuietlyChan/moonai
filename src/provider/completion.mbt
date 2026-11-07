@@ -125,3 +125,15 @@ pub fn CompletionResponse::with_transport(
     warnings: copy_warnings(self.warnings),
   }
 }
+
+///|
+#deprecated
+pub extend CompletionOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend CompletionResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend CompletionResponse with Eq::{not_equal, equal}

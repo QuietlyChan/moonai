@@ -30,6 +30,12 @@ pub(all) struct GrokOAuthRecord {
   refresh_token : String
   expires_at : Int64
 }
+#deprecated
+pub fn GrokOAuthRecord::equal(Self, Self) -> Bool
+#deprecated
+pub fn GrokOAuthRecord::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn GrokOAuthRecord::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

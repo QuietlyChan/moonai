@@ -1,5 +1,5 @@
 ///|
-fn mock_chat_v4(model : MockChatModel) -> &@provider.LanguageModelV4 {
+fn mock_chat_v4(model : @testing.MockChatModel) -> &@provider.LanguageModelV4 {
   @ai.as_language_model_v4(model as &@provider.ChatModel)
 }
 
@@ -20,7 +20,7 @@ async test "streamText is provider-neutral and testable with a mock" {
     usage,
     @provider.Stop,
   )
-  let model = MockChatModel::new(
+  let model = @testing.MockChatModel::new(
     [
       @provider.StreamStart,
       @provider.TextStart("text-0"),
@@ -55,7 +55,7 @@ async test "generateText uses the same provider-neutral options" {
     @provider.Usage::zero(),
     @provider.Stop,
   )
-  let model = MockChatModel::new([], result)
+  let model = @testing.MockChatModel::new([], result)
   let actual = @ai.generateText(
     mock_chat_v4(model),
     messages=[@ai.ModelMessage::user("say hello")],
@@ -71,7 +71,7 @@ async test "generateText uses the same provider-neutral options" {
 
 ///|
 async test "generateText rejects system messages unless explicitly enabled" {
-  let model = MockChatModel::new([], @provider.ChatResponse::empty())
+  let model = @testing.MockChatModel::new([], @provider.ChatResponse::empty())
   try
     @ai.generateText(mock_chat_v4(model), messages=[
       @ai.ModelMessage::system("Be concise"),
@@ -107,7 +107,7 @@ async test "generateText downloads URL assets unsupported by the model" {
     @provider.Usage::zero(),
     @provider.Stop,
   )
-  let model = MockChatModel::new([], result)
+  let model = @testing.MockChatModel::new([], result)
   let captured_requests : Array[@ai.DownloadRequest] = []
   let custom_download : @ai.DownloadFunction = requests => {
     for request in requests {
@@ -197,7 +197,7 @@ async test "generateText passes model-supported URLs through" {
     @provider.Usage::zero(),
     @provider.Stop,
   )
-  let model = MockChatModel::new([], result, supported_urls=[
+  let model = @testing.MockChatModel::new([], result, supported_urls=[
     @provider.SupportedUrlRule::http("image/*"),
   ])
   let captured_requests : Array[@ai.DownloadRequest] = []
@@ -244,7 +244,7 @@ async test "embedding helpers use a provider-neutral mock" {
     cached_input_tokens: 0,
     cache_write_input_tokens: 0,
   })
-  let model = MockEmbeddingModel::new(result)
+  let model = @testing.MockEmbeddingModel::new(result)
   let actual = @ai.embedMany(model, ["one", "two"])
   assert_eq(actual, result)
   assert_eq(model.captured_values(), ["one", "two"])
@@ -260,7 +260,10 @@ async test "embedMany batches at the model limit and accumulates usage" {
     cached_input_tokens: 0,
     cache_write_input_tokens: 0,
   })
-  let model = MockEmbeddingModel::new(result, max_embeddings_per_call=2)
+  let model = @testing.MockEmbeddingModel::new(
+    result,
+    max_embeddings_per_call=2,
+  )
   let actual = @ai.embedMany(model, ["one", "two", "three"])
   assert_eq(actual.embeddings, [[0.1], [0.2], [0.1]])
   assert_eq(actual.usage.input_tokens, 4)
@@ -277,7 +280,7 @@ async test "embedMany honors model parallel capability and caller limit" {
     cached_input_tokens: 0,
     cache_write_input_tokens: 0,
   })
-  let model = MockEmbeddingModel::new(
+  let model = @testing.MockEmbeddingModel::new(
     result,
     max_embeddings_per_call=1,
     supports_parallel_calls=true,
@@ -299,7 +302,7 @@ async test "completion helpers use a provider-neutral mock" {
     @provider.Usage::zero(),
     @provider.Stop,
   )
-  let model = MockCompletionModel::new(
+  let model = @testing.MockCompletionModel::new(
     [@provider.TextDelta(id="text-0", delta=" complete")],
     result,
   )
@@ -321,7 +324,7 @@ async test "generateImage batches through a provider-neutral mock" {
     [@provider.GeneratedImage::new(@provider.ImageData::Base64("mock-image"))],
     @provider.Usage::zero(),
   )
-  let model = MockImageModel::new(result, max_images_per_call=2)
+  let model = @testing.MockImageModel::new(result, max_images_per_call=2)
   let actual = @ai.generateImage(model, "MoonBit", n=3)
   assert_eq(actual.images.length(), 3)
   assert_eq(model.captured_batch_sizes(), [2, 1])
@@ -335,7 +338,7 @@ async test "generateVideo uses the versioned provider contract and batches" {
       "video/mp4",
     ),
   ])
-  let model = MockVideoModel::new(result, max_videos_per_call=2)
+  let model = @testing.MockVideoModel::new(result, max_videos_per_call=2)
   let actual = @ai.generateVideo(model, "MoonBit", n=3)
   assert_eq(actual.videos.length(), 3)
   assert_eq(model.captured_batch_sizes(), [2, 1])
@@ -357,7 +360,7 @@ async test "generateObject parses structured model output" {
     @provider.Usage::zero(),
     @provider.Stop,
   )
-  let model = MockChatModel::new([], result)
+  let model = @testing.MockChatModel::new([], result)
   let actual = @ai.generateObject(
     mock_chat_v4(model),
     {
@@ -387,7 +390,7 @@ async test "generateObject rejects output that does not match its schema" {
     @provider.Usage::zero(),
     @provider.Stop,
   )
-  let model = MockChatModel::new([], result)
+  let model = @testing.MockChatModel::new([], result)
   try
     @ai.generateObject(
       mock_chat_v4(model),
@@ -426,7 +429,7 @@ async test "generateObject reports invalid JSON separately" {
     @provider.Usage::zero(),
     @provider.Stop,
   )
-  let model = MockChatModel::new([], result)
+  let model = @testing.MockChatModel::new([], result)
   try
     @ai.generateObject(
       mock_chat_v4(model),
@@ -450,7 +453,7 @@ async test "rerank reconstructs provider ordering and forwards options" {
     @provider.RerankingModelV4Ranking::new(2, 0.95),
     @provider.RerankingModelV4Ranking::new(0, 0.75),
   ])
-  let model = MockRerankingModelV4::new(result)
+  let model = @testing.MockRerankingModelV4::new(result)
   let actual = @ai.rerankText(
     model,
     ["first", "second", "third"],
@@ -491,7 +494,7 @@ async test "rerank preserves object document representation" {
   let result = @provider.RerankingModelV4Result::new([
     @provider.RerankingModelV4Ranking::new(1, 0.8),
   ])
-  let model = MockRerankingModelV4::new(result)
+  let model = @testing.MockRerankingModelV4::new(result)
   let actual = @ai.rerank(
     model,
     @provider.RerankingModelV4Documents::objects([{ "id": 1 }, { "id": 2 }]),
@@ -508,7 +511,7 @@ async test "rerank returns an empty result without invoking the model" {
   let result = @provider.RerankingModelV4Result::new([
     @provider.RerankingModelV4Ranking::new(0, 1.0),
   ])
-  let model = MockRerankingModelV4::new(result)
+  let model = @testing.MockRerankingModelV4::new(result)
   let actual = @ai.rerankText(model, [], "query")
   match actual.reranked_documents {
     @provider.TextDocuments(values) => assert_eq(values, [])
@@ -525,7 +528,7 @@ async test "rerank rejects invalid provider indices" {
   let result = @provider.RerankingModelV4Result::new([
     @provider.RerankingModelV4Ranking::new(4, 1.0),
   ])
-  let model = MockRerankingModelV4::new(result)
+  let model = @testing.MockRerankingModelV4::new(result)
   try @ai.rerankText(model, ["one"], "query") catch {
     @provider.InvalidResponseDataError(message~, data~) => {
       assert_true(message.contains("out-of-range"))
@@ -541,7 +544,7 @@ async test "rerank rejects invalid provider indices" {
 async test "standard helpers honor cancellation before invoking a model" {
   let token = @provider.CancellationToken::new()
   token.cancel()
-  let model = MockChatModel::new(
+  let model = @testing.MockChatModel::new(
     [],
     @provider.ChatResponse::new(
       "ignored",
@@ -594,7 +597,7 @@ async test "streamTranscribe uses the provider-neutral audio stream contract" {
       provider_metadata=Map([]),
     ),
   ]
-  let model = MockTranscriptionModel::new(
+  let model = @testing.MockTranscriptionModel::new(
     result,
     stream_events=configured_events,
   )

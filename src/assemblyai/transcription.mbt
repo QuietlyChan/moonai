@@ -235,3 +235,12 @@ pub impl @provider.TranscriptionModelV4 for AssemblyAITranscriptionModel with fn
     functionality="AssemblyAI realtime streaming",
   )
 }
+
+///|
+pub extend AssemblyAITranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  do_stream,
+  model_id,
+}

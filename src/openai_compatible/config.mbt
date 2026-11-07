@@ -275,3 +275,19 @@ fn non_negative_text_tokens(
     text
   }
 }
+
+///|
+#deprecated
+pub extend OpenAICompatibleErrorDetail with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAICompatibleErrorDetail with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAICompatibleErrorData with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAICompatibleErrorData with Eq::{not_equal, equal}

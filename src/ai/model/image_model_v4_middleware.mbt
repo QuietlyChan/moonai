@@ -127,3 +127,12 @@ pub impl @provider.ImageModelV4 for MiddlewareImageModelV4 with fn do_generate(
     None => do_generate()
   }
 }
+
+///|
+pub extend MiddlewareImageModelV4 with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
+}

@@ -129,9 +129,9 @@ fn retry_call_options() -> @provider.LanguageModelV4CallOptions {
 ///|
 async test "stream retries middleware retries a pre-stream failure" {
   let model = flaky_stream_model([retryable_api_error(message="upstream reset")])
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    stream_retries_middleware(retry_policy=no_delay_retry_policy(2)),
+    @model.stream_retries_middleware(retry_policy=no_delay_retry_policy(2)),
   )
   let events : Array[@provider.LanguageModelV4StreamPart] = []
   let result = wrapped.do_stream(retry_call_options(), event => {
@@ -149,9 +149,9 @@ async test "stream retries middleware never retries after events were delivered"
     [retryable_api_error(message="mid-stream reset")],
     streams_a_delta_first=true,
   )
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    stream_retries_middleware(retry_policy=no_delay_retry_policy(3)),
+    @model.stream_retries_middleware(retry_policy=no_delay_retry_policy(3)),
   )
   let events : Array[@provider.LanguageModelV4StreamPart] = []
   try
@@ -175,9 +175,9 @@ async test "stream retries middleware raises after exhausting retries" {
     retryable_api_error(message="upstream reset"),
     retryable_api_error(message="upstream reset"),
   ])
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    stream_retries_middleware(retry_policy=no_delay_retry_policy(2)),
+    @model.stream_retries_middleware(retry_policy=no_delay_retry_policy(2)),
   )
   try wrapped.do_stream(retry_call_options(), _ => ()) catch {
     @provider.APICallError(message="upstream reset", ..) => ()
@@ -205,9 +205,9 @@ async test "stream retries middleware passes non-retryable errors through" {
       cause=None,
     ),
   ])
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    stream_retries_middleware(retry_policy=no_delay_retry_policy(3)),
+    @model.stream_retries_middleware(retry_policy=no_delay_retry_policy(3)),
   )
   try wrapped.do_stream(retry_call_options(), _ => ()) catch {
     @provider.APICallError(message="invalid request", ..) => ()
@@ -221,9 +221,9 @@ async test "stream retries middleware passes non-retryable errors through" {
 ///|
 async test "stream retries middleware respects max_retries zero" {
   let model = flaky_stream_model([retryable_api_error(message="upstream reset")])
-  let wrapped = wrap_language_model_v4(
+  let wrapped = @model.wrap_language_model_v4(
     model as &@provider.LanguageModelV4,
-    stream_retries_middleware(retry_policy=no_delay_retry_policy(0)),
+    @model.stream_retries_middleware(retry_policy=no_delay_retry_policy(0)),
   )
   try wrapped.do_stream(retry_call_options(), _ => ()) catch {
     @provider.APICallError(message="upstream reset", ..) => ()

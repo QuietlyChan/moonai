@@ -21,3 +21,11 @@ pub fn invalid_argument(
   let rendered = "Invalid argument for parameter \{parameter}: \{message}"
   InvalidArgumentError(parameter~, value~, message=rendered)
 }
+
+///|
+#deprecated
+pub extend InvalidArgumentError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend InvalidArgumentError with Eq::{not_equal, equal}

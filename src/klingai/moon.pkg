@@ -5,11 +5,10 @@ import {
   "moonbitlang/core/encoding/base64",
   "moonbitlang/core/encoding/utf8" @utf8enc,
   "moonbitlang/core/env",
-  "moonbitlang/core/json",
 }
 
 import {
   "QuietlyChan/moonai/provider",
-} for "test"
+} for "wbtest"
 
 supported_targets = "+native"

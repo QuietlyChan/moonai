@@ -101,3 +101,19 @@ fn parse_open_responses_provider_options(
   )
   { options: { reasoning_summary, }, warnings: reader.diagnostics(), }
 }
+
+///|
+#deprecated
+pub extend OpenResponsesReasoningSummary with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenResponsesReasoningSummary with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenResponsesLanguageModelOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenResponsesLanguageModelOptions with Eq::{not_equal, equal}

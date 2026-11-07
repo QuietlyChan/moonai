@@ -305,3 +305,12 @@ pub impl @provider.ImageModelV4 for OpenAICompatibleImageModel with fn do_genera
 ) {
   self.generate_images_v4(options)
 }
+
+///|
+pub extend OpenAICompatibleImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
+}

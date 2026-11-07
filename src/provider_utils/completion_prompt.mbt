@@ -73,3 +73,11 @@ pub fn convert_to_completion_prompt(
   text.write_string(":\n")
   { prompt: text.to_string(), stop_sequences: ["\n\{user}:"], }
 }
+
+///|
+#deprecated
+pub extend CompletionPrompt with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend CompletionPrompt with Eq::{not_equal, equal}

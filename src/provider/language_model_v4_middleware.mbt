@@ -99,3 +99,11 @@ pub async fn LanguageModelV4Middleware::transform(
     None => params
   }
 }
+
+///|
+#deprecated
+pub extend LanguageModelV4MiddlewareOperation with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4MiddlewareOperation with Eq::{not_equal, equal}

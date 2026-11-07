@@ -36,7 +36,7 @@ async test "streamText drives an OpenAI-compatible HTTP SSE request" {
         max_connections=1,
       )
     }
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="local-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -92,7 +92,7 @@ async test "OpenAI-compatible V4 preserves native stream usage and finish reason
         max_connections=1,
       )
     }
-    let concrete = openai_compatible(
+    let concrete = @openai_compatible.openai_compatible(
       provider_name="local-v4",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -138,7 +138,7 @@ async test "OpenAI-compatible V4 preserves streamed tool thought signatures" {
         max_connections=1,
       )
     }
-    let concrete = openai_compatible(
+    let concrete = @openai_compatible.openai_compatible(
       provider_name="google",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="gemini-compatible",
@@ -188,7 +188,7 @@ async test "generateText drives an OpenAI-compatible JSON request" {
         max_connections=1,
       )
     }
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="local-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -243,7 +243,7 @@ async test "compatible chat applies custom metadata and usage converters" {
         max_connections=1,
       )
     }
-    let metadata_extractor = OpenAICompatibleMetadataExtractor::new(
+    let metadata_extractor = @openai_compatible.OpenAICompatibleMetadataExtractor::new(
       extract_metadata=response => {
         let trace = match response {
           { "trace": String(value), .. } => value
@@ -252,12 +252,13 @@ async test "compatible chat applies custom metadata and usage converters" {
         Map([("vendor", ({ "trace": trace } : Json))])
       },
       create_stream_extractor=() => {
-        OpenAICompatibleStreamMetadataExtractor::new(process_chunk=_ => (), build_metadata=() => {
-          Map([])
-        })
+        @openai_compatible.OpenAICompatibleStreamMetadataExtractor::new(
+          process_chunk=_ => (),
+          build_metadata=() => Map([]),
+        )
       },
     )
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="custom-hooks",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -319,11 +320,11 @@ async test "compatible stream metadata extractor accumulates chunks" {
         max_connections=1,
       )
     }
-    let metadata_extractor = OpenAICompatibleMetadataExtractor::new(
+    let metadata_extractor = @openai_compatible.OpenAICompatibleMetadataExtractor::new(
       extract_metadata=_ => Map([]),
       create_stream_extractor=() => {
         let chunks = Ref(0)
-        OpenAICompatibleStreamMetadataExtractor::new(
+        @openai_compatible.OpenAICompatibleStreamMetadataExtractor::new(
           process_chunk=_ => chunks.val = chunks.val + 1,
           build_metadata=() => {
             Map([("vendor", ({ "chunk_count": chunks.val } : Json))])
@@ -331,7 +332,7 @@ async test "compatible stream metadata extractor accumulates chunks" {
         )
       },
     )
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="stream-hooks",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -381,7 +382,7 @@ async test "custom error structure can mark a provider response retryable" {
         max_connections=2,
       )
     }
-    let error_structure = OpenAICompatibleErrorStructure::new(
+    let error_structure = @openai_compatible.OpenAICompatibleErrorStructure::new(
       error_to_message=error => {
         match error {
           { "problem": { "detail": String(message), .. }, .. } => Some(message)
@@ -396,7 +397,7 @@ async test "custom error structure can mark a provider response retryable" {
         }
       },
     )
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="custom-error",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -435,13 +436,14 @@ async test "custom error parser failures use the shared API call boundary" {
         max_connections=1,
       )
     }
-    let error_structure = OpenAICompatibleErrorStructure::new(error_to_message=value => {
-      raise @provider.InvalidResponseDataError(
-        message="custom compatible parser failed",
-        data=value,
-      )
-    })
-    let model = openai_compatible(
+    let error_structure = @openai_compatible.OpenAICompatibleErrorStructure::new(error_to_message=value => {
+        raise @provider.InvalidResponseDataError(
+          message="custom compatible parser failed",
+          data=value,
+        )
+      },
+    )
+    let model = @openai_compatible.openai_compatible(
       provider_name="custom-error",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -514,7 +516,7 @@ async test "JSON transport retries a transient server response" {
         max_connections=2,
       )
     }
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="retry-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -552,7 +554,7 @@ async test "JSON transport does not retry a client error" {
         max_connections=1,
       )
     }
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="client-error-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -600,7 +602,7 @@ async test "cancellation interrupts retry backoff" {
       @async.sleep(10)
       token.cancel()
     }
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="cancel-retry-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -633,7 +635,7 @@ async test "cancellation interrupts retry backoff" {
 async test "cancelled token prevents a provider request" {
   let token = @provider.CancellationToken::new()
   token.cancel()
-  let model = openai_compatible(
+  let model = @openai_compatible.openai_compatible(
     provider_name="cancel-test",
     base_url="http://127.0.0.1:1/v1",
     model_id="test-model",
@@ -679,7 +681,7 @@ async test "SSE transport retries before stream start" {
         max_connections=2,
       )
     }
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="sse-retry-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -730,7 +732,7 @@ async test "SSE transport does not retry after stream events are emitted" {
         max_connections=1,
       )
     }
-    let model = openai_compatible(
+    let model = @openai_compatible.openai_compatible(
       provider_name="sse-no-retry-test",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       model_id="test-model",
@@ -782,7 +784,7 @@ impl @provider_utils.HttpTransport for CompatibleNetworkFailureTransport with fn
 ///|
 async test "OpenAI-compatible exposes network failures as API call errors" {
   let transport = CompatibleNetworkFailureTransport::{ calls: Ref(0), }
-  let model = openai_compatible(
+  let model = @openai_compatible.openai_compatible(
     provider_name="network-test",
     base_url="https://gateway.example/v1",
     model_id="test-model",

@@ -256,3 +256,14 @@ pub impl @provider.ProviderV4 for BasetenProvider with fn files(_self) {
 pub impl @provider.ProviderV4 for BasetenProvider with fn skills(_self) {
   None
 }
+
+///|
+pub extend BasetenProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  reranking_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

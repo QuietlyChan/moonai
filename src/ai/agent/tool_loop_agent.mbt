@@ -243,3 +243,6 @@ pub impl Agent for ToolLoopAgent with fn stream(
     cancellation_token?=options.cancellation_token,
   )
 }
+
+///|
+pub extend ToolLoopAgent with Agent::{id, generate, stream, version, tools}

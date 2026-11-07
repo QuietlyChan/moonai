@@ -148,39 +148,75 @@ pub fn web_search_20260209_tool(args? : @json.Json, name? : String) -> @provider
 pub(all) struct AnthropicAdvisorCaching {
   ttl : AnthropicCacheTtl
 }
+#deprecated
+pub fn AnthropicAdvisorCaching::equal(Self, Self) -> Bool
 pub fn AnthropicAdvisorCaching::new(ttl~ : AnthropicCacheTtl) -> Self
+#deprecated
+pub fn AnthropicAdvisorCaching::not_equal(Self, Self) -> Bool
 pub fn AnthropicAdvisorCaching::to_json(Self) -> @json.Json
+#deprecated
+pub fn AnthropicAdvisorCaching::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicCacheControl {
   ttl : AnthropicCacheTtl?
 }
+#deprecated
+pub fn AnthropicCacheControl::equal(Self, Self) -> Bool
 pub fn AnthropicCacheControl::new(ttl? : AnthropicCacheTtl) -> Self
+#deprecated
+pub fn AnthropicCacheControl::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicCacheControl::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicCacheTtl {
   AnthropicCacheFiveMinutes
   AnthropicCacheOneHour
 }
+#deprecated
+pub fn AnthropicCacheTtl::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicCacheTtl::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicCacheTtl::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicCitations {
   enabled : Bool
 }
+#deprecated
+pub fn AnthropicCitations::equal(Self, Self) -> Bool
 pub fn AnthropicCitations::new(enabled~ : Bool) -> Self
+#deprecated
+pub fn AnthropicCitations::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicCitations::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicCompactionTrigger {
   value : Double
 }
+#deprecated
+pub fn AnthropicCompactionTrigger::equal(Self, Self) -> Bool
 pub fn AnthropicCompactionTrigger::new(value~ : Double) -> Self
+#deprecated
+pub fn AnthropicCompactionTrigger::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicCompactionTrigger::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicContainer {
   id : String?
   skills : Array[AnthropicContainerSkill]
 }
+#deprecated
+pub fn AnthropicContainer::equal(Self, Self) -> Bool
 pub fn AnthropicContainer::new(id? : String, skills? : Array[AnthropicContainerSkill]) -> Self
+#deprecated
+pub fn AnthropicContainer::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContainer::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicContainerMetadata {
@@ -188,6 +224,12 @@ pub(all) struct AnthropicContainerMetadata {
   id : String
   skills : Array[AnthropicContainerSkillMetadata]?
 }
+#deprecated
+pub fn AnthropicContainerMetadata::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContainerMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContainerMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicContainerSkill {
@@ -196,6 +238,12 @@ pub(all) enum AnthropicContainerSkill {
 }
 pub fn AnthropicContainerSkill::built_in(skill_id~ : String, version? : String) -> Self
 pub fn AnthropicContainerSkill::custom(provider_reference~ : @provider.ProviderReference, version? : String) -> Self
+#deprecated
+pub fn AnthropicContainerSkill::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContainerSkill::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContainerSkill::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicContainerSkillMetadata {
@@ -203,12 +251,24 @@ pub(all) struct AnthropicContainerSkillMetadata {
   skill_id : String
   version : String
 }
+#deprecated
+pub fn AnthropicContainerSkillMetadata::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContainerSkillMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContainerSkillMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicContextManagement {
   edits : Array[AnthropicContextManagementEdit]
 }
+#deprecated
+pub fn AnthropicContextManagement::equal(Self, Self) -> Bool
 pub fn AnthropicContextManagement::new(edits~ : Array[AnthropicContextManagementEdit]) -> Self
+#deprecated
+pub fn AnthropicContextManagement::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContextManagement::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicContextManagementEdit {
@@ -219,6 +279,12 @@ pub(all) enum AnthropicContextManagementEdit {
 pub fn AnthropicContextManagementEdit::clear_thinking(keep? : AnthropicThinkingKeep) -> Self
 pub fn AnthropicContextManagementEdit::clear_tool_uses(trigger? : AnthropicContextTrigger, keep? : AnthropicToolUseKeep, clear_at_least? : AnthropicInputTokenClearAtLeast, clear_tool_inputs? : Bool, exclude_tools? : Array[String]) -> Self
 pub fn AnthropicContextManagementEdit::compact(trigger? : AnthropicCompactionTrigger, pause_after_compaction? : Bool, instructions? : String) -> Self
+#deprecated
+pub fn AnthropicContextManagementEdit::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContextManagementEdit::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContextManagementEdit::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicContextManagementEditMetadata {
@@ -227,18 +293,36 @@ pub(all) struct AnthropicContextManagementEditMetadata {
   cleared_input_tokens : Int32?
   cleared_thinking_turns : Int32?
 }
+#deprecated
+pub fn AnthropicContextManagementEditMetadata::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContextManagementEditMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContextManagementEditMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicContextManagementMetadata {
   applied_edits : Array[AnthropicContextManagementEditMetadata]
 }
+#deprecated
+pub fn AnthropicContextManagementMetadata::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContextManagementMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContextManagementMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicContextTrigger {
   AnthropicContextInputTokens(Double)
   AnthropicContextToolUses(Double)
 }
+#deprecated
+pub fn AnthropicContextTrigger::equal(Self, Self) -> Bool
 pub fn AnthropicContextTrigger::input_tokens(Double) -> Self
+#deprecated
+pub fn AnthropicContextTrigger::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicContextTrigger::to_repr(Self) -> @debug.Repr
 pub fn AnthropicContextTrigger::tool_uses(Double) -> Self
 
 #derive(Eq, @debug.Debug)
@@ -249,6 +333,12 @@ pub(all) enum AnthropicEffort {
   AnthropicEffortXHigh
   AnthropicEffortMax
 }
+#deprecated
+pub fn AnthropicEffort::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicEffort::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicEffort::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicFallback {
@@ -258,7 +348,13 @@ pub(all) struct AnthropicFallback {
   output_config : Map[String, @json.Json]?
   speed : AnthropicSpeed?
 }
+#deprecated
+pub fn AnthropicFallback::equal(Self, Self) -> Bool
 pub fn AnthropicFallback::new(model~ : String, max_tokens? : Int32, thinking? : Map[String, @json.Json], output_config? : Map[String, @json.Json], speed? : AnthropicSpeed) -> Self
+#deprecated
+pub fn AnthropicFallback::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicFallback::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicFallbacks {
@@ -267,6 +363,12 @@ pub(all) enum AnthropicFallbacks {
 }
 pub fn AnthropicFallbacks::chain(Array[AnthropicFallback]) -> Self
 pub fn AnthropicFallbacks::default_fallback() -> Self
+#deprecated
+pub fn AnthropicFallbacks::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicFallbacks::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicFallbacks::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicFilePartProviderOptions {
@@ -275,12 +377,24 @@ pub(all) struct AnthropicFilePartProviderOptions {
   title : String?
   context : String?
 }
+#deprecated
+pub fn AnthropicFilePartProviderOptions::equal(Self, Self) -> Bool
 pub fn AnthropicFilePartProviderOptions::new(container_upload? : Bool, citations? : AnthropicCitations, title? : String, context? : String) -> Self
+#deprecated
+pub fn AnthropicFilePartProviderOptions::not_equal(Self, Self) -> Bool
 pub fn AnthropicFilePartProviderOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn AnthropicFilePartProviderOptions::to_repr(Self) -> @debug.Repr
 
 pub struct AnthropicFiles {
   // private fields
 }
+pub async fn AnthropicFiles::delete_file(Self, @provider.FilesV4DeleteFileCallOptions) -> @provider.FilesV4DeleteFileResult
+pub async fn AnthropicFiles::download_file(Self, @provider.FilesV4DownloadFileCallOptions) -> @provider.FilesV4DownloadFileResult
+pub async fn AnthropicFiles::get_file_metadata(Self, @provider.FilesV4GetFileMetadataCallOptions) -> @provider.FilesV4FileMetadata
+pub fn AnthropicFiles::provider(Self) -> String
+pub fn AnthropicFiles::specification_version(Self) -> String
+pub async fn AnthropicFiles::upload_file(Self, @provider.FilesV4UploadFileCallOptions) -> @provider.FilesV4UploadFileResult
 pub impl @provider.FilesV4 for AnthropicFiles
 
 #derive(Eq, @debug.Debug)
@@ -288,12 +402,24 @@ pub(all) enum AnthropicInferenceGeo {
   AnthropicInferenceUs
   AnthropicInferenceGlobal
 }
+#deprecated
+pub fn AnthropicInferenceGeo::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicInferenceGeo::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicInferenceGeo::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicInputTokenClearAtLeast {
   value : Double
 }
+#deprecated
+pub fn AnthropicInputTokenClearAtLeast::equal(Self, Self) -> Bool
 pub fn AnthropicInputTokenClearAtLeast::new(value~ : Double) -> Self
+#deprecated
+pub fn AnthropicInputTokenClearAtLeast::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicInputTokenClearAtLeast::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicLanguageModelOptions {
@@ -314,8 +440,14 @@ pub(all) struct AnthropicLanguageModelOptions {
   anthropic_beta : Array[String]
   context_management : AnthropicContextManagement?
 }
+#deprecated
+pub fn AnthropicLanguageModelOptions::equal(Self, Self) -> Bool
 pub fn AnthropicLanguageModelOptions::new(send_reasoning? : Bool, structured_output_mode? : AnthropicStructuredOutputMode, thinking? : AnthropicThinking, disable_parallel_tool_use? : Bool, cache_control? : AnthropicCacheControl, metadata? : AnthropicMetadata, mcp_servers? : Array[AnthropicMcpServer], container? : AnthropicContainer, tool_streaming? : Bool, effort? : AnthropicEffort, task_budget? : AnthropicTaskBudget, speed? : AnthropicSpeed, inference_geo? : AnthropicInferenceGeo, fallbacks? : AnthropicFallbacks, anthropic_beta? : Array[String], context_management? : AnthropicContextManagement) -> Self
+#deprecated
+pub fn AnthropicLanguageModelOptions::not_equal(Self, Self) -> Bool
 pub fn AnthropicLanguageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn AnthropicLanguageModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicMcpServer {
@@ -324,14 +456,26 @@ pub(all) struct AnthropicMcpServer {
   authorization_token : String?
   tool_configuration : AnthropicMcpToolConfiguration?
 }
+#deprecated
+pub fn AnthropicMcpServer::equal(Self, Self) -> Bool
 pub fn AnthropicMcpServer::new(name~ : String, url~ : String, authorization_token? : String, tool_configuration? : AnthropicMcpToolConfiguration) -> Self
+#deprecated
+pub fn AnthropicMcpServer::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicMcpServer::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicMcpToolConfiguration {
   enabled : Bool?
   allowed_tools : Array[String]?
 }
+#deprecated
+pub fn AnthropicMcpToolConfiguration::equal(Self, Self) -> Bool
 pub fn AnthropicMcpToolConfiguration::new(enabled? : Bool, allowed_tools? : Array[String]) -> Self
+#deprecated
+pub fn AnthropicMcpToolConfiguration::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicMcpToolConfiguration::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct AnthropicMessageMetadata {
@@ -343,29 +487,46 @@ pub(all) struct AnthropicMessageMetadata {
   context_management : AnthropicContextManagementMetadata?
   raw : @json.Json
 }
+#deprecated
+pub fn AnthropicMessageMetadata::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicMetadata {
   user_id : String?
 }
+#deprecated
+pub fn AnthropicMetadata::equal(Self, Self) -> Bool
 pub fn AnthropicMetadata::new(user_id? : String) -> Self
+#deprecated
+pub fn AnthropicMetadata::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicMetadata::to_repr(Self) -> @debug.Repr
 
 pub struct AnthropicProvider {
   // private fields
 }
 pub fn AnthropicProvider::batch(Self) -> &@provider.BatchV4
 pub fn AnthropicProvider::chat(Self, String) -> &@provider.LanguageModelV4
+pub fn AnthropicProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
 pub fn AnthropicProvider::files(Self) -> AnthropicFiles raise
+pub fn AnthropicProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn AnthropicProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn AnthropicProvider::language_model(Self, String) -> &@provider.LanguageModelV4
 pub fn AnthropicProvider::messages(Self, String) -> &@provider.LanguageModelV4
+pub fn AnthropicProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
 pub fn AnthropicProvider::skills(Self) -> AnthropicSkills
+pub fn AnthropicProvider::specification_version(Self) -> String
+pub fn AnthropicProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
 pub fn AnthropicProvider::tools(Self) -> AnthropicTools
+pub fn AnthropicProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for AnthropicProvider
 
 pub struct AnthropicSkills {
   // private fields
 }
+pub fn AnthropicSkills::provider(Self) -> String
+pub fn AnthropicSkills::specification_version(Self) -> String
+pub async fn AnthropicSkills::upload_skill(Self, @provider.SkillsV4UploadSkillCallOptions) -> @provider.SkillsV4UploadSkillResult
 pub impl @provider.SkillsV4 for AnthropicSkills
 
 #derive(Eq, @debug.Debug)
@@ -373,6 +534,12 @@ pub(all) enum AnthropicSpeed {
   AnthropicSpeedFast
   AnthropicSpeedStandard
 }
+#deprecated
+pub fn AnthropicSpeed::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicSpeed::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicSpeed::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicStopDetails {
@@ -381,6 +548,12 @@ pub(all) struct AnthropicStopDetails {
   explanation : String?
   recommended_model : String?
 }
+#deprecated
+pub fn AnthropicStopDetails::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicStopDetails::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicStopDetails::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicStructuredOutputMode {
@@ -388,20 +561,38 @@ pub(all) enum AnthropicStructuredOutputMode {
   AnthropicStructuredOutputJsonTool
   AnthropicStructuredOutputAuto
 }
+#deprecated
+pub fn AnthropicStructuredOutputMode::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicStructuredOutputMode::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicStructuredOutputMode::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicSystemMessageProviderOptions {
   tool_changes : Array[AnthropicToolChange]
 }
+#deprecated
+pub fn AnthropicSystemMessageProviderOptions::equal(Self, Self) -> Bool
 pub fn AnthropicSystemMessageProviderOptions::new(tool_changes? : Array[AnthropicToolChange]) -> Self
+#deprecated
+pub fn AnthropicSystemMessageProviderOptions::not_equal(Self, Self) -> Bool
 pub fn AnthropicSystemMessageProviderOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn AnthropicSystemMessageProviderOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicTaskBudget {
   total : Int32
   remaining : Int32?
 }
+#deprecated
+pub fn AnthropicTaskBudget::equal(Self, Self) -> Bool
 pub fn AnthropicTaskBudget::new(total~ : Int32, remaining? : Int32) -> Self raise
+#deprecated
+pub fn AnthropicTaskBudget::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicTaskBudget::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicThinking {
@@ -412,12 +603,24 @@ pub(all) enum AnthropicThinking {
 pub fn AnthropicThinking::adaptive(display? : AnthropicThinkingDisplay) -> Self
 pub fn AnthropicThinking::disabled() -> Self
 pub fn AnthropicThinking::enabled(budget_tokens? : Int32) -> Self
+#deprecated
+pub fn AnthropicThinking::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicThinking::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicThinking::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicThinkingDisplay {
   AnthropicThinkingOmitted
   AnthropicThinkingSummarized
 }
+#deprecated
+pub fn AnthropicThinkingDisplay::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicThinkingDisplay::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicThinkingDisplay::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicThinkingKeep {
@@ -425,6 +628,12 @@ pub(all) enum AnthropicThinkingKeep {
   AnthropicKeepThinkingTurns(Double)
 }
 pub fn AnthropicThinkingKeep::all() -> Self
+#deprecated
+pub fn AnthropicThinkingKeep::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicThinkingKeep::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicThinkingKeep::to_repr(Self) -> @debug.Repr
 pub fn AnthropicThinkingKeep::turns(Double) -> Self
 
 #derive(Eq, @debug.Debug)
@@ -433,6 +642,12 @@ pub(all) enum AnthropicToolAllowedCaller {
   AnthropicToolCodeExecution20250825
   AnthropicToolCodeExecution20260120
 }
+#deprecated
+pub fn AnthropicToolAllowedCaller::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicToolAllowedCaller::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicToolAllowedCaller::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum AnthropicToolChange {
@@ -440,7 +655,13 @@ pub(all) enum AnthropicToolChange {
   AnthropicToolRemoval(String)
 }
 pub fn AnthropicToolChange::addition(String) -> Self
+#deprecated
+pub fn AnthropicToolChange::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicToolChange::not_equal(Self, Self) -> Bool
 pub fn AnthropicToolChange::removal(String) -> Self
+#deprecated
+pub fn AnthropicToolChange::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicToolOptions {
@@ -448,14 +669,26 @@ pub(all) struct AnthropicToolOptions {
   allowed_callers : Array[AnthropicToolAllowedCaller]
   eager_input_streaming : Bool?
 }
+#deprecated
+pub fn AnthropicToolOptions::equal(Self, Self) -> Bool
 pub fn AnthropicToolOptions::new(defer_loading? : Bool, allowed_callers? : Array[AnthropicToolAllowedCaller], eager_input_streaming? : Bool) -> Self
+#deprecated
+pub fn AnthropicToolOptions::not_equal(Self, Self) -> Bool
 pub fn AnthropicToolOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn AnthropicToolOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicToolUseKeep {
   value : Double
 }
+#deprecated
+pub fn AnthropicToolUseKeep::equal(Self, Self) -> Bool
 pub fn AnthropicToolUseKeep::new(value~ : Double) -> Self
+#deprecated
+pub fn AnthropicToolUseKeep::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicToolUseKeep::to_repr(Self) -> @debug.Repr
 
 pub struct AnthropicTools {
 }
@@ -489,13 +722,25 @@ pub(all) struct AnthropicUsageIteration {
   cache_creation_input_tokens : Int32?
   cache_read_input_tokens : Int32?
 }
+#deprecated
+pub fn AnthropicUsageIteration::equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicUsageIteration::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AnthropicUsageIteration::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicWebFetchCitations {
   enabled : Bool
 }
+#deprecated
+pub fn AnthropicWebFetchCitations::equal(Self, Self) -> Bool
 pub fn AnthropicWebFetchCitations::new(enabled~ : Bool) -> Self
+#deprecated
+pub fn AnthropicWebFetchCitations::not_equal(Self, Self) -> Bool
 pub fn AnthropicWebFetchCitations::to_json(Self) -> @json.Json
+#deprecated
+pub fn AnthropicWebFetchCitations::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct AnthropicWebSearchUserLocation {
@@ -504,8 +749,14 @@ pub(all) struct AnthropicWebSearchUserLocation {
   country : String?
   timezone : String?
 }
+#deprecated
+pub fn AnthropicWebSearchUserLocation::equal(Self, Self) -> Bool
 pub fn AnthropicWebSearchUserLocation::new(city? : String, region? : String, country? : String, timezone? : String) -> Self
+#deprecated
+pub fn AnthropicWebSearchUserLocation::not_equal(Self, Self) -> Bool
 pub fn AnthropicWebSearchUserLocation::to_json(Self) -> @json.Json
+#deprecated
+pub fn AnthropicWebSearchUserLocation::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type AnthropicModelId = String

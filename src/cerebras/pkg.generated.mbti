@@ -23,8 +23,16 @@ pub struct CerebrasProvider {
 }
 pub fn CerebrasProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn CerebrasProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
+pub fn CerebrasProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn CerebrasProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn CerebrasProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn CerebrasProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn CerebrasProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn CerebrasProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn CerebrasProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn CerebrasProvider::specification_version(Self) -> String
+pub fn CerebrasProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn CerebrasProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for CerebrasProvider
 
 // Type aliases

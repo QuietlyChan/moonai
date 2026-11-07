@@ -1,7 +1,7 @@
 ///|
 test "copy_headers isolates provider configuration" {
   let source : Map[String, String] = { "Authorization": "old" }
-  let copied = copy_headers(source)
+  let copied = @provider_utils.copy_headers(source)
   copied["Authorization"] = "new"
   assert_eq(source["Authorization"], "old")
   assert_eq(copied["Authorization"], "new")
@@ -9,7 +9,7 @@ test "copy_headers isolates provider configuration" {
 
 ///|
 test "call headers override provider headers" {
-  let merged = merge_headers(
+  let merged = @provider_utils.merge_headers(
     { "Authorization": "provider", "X-Provider": "moonai" },
     { "authorization": "call", "X-Request-Id": "request-1" },
   )
@@ -23,11 +23,11 @@ test "call headers override provider headers" {
 test "header utility aliases match AI SDK record behavior" {
   let first = { "Authorization": "provider", "X-First": "one" }
   let second = { "Authorization": "call", "X-Second": "two" }
-  let combined = combineHeaders([first, second])
+  let combined = @provider_utils.combineHeaders([first, second])
   assert_eq(combined["Authorization"], "call")
   assert_eq(combined["X-First"], "one")
   assert_eq(combined["X-Second"], "two")
-  let normalized = normalizeHeaders(combined)
+  let normalized = @provider_utils.normalizeHeaders(combined)
   assert_eq(normalized.get("Authorization"), None)
   assert_eq(normalized["authorization"], "call")
   assert_eq(first["Authorization"], "provider")
@@ -45,7 +45,7 @@ test "request header sanitizer removes untrusted forwarding headers" {
     "User-Agent": "moonai-test",
     "X-Request-Id": "request-1",
   }
-  let sanitized = sanitizeRequestHeaders(input)
+  let sanitized = @provider_utils.sanitizeRequestHeaders(input)
   assert_eq(sanitized.get("Host"), None)
   assert_eq(sanitized.get("Connection"), None)
   assert_eq(sanitized.get("X-Forwarded-For"), None)
@@ -63,7 +63,7 @@ test "user agent suffix appends case-insensitively without mutating input" {
     "User-Agent": "moon-app/1.0",
     "Authorization": "Bearer token",
   }
-  let result = with_user_agent_suffix(headers, [
+  let result = @provider_utils.with_user_agent_suffix(headers, [
     "moonai/0.1.0", "provider/open-responses",
   ])
   assert_eq(
@@ -76,23 +76,26 @@ test "user agent suffix appends case-insensitively without mutating input" {
 
 ///|
 test "AI SDK-style user agent alias shares the header normalization" {
-  let result = withUserAgentSuffix({ "User-Agent": "moon-app/1.0" }, [
-    "moonai/0.1.0",
-  ])
+  let result = @provider_utils.withUserAgentSuffix(
+    { "User-Agent": "moon-app/1.0" },
+    ["moonai/0.1.0"],
+  )
   assert_eq(result.get("user-agent"), Some("moon-app/1.0 moonai/0.1.0"))
 }
 
 ///|
 test "append_query percent-encodes UTF-8 keys and values" {
   assert_eq(
-    append_query("https://example.com/v1/models", { "name": "Moon Bit/月" }),
+    @provider_utils.append_query("https://example.com/v1/models", {
+      "name": "Moon Bit/月",
+    }),
     "https://example.com/v1/models?name=Moon%20Bit%2F%E6%9C%88",
   )
 }
 
 ///|
 test "provider options prefer camel-case namespaces and protect request fields" {
-  let resolution = resolve_provider_options(
+  let resolution = @provider_utils.resolve_provider_options(
     { "openaiCompatible": { "reasoning_effort": "high", "stream": false } },
     provider_name="openai-compatible.chat",
     reserved_fields=["stream"],
@@ -104,7 +107,7 @@ test "provider options prefer camel-case namespaces and protect request fields" 
 
 ///|
 test "provider options can preserve an exact configurable provider key" {
-  let resolution = resolve_provider_options(
+  let resolution = @provider_utils.resolve_provider_options(
     { "local-v4": { "reasoningSummary": "detailed" } },
     provider_name="local-v4",
     prefer_exact_provider_name=true,
@@ -116,7 +119,7 @@ test "provider options can preserve an exact configurable provider key" {
 
 ///|
 test "exact provider option keys retain dotted configurable names" {
-  let resolution = resolve_provider_options(
+  let resolution = @provider_utils.resolve_provider_options(
     { "local.responses": { "reasoningSummary": "auto" } },
     provider_name=" local.responses ",
     prefer_exact_provider_name=true,
@@ -127,7 +130,7 @@ test "exact provider option keys retain dotted configurable names" {
 
 ///|
 test "flat provider options are ignored" {
-  let resolution = resolve_provider_options(
+  let resolution = @provider_utils.resolve_provider_options(
     { "quality": "high" },
     provider_name="openai-compatible.image",
   )
@@ -139,11 +142,11 @@ test "flat provider options are ignored" {
 ///|
 test "base URL validation preserves valid values and rejects blanks" {
   assert_eq(
-    validate_base_url(Some("https://example.com/v1/")),
+    @provider_utils.validate_base_url(Some("https://example.com/v1/")),
     Some("https://example.com/v1/"),
   )
-  assert_eq(validate_base_url(None), None)
-  try validate_base_url(Some("  ")) catch {
+  assert_eq(@provider_utils.validate_base_url(None), None)
+  try @provider_utils.validate_base_url(Some("  ")) catch {
     @provider.InvalidArgumentError(argument~, message~) => {
       assert_eq(argument, "baseURL")
       assert_eq(message, "baseURL must be a non-empty string.")
@@ -155,7 +158,7 @@ test "base URL validation preserves valid values and rejects blanks" {
 
 ///|
 test "provider options ignore namespaces owned by another provider" {
-  let resolution = resolve_provider_options(
+  let resolution = @provider_utils.resolve_provider_options(
     { "anthropic": { "thinking": { "type": "adaptive" } } },
     provider_name="openai.responses",
   )
@@ -166,7 +169,7 @@ test "provider options ignore namespaces owned by another provider" {
 
 ///|
 test "typed provider option reader validates aliases and extension fields" {
-  let resolution = resolve_provider_options(
+  let resolution = @provider_utils.resolve_provider_options(
     {
       "localTest": {
         "reasoning_summary": "detailed",
@@ -176,7 +179,7 @@ test "typed provider option reader validates aliases and extension fields" {
     },
     provider_name="local-test.responses",
   )
-  let reader = ProviderOptionsReader::new(
+  let reader = @provider_utils.ProviderOptionsReader::new(
     resolution,
     path="providerOptions.localTest",
   )
@@ -197,9 +200,9 @@ test "typed provider option reader validates aliases and extension fields" {
 
 ///|
 test "typed provider option reader rejects fractional integers" {
-  assert_eq(json_number_as_int(1024.5), None)
-  let reader = ProviderOptionsReader::new(
-    resolve_provider_options(
+  assert_eq(@provider_utils.json_number_as_int(1024.5), None)
+  let reader = @provider_utils.ProviderOptionsReader::new(
+    @provider_utils.resolve_provider_options(
       { "localTest": { "count": 3.5 } },
       provider_name="local-test.chat",
     ),
@@ -215,30 +218,33 @@ test "typed provider option reader rejects fractional integers" {
 ///|
 test "provider metadata key follows the selected camel-case namespace" {
   assert_eq(
-    resolve_provider_options_key("local-test.chat", {
+    @provider_utils.resolve_provider_options_key("local-test.chat", {
       "localTest": { "user": "caller" },
     }),
     "localTest",
   )
   assert_eq(
-    resolve_provider_options_key("local-test.chat", {
+    @provider_utils.resolve_provider_options_key("local-test.chat", {
       "local-test": { "user": "caller" },
     }),
     "local-test",
   )
   assert_eq(
-    resolve_provider_options_key("local-test.chat", Map([])),
+    @provider_utils.resolve_provider_options_key("local-test.chat", Map([])),
     "local-test",
   )
   assert_eq(
-    resolve_provider_options_key(" anthropic.beta.responses ", Map([])),
+    @provider_utils.resolve_provider_options_key(
+      " anthropic.beta.responses ",
+      Map([]),
+    ),
     "anthropic",
   )
 }
 
 ///|
 test "provider options use the leading provider segment" {
-  let resolution = resolve_provider_options(
+  let resolution = @provider_utils.resolve_provider_options(
     { "anthropic": { "thinking": { "type": "adaptive" } } },
     provider_name="anthropic.beta.messages",
   )
@@ -249,11 +255,11 @@ test "provider options use the leading provider segment" {
 ///|
 test "append_path normalizes one trailing slash and avoids duplicates" {
   assert_eq(
-    append_path("https://example.com/v1/", "/responses"),
+    @provider_utils.append_path("https://example.com/v1/", "/responses"),
     "https://example.com/v1/responses",
   )
   assert_eq(
-    append_path("https://example.com/v1/responses", "responses"),
+    @provider_utils.append_path("https://example.com/v1/responses", "responses"),
     "https://example.com/v1/responses",
   )
 }
@@ -261,24 +267,24 @@ test "append_path normalizes one trailing slash and avoids duplicates" {
 ///|
 test "AI SDK-style URL helper preserves optional endpoints" {
   assert_eq(
-    withoutTrailingSlash(Some("https://example.com/v1/")),
+    @provider_utils.withoutTrailingSlash(Some("https://example.com/v1/")),
     Some("https://example.com/v1"),
   )
-  assert_eq(withoutTrailingSlash(None), None)
+  assert_eq(@provider_utils.withoutTrailingSlash(None), None)
 }
 
 ///|
 test "WebSocket URL conversion preserves WebSocket URLs" {
   assert_eq(
-    to_websocket_url("https://example.com/v1/realtime"),
+    @provider_utils.to_websocket_url("https://example.com/v1/realtime"),
     "wss://example.com/v1/realtime",
   )
   assert_eq(
-    toWebSocketUrl("http://example.com/socket"),
+    @provider_utils.toWebSocketUrl("http://example.com/socket"),
     "ws://example.com/socket",
   )
   assert_eq(
-    to_websocket_url("wss://example.com/socket"),
+    @provider_utils.to_websocket_url("wss://example.com/socket"),
     "wss://example.com/socket",
   )
 }
@@ -306,7 +312,7 @@ async test "native WebSocket connector sends protocols and exchanges text" {
         max_connections=1,
       )
     }
-    let connector = native_websocket_connector()
+    let connector = @provider_utils.native_websocket_connector()
     let websocket = connector.connect(
       "ws://127.0.0.1:\{server.addr.port()}/translation",
       ["realtime", "protocol-token"],
@@ -322,10 +328,10 @@ async test "native WebSocket connector sends protocols and exchanges text" {
 ///|
 test "JSON field accessors reject mismatched values" {
   let value : Json = { "name": "moonai", "count": 3, "enabled": true }
-  assert_eq(json_string_field(value, "name"), Some("moonai"))
-  assert_eq(json_string_field(value, "enabled"), None)
-  assert_eq(json_int_field_opt(value, "count"), Some(3))
-  assert_eq(json_int_field(value, "missing", default=7), 7)
+  assert_eq(@provider_utils.json_string_field(value, "name"), Some("moonai"))
+  assert_eq(@provider_utils.json_string_field(value, "enabled"), None)
+  assert_eq(@provider_utils.json_int_field_opt(value, "count"), Some(3))
+  assert_eq(@provider_utils.json_int_field(value, "missing", default=7), 7)
 }
 
 ///|
@@ -333,7 +339,9 @@ test "provider metadata preserves gateway provider keys" {
   let value : Json = {
     "provider_metadata": { "openai": { "trace_id": "trace-1" } },
   }
-  let metadata = provider_metadata_from_json(value, "openai.chat")
+  let metadata = @provider_utils.provider_metadata_from_json(
+    value, "openai.chat",
+  )
   json_inspect(metadata["openai"], content={ "trace_id": "trace-1" })
 }
 
@@ -343,58 +351,85 @@ test "provider utils resolves shared provider references" {
     provider="openai",
     id="file-123",
   )
-  assert_eq(resolve_provider_reference(reference, "openai"), "file-123")
-  assert_eq(resolveProviderReference(reference, "openai"), "file-123")
+  assert_eq(
+    @provider_utils.resolve_provider_reference(reference, "openai"),
+    "file-123",
+  )
+  assert_eq(
+    @provider_utils.resolveProviderReference(reference, "openai"),
+    "file-123",
+  )
 }
 
 ///|
 test "media type helpers resolve full and top-level-only inputs" {
-  assert_eq(get_top_level_media_type("image/png"), "image")
-  assert_eq(is_full_media_type("image/png"), true)
-  assert_eq(is_full_media_type("image/*"), false)
-  assert_eq(resolve_full_media_type("image", "iVBORw0KGgo="), "image/png")
+  assert_eq(@provider_utils.get_top_level_media_type("image/png"), "image")
+  assert_eq(@provider_utils.is_full_media_type("image/png"), true)
+  assert_eq(@provider_utils.is_full_media_type("image/*"), false)
   assert_eq(
-    resolve_full_media_type("application", "JVBERg=="),
+    @provider_utils.resolve_full_media_type("image", "iVBORw0KGgo="),
+    "image/png",
+  )
+  assert_eq(
+    @provider_utils.resolve_full_media_type("application", "JVBERg=="),
     "application/pdf",
   )
-  assert_eq(decode_base64_text("TW9vbkJpdA=="), "MoonBit")
-  assert_eq(getTopLevelMediaType("image/png"), "image")
-  assert_eq(isFullMediaType("image/png"), true)
-  assert_eq(resolveFullMediaType("image", "iVBORw0KGgo="), "image/png")
-  assert_eq(mediaTypeToExtension("audio/mpeg"), "mp3")
+  assert_eq(@provider_utils.decode_base64_text("TW9vbkJpdA=="), "MoonBit")
+  assert_eq(@provider_utils.getTopLevelMediaType("image/png"), "image")
+  assert_eq(@provider_utils.isFullMediaType("image/png"), true)
+  assert_eq(
+    @provider_utils.resolveFullMediaType("image", "iVBORw0KGgo="),
+    "image/png",
+  )
+  assert_eq(@provider_utils.mediaTypeToExtension("audio/mpeg"), "mp3")
 }
 
 ///|
 test "media type detection skips bounded ID3v2 tags and accepts base64url" {
   assert_eq(
-    detect_media_type("SUQzBAAAAAAABQAAAAAA//s=", top_level_type="audio"),
+    @provider_utils.detect_media_type(
+      "SUQzBAAAAAAABQAAAAAA//s=",
+      top_level_type="audio",
+    ),
     Some("audio/mpeg"),
   )
-  assert_eq(resolve_full_media_type("image/*", "iVBORw0KGgo"), "image/png")
   assert_eq(
-    detectMediaType("SUQzBAAAAAAABQAAAAAA//s=", top_level_type="audio"),
+    @provider_utils.resolve_full_media_type("image/*", "iVBORw0KGgo"),
+    "image/png",
+  )
+  assert_eq(
+    @provider_utils.detectMediaType(
+      "SUQzBAAAAAAABQAAAAAA//s=",
+      top_level_type="audio",
+    ),
     Some("audio/mpeg"),
   )
 }
 
 ///|
 test "media type detection requires full GIF signatures and BMP headers" {
-  assert_eq(detect_media_type("R0lGODlh"), Some("image/gif"))
-  assert_eq(detect_media_type("R0lGODlhAQABAAAAADs="), Some("image/gif"))
+  assert_eq(@provider_utils.detect_media_type("R0lGODlh"), Some("image/gif"))
+  assert_eq(
+    @provider_utils.detect_media_type("R0lGODlhAQABAAAAADs="),
+    Some("image/gif"),
+  )
   // A 3-byte "GIF" prefix alone (e.g. plain text "GIF...") is not an image.
-  assert_eq(detect_media_type("R0lGOA=="), None)
-  assert_eq(detect_media_type("R0lG"), None)
-  assert_eq(detect_media_type("Qk0BAgMEAAAAAA=="), Some("image/bmp"))
+  assert_eq(@provider_utils.detect_media_type("R0lGOA=="), None)
+  assert_eq(@provider_utils.detect_media_type("R0lG"), None)
+  assert_eq(
+    @provider_utils.detect_media_type("Qk0BAgMEAAAAAA=="),
+    Some("image/bmp"),
+  )
   // Plain text starting with "BM" has non-zero reserved header bytes.
-  assert_eq(detect_media_type("Qk1Ob3Rl"), None)
+  assert_eq(@provider_utils.detect_media_type("Qk1Ob3Rl"), None)
 }
 
 ///|
 test "multipart form data preserves binary files and redacts diagnostics" {
-  let form = encode_multipart_form_data(
+  let form = @provider_utils.encode_multipart_form_data(
     [
-      MultipartField::text(name="model", value="gpt-image-1"),
-      MultipartField::file(
+      @provider_utils.MultipartField::text(name="model", value="gpt-image-1"),
+      @provider_utils.MultipartField::file(
         name="image",
         filename="input.png",
         media_type="image/png",
@@ -416,8 +451,8 @@ test "multipart form data preserves binary files and redacts diagnostics" {
 ///|
 test "multipart form data rejects header injection" {
   try
-    encode_multipart_form_data([
-      MultipartField::text(name="bad\r\nheader", value="value"),
+    @provider_utils.encode_multipart_form_data([
+      @provider_utils.MultipartField::text(name="bad\r\nheader", value="value"),
     ])
   catch {
     Failure::Failure(message) => assert_true(message.contains("invalid header"))
@@ -429,9 +464,9 @@ test "multipart form data rejects header injection" {
 
 ///|
 test "multipart form data extends colliding boundaries" {
-  let form = encode_multipart_form_data(
+  let form = @provider_utils.encode_multipart_form_data(
     [
-      MultipartField::file(
+      @provider_utils.MultipartField::file(
         name="image",
         filename="input.png",
         media_type="image/png",
@@ -446,7 +481,7 @@ test "multipart form data extends colliding boundaries" {
 
 ///|
 async test "V4 image files resolve without legacy image conversion" {
-  let bytes = resolve_image_model_v4_file(
+  let bytes = @provider_utils.resolve_image_model_v4_file(
     @provider.ImageModelV4File::bytes(data=b"raw-image", media_type="image/png"),
     filename="input.png",
     provider_name="test",
@@ -454,7 +489,7 @@ async test "V4 image files resolve without legacy image conversion" {
   assert_eq(bytes.filename, "input.png")
   assert_eq(bytes.media_type, "image/png")
   assert_eq(bytes.data, b"raw-image")
-  let base64 = resolve_image_model_v4_file(
+  let base64 = @provider_utils.resolve_image_model_v4_file(
     @provider.ImageModelV4File::base64(
       data="iVBORw0KGgo=",
       media_type="image/*",

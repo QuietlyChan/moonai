@@ -54,3 +54,11 @@ pub impl @provider.RerankingModelV4 for MockRerankingModelV4 with fn do_rerank(
   self.captured_options = Some(options)
   self.result
 }
+
+///|
+pub extend MockRerankingModelV4 with @QuietlyChan/moonai/provider.RerankingModelV4::{
+  do_rerank,
+  specification_version,
+  provider,
+  model_id,
+}

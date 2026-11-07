@@ -247,3 +247,17 @@ pub impl HarnessV1Session for HarnessV1BridgeSession with fn do_destroy(self) {
     self.bridge_state.close()
   }
 }
+
+///|
+pub extend HarnessV1BridgeSession with HarnessV1Session::{
+  session_id,
+  do_suspend_turn,
+  do_destroy,
+  do_stop,
+  do_prompt_turn,
+  is_resume,
+  do_compact,
+  do_continue_turn,
+  do_detach,
+  model_id,
+}

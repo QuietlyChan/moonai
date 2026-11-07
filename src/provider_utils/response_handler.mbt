@@ -34,8 +34,7 @@ fn handle_failed_response(
     }
     (message, retryable)
   } catch {
-    error if @async.is_cancellation_error(error) || @async.is_being_cancelled() =>
-      raise error
+    error if @async.is_being_cancelled() => raise error
     error =>
       match error {
         @provider.CancellationError => raise error

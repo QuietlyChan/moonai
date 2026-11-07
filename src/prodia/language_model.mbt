@@ -333,3 +333,13 @@ pub impl @provider.LanguageModelV4 for ProdiaLanguageModel with fn do_stream(
   )
   @provider.LanguageModelV4StreamResult::new(None, None)
 }
+
+///|
+pub extend ProdiaLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

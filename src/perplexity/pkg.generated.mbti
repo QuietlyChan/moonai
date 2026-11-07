@@ -21,9 +21,22 @@ pub fn perplexity(String, api_key? : String, base_url? : String, headers? : Map[
 
 // Types and methods
 type PerplexityEmbeddingModel
+pub async fn PerplexityEmbeddingModel::do_embed(Self, @provider.EmbeddingModelV4CallOptions) -> @provider.EmbeddingModelV4Result
+pub fn PerplexityEmbeddingModel::max_embeddings_per_call(Self) -> Int32?
+pub fn PerplexityEmbeddingModel::max_input_bytes_per_call(Self) -> Int64?
+pub fn PerplexityEmbeddingModel::model_id(Self) -> String
+pub fn PerplexityEmbeddingModel::provider(Self) -> String
+pub fn PerplexityEmbeddingModel::specification_version(Self) -> String
+pub fn PerplexityEmbeddingModel::supports_parallel_calls(Self) -> Bool
 pub impl @provider.EmbeddingModelV4 for PerplexityEmbeddingModel
 
 type PerplexityLanguageModel
+pub async fn PerplexityLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn PerplexityLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn PerplexityLanguageModel::model_id(Self) -> String
+pub fn PerplexityLanguageModel::provider(Self) -> String
+pub fn PerplexityLanguageModel::specification_version(Self) -> String
+pub fn PerplexityLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for PerplexityLanguageModel
 
 pub struct PerplexityProvider {
@@ -33,8 +46,15 @@ pub fn PerplexityProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn PerplexityProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn PerplexityProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn PerplexityProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn PerplexityProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn PerplexityProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn PerplexityProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn PerplexityProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn PerplexityProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn PerplexityProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn PerplexityProvider::specification_version(Self) -> String
+pub fn PerplexityProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn PerplexityProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for PerplexityProvider
 
 // Type aliases

@@ -89,3 +89,12 @@ pub impl @provider.ChatModel for MockChatModel with fn stream(
   }
   self.result
 }
+
+///|
+pub extend MockChatModel with @QuietlyChan/moonai/provider.ChatModel::{
+  provider,
+  supported_urls,
+  generate,
+  stream,
+  model_id,
+}

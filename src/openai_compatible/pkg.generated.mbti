@@ -46,7 +46,13 @@ pub fn OpenAICompatibleChatConfig::new(provider_name~ : String, base_url~ : Stri
 pub struct OpenAICompatibleChatLanguageModel {
   // private fields
 }
+pub async fn OpenAICompatibleChatLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn OpenAICompatibleChatLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn OpenAICompatibleChatLanguageModel::model_id(Self) -> String
 pub fn OpenAICompatibleChatLanguageModel::new(String, OpenAICompatibleChatConfig) -> Self
+pub fn OpenAICompatibleChatLanguageModel::provider(Self) -> String
+pub fn OpenAICompatibleChatLanguageModel::specification_version(Self) -> String
+pub fn OpenAICompatibleChatLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for OpenAICompatibleChatLanguageModel
 
 pub struct OpenAICompatibleCompletionConfig {
@@ -57,12 +63,25 @@ pub fn OpenAICompatibleCompletionConfig::new(provider_name~ : String, base_url~ 
 pub struct OpenAICompatibleCompletionLanguageModel {
   // private fields
 }
+pub async fn OpenAICompatibleCompletionLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn OpenAICompatibleCompletionLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn OpenAICompatibleCompletionLanguageModel::model_id(Self) -> String
 pub fn OpenAICompatibleCompletionLanguageModel::new(String, OpenAICompatibleCompletionConfig) -> Self
+pub fn OpenAICompatibleCompletionLanguageModel::provider(Self) -> String
+pub fn OpenAICompatibleCompletionLanguageModel::specification_version(Self) -> String
+pub fn OpenAICompatibleCompletionLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for OpenAICompatibleCompletionLanguageModel
 
 pub struct OpenAICompatibleEmbeddingModel {
   // private fields
 }
+pub async fn OpenAICompatibleEmbeddingModel::do_embed(Self, @provider.EmbeddingModelV4CallOptions) -> @provider.EmbeddingModelV4Result
+pub fn OpenAICompatibleEmbeddingModel::max_embeddings_per_call(Self) -> Int32?
+pub fn OpenAICompatibleEmbeddingModel::max_input_bytes_per_call(Self) -> Int64?
+pub fn OpenAICompatibleEmbeddingModel::model_id(Self) -> String
+pub fn OpenAICompatibleEmbeddingModel::provider(Self) -> String
+pub fn OpenAICompatibleEmbeddingModel::specification_version(Self) -> String
+pub fn OpenAICompatibleEmbeddingModel::supports_parallel_calls(Self) -> Bool
 pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel
 
 #derive(Eq, @debug.Debug)
@@ -70,13 +89,25 @@ pub(all) struct OpenAICompatibleEmbeddingModelOptions {
   dimensions : Int32?
   user : String?
 }
+#deprecated
+pub fn OpenAICompatibleEmbeddingModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAICompatibleEmbeddingModelOptions::new(dimensions? : Int32, user? : String) -> Self
+#deprecated
+pub fn OpenAICompatibleEmbeddingModelOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAICompatibleEmbeddingModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAICompatibleEmbeddingModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAICompatibleErrorData {
   error : OpenAICompatibleErrorDetail
 }
+#deprecated
+pub fn OpenAICompatibleErrorData::equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAICompatibleErrorData::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAICompatibleErrorData::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAICompatibleErrorDetail {
@@ -85,7 +116,13 @@ pub(all) struct OpenAICompatibleErrorDetail {
   param : @json.Json?
   code : @json.Json?
 }
+#deprecated
+pub fn OpenAICompatibleErrorDetail::equal(Self, Self) -> Bool
 pub fn OpenAICompatibleErrorDetail::new(message~ : String, error_type? : String, param? : @json.Json, code? : @json.Json) -> Self
+#deprecated
+pub fn OpenAICompatibleErrorDetail::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn OpenAICompatibleErrorDetail::to_repr(Self) -> @debug.Repr
 
 #alias(ProviderErrorStructure)
 pub struct OpenAICompatibleErrorStructure {
@@ -96,6 +133,11 @@ pub fn OpenAICompatibleErrorStructure::new(error_to_message~ : (@json.Json) -> S
 pub struct OpenAICompatibleImageModel {
   // private fields
 }
+pub async fn OpenAICompatibleImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn OpenAICompatibleImageModel::max_images_per_call(Self) -> Int32?
+pub fn OpenAICompatibleImageModel::model_id(Self) -> String
+pub fn OpenAICompatibleImageModel::provider(Self) -> String
+pub fn OpenAICompatibleImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for OpenAICompatibleImageModel
 
 #derive(Eq, @debug.Debug)
@@ -107,8 +149,14 @@ pub(all) struct OpenAICompatibleImageModelOptions {
   background : String?
   extensions : Map[String, @json.Json]
 }
+#deprecated
+pub fn OpenAICompatibleImageModelOptions::equal(Self, Self) -> Bool
 pub fn OpenAICompatibleImageModelOptions::new(size? : String, quality? : String, output_format? : String, output_compression? : Int32, background? : String, extensions? : Map[String, @json.Json]) -> Self raise
+#deprecated
+pub fn OpenAICompatibleImageModelOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAICompatibleImageModelOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAICompatibleImageModelOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAICompatibleLanguageModelChatOptions {
@@ -117,8 +165,14 @@ pub(all) struct OpenAICompatibleLanguageModelChatOptions {
   text_verbosity : String?
   strict_json_schema : Bool?
 }
+#deprecated
+pub fn OpenAICompatibleLanguageModelChatOptions::equal(Self, Self) -> Bool
 pub fn OpenAICompatibleLanguageModelChatOptions::new(user? : String, reasoning_effort? : String, text_verbosity? : String, strict_json_schema? : Bool) -> Self
+#deprecated
+pub fn OpenAICompatibleLanguageModelChatOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAICompatibleLanguageModelChatOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAICompatibleLanguageModelChatOptions::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct OpenAICompatibleLanguageModelCompletionOptions {
@@ -127,8 +181,14 @@ pub(all) struct OpenAICompatibleLanguageModelCompletionOptions {
   suffix : String?
   user : String?
 }
+#deprecated
+pub fn OpenAICompatibleLanguageModelCompletionOptions::equal(Self, Self) -> Bool
 pub fn OpenAICompatibleLanguageModelCompletionOptions::new(echo? : Bool, logit_bias? : Map[String, Double], suffix? : String, user? : String) -> Self
+#deprecated
+pub fn OpenAICompatibleLanguageModelCompletionOptions::not_equal(Self, Self) -> Bool
 pub fn OpenAICompatibleLanguageModelCompletionOptions::to_provider_options(Self, provider_name? : String) -> Map[String, @json.Json]
+#deprecated
+pub fn OpenAICompatibleLanguageModelCompletionOptions::to_repr(Self) -> @debug.Repr
 
 #alias(MetadataExtractor)
 pub struct OpenAICompatibleMetadataExtractor {
@@ -154,14 +214,20 @@ pub fn OpenAICompatibleProvider::completion_model(Self, String) -> &@provider.La
 pub fn OpenAICompatibleProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn OpenAICompatibleProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn OpenAICompatibleProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn OpenAICompatibleProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn OpenAICompatibleProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn OpenAICompatibleProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn OpenAICompatibleProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn OpenAICompatibleProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn OpenAICompatibleProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn OpenAICompatibleProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn OpenAICompatibleProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn OpenAICompatibleProvider::specification_version(Self) -> String
+pub fn OpenAICompatibleProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
 pub fn OpenAICompatibleProvider::textEmbeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn OpenAICompatibleProvider::text_embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn OpenAICompatibleProvider::text_embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn OpenAICompatibleProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for OpenAICompatibleProvider
 
 pub struct OpenAICompatibleStreamMetadataExtractor {

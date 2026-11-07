@@ -194,3 +194,14 @@ pub impl @provider.ProviderV4 for CartesiaProvider with fn files(_self) {
 pub impl @provider.ProviderV4 for CartesiaProvider with fn skills(_self) {
   None
 }
+
+///|
+pub extend CartesiaProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  language_model,
+  reranking_model,
+  embedding_model,
+  files,
+  skills,
+}

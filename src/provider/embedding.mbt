@@ -121,3 +121,23 @@ pub fn EmbeddingResponse::new(
     warnings: [],
   }
 }
+
+///|
+#deprecated
+pub extend EmbeddingOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend EmbeddingBatchResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend EmbeddingBatchResponse with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend EmbeddingResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend EmbeddingResponse with Eq::{not_equal, equal}

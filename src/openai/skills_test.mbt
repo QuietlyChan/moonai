@@ -28,7 +28,7 @@ async test "official OpenAI Skills uploads bundles and maps metadata" {
         max_connections=1,
       )
     }
-    let skills = create_openai(
+    let skills = @openai.create_openai(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,

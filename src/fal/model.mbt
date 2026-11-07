@@ -161,3 +161,15 @@ pub fn fal(
     model_id,
   )
 }
+
+///|
+pub extend FalProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  language_model,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

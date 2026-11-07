@@ -1,15 +1,17 @@
 ///|
 test "V4 prompt tool calls keep structured input across the legacy bridge" {
-  let legacy = LanguageModelMessage::assistant_parts([
-    LanguageModelContentPart::tool_call(
-      ToolCall::new(
+  let legacy = @provider.LanguageModelMessage::assistant_parts([
+    @provider.LanguageModelContentPart::tool_call(
+      @provider.ToolCall::new(
         id="call-1",
         name="weather",
         arguments="{\"city\":\"Hangzhou\"}",
       ),
     ),
   ])
-  let prompt = LanguageModelV4Prompt::from_language_model_prompt([legacy])
+  let prompt = @provider.LanguageModelV4Prompt::from_language_model_prompt([
+    legacy,
+  ])
   match prompt.messages[0] {
     V4AssistantMessage(content=[V4PromptToolCall(call)], ..) => {
       assert_eq(call.tool_call_id, "call-1")
@@ -29,27 +31,29 @@ test "V4 prompt tool calls keep structured input across the legacy bridge" {
 
 ///|
 test "V4 prompt filters AI-layer approval requests and local approvals" {
-  let approval_request : LanguageModelToolApprovalRequest = {
+  let approval_request : @provider.LanguageModelToolApprovalRequest = {
     approval_id: "approval-1",
     tool_call_id: "call-1",
     is_automatic: false,
     signature: None,
   }
-  let prompt = LanguageModelV4Prompt::from_language_model_prompt([
-    LanguageModelMessage::assistant_parts([
-      LanguageModelContentPart::tool_approval_request(approval_request),
+  let prompt = @provider.LanguageModelV4Prompt::from_language_model_prompt([
+    @provider.LanguageModelMessage::assistant_parts([
+      @provider.LanguageModelContentPart::tool_approval_request(
+        approval_request,
+      ),
     ]),
-    LanguageModelMessage::tool_parts("call-1", [
-      LanguageModelContentPart::tool_approval_response(
-        LanguageModelToolApprovalResponse::new(
+    @provider.LanguageModelMessage::tool_parts("call-1", [
+      @provider.LanguageModelContentPart::tool_approval_response(
+        @provider.LanguageModelToolApprovalResponse::new(
           approval_id="approval-1",
           approved=true,
         ),
       ),
     ]),
-    LanguageModelMessage::tool_parts("call-2", [
-      LanguageModelContentPart::tool_approval_response(
-        LanguageModelToolApprovalResponse::new(
+    @provider.LanguageModelMessage::tool_parts("call-2", [
+      @provider.LanguageModelContentPart::tool_approval_response(
+        @provider.LanguageModelToolApprovalResponse::new(
           approval_id="approval-2",
           approved=false,
           provider_executed=true,
@@ -77,7 +81,7 @@ test "V4 prompt filters AI-layer approval requests and local approvals" {
 
 ///|
 test "V4 prompt raw file bytes lower to Base64 only at the legacy boundary" {
-  let prompt = LanguageModelV4Prompt::new([
+  let prompt = @provider.LanguageModelV4Prompt::new([
     V4UserMessage(
       content=[
         V4PromptFile(
@@ -92,11 +96,11 @@ test "V4 prompt raw file bytes lower to Base64 only at the legacy boundary" {
     V4ToolMessage(
       content=[
         V4PromptToolResult(
-          LanguageModelV4ToolResultPart::content(
+          @provider.LanguageModelV4ToolResultPart::content(
             tool_call_id="call-1",
             tool_name="read",
             value=[
-              LanguageModelV4ToolResultContentPart::file(
+              @provider.LanguageModelV4ToolResultContentPart::file(
                 data=V4FileBytes(b"PDFDATA"),
                 media_type="application/pdf",
                 filename="report.pdf",

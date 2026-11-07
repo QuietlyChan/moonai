@@ -179,19 +179,21 @@ async test "ToolLoopAgent runs the tool loop and tags the agent header" {
       @provider.V4FinishStop,
     ),
   ])
-  let agent = ToolLoopAgent::new(
-    settings=ToolLoopAgentSettings::new(
+  let agent = @agent.ToolLoopAgent::new(
+    settings=@agent.ToolLoopAgentSettings::new(
       model=model as &@provider.LanguageModelV4,
       id="research-agent",
       tools=agent_loop_tools(executions),
       runtime_context={ "requestId": "req-agent-1" },
     ),
   )
-  assert_eq(agent.version(), AGENT_VERSION)
+  assert_eq(agent.version(), @agent.AGENT_VERSION)
   assert_eq(agent.id(), Some("research-agent"))
   assert_true(agent.tools().get("lookup") is Some(_))
-  let dynamic : &Agent = agent
-  let result = dynamic.generate(AgentCallOptions::new(prompt="what is Moon?"))
+  let dynamic : &@agent.Agent = agent
+  let result = dynamic.generate(
+    @agent.AgentCallOptions::new(prompt="what is Moon?"),
+  )
   assert_eq(result.text(), "Moon it is")
   assert_eq(result.tool_results.length(), 1)
   assert_eq(executions.val, 1)
@@ -215,16 +217,16 @@ async test "ToolLoopAgent streams a single step" {
   let model = AgentSequenceModel::new([], stream_steps=[
     agent_text_stream_step(text="streamed answer"),
   ])
-  let agent = ToolLoopAgent::new(
-    settings=ToolLoopAgentSettings::new(
+  let agent = @agent.ToolLoopAgent::new(
+    settings=@agent.ToolLoopAgentSettings::new(
       model=model as &@provider.LanguageModelV4,
       tools=agent_loop_tools(executions),
       runtime_context={ "requestId": "settings-level" },
     ),
   )
-  let dynamic : &Agent = agent
+  let dynamic : &@agent.Agent = agent
   let result = dynamic.stream(
-    AgentCallOptions::new(prompt="tell me", runtime_context={
+    @agent.AgentCallOptions::new(prompt="tell me", runtime_context={
       "requestId": "call-level",
     }),
   )
@@ -239,8 +241,8 @@ async test "ToolLoopAgent prepare_call hook rewrites the merged call" {
     agent_text_stream_step(text="hooked"),
   ])
   let seen_prompts : Array[String?] = []
-  let agent = ToolLoopAgent::new(
-    settings=ToolLoopAgentSettings::new(
+  let agent = @agent.ToolLoopAgent::new(
+    settings=@agent.ToolLoopAgentSettings::new(
       model=model as &@provider.LanguageModelV4,
       prepare_call=Some(draft => {
         seen_prompts.push(draft.call.prompt)
@@ -251,8 +253,8 @@ async test "ToolLoopAgent prepare_call hook rewrites the merged call" {
       }),
     ),
   )
-  let dynamic : &Agent = agent
-  let result = dynamic.stream(AgentCallOptions::new(prompt="hello"))
+  let dynamic : &@agent.Agent = agent
+  let result = dynamic.stream(@agent.AgentCallOptions::new(prompt="hello"))
   assert_eq(result.text(), "hooked")
   assert_eq(seen_prompts, [Some("hello")])
   // The hook rewrites the dispatched call, not the agent settings.

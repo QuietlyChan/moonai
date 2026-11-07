@@ -32,7 +32,7 @@ async test "embedding V4 middleware transforms and delegates calls" {
     max_embeddings_per_call=8,
     supports_parallel_calls=false,
   )
-  let wrapped = wrapEmbeddingModel(
+  let wrapped = @model.wrapEmbeddingModel(
     base,
     @provider.EmbeddingModelV4Middleware::new(
       transform_params=transform_embedding_values,
@@ -60,7 +60,7 @@ test "embedding V4 middleware chain keeps the first wrapper outermost" {
   let base = @testing.MockEmbeddingModel::new(
     @provider.EmbeddingBatchResponse::new([[1.0]], @provider.Usage::zero()),
   )
-  let wrapped = wrapEmbeddingModelChain(base, [
+  let wrapped = @model.wrapEmbeddingModelChain(base, [
     @provider.EmbeddingModelV4Middleware::new(override_provider=_ => "outer"),
     @provider.EmbeddingModelV4Middleware::new(override_model_id=_ => {
       "inner-model"

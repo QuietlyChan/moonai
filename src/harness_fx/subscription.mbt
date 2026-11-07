@@ -93,3 +93,11 @@ pub fn fx_subscription_authentication_files(
   }
   forwarded
 }
+
+///|
+#deprecated
+pub extend FxSubscriptionCredential with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend FxSubscriptionCredential with Eq::{not_equal, equal}

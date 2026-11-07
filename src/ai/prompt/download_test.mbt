@@ -47,26 +47,29 @@ async test "prompt conversion rewrites URLs and preserves provider options" {
       provider_options~,
     ),
   ]
-  let captured_requests : Array[DownloadRequest] = []
-  let download : DownloadFunction = requests => {
+  let captured_requests : Array[@prompt.DownloadRequest] = []
+  let download : @prompt.DownloadFunction = requests => {
     for request in requests {
       captured_requests.push(request)
     }
     [
       Some(
-        DownloadedAsset::new(data=@utf8.encode("PNG"), media_type="image/png"),
+        @prompt.DownloadedAsset::new(
+          data=@utf8.encode("PNG"),
+          media_type="image/png",
+        ),
       ),
     ]
   }
-  let converted = convert_to_language_model_prompt(
-    standardize_prompt(None, messages),
+  let converted = @prompt.convert_to_language_model_prompt(
+    @prompt.standardize_prompt(None, messages),
     PromptTestModel::{ },
     Some(download),
     @provider.RetryPolicy::none(),
     None,
   )
   assert_eq(captured_requests, [
-    DownloadRequest::new(
+    @prompt.DownloadRequest::new(
       url="https://example.com/image.png",
       is_url_supported_by_model=false,
     ),
@@ -94,8 +97,8 @@ async test "prompt conversion serializes structured high-level tool input" {
     ]),
     @provider_utils.ModelMessage::tool("call-1", "18 degrees"),
   ]
-  let converted = convert_to_language_model_prompt(
-    standardize_prompt(None, messages),
+  let converted = @prompt.convert_to_language_model_prompt(
+    @prompt.standardize_prompt(None, messages),
     PromptTestModel::{ },
     None,
     @provider.RetryPolicy::none(),
@@ -127,8 +130,8 @@ async test "prompt conversion accepts tool_parts as a matching structured result
       ),
     ]),
   ]
-  let converted = convert_to_language_model_prompt(
-    standardize_prompt(None, messages),
+  let converted = @prompt.convert_to_language_model_prompt(
+    @prompt.standardize_prompt(None, messages),
     PromptTestModel::{ },
     None,
     @provider.RetryPolicy::none(),
@@ -152,8 +155,8 @@ async test "prompt conversion rejects missing client tool results" {
   ]
   try
     ignore(
-      convert_to_language_model_prompt(
-        standardize_prompt(None, messages),
+      @prompt.convert_to_language_model_prompt(
+        @prompt.standardize_prompt(None, messages),
         PromptTestModel::{ },
         None,
         @provider.RetryPolicy::none(),
@@ -194,8 +197,8 @@ async test "prompt conversion filters client approvals and assistant approval re
     ]),
     @provider_utils.ModelMessage::user("continue"),
   ]
-  let converted = convert_to_language_model_prompt(
-    standardize_prompt(None, messages),
+  let converted = @prompt.convert_to_language_model_prompt(
+    @prompt.standardize_prompt(None, messages),
     PromptTestModel::{ },
     None,
     @provider.RetryPolicy::none(),
@@ -224,8 +227,8 @@ async test "prompt conversion maps tool results and approval responses" {
     @provider_utils.ModelContentPart::tool_result(result),
     @provider_utils.ModelContentPart::tool_approval_response(approval),
   ])
-  let converted = convert_to_language_model_prompt(
-    standardize_prompt(None, [message]),
+  let converted = @prompt.convert_to_language_model_prompt(
+    @prompt.standardize_prompt(None, [message]),
     PromptTestModel::{ },
     None,
     @provider.RetryPolicy::none(),
@@ -262,29 +265,29 @@ async test "prompt conversion downloads nested tool-result files" {
   let message = @provider_utils.ModelMessage::tool_content([
     @provider_utils.ModelContentPart::tool_result(result),
   ])
-  let captured_requests : Array[DownloadRequest] = []
-  let download : DownloadFunction = requests => {
+  let captured_requests : Array[@prompt.DownloadRequest] = []
+  let download : @prompt.DownloadFunction = requests => {
     for request in requests {
       captured_requests.push(request)
     }
     [
       Some(
-        DownloadedAsset::new(
+        @prompt.DownloadedAsset::new(
           data=@utf8.encode("tool output"),
           media_type="text/plain",
         ),
       ),
     ]
   }
-  let converted = convert_to_language_model_prompt(
-    standardize_prompt(None, [message]),
+  let converted = @prompt.convert_to_language_model_prompt(
+    @prompt.standardize_prompt(None, [message]),
     PromptTestModel::{ },
     Some(download),
     @provider.RetryPolicy::none(),
     None,
   )
   assert_eq(captured_requests, [
-    DownloadRequest::new(
+    @prompt.DownloadRequest::new(
       url="https://example.com/output.txt",
       is_url_supported_by_model=false,
     ),

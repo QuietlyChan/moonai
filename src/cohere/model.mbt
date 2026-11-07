@@ -243,3 +243,13 @@ pub fn cohere(
     id_generator?,
   ).language_model(model_id)
 }
+
+///|
+pub extend CohereProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

@@ -76,3 +76,11 @@ pub fn resolveDeepAgentsEnv(
 ) -> Map[String, String] {
   resolve_deep_agents_env(auth?, environment~)
 }
+
+///|
+#deprecated
+pub extend DeepAgentsAuthOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend DeepAgentsAuthOptions with Eq::{not_equal, equal}

@@ -185,3 +185,55 @@ pub fn VideoResponse::with_transport(
     warnings: copy_warnings(self.warnings),
   }
 }
+
+///|
+#deprecated
+pub extend VideoInput with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend VideoInput with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend VideoFrameType with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend VideoFrameType with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend VideoFrameImage with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend VideoFrameImage with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GeneratedVideoData with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GeneratedVideoData with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GeneratedVideo with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GeneratedVideo with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend VideoCallOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend VideoResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend VideoResponse with Eq::{not_equal, equal}

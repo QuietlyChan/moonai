@@ -171,3 +171,19 @@ pub impl @provider.EmbeddingModelV4 for MockEmbeddingModel with fn do_embed(
     self.embed_values_for_v4(options.values, legacy_options),
   )
 }
+
+///|
+pub extend MockEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingWireModel::{
+  provider,
+  max_embeddings_per_call,
+  embed,
+  supports_parallel_calls,
+  model_id,
+}
+
+///|
+pub extend MockEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  max_input_bytes_per_call,
+}

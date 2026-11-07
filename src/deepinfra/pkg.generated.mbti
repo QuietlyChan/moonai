@@ -19,9 +19,20 @@ pub fn deepinfra(String, api_key? : String, base_url? : String, headers? : Map[S
 
 // Types and methods
 type DeepInfraChatLanguageModel
+pub async fn DeepInfraChatLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn DeepInfraChatLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn DeepInfraChatLanguageModel::model_id(Self) -> String
+pub fn DeepInfraChatLanguageModel::provider(Self) -> String
+pub fn DeepInfraChatLanguageModel::specification_version(Self) -> String
+pub fn DeepInfraChatLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for DeepInfraChatLanguageModel
 
 type DeepInfraImageModel
+pub async fn DeepInfraImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn DeepInfraImageModel::max_images_per_call(Self) -> Int32?
+pub fn DeepInfraImageModel::model_id(Self) -> String
+pub fn DeepInfraImageModel::provider(Self) -> String
+pub fn DeepInfraImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for DeepInfraImageModel
 
 pub struct DeepInfraProvider {
@@ -34,10 +45,16 @@ pub fn DeepInfraProvider::completion_model(Self, String) -> &@provider.LanguageM
 pub fn DeepInfraProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn DeepInfraProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn DeepInfraProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn DeepInfraProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn DeepInfraProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn DeepInfraProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn DeepInfraProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn DeepInfraProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn DeepInfraProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn DeepInfraProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn DeepInfraProvider::specification_version(Self) -> String
+pub fn DeepInfraProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn DeepInfraProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for DeepInfraProvider
 
 // Type aliases

@@ -347,3 +347,27 @@ pub(open) trait SpeechTranslationModelV4 {
     async (SpeechTranslationModelV4StreamPart) -> Unit,
   ) -> SpeechTranslationModelV4StreamResult
 }
+
+///|
+#deprecated
+pub extend SpeechTranslationModelV4Usage with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SpeechTranslationModelV4Usage with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend SpeechTranslationModelV4StreamPart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SpeechTranslationModelV4StreamPart with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend SpeechTranslationModelV4StreamResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SpeechTranslationModelV4StreamResult with Eq::{not_equal, equal}

@@ -36,16 +36,16 @@ async test "tool approval requests carry the policy reason (#19658)" {
       @provider.V4FinishToolCalls,
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     messages=[@provider_utils.ModelMessage::user("remove the draft")],
     tools=approval_reason_test_tool(executions),
-    tool_approval=ToolApprovalConfiguration::per_tool(
+    tool_approval=@generate_text.ToolApprovalConfiguration::per_tool(
       Map([
         (
           "shell",
-          ToolApprovalRule::status(
-            ToolApprovalStatus::user_approval(
+          @generate_text.ToolApprovalRule::status(
+            @generate_text.ToolApprovalStatus::user_approval(
               reason="policy: destructive commands need sign-off",
             ),
           ),
@@ -86,13 +86,18 @@ async test "tool approval requests without a policy reason stay reasonless" {
       @provider.V4FinishToolCalls,
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     messages=[@provider_utils.ModelMessage::user("list files")],
     tools=approval_reason_test_tool(executions),
-    tool_approval=ToolApprovalConfiguration::per_tool(
+    tool_approval=@generate_text.ToolApprovalConfiguration::per_tool(
       Map([
-        ("shell", ToolApprovalRule::status(ToolApprovalStatus::user_approval())),
+        (
+          "shell",
+          @generate_text.ToolApprovalRule::status(
+            @generate_text.ToolApprovalStatus::user_approval(),
+          ),
+        ),
       ]),
     ),
   )

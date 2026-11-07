@@ -229,3 +229,14 @@ pub fn prodia(
     http_transport?,
   ).image(model_id)
 }
+
+///|
+pub extend ProdiaProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

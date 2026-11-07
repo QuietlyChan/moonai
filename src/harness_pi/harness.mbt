@@ -250,3 +250,22 @@ pub fn create_pi(
 ///|
 /// Default Pi adapter instance.
 pub let pi : PiHarness = createPi()
+
+///|
+#deprecated
+pub extend PiThinkingLevel with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend PiThinkingLevel with Eq::{not_equal, equal}
+
+///|
+pub extend PiHarness with @QuietlyChan/moonai/harness.HarnessV1::{
+  supports_builtin_tool_filtering,
+  specification_version,
+  do_start,
+  builtin_tools,
+  get_bootstrap,
+  harness_id,
+  supports_builtin_tool_approvals,
+}

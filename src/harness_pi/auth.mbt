@@ -58,3 +58,11 @@ pub fn resolve_pi_model(
     }
   }
 }
+
+///|
+#deprecated
+pub extend PiAuthOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend PiAuthOptions with Eq::{not_equal, equal}

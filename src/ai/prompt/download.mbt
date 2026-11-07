@@ -665,3 +665,19 @@ pub async fn convert_to_language_model_prompt(
     cancellation_token,
   )
 }
+
+///|
+#deprecated
+pub extend DownloadRequest with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend DownloadRequest with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend DownloadedAsset with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend DownloadedAsset with Eq::{not_equal, equal}

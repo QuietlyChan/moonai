@@ -544,3 +544,21 @@ pub impl @provider.FilesV4 for DeepSeekFiles with fn delete_file(
     functionality="DeepSeek Files deletion",
   )
 }
+
+///|
+#deprecated
+pub extend DeepSeekFilesOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend DeepSeekFilesOptions with Eq::{not_equal, equal}
+
+///|
+pub extend DeepSeekFiles with @QuietlyChan/moonai/provider.FilesV4::{
+  delete_file,
+  specification_version,
+  provider,
+  upload_file,
+  get_file_metadata,
+  download_file,
+}

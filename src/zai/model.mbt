@@ -194,3 +194,15 @@ pub fn zai(
     id_generator?,
   ).language_model(model_id)
 }
+
+///|
+pub extend ZaiProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

@@ -179,3 +179,11 @@ pub fn SmoothTextTransformer::flush(
   self.flush_into(events)
   events
 }
+
+///|
+#deprecated
+pub extend SmoothChunking with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SmoothChunking with Eq::{not_equal, equal}

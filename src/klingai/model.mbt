@@ -183,3 +183,16 @@ pub fn klingai(
     http_transport?,
   ).video(model_id)
 }
+
+///|
+pub extend KlingaiProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  language_model,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

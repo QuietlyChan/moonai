@@ -220,3 +220,12 @@ pub impl @provider.ImageModelV4 for GoogleImageModel with fn do_generate(
     ),
   )
 }
+
+///|
+pub extend GoogleImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+  max_images_per_call,
+}

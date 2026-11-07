@@ -23,12 +23,25 @@ pub fn create_assemblyai(api_key? : String, base_url? : String, headers? : Map[S
 pub struct AssemblyAIProvider {
   // private fields
 }
+pub fn AssemblyAIProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn AssemblyAIProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn AssemblyAIProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
+pub fn AssemblyAIProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn AssemblyAIProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn AssemblyAIProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn AssemblyAIProvider::specification_version(Self) -> String
+pub fn AssemblyAIProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
 pub fn AssemblyAIProvider::transcription(Self, String) -> &@provider.TranscriptionModelV4
 pub fn AssemblyAIProvider::transcriptionModel(Self, String) -> &@provider.TranscriptionModelV4
 pub fn AssemblyAIProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4
 pub impl @provider.ProviderV4 for AssemblyAIProvider
 
 type AssemblyAITranscriptionModel
+pub async fn AssemblyAITranscriptionModel::do_generate(Self, @provider.TranscriptionModelV4CallOptions) -> @provider.TranscriptionModelV4Result
+pub async fn AssemblyAITranscriptionModel::do_stream(Self, @provider.TranscriptionModelV4StreamOptions, async (@provider.TranscriptionModelV4StreamPart) -> Unit) -> @provider.TranscriptionModelV4StreamResult
+pub fn AssemblyAITranscriptionModel::model_id(Self) -> String
+pub fn AssemblyAITranscriptionModel::provider(Self) -> String
+pub fn AssemblyAITranscriptionModel::specification_version(Self) -> String
 pub impl @provider.TranscriptionModelV4 for AssemblyAITranscriptionModel
 
 // Type aliases

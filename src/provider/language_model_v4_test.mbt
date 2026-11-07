@@ -1,6 +1,6 @@
 ///|
 test "V4 usage keeps cache and reasoning counters" {
-  let usage = Usage::new(
+  let usage = @provider.Usage::new(
     input_tokens=120,
     output_tokens=30,
     total_tokens=150,
@@ -8,7 +8,7 @@ test "V4 usage keeps cache and reasoning counters" {
     cached_input_tokens=40,
     cache_write_input_tokens=12,
   )
-  let v4 = LanguageModelV4Usage::from_usage(usage)
+  let v4 = @provider.LanguageModelV4Usage::from_usage(usage)
   assert_eq(v4.input_tokens.total, Some(120))
   assert_eq(v4.input_tokens.no_cache, Some(68))
   assert_eq(v4.input_tokens.cache_read, Some(40))
@@ -21,7 +21,7 @@ test "V4 usage keeps cache and reasoning counters" {
 
 ///|
 test "V4 unknown usage does not fabricate zero counters" {
-  let usage = LanguageModelV4Usage::unknown()
+  let usage = @provider.LanguageModelV4Usage::unknown()
   assert_eq(usage.input_tokens.total, None)
   assert_eq(usage.input_tokens.no_cache, None)
   assert_eq(usage.input_tokens.cache_read, None)
@@ -34,19 +34,21 @@ test "V4 unknown usage does not fabricate zero counters" {
 
 ///|
 test "V4 stream conversion preserves lifecycle and diagnostics" {
-  let start = LanguageModelV4StreamPart::from_stream_event(StreamStart)
+  let start = @provider.LanguageModelV4StreamPart::from_stream_event(
+    StreamStart,
+  )
   assert_true(
     start is Some(V4StreamStart(warnings=values)) && values.length() == 0,
   )
 
   assert_true(
-    LanguageModelV4StreamPart::from_stream_event(
-      Warning(Warning::unsupported("topK")),
+    @provider.LanguageModelV4StreamPart::from_stream_event(
+      Warning(@provider.Warning::unsupported("topK")),
     )
     is None,
   )
 
-  let delta = LanguageModelV4StreamPart::from_stream_event(
+  let delta = @provider.LanguageModelV4StreamPart::from_stream_event(
     TextDelta(id="text-0", delta="hello"),
   )
   assert_true(
@@ -55,8 +57,8 @@ test "V4 stream conversion preserves lifecycle and diagnostics" {
     metadata.length() == 0,
   )
 
-  let finish = LanguageModelV4StreamPart::from_stream_event(
-    Finish(usage=Usage::zero(), reason=Stop),
+  let finish = @provider.LanguageModelV4StreamPart::from_stream_event(
+    Finish(usage=@provider.Usage::zero(), reason=Stop),
   )
   assert_true(
     finish is Some(V4Finish(usage=value, reason~, provider_metadata=metadata)) &&
@@ -65,8 +67,10 @@ test "V4 stream conversion preserves lifecycle and diagnostics" {
     metadata.length() == 0,
   )
 
-  let error = LanguageModelV4StreamPart::from_stream_event(
-    StreamError(StreamErrorInfo::new("broken", data={ "code": "bad" })),
+  let error = @provider.LanguageModelV4StreamPart::from_stream_event(
+    StreamError(
+      @provider.StreamErrorInfo::new("broken", data={ "code": "bad" }),
+    ),
   )
   match error {
     Some(V4Error(value)) => {
@@ -80,16 +84,16 @@ test "V4 stream conversion preserves lifecycle and diagnostics" {
 ///|
 test "V4 prompt is a distinct tagged shape with an explicit wire bridge" {
   let prompt = [
-    LanguageModelMessage::system("You are concise"),
-    LanguageModelMessage::user_parts([
-      LanguageModelContentPart::text("hello"),
-      LanguageModelContentPart::file_url(
+    @provider.LanguageModelMessage::system("You are concise"),
+    @provider.LanguageModelMessage::user_parts([
+      @provider.LanguageModelContentPart::text("hello"),
+      @provider.LanguageModelContentPart::file_url(
         url="https://example.com/image.png",
         media_type="image/png",
       ),
     ]),
   ]
-  let v4 = LanguageModelV4Prompt::from_language_model_prompt(prompt)
+  let v4 = @provider.LanguageModelV4Prompt::from_language_model_prompt(prompt)
   assert_eq(v4.messages.length(), 2)
   assert_true(v4.messages[0] is V4SystemMessage(content="You are concise", ..))
   assert_true(
@@ -106,20 +110,24 @@ test "V4 prompt is a distinct tagged shape with an explicit wire bridge" {
 ///|
 test "V4 prompt bridge preserves text and normalizes wire tool content" {
   let prompt = [
-    LanguageModelMessage::user("hello"),
-    LanguageModelMessage::user_parts([
-      LanguageModelContentPart::image_url("https://example.com/image.png"),
+    @provider.LanguageModelMessage::user("hello"),
+    @provider.LanguageModelMessage::user_parts([
+      @provider.LanguageModelContentPart::image_url(
+        "https://example.com/image.png",
+      ),
     ]),
-    LanguageModelMessage::tool_parts("call-1", [
-      LanguageModelContentPart::file_data(
+    @provider.LanguageModelMessage::tool_parts("call-1", [
+      @provider.LanguageModelContentPart::file_data(
         data="UERG",
         media_type="application/pdf",
         filename="report.pdf",
       ),
     ]),
   ]
-  let round_trip = LanguageModelV4Prompt::from_language_model_prompt(prompt).to_language_model_prompt()
-  assert_eq(round_trip[0], LanguageModelMessage::user("hello"))
+  let round_trip = @provider.LanguageModelV4Prompt::from_language_model_prompt(
+    prompt,
+  ).to_language_model_prompt()
+  assert_eq(round_trip[0], @provider.LanguageModelMessage::user("hello"))
   assert_true(
     round_trip[1].parts[0] is ImageUrl("https://example.com/image.png"),
   )
@@ -148,21 +156,24 @@ test "V4 prompt bridge preserves text and normalizes wire tool content" {
 ///|
 test "V4 prompt bridge keeps single text part provider options" {
   let prompt = [
-    LanguageModelMessage::user_parts(
+    @provider.LanguageModelMessage::user_parts(
       [
-        LanguageModelContentPart::text("cached").with_provider_options({
-          "openai": { "promptCacheBreakpoint": { "mode": "explicit" } },
-        }),
+        @provider.LanguageModelContentPart::text("cached").with_provider_options({
+            "openai": { "promptCacheBreakpoint": { "mode": "explicit" } },
+          },
+        ),
       ],
       provider_options={ "message": { "keep": true } },
     ),
-    LanguageModelMessage::assistant_parts([
-      LanguageModelContentPart::text("answer").with_provider_options({
+    @provider.LanguageModelMessage::assistant_parts([
+      @provider.LanguageModelContentPart::text("answer").with_provider_options({
         "openaiCompatible": { "messageLevel": true },
       }),
     ]),
   ]
-  let round_trip = LanguageModelV4Prompt::from_language_model_prompt(prompt).to_language_model_prompt()
+  let round_trip = @provider.LanguageModelV4Prompt::from_language_model_prompt(
+    prompt,
+  ).to_language_model_prompt()
   assert_true(round_trip[0].parts.length() == 1)
   assert_true(
     round_trip[0].parts[0].provider_options()
@@ -180,8 +191,8 @@ test "V4 prompt bridge keeps single text part provider options" {
 
 ///|
 test "V4 call options merge provider values without mutating the source" {
-  let original = LanguageModelV4CallOptions::new(
-    LanguageModelV4Prompt::new([]),
+  let original = @provider.LanguageModelV4CallOptions::new(
+    @provider.LanguageModelV4Prompt::new([]),
     provider_options={ "provider": { "keep": true } },
   )
   let derived = original.with_provider_options({ "provider": { "added": 1 } })
@@ -200,17 +211,21 @@ test "V4 call options merge provider values without mutating the source" {
 ///|
 test "V4 call option inputs are independent from legacy tool and format types" {
   let legacy_tools = [
-    ToolDefinition::new(
+    @provider.ToolDefinition::new(
       "lookup",
       { "type": "object", "properties": { "query": { "type": "string" } } },
       input_examples=[{ "query": "moon" }],
       strict=true,
     ),
-    ToolDefinition::provider(id="anthropic.web_search", name="search", args={
-      "max_uses": 3,
-    }),
+    @provider.ToolDefinition::provider(
+      id="anthropic.web_search",
+      name="search",
+      args={ "max_uses": 3 },
+    ),
   ]
-  let v4_tools = LanguageModelV4Tool::from_tool_definitions(legacy_tools)
+  let v4_tools = @provider.LanguageModelV4Tool::from_tool_definitions(
+    legacy_tools,
+  )
   match v4_tools[0] {
     V4FunctionTool(value) =>
       assert_eq(value.input_examples[0].input, { "query": "moon" })
@@ -223,7 +238,9 @@ test "V4 call option inputs are independent from legacy tool and format types" {
     }
     _ => fail("expected a V4 provider tool")
   }
-  let round_trip_tools = LanguageModelV4Tool::to_tool_definitions(v4_tools)
+  let round_trip_tools = @provider.LanguageModelV4Tool::to_tool_definitions(
+    v4_tools,
+  )
   match round_trip_tools[0] {
     FunctionTool(name~, input_examples~, strict~, ..) => {
       assert_eq(name, "lookup")
@@ -241,11 +258,13 @@ test "V4 call option inputs are independent from legacy tool and format types" {
     _ => fail("expected a normalized provider tool")
   }
 
-  let choice = LanguageModelV4ToolChoice::from_tool_choice(Named("lookup"))
+  let choice = @provider.LanguageModelV4ToolChoice::from_tool_choice(
+    Named("lookup"),
+  )
   assert_true(choice is V4ToolChoiceTool("lookup"))
   assert_eq(choice.to_tool_choice(), Named("lookup"))
 
-  let format = LanguageModelV4ResponseFormat::json(
+  let format = @provider.LanguageModelV4ResponseFormat::json(
     schema={ "type": "object" },
     name="result",
     description="A result object",

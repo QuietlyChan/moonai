@@ -821,3 +821,26 @@ fn HarnessV1BridgeState::report_diagnostic(
     report(diagnostic)
   }
 }
+
+///|
+pub extend CallbackHarnessV1BridgeConnection with HarnessV1BridgeConnection::{
+  close,
+  receive,
+  send,
+}
+
+///|
+#deprecated
+pub extend HarnessV1BridgeCommand with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1BridgeCommand with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1BridgeOutboundFrame with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1BridgeOutboundFrame with Eq::{not_equal, equal}

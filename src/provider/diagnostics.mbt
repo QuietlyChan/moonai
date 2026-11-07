@@ -642,3 +642,167 @@ pub fn merge_optional_response_metadata(
     Some(value) => Some(merge_response_metadata(base, value))
   }
 }
+
+///|
+#deprecated
+pub extend RequestMetadata with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RequestMetadata with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ResponseMetadata with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ResponseMetadata with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend Warning with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend Warning with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend NoSuchProviderReferenceError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend APICallError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend JSONParseError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend JSONParseError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend TypeValidationContext with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend TypeValidationContext with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend TypeValidationError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend EmptyResponseBodyError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend EmptyResponseBodyError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend NoContentGeneratedError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend NoContentGeneratedError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend InvalidArgumentError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend InvalidArgumentError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend InvalidPromptError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend InvalidPromptError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend NoSuchModelType with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend NoSuchModelType with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend NoSuchModelError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend NoSuchModelError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MissingToolResultsError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MissingToolResultsError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LoadAPIKeyError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LoadAPIKeyError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LoadSettingError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LoadSettingError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend InvalidResponseDataError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolChoiceViolationError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ProviderTimeoutError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ProviderTimeoutError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend UnsupportedFunctionalityError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend TooManyEmbeddingValuesForCallError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend TooManyEmbeddingValuesForCallError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RetryPolicy with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend CancellationToken with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend CancellationError with Debug::{to_repr}

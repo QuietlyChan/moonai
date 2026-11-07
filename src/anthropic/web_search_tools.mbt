@@ -195,3 +195,11 @@ pub fn webSearch_20260209(
     on_input_available?,
   )
 }
+
+///|
+#deprecated
+pub extend AnthropicWebSearchUserLocation with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicWebSearchUserLocation with Eq::{not_equal, equal}

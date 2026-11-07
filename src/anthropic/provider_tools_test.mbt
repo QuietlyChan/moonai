@@ -16,7 +16,7 @@ fn assert_anthropic_high_level_tool(
 
 ///|
 test "Anthropic public factory exposes the AI SDK provider contract" {
-  let provider = createAnthropic(
+  let provider = @anthropic.createAnthropic(
     api_key="test-key",
     base_url="https://example.test/v1",
   )
@@ -57,7 +57,7 @@ test "Anthropic public factory exposes the AI SDK provider contract" {
 
 ///|
 test "Anthropic provider exposes the AI SDK languageModel alias" {
-  let provider = createAnthropic(api_key="test-key")
+  let provider = @anthropic.createAnthropic(api_key="test-key")
   let snake_case = provider.language_model("claude-sonnet-4-6")
   let camel_case = provider.languageModel("claude-sonnet-4-6")
   assert_eq(snake_case.model_id(), "claude-sonnet-4-6")
@@ -67,7 +67,7 @@ test "Anthropic provider exposes the AI SDK languageModel alias" {
 
 ///|
 test "Anthropic provider exposes the complete AI SDK tools namespace" {
-  let tools = createAnthropic(api_key="test-key").tools()
+  let tools = @anthropic.createAnthropic(api_key="test-key").tools()
   let definitions : Array[(@provider_utils.Tool, String, Bool)] = [
     (
       tools.advisor_20260301(model="claude-opus-4-8"),
@@ -121,14 +121,16 @@ test "Anthropic provider exposes the complete AI SDK tools namespace" {
 
 ///|
 test "Anthropic namespace wrappers retain args and deferred semantics" {
-  let tools = anthropicTools()
+  let tools = @anthropic.anthropicTools()
   let selected = @provider_utils.tool_set([
     (
       "advisor",
       tools.advisor_20260301(
         model="claude-opus-4-8",
         max_uses=3,
-        caching=AnthropicAdvisorCaching::new(ttl=AnthropicCacheOneHour),
+        caching=@anthropic.AnthropicAdvisorCaching::new(
+          ttl=AnthropicCacheOneHour,
+        ),
       ),
     ),
     (
@@ -146,7 +148,7 @@ test "Anthropic namespace wrappers retain args and deferred semantics" {
       tools.webFetch_20260209(
         max_uses=4,
         allowed_domains=["moonbitlang.com"],
-        citations=AnthropicWebFetchCitations::new(enabled=true),
+        citations=@anthropic.AnthropicWebFetchCitations::new(enabled=true),
         max_content_tokens=4096,
       ),
     ),
@@ -209,7 +211,7 @@ test "Anthropic namespace wrappers retain args and deferred semantics" {
 
 ///|
 test "Anthropic namespace preserves provider caller metadata" {
-  let code = anthropic_tools().codeExecution_20260120()
+  let code = @anthropic.anthropic_tools().codeExecution_20260120()
   let caller = @provider_utils.experimental_get_tool_caller(code).unwrap()
   assert_true(caller.is_provider())
   assert_eq(
@@ -223,7 +225,7 @@ test "Anthropic namespace preserves provider caller metadata" {
 ///|
 async test "Anthropic namespace client tools preserve behavior callbacks" {
   let events : Array[String] = []
-  let tool = anthropic_tools().bash_20250124(
+  let tool = @anthropic.anthropic_tools().bash_20250124(
     output_schema={
       "type": "object",
       "properties": { "stdout": { "type": "string" } },
@@ -280,7 +282,7 @@ async test "Anthropic namespace client tools preserve behavior callbacks" {
 ///|
 async test "Anthropic namespace provider tools preserve streaming callbacks" {
   let events : Array[String] = []
-  let tool = anthropic_tools().webSearch_20260209(
+  let tool = @anthropic.anthropic_tools().webSearch_20260209(
     on_input_start=options => events.push("start:" + options.tool_call_id),
     on_input_delta=options => events.push("delta:" + options.input_text_delta),
     on_input_available=options => {

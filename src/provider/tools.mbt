@@ -481,3 +481,71 @@ pub fn LanguageModelToolResult::output_json(
 ) -> Json {
   self.output.to_json()
 }
+
+///|
+#deprecated
+pub extend ToolDefinition with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolCall with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolCall with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ToolResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ToolApprovalRequest with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolApprovalRequest with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelToolResultContentPart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelToolResultContentPart with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelToolResultOutput with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelToolResultOutput with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelToolResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelToolResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelToolApprovalRequest with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelToolApprovalRequest with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelToolApprovalResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelToolApprovalResponse with Eq::{not_equal, equal}

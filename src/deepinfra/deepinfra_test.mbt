@@ -1,6 +1,6 @@
 ///|
 test "deepinfra provider exposes chat, completion, embedding, image" {
-  let provider = create_deepinfra(api_key="sk-test")
+  let provider = @deepinfra.create_deepinfra(api_key="sk-test")
   let chat = provider.chat("meta-llama/Llama-3.3-70B-Instruct-Turbo")
   assert_eq(chat.provider(), "deepinfra.chat")
   assert_eq(chat.model_id(), "meta-llama/Llama-3.3-70B-Instruct-Turbo")

@@ -32,6 +32,12 @@ pub(all) struct FxSubscriptionCredential {
   access_token : String
   account_id : String
 }
+#deprecated
+pub fn FxSubscriptionCredential::equal(Self, Self) -> Bool
+#deprecated
+pub fn FxSubscriptionCredential::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn FxSubscriptionCredential::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

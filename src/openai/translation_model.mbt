@@ -457,3 +457,17 @@ pub impl @provider.SpeechTranslationModelV4 for OpenAITranslationModel with fn d
     response?=response.response,
   )
 }
+
+///|
+#deprecated
+pub extend OpenAITranslationModelOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAITranslationModelOptions with Eq::{not_equal, equal}
+
+///|
+pub extend OpenAITranslationModel with @QuietlyChan/moonai/provider.SpeechTranslationModelV4::{
+  specification_version,
+  do_stream,
+}

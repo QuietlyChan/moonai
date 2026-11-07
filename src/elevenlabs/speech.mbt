@@ -164,3 +164,11 @@ fn elevenlabs_error_to_message(json : Json) -> String? raise {
     _ => None
   }
 }
+
+///|
+pub extend ElevenLabsSpeechModel with @QuietlyChan/moonai/provider.SpeechModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  model_id,
+}

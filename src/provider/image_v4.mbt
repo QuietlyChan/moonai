@@ -241,3 +241,31 @@ pub(open) trait ImageModelV4 {
   fn max_images_per_call(Self) -> Int32?
   async fn do_generate(Self, ImageModelV4CallOptions) -> ImageModelV4Result
 }
+
+///|
+#deprecated
+pub extend ImageModelV4File with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ImageModelV4File with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ImageModelV4CallOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ImageModelV4Usage with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ImageModelV4Usage with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ImageModelV4Result with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ImageModelV4Result with Eq::{not_equal, equal}

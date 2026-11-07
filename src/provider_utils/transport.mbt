@@ -216,8 +216,7 @@ async fn read_stream_line(
 ) -> String?? {
   let read = () => {
     reader.read_until("\n") catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error =>
         match error {
           @provider.CancellationError | @provider.APICallError(..) =>
@@ -261,8 +260,7 @@ async fn[E, T] run_sse_attempt(
     transport.fetch_stream(
       HttpRequest::post(url~, headers~, body=@utf8.encode(request_body)),
     ) catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error =>
         match error {
           @provider.CancellationError | @provider.APICallError(..) =>
@@ -524,8 +522,7 @@ pub async fn[E, T] post_json_sse_events(
         on_event~,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if !emitted.val &&
         is_retryable_error(error) &&
         retry_policy.can_retry(retry_number) => {
@@ -551,3 +548,23 @@ pub async fn[E, T] post_json_sse_events(
     }
   }
 }
+
+///|
+#deprecated
+pub extend SseHttpResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SseTransportError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SseTimeoutError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SseProtocolError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SseProviderError with Debug::{to_repr}

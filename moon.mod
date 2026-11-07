@@ -5,8 +5,8 @@ source = "src"
 version = "0.1.0"
 
 import {
-  "moonbitlang/async@0.20.2",
-  "cc06b/mooncry@0.13.1",
+  "moonbitlang/async@0.22.7",
+  "cc06b/mooncry@0.95.0",
 }
 
 readme = "README.md"

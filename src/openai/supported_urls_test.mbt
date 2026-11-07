@@ -1,6 +1,6 @@
 ///|
 test "OpenAI Chat and Responses expose distinct native URL capabilities" {
-  let provider = create_openai(api_key="test-key")
+  let provider = @openai.create_openai(api_key="test-key")
   let chat = provider.chat("gpt-4o")
   let responses = provider.responses("gpt-4o")
   assert_true(

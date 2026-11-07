@@ -152,3 +152,12 @@ pub impl @provider.TranscriptionModelV4 for ElevenLabsTranscriptionModel with fn
     functionality="ElevenLabs transcription streaming",
   )
 }
+
+///|
+pub extend ElevenLabsTranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  do_stream,
+  model_id,
+}

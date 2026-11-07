@@ -223,3 +223,11 @@ pub fn prepareToolsForToolCallers(
 ) -> PreparedToolsForToolCallers {
   prepare_tools_for_tool_callers(tools, tool_callers)
 }
+
+///|
+#deprecated
+pub extend ToolCallerReference with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolCallerReference with Eq::{not_equal, equal}

@@ -275,3 +275,13 @@ pub fn deepinfra(
     id_generator?,
   ).language_model(model_id)
 }
+
+///|
+pub extend DeepInfraProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  reranking_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

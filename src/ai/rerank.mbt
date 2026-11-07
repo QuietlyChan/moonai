@@ -297,3 +297,27 @@ pub async fn rerankText(
     on_end?,
   )
 }
+
+///|
+#deprecated
+pub extend RerankingDocument with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RerankingDocument with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RerankItem with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RerankItem with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RerankResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RerankResult with Eq::{not_equal, equal}

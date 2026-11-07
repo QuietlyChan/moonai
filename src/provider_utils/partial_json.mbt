@@ -240,3 +240,19 @@ pub fn parse_partial_json(text : String) -> PartialJsonResult {
   }
   { value: Json::string(""), state: PartialFailedParse, }
 }
+
+///|
+#deprecated
+pub extend PartialJsonParseState with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend PartialJsonParseState with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend PartialJsonResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend PartialJsonResult with Eq::{not_equal, equal}

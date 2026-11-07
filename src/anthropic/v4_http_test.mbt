@@ -358,7 +358,7 @@ async test "Anthropic V4 generate exposes custom metadata only for a used custom
         max_connections=3,
       )
     }
-    let model = create_anthropic(
+    let model = @anthropic.create_anthropic(
         api_key="test-key",
         provider_name="my-custom-anthropic.messages",
         base_url="http://127.0.0.1:\{server.addr.port()}/v1",
@@ -423,7 +423,7 @@ async test "Anthropic V4 stream exposes custom metadata only for a used custom o
         max_connections=3,
       )
     }
-    let model = create_anthropic(
+    let model = @anthropic.create_anthropic(
         api_key="test-key",
         provider_name="my-custom-anthropic.messages",
         base_url="http://127.0.0.1:\{server.addr.port()}/v1",

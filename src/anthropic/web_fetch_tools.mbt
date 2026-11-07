@@ -226,3 +226,11 @@ pub fn webFetch_20260209(
     on_input_available?,
   )
 }
+
+///|
+#deprecated
+pub extend AnthropicWebFetchCitations with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicWebFetchCitations with Eq::{not_equal, equal}

@@ -176,3 +176,27 @@ pub fn SpeechTranslationResponse::with_diagnostics(
     warnings: copy_warnings(warnings),
   }
 }
+
+///|
+#deprecated
+pub extend SpeechTranslationUsage with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SpeechTranslationUsage with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend SpeechTranslationStreamEvent with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SpeechTranslationStreamEvent with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend SpeechTranslationResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend SpeechTranslationResponse with Eq::{not_equal, equal}

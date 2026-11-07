@@ -1,10 +1,10 @@
 ///|
 async test "sandbox session exposes command file and process boundaries" {
-  let commands : Array[SandboxProcessOptions] = []
-  let writes : Array[SandboxWriteTextFileOptions] = []
+  let commands : Array[@provider_utils.SandboxProcessOptions] = []
+  let writes : Array[@provider_utils.SandboxWriteTextFileOptions] = []
   let stdout_chunks = [b"one", b"two"]
   let stdout_index = Ref(0)
-  let stdout = SandboxByteStream::new(read_next=() => {
+  let stdout = @provider_utils.SandboxByteStream::new(read_next=() => {
     if stdout_index.val >= stdout_chunks.length() {
       None
     } else {
@@ -13,12 +13,16 @@ async test "sandbox session exposes command file and process boundaries" {
       Some(value)
     }
   })
-  let stderr = SandboxByteStream::new(read_next=() => None)
-  let session = SandboxSession::new(
+  let stderr = @provider_utils.SandboxByteStream::new(read_next=() => None)
+  let session = @provider_utils.SandboxSession::new(
     description="MoonBit test sandbox",
     run=options => {
       commands.push(options)
-      SandboxProcessResult::new(exit_code=0, stdout="ok", stderr="")
+      @provider_utils.SandboxProcessResult::new(
+        exit_code=0,
+        stdout="ok",
+        stderr="",
+      )
     },
     read_binary_file=options => {
       assert_eq(options.path, "/workspace/input.txt")
@@ -27,20 +31,22 @@ async test "sandbox session exposes command file and process boundaries" {
     write_text_file=options => writes.push(options),
     spawn=options => {
       commands.push(options)
-      SandboxProcess::new(
+      @provider_utils.SandboxProcess::new(
         pid=42,
         stdout~,
         stderr~,
-        wait=() => SandboxProcessExit::new(exit_code=7),
+        wait=() => @provider_utils.SandboxProcessExit::new(exit_code=7),
         kill=() => (),
       )
     },
   )
   assert_eq(session.description(), "MoonBit test sandbox")
   let result = session.run(
-    SandboxProcessOptions::new(command="pwd", working_directory="/workspace", env={
-      "MODE": "test",
-    }),
+    @provider_utils.SandboxProcessOptions::new(
+      command="pwd",
+      working_directory="/workspace",
+      env={ "MODE": "test" },
+    ),
   )
   assert_eq(result.to_json(), { "exitCode": 0, "stdout": "ok", "stderr": "" })
   assert_eq(commands[0].command, "pwd")
@@ -48,12 +54,12 @@ async test "sandbox session exposes command file and process boundaries" {
   assert_eq(commands[0].env, { "MODE": "test" })
   assert_eq(
     session.read_binary_file(
-      SandboxReadFileOptions::new(path="/workspace/input.txt"),
+      @provider_utils.SandboxReadFileOptions::new(path="/workspace/input.txt"),
     ),
     Some(b"input"),
   )
   session.write_text_file(
-    SandboxWriteTextFileOptions::new(
+    @provider_utils.SandboxWriteTextFileOptions::new(
       path="/workspace/output.txt",
       content="output",
       encoding="utf-8",
@@ -61,23 +67,31 @@ async test "sandbox session exposes command file and process boundaries" {
   )
   assert_eq(writes.length(), 1)
   assert_eq(writes[0].content, "output")
-  let process = session.spawn(SandboxProcessOptions::new(command="watch"))
+  let process = session.spawn(
+    @provider_utils.SandboxProcessOptions::new(command="watch"),
+  )
   assert_eq(process.pid(), Some(42))
   assert_eq(process.stdout().read_next(), Some(b"one"))
   assert_eq(process.stdout().read_next(), Some(b"two"))
   assert_eq(process.stdout().read_next(), None)
   assert_eq(process.stderr().read_next(), None)
-  assert_eq(process.wait(), SandboxProcessExit::new(exit_code=7))
+  assert_eq(
+    process.wait(),
+    @provider_utils.SandboxProcessExit::new(exit_code=7),
+  )
   process.kill()
 }
 
 ///|
 async test "command-only sandbox reports unavailable optional capabilities" {
-  let session = SandboxSession::new(description="command only", run=_ => {
-    SandboxProcessResult::new(exit_code=0)
-  })
+  let session = @provider_utils.SandboxSession::new(
+    description="command only",
+    run=_ => @provider_utils.SandboxProcessResult::new(exit_code=0),
+  )
   ignore(
-    session.read_text_file(SandboxReadTextFileOptions::new(path="missing.txt")),
+    session.read_text_file(
+      @provider_utils.SandboxReadTextFileOptions::new(path="missing.txt"),
+    ),
   ) catch {
     @provider.UnsupportedFunctionalityError(functionality~) =>
       assert_eq(functionality, "sandbox.readTextFile")
@@ -87,7 +101,7 @@ async test "command-only sandbox reports unavailable optional capabilities" {
 
 ///|
 test "sandbox text range options pass through to the implementation" {
-  let options = SandboxReadTextFileOptions::new(
+  let options = @provider_utils.SandboxReadTextFileOptions::new(
     path="input",
     encoding="utf-8",
     start_line=4,

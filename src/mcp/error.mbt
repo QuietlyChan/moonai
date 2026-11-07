@@ -61,3 +61,27 @@ pub(all) suberror UnauthorizedError {
 fn mcp_error(message : String) -> MCPClientError {
   MCPClientError::new(message~)
 }
+
+///|
+#deprecated
+pub extend MCPClientError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPClientError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPClientOAuthError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPClientOAuthError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend UnauthorizedError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend UnauthorizedError with Eq::{not_equal, equal}

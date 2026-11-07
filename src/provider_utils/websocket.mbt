@@ -152,7 +152,10 @@ impl WebSocketConnector for NativeWebSocketConnector with fn connect(
   if protocols.length() > 0 {
     handshake_headers["Sec-WebSocket-Protocol"] = protocols.join(", ")
   }
-  let connection = @websocket.connect(url, headers=handshake_headers)
+  let connection = @websocket.connect(
+    url,
+    headers=to_http_headers(handshake_headers),
+  )
   NativeWebSocketConnection::{ connection, } as &WebSocketConnection
 }
 
@@ -161,3 +164,11 @@ impl WebSocketConnector for NativeWebSocketConnector with fn connect(
 pub fn native_websocket_connector() -> &WebSocketConnector {
   NativeWebSocketConnector::new()
 }
+
+///|
+#deprecated
+pub extend WebSocketReceive with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend WebSocketReceive with Eq::{not_equal, equal}

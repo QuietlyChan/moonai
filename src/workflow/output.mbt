@@ -41,3 +41,15 @@ pub fn validate_workflow_output(
   }
   value
 }
+
+///|
+#deprecated
+pub extend WorkflowOutputSpecification with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend WorkflowOutputValidationError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend WorkflowOutputValidationError with Eq::{not_equal, equal}

@@ -919,3 +919,91 @@ pub(all) enum StreamEvent {
   Raw(Json)
   StreamError(StreamErrorInfo)
 }
+
+///|
+#deprecated
+pub extend LanguageModelMessageRole with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelMessageRole with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ProviderReference with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ProviderReference with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelContentPart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelContentPart with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelMessage with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelMessage with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend Usage with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend Usage with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend FinishReason with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend FinishReason with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ToolChoice with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolChoice with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend JsonResponseFormat with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ResponseFormat with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ReasoningEffort with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ReasoningEffort with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ChatCallOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ChatResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ChatResponse with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend StreamEvent with Debug::{to_repr}

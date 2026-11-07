@@ -107,3 +107,19 @@ pub fn audio_reader(
   }
   ReaderAudioStream::{ reader, max_chunk_size, cancelled: Ref(false), }
 }
+
+///|
+#deprecated
+pub extend AudioFormat with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AudioFormat with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AudioChunk with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AudioChunk with Eq::{not_equal, equal}

@@ -162,7 +162,7 @@ async test "generate_text invokes input callbacks for valid registered tools" {
       })
     },
   )
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     messages=[@provider_utils.ModelMessage::user("callback input")],
     tools=@provider_utils.tool_set([("weather", weather)]),
@@ -225,11 +225,11 @@ async test "generate_text requests user approval before tool execution" {
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     messages=[@provider_utils.ModelMessage::user("remove the draft")],
     tools~,
-    tool_approval=ToolApprovalConfiguration::generic(options => {
+    tool_approval=@generate_text.ToolApprovalConfiguration::generic(options => {
       approval_context.push({
         "toolName": options.tool_call.tool_name,
         "input": options.tool_call.input,
@@ -238,7 +238,7 @@ async test "generate_text requests user approval before tool execution" {
         "runtimeContext": options.runtime_context,
         "hasTool": options.tools.get("shell") is Some(_),
       })
-      ToolApprovalStatus::user_approval()
+      @generate_text.ToolApprovalStatus::user_approval()
     }),
     tools_context=Map([("shell", { "cwd": "/workspace" })]),
     runtime_context={ "requestId": "req-approval" },
@@ -310,22 +310,26 @@ async test "generate_text handles automatic approval and denial" {
       }),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="run both",
     tools~,
-    tool_approval=ToolApprovalConfiguration::per_tool(
+    tool_approval=@generate_text.ToolApprovalConfiguration::per_tool(
       Map([
         (
           "approved",
-          ToolApprovalRule::status(
-            ToolApprovalStatus::approved(reason="policy allows this call"),
+          @generate_text.ToolApprovalRule::status(
+            @generate_text.ToolApprovalStatus::approved(
+              reason="policy allows this call",
+            ),
           ),
         ),
         (
           "denied",
-          ToolApprovalRule::status(
-            ToolApprovalStatus::denied(reason="policy blocks this call"),
+          @generate_text.ToolApprovalRule::status(
+            @generate_text.ToolApprovalStatus::denied(
+              reason="policy blocks this call",
+            ),
           ),
         ),
       ]),
@@ -398,7 +402,7 @@ async test "generate_text executes a user-approved tool on the next call" {
     ),
   ])
   let user_message = @provider_utils.ModelMessage::user("publish the release")
-  let first = generate_text(
+  let first = @generate_text.generate_text(
     first_model as &@provider.LanguageModelV4,
     messages=[user_message],
     tools~,
@@ -428,7 +432,7 @@ async test "generate_text executes a user-approved tool on the next call" {
       @provider.V4FinishStop,
     ),
   ])
-  let second = generate_text(
+  let second = @generate_text.generate_text(
     second_model as &@provider.LanguageModelV4,
     messages=history,
     tools~,
@@ -480,7 +484,7 @@ async test "generate_text defaults to one completed step" {
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="weather",
     tools~,
@@ -520,11 +524,11 @@ async test "generate_text executes tools and appends response messages across st
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="weather",
     tools~,
-    stop_when=[is_step_count(2)],
+    stop_when=[@generate_text.is_step_count(2)],
   )
   assert_eq(model.call_count.val, 2)
   assert_eq(result.steps.length(), 2)
@@ -573,11 +577,11 @@ async test "generate_text sends custom tool model output while retaining raw out
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="weather",
     tools~,
-    stop_when=[is_step_count(2)],
+    stop_when=[@generate_text.is_step_count(2)],
   )
   assert_eq(result.tool_results[0].output, { "temperature": 18 })
   let second_prompt = model.captured_options.val[1].prompt.messages
@@ -621,7 +625,7 @@ async test "invalid tool input becomes a tool error without executing" {
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="weather",
     tools~,
@@ -643,7 +647,7 @@ async test "tool execution failures become error results" {
       @provider.V4FinishToolCalls,
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="run tool",
     tools=@provider_utils.tool_set([
@@ -678,7 +682,7 @@ async test "tool execution cancellation is never converted to a tool error" {
     ),
   ])
   try
-    generate_text(
+    @generate_text.generate_text(
       model as &@provider.LanguageModelV4,
       prompt="cancel tool",
       tools=@provider_utils.tool_set([
@@ -720,13 +724,13 @@ async test "tool without execute callback stops the natural loop" {
       @provider.V4FinishStop,
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="weather",
     tools=@provider_utils.tool_set([
       ("weather", @provider_utils.Tool::function({ "type": "object" })),
     ]),
-    stop_when=[is_step_count(3)],
+    stop_when=[@generate_text.is_step_count(3)],
   )
   assert_eq(model.call_count.val, 1)
   assert_eq(result.steps.length(), 1)
@@ -767,7 +771,7 @@ async test "deferred provider tool result keeps the loop active until resolved" 
       @provider.V4FinishStop,
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="run code",
     tools=@provider_utils.tool_set([
@@ -779,7 +783,7 @@ async test "deferred provider tool result keeps the loop active until resolved" 
         ),
       ),
     ]),
-    stop_when=[is_step_count(3)],
+    stop_when=[@generate_text.is_step_count(3)],
   )
   assert_eq(model.call_count.val, 2)
   assert_eq(result.steps.length(), 2)
@@ -827,14 +831,14 @@ async test "OpenAI programmatic caller prepares and executes callee tools across
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="search",
     tools~,
     experimental_tool_callers=Map([
       ("lookup", [@tool.ToolCallerReference::tool("programmatic")]),
     ]),
-    stop_when=[is_step_count(2)],
+    stop_when=[@generate_text.is_step_count(2)],
   )
   assert_eq(executions.val, 1)
   assert_eq(result.steps.length(), 2)
@@ -915,14 +919,14 @@ async test "Anthropic code execution caller keeps deferred provider work in the 
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="search with code",
     tools~,
     experimental_tool_callers=Map([
       ("lookup", [@tool.ToolCallerReference::tool("code_execution")]),
     ]),
-    stop_when=[is_step_count(3)],
+    stop_when=[@generate_text.is_step_count(3)],
   )
   assert_eq(executions.val, 1)
   assert_eq(result.steps.length(), 2)
@@ -994,12 +998,12 @@ async test "prepare_step carries state while model call overrides stay local" {
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     primary as &@provider.LanguageModelV4,
     messages=[@provider_utils.ModelMessage::user("original prompt")],
     instructions=@prompt.Instructions::text("outer instructions"),
     tools~,
-    stop_when=[is_step_count(3)],
+    stop_when=[@generate_text.is_step_count(3)],
     max_output_tokens=100,
     temperature=1.0,
     stop_sequences=["outer"],
@@ -1019,7 +1023,7 @@ async test "prepare_step carries state while model call overrides stay local" {
         assert_eq(options.response_messages.length(), 0)
         assert_eq(options.messages[0].content, "original prompt")
         Some(
-          PrepareStepResult::new(
+          @generate_text.PrepareStepResult::new(
             instructions=@prompt.Instructions::text("prepared instructions"),
             messages=[@provider_utils.ModelMessage::user("prepared prompt")],
             runtime_context={ "phase": "prepared" },
@@ -1047,7 +1051,9 @@ async test "prepare_step carries state while model call overrides stay local" {
           Some({ "label": "prepared" }),
         )
         Some(
-          PrepareStepResult::new(model=alternate as &@provider.LanguageModelV4),
+          @generate_text.PrepareStepResult::new(
+            model=alternate as &@provider.LanguageModelV4,
+          ),
         )
       }
     },
@@ -1140,20 +1146,20 @@ async test "prepare_step sandbox override is local to one generate_text step" {
       ),
     ),
   ])
-  let result = generate_text(
+  let result = @generate_text.generate_text(
     model as &@provider.LanguageModelV4,
     prompt="lookup twice",
     tools~,
     tools_context=Map([("lookup", { "label": "outer" })]),
     experimental_sandbox=outer_sandbox,
-    stop_when=[is_step_count(4)],
+    stop_when=[@generate_text.is_step_count(4)],
     prepare_step=options => {
       observed_prepare_sandboxes.push(
         options.experimental_sandbox.unwrap().description(),
       )
       if options.step_number == 0 {
         Some(
-          PrepareStepResult::new(
+          @generate_text.PrepareStepResult::new(
             tools_context=Map([("lookup", { "label": "step" })]),
             experimental_sandbox=step_sandbox,
           ),
@@ -1200,7 +1206,7 @@ async test "active_tools and tool_order are resolved before provider calls" {
     ("middle", @provider_utils.Tool::function(schema)),
   ])
   ignore(
-    generate_text(
+    @generate_text.generate_text(
       model as &@provider.LanguageModelV4,
       prompt="order tools",
       tools~,
@@ -1208,9 +1214,10 @@ async test "active_tools and tool_order are resolved before provider calls" {
       tool_order=["middle"],
       prepare_step=_ => {
         Some(
-          PrepareStepResult::new(active_tools=["zebra", "alpha"], tool_order=[
-            "alpha",
-          ]),
+          @generate_text.PrepareStepResult::new(
+            active_tools=["zebra", "alpha"],
+            tool_order=["alpha"],
+          ),
         )
       },
     ),
@@ -1236,10 +1243,12 @@ async test "prepare_step validates per-step model call settings" {
     ),
   ])
   try
-    generate_text(
+    @generate_text.generate_text(
       model as &@provider.LanguageModelV4,
       prompt="validate settings",
-      prepare_step=_ => Some(PrepareStepResult::new(max_output_tokens=0)),
+      prepare_step=_ => {
+        Some(@generate_text.PrepareStepResult::new(max_output_tokens=0))
+      },
     )
   catch {
     @provider.InvalidArgumentError(argument~, message~) => {
@@ -1256,7 +1265,9 @@ async test "prepare_step validates per-step model call settings" {
 ///|
 async test "generate_text signs and validates tool approval replay" {
   let executions = Ref(0)
-  let secret = ToolApprovalSecret::string("approval-replay-secret")
+  let secret = @generate_text.ToolApprovalSecret::string(
+    "approval-replay-secret",
+  )
   let tools = @provider_utils.tool_set([
     (
       "release",
@@ -1288,7 +1299,7 @@ async test "generate_text signs and validates tool approval replay" {
     ),
   ])
   let user_message = @provider_utils.ModelMessage::user("publish the release")
-  let first = generate_text(
+  let first = @generate_text.generate_text(
     first_model as &@provider.LanguageModelV4,
     messages=[user_message],
     tools~,
@@ -1325,7 +1336,7 @@ async test "generate_text signs and validates tool approval replay" {
       @provider.V4FinishStop,
     ),
   ])
-  let second = generate_text(
+  let second = @generate_text.generate_text(
     second_model as &@provider.LanguageModelV4,
     messages=history,
     tools~,
@@ -1387,11 +1398,11 @@ async test "generate_text rejects unsigned approval replay when signing is confi
     ),
   ])
   try
-    generate_text(
+    @generate_text.generate_text(
       model as &@provider.LanguageModelV4,
       messages=history,
       tools~,
-      experimental_tool_approval_secret=ToolApprovalSecret::string(
+      experimental_tool_approval_secret=@generate_text.ToolApprovalSecret::string(
         "required-secret",
       ),
     )

@@ -573,3 +573,159 @@ fn decode_complete_result(value : Json) -> CompleteResult raise MCPClientError {
     raw: value,
   }
 }
+
+///|
+#deprecated
+pub extend MCPImplementation with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPImplementation with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend InitializeResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend InitializeResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPTool with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPTool with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ListToolsResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ListToolsResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPResource with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPResource with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ListResourcesResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ListResourcesResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPResourceTemplate with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPResourceTemplate with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ListResourceTemplatesResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ListResourceTemplatesResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPResourceContents with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPResourceContents with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ReadResourceResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ReadResourceResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPPromptArgument with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPPromptArgument with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPPrompt with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPPrompt with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ListPromptsResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ListPromptsResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPPromptMessage with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPPromptMessage with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GetPromptResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GetPromptResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPCompletionReference with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MCPCompletionReference with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend CompleteRequestParams with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend CompleteRequestParams with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend CompleteResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend CompleteResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend CallToolResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend CallToolResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MCPRequestOptions with Debug::{to_repr}

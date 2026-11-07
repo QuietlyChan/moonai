@@ -244,3 +244,23 @@ pub fn standardizePrompt(
 ) -> StandardizedPrompt raise {
   standardize_prompt(prompt, messages, instructions?, allow_system_in_messages~)
 }
+
+///|
+#deprecated
+pub extend PromptInput with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend Instructions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend Instructions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend Prompt with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend StandardizedPrompt with Debug::{to_repr}

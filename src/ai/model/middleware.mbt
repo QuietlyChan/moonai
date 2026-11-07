@@ -471,3 +471,28 @@ pub impl @provider.ImageWireModel for MiddlewareImageWireModel with fn generate(
     None => do_generate()
   }
 }
+
+///|
+#deprecated
+pub extend ChatModelMiddlewareOperation with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ChatModelMiddlewareOperation with Eq::{not_equal, equal}
+
+///|
+pub extend MiddlewareChatModel with @QuietlyChan/moonai/provider.ChatModel::{
+  provider,
+  supported_urls,
+  generate,
+  stream,
+  model_id,
+}
+
+///|
+pub extend MiddlewareImageWireModel with @QuietlyChan/moonai/provider.ImageWireModel::{
+  provider,
+  generate,
+  model_id,
+  max_images_per_call,
+}

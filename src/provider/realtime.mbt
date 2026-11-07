@@ -332,3 +332,107 @@ pub fn RealtimeFactoryTokenOptions::new(
 ) -> RealtimeFactoryTokenOptions {
   { model, expires_after_seconds, session_config, }
 }
+
+///|
+#deprecated
+pub extend RealtimeOutputModality with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeOutputModality with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeAudioTranscriptionConfig with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeAudioTranscriptionConfig with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeTurnDetection with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeTurnDetection with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeToolDefinition with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeToolDefinition with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeSessionConfig with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeSessionConfig with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeConversationItem with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeConversationItem with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeResponseCreateOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeResponseCreateOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeClientEvent with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeClientEvent with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeServerEvent with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeServerEvent with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeClientSecretOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeClientSecretOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeClientSecretResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeClientSecretResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeWebSocketConfig with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeWebSocketConfig with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend RealtimeFactoryTokenOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend RealtimeFactoryTokenOptions with Eq::{not_equal, equal}

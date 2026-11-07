@@ -363,31 +363,51 @@ pub fn without_trailing_slash(String) -> String
 pub(all) suberror DownloadError {
   DownloadError(url~ : String, message~ : String, status_code~ : Int32?, status_text~ : String?)
 }
+#deprecated
+pub fn DownloadError::equal(Self, Self) -> Bool
+#deprecated
+pub fn DownloadError::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn DownloadError::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 type HttpTimeoutError
+#deprecated
+pub fn HttpTimeoutError::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 type HttpTransportError
+#deprecated
+pub fn HttpTransportError::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub suberror JsonSchemaValidationError {
   JsonSchemaValidationError(path~ : String, message~ : String)
 }
+#deprecated
+pub fn JsonSchemaValidationError::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 type SseProtocolError
+#deprecated
+pub fn SseProtocolError::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) suberror SseProviderError {
   SseProviderError(message~ : String, status_code~ : Int32, response_body~ : String, is_retryable~ : Bool)
 }
+#deprecated
+pub fn SseProviderError::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 type SseTimeoutError
+#deprecated
+pub fn SseTimeoutError::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 type SseTransportError
+#deprecated
+pub fn SseTransportError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 #derive(@debug.Debug)
@@ -396,12 +416,20 @@ pub(all) struct BinaryHttpResponse {
   request : @provider.RequestMetadata
   response : @provider.ResponseMetadata
 }
+#deprecated
+pub fn BinaryHttpResponse::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct CompletionPrompt {
   prompt : String
   stop_sequences : Array[String]
 }
+#deprecated
+pub fn CompletionPrompt::equal(Self, Self) -> Bool
+#deprecated
+pub fn CompletionPrompt::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn CompletionPrompt::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct DownloadedFile {
@@ -409,6 +437,12 @@ pub(all) struct DownloadedFile {
   media_type : String
   response : @provider.ResponseMetadata
 }
+#deprecated
+pub fn DownloadedFile::equal(Self, Self) -> Bool
+#deprecated
+pub fn DownloadedFile::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn DownloadedFile::to_repr(Self) -> @debug.Repr
 
 pub struct EventSourceBuffer {
   // private fields
@@ -423,6 +457,12 @@ pub(all) enum HttpMethod {
   HttpPost
   HttpDelete
 }
+#deprecated
+pub fn HttpMethod::equal(Self, Self) -> Bool
+#deprecated
+pub fn HttpMethod::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn HttpMethod::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct HttpRequest {
@@ -433,9 +473,15 @@ pub(all) struct HttpRequest {
 }
 pub fn HttpRequest::body_text(Self) -> String raise
 pub fn HttpRequest::delete(url~ : String, headers? : Map[String, String]) -> Self
+#deprecated
+pub fn HttpRequest::equal(Self, Self) -> Bool
 pub fn HttpRequest::get(url~ : String, headers? : Map[String, String]) -> Self
 pub fn HttpRequest::new(meth~ : HttpMethod, url~ : String, headers? : Map[String, String], body? : Bytes) -> Self
+#deprecated
+pub fn HttpRequest::not_equal(Self, Self) -> Bool
 pub fn HttpRequest::post(url~ : String, headers? : Map[String, String], body~ : Bytes) -> Self
+#deprecated
+pub fn HttpRequest::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct HttpResponse {
@@ -445,9 +491,15 @@ pub(all) struct HttpResponse {
   body : Bytes
 }
 pub fn HttpResponse::body_text(Self) -> String raise
+#deprecated
+pub fn HttpResponse::equal(Self, Self) -> Bool
 pub fn HttpResponse::is_success(Self) -> Bool
 pub fn HttpResponse::new(status_code~ : Int32, body~ : Bytes, reason? : String, headers? : Map[String, String]) -> Self
+#deprecated
+pub fn HttpResponse::not_equal(Self, Self) -> Bool
 pub fn HttpResponse::text(status_code~ : Int32, body~ : String, reason? : String, headers? : Map[String, String]) -> Self
+#deprecated
+pub fn HttpResponse::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct JsonHttpResponse {
@@ -455,6 +507,8 @@ pub(all) struct JsonHttpResponse {
   request : @provider.RequestMetadata
   response : @provider.ResponseMetadata
 }
+#deprecated
+pub fn JsonHttpResponse::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum ModelContentPart {
@@ -477,16 +531,22 @@ pub(all) enum ModelContentPart {
 }
 pub fn ModelContentPart::audio_data(data~ : String, format~ : String) -> Self
 pub fn ModelContentPart::custom(String) -> Self
+#deprecated
+pub fn ModelContentPart::equal(Self, Self) -> Bool
 pub fn ModelContentPart::file_data(data~ : String, media_type~ : String, filename~ : String) -> Self
 pub fn ModelContentPart::file_reference(reference~ : @provider.ProviderReference, media_type? : String, filename? : String) -> Self
 pub fn ModelContentPart::file_url(url~ : String, media_type? : String, filename? : String) -> Self
 pub fn ModelContentPart::image_data(data~ : String, media_type~ : String) -> Self
 pub fn ModelContentPart::image_url(String) -> Self
+#deprecated
+pub fn ModelContentPart::not_equal(Self, Self) -> Bool
 pub fn ModelContentPart::provider_options(Self) -> Map[String, @json.Json]
 pub fn ModelContentPart::reasoning(String) -> Self
 pub fn ModelContentPart::reasoning_file_data(data~ : String, media_type~ : String) -> Self
 pub fn ModelContentPart::reasoning_file_url(url~ : String, media_type~ : String) -> Self
 pub fn ModelContentPart::text(String) -> Self
+#deprecated
+pub fn ModelContentPart::to_repr(Self) -> @debug.Repr
 pub fn ModelContentPart::tool_approval_request(ModelToolApprovalRequest) -> Self
 pub fn ModelContentPart::tool_approval_response(ModelToolApprovalResponse) -> Self
 pub fn ModelContentPart::tool_call(ModelToolCall) -> Self
@@ -506,7 +566,13 @@ pub(all) struct ModelMessage {
 pub fn ModelMessage::assistant(String, tool_calls? : Array[ModelToolCall], reasoning_content? : String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelMessage::assistant_parts(Array[ModelContentPart], tool_calls? : Array[ModelToolCall], reasoning_content? : String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelMessage::copy(Self) -> Self
+#deprecated
+pub fn ModelMessage::equal(Self, Self) -> Bool
+#deprecated
+pub fn ModelMessage::not_equal(Self, Self) -> Bool
 pub fn ModelMessage::system(String, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelMessage::to_repr(Self) -> @debug.Repr
 pub fn ModelMessage::tool(String, String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelMessage::tool_content(Array[ModelContentPart], provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelMessage::tool_parts(String, Array[ModelContentPart], provider_options? : Map[String, @json.Json]) -> Self
@@ -522,6 +588,12 @@ pub(all) enum ModelMessageRole {
   ModelAssistant
   ModelTool(String)
 }
+#deprecated
+pub fn ModelMessageRole::equal(Self, Self) -> Bool
+#deprecated
+pub fn ModelMessageRole::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn ModelMessageRole::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct ModelToolApprovalRequest {
@@ -531,7 +603,13 @@ pub(all) struct ModelToolApprovalRequest {
   signature : String?
   request_reason : String?
 }
+#deprecated
+pub fn ModelToolApprovalRequest::equal(Self, Self) -> Bool
 pub fn ModelToolApprovalRequest::new(approval_id~ : String, tool_call_id~ : String, is_automatic? : Bool, signature? : String, request_reason? : String) -> Self
+#deprecated
+pub fn ModelToolApprovalRequest::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn ModelToolApprovalRequest::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct ModelToolApprovalResponse {
@@ -541,7 +619,13 @@ pub(all) struct ModelToolApprovalResponse {
   provider_executed : Bool
   provider_options : Map[String, @json.Json]
 }
+#deprecated
+pub fn ModelToolApprovalResponse::equal(Self, Self) -> Bool
 pub fn ModelToolApprovalResponse::new(approval_id~ : String, approved~ : Bool, reason? : String, provider_executed? : Bool, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolApprovalResponse::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn ModelToolApprovalResponse::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct ModelToolCall {
@@ -552,7 +636,13 @@ pub(all) struct ModelToolCall {
   dynamic : Bool
   provider_options : Map[String, @json.Json]
 }
+#deprecated
+pub fn ModelToolCall::equal(Self, Self) -> Bool
 pub fn ModelToolCall::new(id~ : String, name~ : String, input~ : @json.Json, provider_executed? : Bool, dynamic? : Bool, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolCall::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn ModelToolCall::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct ModelToolResult {
@@ -562,11 +652,17 @@ pub(all) struct ModelToolResult {
   provider_options : Map[String, @json.Json]
 }
 pub fn ModelToolResult::content(tool_call_id~ : String, tool_name~ : String, value~ : Array[ModelToolResultContentPart], provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResult::equal(Self, Self) -> Bool
 pub fn ModelToolResult::error_json(tool_call_id~ : String, tool_name~ : String, value~ : @json.Json, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelToolResult::error_text(tool_call_id~ : String, tool_name~ : String, value~ : String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelToolResult::execution_denied(tool_call_id~ : String, tool_name~ : String, reason? : String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelToolResult::json(tool_call_id~ : String, tool_name~ : String, value~ : @json.Json, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResult::not_equal(Self, Self) -> Bool
 pub fn ModelToolResult::text(tool_call_id~ : String, tool_name~ : String, value~ : String, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResult::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum ModelToolResultContentPart {
@@ -577,10 +673,16 @@ pub(all) enum ModelToolResultContentPart {
   ModelToolResultCustom(provider_options~ : Map[String, @json.Json])
 }
 pub fn ModelToolResultContentPart::custom(provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResultContentPart::equal(Self, Self) -> Bool
 pub fn ModelToolResultContentPart::file_data(data~ : String, media_type~ : String, filename? : String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelToolResultContentPart::file_reference(reference~ : @provider.ProviderReference, media_type~ : String, filename? : String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelToolResultContentPart::file_url(url~ : String, media_type~ : String, filename? : String, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResultContentPart::not_equal(Self, Self) -> Bool
 pub fn ModelToolResultContentPart::text(String, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResultContentPart::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) enum ModelToolResultOutput {
@@ -592,19 +694,31 @@ pub(all) enum ModelToolResultOutput {
   ModelToolContent(value~ : Array[ModelToolResultContentPart], provider_options~ : Map[String, @json.Json])
 }
 pub fn ModelToolResultOutput::content(Array[ModelToolResultContentPart], provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResultOutput::equal(Self, Self) -> Bool
 pub fn ModelToolResultOutput::error_json(@json.Json, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelToolResultOutput::error_text(String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelToolResultOutput::execution_denied(reason? : String, provider_options? : Map[String, @json.Json]) -> Self
 pub fn ModelToolResultOutput::json(@json.Json, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResultOutput::not_equal(Self, Self) -> Bool
 pub fn ModelToolResultOutput::text(String, provider_options? : Map[String, @json.Json]) -> Self
+#deprecated
+pub fn ModelToolResultOutput::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct MultipartField {
   name : String
   value : MultipartValue
 }
+#deprecated
+pub fn MultipartField::equal(Self, Self) -> Bool
 pub fn MultipartField::file(name~ : String, filename~ : String, media_type~ : String, data~ : Bytes) -> Self
+#deprecated
+pub fn MultipartField::not_equal(Self, Self) -> Bool
 pub fn MultipartField::text(name~ : String, value~ : String) -> Self
+#deprecated
+pub fn MultipartField::to_repr(Self) -> @debug.Repr
 
 pub(all) enum MultipartFieldPlan {
   MultipartPlanText(name~ : String, value~ : String)
@@ -619,12 +733,20 @@ pub(all) struct MultipartFormData {
   body : Bytes
   diagnostic_body : String
 }
+#deprecated
+pub fn MultipartFormData::equal(Self, Self) -> Bool
+#deprecated
+pub fn MultipartFormData::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn MultipartFormData::to_repr(Self) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct MultipartResponsePart {
   headers : Map[String, String]
   body : Bytes
 }
+#deprecated
+pub fn MultipartResponsePart::to_repr(Self) -> @debug.Repr
 
 pub(all) struct MultipartStreamingPlan {
   boundary : String
@@ -641,6 +763,12 @@ pub(all) enum MultipartValue {
   MultipartText(String)
   MultipartFile(filename~ : String, media_type~ : String, data~ : Bytes)
 }
+#deprecated
+pub fn MultipartValue::equal(Self, Self) -> Bool
+#deprecated
+pub fn MultipartValue::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn MultipartValue::to_repr(Self) -> @debug.Repr
 
 pub struct NativeHttpTransport {
 }
@@ -663,12 +791,24 @@ pub(all) enum PartialJsonParseState {
   PartialSuccessfulRepair
   PartialFailedParse
 }
+#deprecated
+pub fn PartialJsonParseState::equal(Self, Self) -> Bool
+#deprecated
+pub fn PartialJsonParseState::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn PartialJsonParseState::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct PartialJsonResult {
   value : @json.Json
   state : PartialJsonParseState
 }
+#deprecated
+pub fn PartialJsonResult::equal(Self, Self) -> Bool
+#deprecated
+pub fn PartialJsonResult::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn PartialJsonResult::to_repr(Self) -> @debug.Repr
 
 pub struct ProviderDefinedToolFactory {
   // private fields
@@ -703,6 +843,8 @@ pub(all) struct ProviderOptionsResolution {
   warnings : Array[@provider.Warning]
   namespace_key : String?
 }
+#deprecated
+pub fn ProviderOptionsResolution::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct ResolvedImageFile {
@@ -710,6 +852,12 @@ pub(all) struct ResolvedImageFile {
   media_type : String
   data : Bytes
 }
+#deprecated
+pub fn ResolvedImageFile::equal(Self, Self) -> Bool
+#deprecated
+pub fn ResolvedImageFile::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn ResolvedImageFile::to_repr(Self) -> @debug.Repr
 
 pub struct SandboxByteStream {
   // private fields
@@ -733,7 +881,13 @@ pub async fn SandboxProcess::wait(Self) -> SandboxProcessExit
 pub(all) struct SandboxProcessExit {
   exit_code : Int32
 }
+#deprecated
+pub fn SandboxProcessExit::equal(Self, Self) -> Bool
 pub fn SandboxProcessExit::new(exit_code~ : Int32) -> Self
+#deprecated
+pub fn SandboxProcessExit::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn SandboxProcessExit::to_repr(Self) -> @debug.Repr
 
 pub(all) struct SandboxProcessOptions {
   command : String
@@ -749,8 +903,14 @@ pub(all) struct SandboxProcessResult {
   stdout : String
   stderr : String
 }
+#deprecated
+pub fn SandboxProcessResult::equal(Self, Self) -> Bool
 pub fn SandboxProcessResult::new(exit_code~ : Int32, stdout? : String, stderr? : String) -> Self
+#deprecated
+pub fn SandboxProcessResult::not_equal(Self, Self) -> Bool
 pub fn SandboxProcessResult::to_json(Self) -> @json.Json
+#deprecated
+pub fn SandboxProcessResult::to_repr(Self) -> @debug.Repr
 
 pub(all) struct SandboxReadFileOptions {
   path : String
@@ -811,6 +971,8 @@ pub(all) struct SseDecodeBatch[E] {
   done : Bool
 }
 pub fn[E] SseDecodeBatch::empty(Bool) -> Self[E]
+#deprecated
+pub fn[E : @debug.Debug] SseDecodeBatch::to_repr(Self[E]) -> @debug.Repr
 
 #derive(@debug.Debug)
 pub(all) struct SseHttpResponse[T] {
@@ -818,6 +980,8 @@ pub(all) struct SseHttpResponse[T] {
   request : @provider.RequestMetadata
   response : @provider.ResponseMetadata
 }
+#deprecated
+pub fn[T : @debug.Debug] SseHttpResponse::to_repr(Self[T]) -> @debug.Repr
 
 pub struct SseStreamStartPolicy {
   // private fields
@@ -834,7 +998,13 @@ pub(all) struct StreamingToolCallDelta {
   provider_metadata : Map[String, @json.Json]
   data : @json.Json
 }
+#deprecated
+pub fn StreamingToolCallDelta::equal(Self, Self) -> Bool
 pub fn StreamingToolCallDelta::new(index? : Int32, id? : String, tool_type? : String, function_name? : String, arguments_delta? : String, provider_metadata? : Map[String, @json.Json], data? : @json.Json) -> Self
+#deprecated
+pub fn StreamingToolCallDelta::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn StreamingToolCallDelta::to_repr(Self) -> @debug.Repr
 
 pub struct StreamingToolCallTracker {
   // private fields
@@ -852,6 +1022,12 @@ pub(all) enum StreamingToolCallTypeValidation {
   ValidateToolCallTypeIfPresent
   RequireFunctionToolCallType
 }
+#deprecated
+pub fn StreamingToolCallTypeValidation::equal(Self, Self) -> Bool
+#deprecated
+pub fn StreamingToolCallTypeValidation::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn StreamingToolCallTypeValidation::to_repr(Self) -> @debug.Repr
 
 pub struct Tool {
   // private fields
@@ -964,6 +1140,12 @@ pub(all) enum TranscriptionStreamClientFrame {
   TranscriptionStreamInvalid(String)
   TranscriptionStreamUnknown
 }
+#deprecated
+pub fn TranscriptionStreamClientFrame::equal(Self, Self) -> Bool
+#deprecated
+pub fn TranscriptionStreamClientFrame::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn TranscriptionStreamClientFrame::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) struct TranscriptionStreamStartFrame {
@@ -971,7 +1153,13 @@ pub(all) struct TranscriptionStreamStartFrame {
   provider_options : Map[String, @json.Json]?
   include_raw_chunks : Bool?
 }
+#deprecated
+pub fn TranscriptionStreamStartFrame::equal(Self, Self) -> Bool
 pub fn TranscriptionStreamStartFrame::new(input_audio_format~ : @provider.AudioFormat, provider_options? : Map[String, @json.Json], include_raw_chunks? : Bool) -> Self
+#deprecated
+pub fn TranscriptionStreamStartFrame::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn TranscriptionStreamStartFrame::to_repr(Self) -> @debug.Repr
 
 pub(all) enum TypeValidationResult[T] {
   TypeValidationSuccess(value~ : T, raw_value~ : @json.Json)
@@ -984,6 +1172,12 @@ pub(all) enum WebSocketReceive {
   WebSocketBinary(Bytes)
   WebSocketClosed(code~ : Int32?, reason~ : String?)
 }
+#deprecated
+pub fn WebSocketReceive::equal(Self, Self) -> Bool
+#deprecated
+pub fn WebSocketReceive::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn WebSocketReceive::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type IdGenerator = () -> String

@@ -210,3 +210,14 @@ pub impl @provider.EmbeddingModelV4 for OpenAICompatibleEmbeddingModel with fn d
     options.cancellation_token,
   )
 }
+
+///|
+pub extend OpenAICompatibleEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  provider,
+  max_embeddings_per_call,
+  supports_parallel_calls,
+  max_input_bytes_per_call,
+  model_id,
+}

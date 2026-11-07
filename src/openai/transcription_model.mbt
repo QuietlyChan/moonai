@@ -831,3 +831,12 @@ pub impl @provider.TranscriptionModelV4 for OpenAITranscriptionModel with fn do_
     response?=response.response,
   )
 }
+
+///|
+pub extend OpenAITranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  do_stream,
+  model_id,
+}

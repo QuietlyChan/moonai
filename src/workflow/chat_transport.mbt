@@ -87,3 +87,7 @@ pub fn WorkflowChatTransport::reconnect_to_stream(
   chunks.push({ "type": "finish", "finishReason": "stop" })
   chunks
 }
+
+///|
+#deprecated
+pub extend WorkflowChatResponse with Debug::{to_repr}

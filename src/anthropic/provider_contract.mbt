@@ -65,3 +65,13 @@ pub impl @provider.ProviderV4 for AnthropicProvider with fn files(self) {
 pub impl @provider.ProviderV4 for AnthropicProvider with fn skills(self) {
   Some(AnthropicProvider::skills(self))
 }
+
+///|
+pub extend AnthropicProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  transcription_model,
+}

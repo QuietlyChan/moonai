@@ -80,3 +80,7 @@ pub fn StreamTextResult::to_chat_response(
 ) -> @provider.ChatResponse {
   self.final_step.provider_result.to_chat_response()
 }
+
+///|
+#deprecated
+pub extend StreamTextResult with Debug::{to_repr}

@@ -235,3 +235,14 @@ pub let deepAgents : DeepAgentsHarness = createDeepAgents()
 ///|
 /// Snake-case alias for the default DeepAgents adapter.
 pub let deep_agents : DeepAgentsHarness = deepAgents
+
+///|
+pub extend DeepAgentsHarness with @QuietlyChan/moonai/harness.HarnessV1::{
+  supports_builtin_tool_filtering,
+  specification_version,
+  do_start,
+  builtin_tools,
+  get_bootstrap,
+  harness_id,
+  supports_builtin_tool_approvals,
+}

@@ -256,3 +256,14 @@ pub let openCode : OpenCodeHarness = createOpenCode()
 ///|
 /// Snake-case alias for the default OpenCode adapter.
 pub let open_code : OpenCodeHarness = openCode
+
+///|
+pub extend OpenCodeHarness with @QuietlyChan/moonai/harness.HarnessV1::{
+  supports_builtin_tool_filtering,
+  specification_version,
+  do_start,
+  builtin_tools,
+  get_bootstrap,
+  harness_id,
+  supports_builtin_tool_approvals,
+}

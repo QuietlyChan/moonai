@@ -146,3 +146,11 @@ fn json_string_field(value : Json, key : String) -> String? {
     _ => None
   }
 }
+
+///|
+pub extend TogetherAIRerankingModel with @QuietlyChan/moonai/provider.RerankingModelV4::{
+  do_rerank,
+  specification_version,
+  provider,
+  model_id,
+}

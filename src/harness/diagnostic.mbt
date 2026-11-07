@@ -71,3 +71,27 @@ pub(all) struct HarnessV1Observability {
   debug : HarnessV1DebugConfig
   report : HarnessV1DiagnosticReporter
 }
+
+///|
+#deprecated
+pub extend HarnessV1DebugLevel with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1DebugLevel with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1DebugConfig with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1DebugConfig with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1Diagnostic with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1Diagnostic with Eq::{not_equal, equal}

@@ -193,7 +193,7 @@ async test "stream_text invokes input callbacks after matching stream events" {
       })
     },
   )
-  let result = stream_text(
+  let result = @generate_text.stream_text(
     model as &@provider.LanguageModelV4,
     messages=[@provider_utils.ModelMessage::user("stream callback input")],
     tools=@provider_utils.tool_set([("lookup", lookup)]),
@@ -293,11 +293,11 @@ async test "stream_text sends custom tool model output on the next step" {
       ),
     ),
   ])
-  let result = stream_text(
+  let result = @generate_text.stream_text(
     model as &@provider.LanguageModelV4,
     prompt="lookup",
     tools~,
-    stop_when=[is_step_count(2)],
+    stop_when=[@generate_text.is_step_count(2)],
   )
   assert_eq(result.tool_results[0].output, { "matches": 1 })
   let second_prompt = model.captured_options.val[1].prompt.messages
@@ -359,14 +359,14 @@ async test "stream_text executes OpenAI programmatic caller tools across steps" 
       ),
     ),
   ])
-  let result = stream_text(
+  let result = @generate_text.stream_text(
     model as &@provider.LanguageModelV4,
     prompt="search",
     tools~,
     experimental_tool_callers=Map([
       ("lookup", [@tool.ToolCallerReference::tool("programmatic")]),
     ]),
-    stop_when=[is_step_count(2)],
+    stop_when=[@generate_text.is_step_count(2)],
     on_event=event => {
       match event {
         @provider.V4StreamStart(..) =>
@@ -469,14 +469,14 @@ async test "stream_text waits for Anthropic deferred caller results" {
       ),
     ),
   ])
-  let result = stream_text(
+  let result = @generate_text.stream_text(
     model as &@provider.LanguageModelV4,
     prompt="search with code",
     tools~,
     experimental_tool_callers=Map([
       ("lookup", [@tool.ToolCallerReference::tool("code_execution")]),
     ]),
-    stop_when=[is_step_count(3)],
+    stop_when=[@generate_text.is_step_count(3)],
   )
   assert_eq(model.call_count.val, 2)
   assert_eq(executions.val, 1)
@@ -565,11 +565,11 @@ async test "stream_text shares prepare_step state and model switching" {
       ),
     ),
   ])
-  let result = stream_text(
+  let result = @generate_text.stream_text(
     primary as &@provider.LanguageModelV4,
     prompt="original prompt",
     tools~,
-    stop_when=[is_step_count(3)],
+    stop_when=[@generate_text.is_step_count(3)],
     max_output_tokens=100,
     temperature=1.0,
     runtime_context={ "phase": "outer" },
@@ -582,7 +582,7 @@ async test "stream_text shares prepare_step state and model switching" {
       )
       if options.step_number == 0 {
         Some(
-          PrepareStepResult::new(
+          @generate_text.PrepareStepResult::new(
             messages=[@provider_utils.ModelMessage::user("prepared prompt")],
             runtime_context={ "phase": "prepared" },
             tools_context=Map([("lookup", { "label": "prepared" })]),
@@ -598,7 +598,9 @@ async test "stream_text shares prepare_step state and model switching" {
         assert_eq(options.messages[0].content, "prepared prompt")
         assert_eq(options.runtime_context, { "phase": "prepared" })
         Some(
-          PrepareStepResult::new(model=alternate as &@provider.LanguageModelV4),
+          @generate_text.PrepareStepResult::new(
+            model=alternate as &@provider.LanguageModelV4,
+          ),
         )
       }
     },
@@ -645,11 +647,11 @@ async test "stream_text requests user approval before tool execution" {
       ),
     ),
   ])
-  let result = stream_text(
+  let result = @generate_text.stream_text(
     model as &@provider.LanguageModelV4,
     messages=[@provider_utils.ModelMessage::user("remove the draft")],
     tools~,
-    tool_approval=ToolApprovalConfiguration::generic(options => {
+    tool_approval=@generate_text.ToolApprovalConfiguration::generic(options => {
       approval_context.push({
         "toolName": options.tool_call.tool_name,
         "input": options.tool_call.input,
@@ -658,7 +660,7 @@ async test "stream_text requests user approval before tool execution" {
         "runtimeContext": options.runtime_context,
         "hasTool": options.tools.get("shell") is Some(_),
       })
-      ToolApprovalStatus::user_approval()
+      @generate_text.ToolApprovalStatus::user_approval()
     }),
     tools_context=Map([("shell", { "cwd": "/workspace" })]),
     runtime_context={ "requestId": "req-stream-approval" },
@@ -732,22 +734,26 @@ async test "stream_text handles automatic approval and denial" {
       }),
     ),
   ])
-  let result = stream_text(
+  let result = @generate_text.stream_text(
     model as &@provider.LanguageModelV4,
     prompt="run both",
     tools~,
-    tool_approval=ToolApprovalConfiguration::per_tool(
+    tool_approval=@generate_text.ToolApprovalConfiguration::per_tool(
       Map([
         (
           "approved",
-          ToolApprovalRule::status(
-            ToolApprovalStatus::approved(reason="policy allows this call"),
+          @generate_text.ToolApprovalRule::status(
+            @generate_text.ToolApprovalStatus::approved(
+              reason="policy allows this call",
+            ),
           ),
         ),
         (
           "denied",
-          ToolApprovalRule::status(
-            ToolApprovalStatus::denied(reason="policy blocks this call"),
+          @generate_text.ToolApprovalRule::status(
+            @generate_text.ToolApprovalStatus::denied(
+              reason="policy blocks this call",
+            ),
           ),
         ),
       ]),
@@ -795,7 +801,9 @@ async test "stream_text handles automatic approval and denial" {
 ///|
 async test "stream_text executes a user-approved tool before streaming" {
   let executions = Ref(0)
-  let secret = ToolApprovalSecret::bytes(b"stream-approval-secret")
+  let secret = @generate_text.ToolApprovalSecret::bytes(
+    b"stream-approval-secret",
+  )
   let tool = @provider_utils.Tool::function(
     {
       "type": "object",
@@ -818,7 +826,7 @@ async test "stream_text executes a user-approved tool before streaming" {
     ],
   ])
   let user_message = @provider_utils.ModelMessage::user("publish the release")
-  let first = stream_text(
+  let first = @generate_text.stream_text(
     first_model as &@provider.LanguageModelV4,
     messages=[user_message],
     tools~,
@@ -856,7 +864,7 @@ async test "stream_text executes a user-approved tool before streaming" {
     ],
   ])
   let execution_counts_at_events : Array[Int32] = []
-  let second = stream_text(
+  let second = @generate_text.stream_text(
     second_model as &@provider.LanguageModelV4,
     messages=history,
     tools~,

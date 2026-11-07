@@ -368,3 +368,35 @@ fn parse_alibaba_video_options(
   }
   (options, reader.diagnostics())
 }
+
+///|
+#deprecated
+pub extend AlibabaLanguageModelChatOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AlibabaLanguageModelChatOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AlibabaEmbeddingModelOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AlibabaEmbeddingModelOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AlibabaVideoModelOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AlibabaVideoModelOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AlibabaVideoMedia with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AlibabaVideoMedia with Eq::{not_equal, equal}

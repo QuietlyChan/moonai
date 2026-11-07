@@ -1,6 +1,6 @@
 ///|
 test "high-level function tool uses the ToolSet key as provider name" {
-  let tool = Tool::function(
+  let tool = @provider_utils.Tool::function(
     { "type": "object" },
     description="lookup inventory",
     provider_options=Map([("test", { "enabled": true })]),
@@ -17,10 +17,11 @@ test "high-level function tool uses the ToolSet key as provider name" {
 
 ///|
 test "function tool resolves a step-local description from context and sandbox" {
-  let sandbox = SandboxSession::new(description="workspace sandbox", run=_ => {
-    SandboxProcessResult::new(exit_code=0)
-  })
-  let original = Tool::function(
+  let sandbox = @provider_utils.SandboxSession::new(
+    description="workspace sandbox",
+    run=_ => @provider_utils.SandboxProcessResult::new(exit_code=0),
+  )
+  let original = @provider_utils.Tool::function(
     { "type": "object" },
     description="fallback description",
     description_resolver=options => {
@@ -49,14 +50,14 @@ test "function tool resolves a step-local description from context and sandbox" 
 
 ///|
 test "experimental provider tool caller prepares callee options" {
-  let caller = experimental_tool_caller(
-    Tool::provider(id="test.programmatic"),
-    ToolCallerDefinition::provider(options => {
+  let caller = @provider_utils.experimental_tool_caller(
+    @provider_utils.Tool::provider(id="test.programmatic"),
+    @provider_utils.ToolCallerDefinition::provider(options => {
       options["test"] = { "allowedCallers": ["programmatic"] }
       options
     }),
   )
-  let definition = experimental_get_tool_caller(caller).unwrap()
+  let definition = @provider_utils.experimental_get_tool_caller(caller).unwrap()
   assert_true(definition.is_provider())
   assert_eq(
     definition.prepare_provider_options(Map([])).get("test"),
@@ -66,14 +67,14 @@ test "experimental provider tool caller prepares callee options" {
 
 ///|
 async test "executable tool receives normalized execution options" {
-  let tool = Tool::function({ "type": "object" }, execute=(input, options) => {
-    "input": input,
-    "toolCallId": options.tool_call_id,
-  })
+  let tool = @provider_utils.Tool::function({ "type": "object" }, execute=(
+    input,
+    options,
+  ) => { "input": input, "toolCallId": options.tool_call_id })
   assert_true(tool.is_executable())
   let output = tool.execute(
     { "sku": "sku-1" },
-    ToolExecutionOptions::new(tool_call_id="call-1"),
+    @provider_utils.ToolExecutionOptions::new(tool_call_id="call-1"),
   )
   assert_eq(
     output,
@@ -85,8 +86,8 @@ async test "executable tool receives normalized execution options" {
 async test "tool input lifecycle callbacks receive copied normalized options" {
   let events : Array[Json] = []
   let token = @provider.CancellationToken::new()
-  let messages = [ModelMessage::user("original input")]
-  let tool = Tool::function(
+  let messages = [@provider_utils.ModelMessage::user("original input")]
+  let tool = @provider_utils.Tool::function(
     { "type": "object" },
     on_input_start=options => {
       events.push({
@@ -121,27 +122,27 @@ async test "tool input lifecycle callbacks receive copied normalized options" {
       })
     },
   )
-  let start_options = ToolExecutionOptions::new(
+  let start_options = @provider_utils.ToolExecutionOptions::new(
     tool_call_id="call-1",
     messages~,
     cancellation_token=token,
     context={ "requestId": "req-1" },
   )
-  let delta_options = ToolInputDeltaOptions::new(
+  let delta_options = @provider_utils.ToolInputDeltaOptions::new(
     input_text_delta="{\"value\":",
     tool_call_id="call-1",
     messages~,
     cancellation_token=token,
     context={ "requestId": "req-1" },
   )
-  let available_options = ToolInputAvailableOptions::new(
+  let available_options = @provider_utils.ToolInputAvailableOptions::new(
     input={ "value": 1 },
     tool_call_id="call-1",
     messages~,
     cancellation_token=token,
     context={ "requestId": "req-1" },
   )
-  messages.push(ModelMessage::user("later mutation"))
+  messages.push(@provider_utils.ModelMessage::user("later mutation"))
   tool.invoke_input_start(start_options)
   tool.invoke_input_delta(delta_options)
   tool.invoke_input_available(available_options)
@@ -177,45 +178,45 @@ async test "tool input lifecycle callbacks receive copied normalized options" {
 
 ///|
 async test "tool model output uses AI SDK defaults and custom conversion" {
-  let default_tool = Tool::function({ "type": "object" })
+  let default_tool = @provider_utils.Tool::function({ "type": "object" })
   assert_eq(
     default_tool.to_model_output(
-      ToolModelOutputOptions::new(
+      @provider_utils.ToolModelOutputOptions::new(
         tool_call_id="call-text",
         input=Json::empty_object(),
         output="plain text",
       ),
     ),
-    ModelToolResultOutput::text("plain text"),
+    @provider_utils.ModelToolResultOutput::text("plain text"),
   )
   assert_eq(
     default_tool.to_model_output(
-      ToolModelOutputOptions::new(
+      @provider_utils.ToolModelOutputOptions::new(
         tool_call_id="call-json",
         input=Json::empty_object(),
         output={ "value": 1 },
       ),
     ),
-    ModelToolResultOutput::json({ "value": 1 }),
+    @provider_utils.ModelToolResultOutput::json({ "value": 1 }),
   )
-  let custom_tool = Tool::function({ "type": "object" }, to_model_output=options => {
+  let custom_tool = @provider_utils.Tool::function({ "type": "object" }, to_model_output=options => {
     assert_eq(options.tool_call_id, "call-custom")
     assert_eq(options.input, { "query": "MoonBit" })
     assert_eq(options.output, { "matches": 1 })
-    ModelToolResultOutput::content([
-      ModelToolResultContentPart::text("one match"),
+    @provider_utils.ModelToolResultOutput::content([
+      @provider_utils.ModelToolResultContentPart::text("one match"),
     ])
   })
   assert_eq(
     custom_tool.to_model_output(
-      ToolModelOutputOptions::new(
+      @provider_utils.ToolModelOutputOptions::new(
         tool_call_id="call-custom",
         input={ "query": "MoonBit" },
         output={ "matches": 1 },
       ),
     ),
-    ModelToolResultOutput::content([
-      ModelToolResultContentPart::text("one match"),
+    @provider_utils.ModelToolResultOutput::content([
+      @provider_utils.ModelToolResultContentPart::text("one match"),
     ]),
   )
 }

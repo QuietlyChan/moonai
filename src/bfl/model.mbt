@@ -224,3 +224,15 @@ pub fn bfl(
     http_transport?,
   ).image(model_id)
 }
+
+///|
+pub extend BflProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+  language_model,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

@@ -148,3 +148,12 @@ fn CartesiaTranscriptionModel::request_headers(
     ["ai-sdk/\{self.provider_name}/\{VERSION}"],
   )
 }
+
+///|
+pub extend CartesiaTranscriptionModel with @QuietlyChan/moonai/provider.TranscriptionModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  do_stream,
+  model_id,
+}

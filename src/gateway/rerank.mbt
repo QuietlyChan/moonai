@@ -152,3 +152,11 @@ pub impl @provider.RerankingModelV4 for GatewayRerankingModel with fn do_rerank(
     response=response.response,
   )
 }
+
+///|
+pub extend GatewayRerankingModel with @QuietlyChan/moonai/provider.RerankingModelV4::{
+  do_rerank,
+  specification_version,
+  provider,
+  model_id,
+}

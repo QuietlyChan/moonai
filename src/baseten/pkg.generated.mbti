@@ -26,8 +26,15 @@ pub fn BasetenProvider::chatModel(Self, model_id? : String) -> &@provider.Langua
 pub fn BasetenProvider::embedding(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
 pub fn BasetenProvider::embeddingModel(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
 pub fn BasetenProvider::embedding_model(Self, model_id? : String) -> &@provider.EmbeddingModelV4 raise
+pub fn BasetenProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn BasetenProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
 pub fn BasetenProvider::languageModel(Self, model_id? : String) -> &@provider.LanguageModelV4 raise
 pub fn BasetenProvider::language_model(Self, model_id? : String) -> &@provider.LanguageModelV4 raise
+pub fn BasetenProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn BasetenProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn BasetenProvider::specification_version(Self) -> String
+pub fn BasetenProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn BasetenProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for BasetenProvider
 
 // Type aliases

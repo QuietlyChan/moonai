@@ -37,7 +37,7 @@ async test "image V4 middleware overrides identity and delegates generation" {
     provider_name="base",
     model_id="base-image",
   )
-  let wrapped = wrapImageModel(
+  let wrapped = @model.wrapImageModel(
     base,
     @provider.ImageModelV4Middleware::new(
       override_max_images_per_call=_ => Some(4),
@@ -66,7 +66,7 @@ async test "image V4 middleware transforms options before the wire adapter" {
       @provider.Usage::zero(),
     ),
   )
-  let wrapped = wrap_image_model_v4_chain(base, [
+  let wrapped = @model.wrap_image_model_v4_chain(base, [
     @provider.ImageModelV4Middleware::new(
       transform_params=transform_image_options,
     ),

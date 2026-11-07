@@ -19,6 +19,13 @@ pub fn create_elevenlabs(api_key? : String, base_url? : String, headers? : Map[S
 pub struct ElevenLabsProvider {
   // private fields
 }
+pub fn ElevenLabsProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
+pub fn ElevenLabsProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn ElevenLabsProvider::image_model(Self, String) -> &@provider.ImageModelV4 raise
+pub fn ElevenLabsProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
+pub fn ElevenLabsProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn ElevenLabsProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn ElevenLabsProvider::specification_version(Self) -> String
 pub fn ElevenLabsProvider::speech(Self, String) -> &@provider.SpeechModelV4
 pub fn ElevenLabsProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
 pub fn ElevenLabsProvider::speech_model(Self, String) -> &@provider.SpeechModelV4
@@ -28,9 +35,18 @@ pub fn ElevenLabsProvider::transcription_model(Self, String) -> &@provider.Trans
 pub impl @provider.ProviderV4 for ElevenLabsProvider
 
 type ElevenLabsSpeechModel
+pub async fn ElevenLabsSpeechModel::do_generate(Self, @provider.SpeechModelV4CallOptions) -> @provider.SpeechModelV4Result
+pub fn ElevenLabsSpeechModel::model_id(Self) -> String
+pub fn ElevenLabsSpeechModel::provider(Self) -> String
+pub fn ElevenLabsSpeechModel::specification_version(Self) -> String
 pub impl @provider.SpeechModelV4 for ElevenLabsSpeechModel
 
 type ElevenLabsTranscriptionModel
+pub async fn ElevenLabsTranscriptionModel::do_generate(Self, @provider.TranscriptionModelV4CallOptions) -> @provider.TranscriptionModelV4Result
+pub async fn ElevenLabsTranscriptionModel::do_stream(Self, @provider.TranscriptionModelV4StreamOptions, async (@provider.TranscriptionModelV4StreamPart) -> Unit) -> @provider.TranscriptionModelV4StreamResult
+pub fn ElevenLabsTranscriptionModel::model_id(Self) -> String
+pub fn ElevenLabsTranscriptionModel::provider(Self) -> String
+pub fn ElevenLabsTranscriptionModel::specification_version(Self) -> String
 pub impl @provider.TranscriptionModelV4 for ElevenLabsTranscriptionModel
 
 // Type aliases

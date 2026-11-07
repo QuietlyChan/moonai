@@ -25,12 +25,30 @@ pub fn google(String, api_key? : String, base_url? : String, headers? : Map[Stri
 
 // Types and methods
 type GoogleChatLanguageModel
+pub async fn GoogleChatLanguageModel::do_generate(Self, @provider.LanguageModelV4CallOptions) -> @provider.LanguageModelV4GenerateResult
+pub async fn GoogleChatLanguageModel::do_stream(Self, @provider.LanguageModelV4CallOptions, async (@provider.LanguageModelV4StreamPart) -> Unit) -> @provider.LanguageModelV4StreamResult
+pub fn GoogleChatLanguageModel::model_id(Self) -> String
+pub fn GoogleChatLanguageModel::provider(Self) -> String
+pub fn GoogleChatLanguageModel::specification_version(Self) -> String
+pub fn GoogleChatLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.LanguageModelV4 for GoogleChatLanguageModel
 
 type GoogleEmbeddingModel
+pub async fn GoogleEmbeddingModel::do_embed(Self, @provider.EmbeddingModelV4CallOptions) -> @provider.EmbeddingModelV4Result
+pub fn GoogleEmbeddingModel::max_embeddings_per_call(Self) -> Int32?
+pub fn GoogleEmbeddingModel::max_input_bytes_per_call(Self) -> Int64?
+pub fn GoogleEmbeddingModel::model_id(Self) -> String
+pub fn GoogleEmbeddingModel::provider(Self) -> String
+pub fn GoogleEmbeddingModel::specification_version(Self) -> String
+pub fn GoogleEmbeddingModel::supports_parallel_calls(Self) -> Bool
 pub impl @provider.EmbeddingModelV4 for GoogleEmbeddingModel
 
 type GoogleImageModel
+pub async fn GoogleImageModel::do_generate(Self, @provider.ImageModelV4CallOptions) -> @provider.ImageModelV4Result
+pub fn GoogleImageModel::max_images_per_call(Self) -> Int32?
+pub fn GoogleImageModel::model_id(Self) -> String
+pub fn GoogleImageModel::provider(Self) -> String
+pub fn GoogleImageModel::specification_version(Self) -> String
 pub impl @provider.ImageModelV4 for GoogleImageModel
 
 pub struct GoogleProvider {
@@ -41,11 +59,17 @@ pub fn GoogleProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GoogleProvider::embedding(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GoogleProvider::embeddingModel(Self, String) -> &@provider.EmbeddingModelV4
 pub fn GoogleProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4
+pub fn GoogleProvider::files(Self) -> &@provider.FilesV4? raise
 pub fn GoogleProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn GoogleProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn GoogleProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn GoogleProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GoogleProvider::language_model(Self, String) -> &@provider.LanguageModelV4
+pub fn GoogleProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
+pub fn GoogleProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn GoogleProvider::specification_version(Self) -> String
+pub fn GoogleProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
+pub fn GoogleProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for GoogleProvider
 
 // Type aliases

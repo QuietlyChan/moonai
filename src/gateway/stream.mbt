@@ -301,3 +301,13 @@ pub impl @provider.LanguageModelV4 for GatewayLanguageModel with fn do_stream(
     Some(response_metadata),
   )
 }
+
+///|
+pub extend GatewayLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

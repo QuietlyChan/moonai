@@ -211,3 +211,39 @@ pub fn TranscriptionResponse::with_transport(
     warnings: copy_warnings(self.warnings),
   }
 }
+
+///|
+#deprecated
+pub extend TranscriptionAudio with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend TranscriptionAudio with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend TranscriptionSegment with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend TranscriptionSegment with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend TranscriptionCallOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend TranscriptionStreamEvent with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend TranscriptionStreamEvent with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend TranscriptionResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend TranscriptionResponse with Eq::{not_equal, equal}

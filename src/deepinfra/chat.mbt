@@ -158,3 +158,13 @@ pub impl @provider.LanguageModelV4 for DeepInfraChatLanguageModel with fn do_str
   }
   (self.base as &@provider.LanguageModelV4).do_stream(options, wrapped)
 }
+
+///|
+pub extend DeepInfraChatLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

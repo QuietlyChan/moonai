@@ -208,3 +208,14 @@ pub fn perplexity(
     id_generator?,
   ).language_model(model_id)
 }
+
+///|
+pub extend PerplexityProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  reranking_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

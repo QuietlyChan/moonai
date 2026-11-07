@@ -62,3 +62,19 @@ pub fn LanguageModelV4FinishReason::with_raw(
 ) -> LanguageModelV4FinishReason {
   { unified: self.unified, raw, }
 }
+
+///|
+#deprecated
+pub extend LanguageModelV4UnifiedFinishReason with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4UnifiedFinishReason with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelV4FinishReason with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4FinishReason with Eq::{not_equal, equal}

@@ -1345,3 +1345,255 @@ pub fn OpenAITranscriptionModelOptions::to_provider_options(
     ),
   )
 }
+
+///|
+#deprecated
+pub extend OpenAILogprobs with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAILogprobs with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIPromptCacheMode with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIPromptCacheMode with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIPromptCacheTtl with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIPromptCacheTtl with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIPromptCacheOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIPromptCacheOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIServiceTier with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIServiceTier with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIReasoningMode with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIReasoningMode with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIReasoningContext with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIReasoningContext with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAITextVerbosity with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAITextVerbosity with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIPromptCacheRetention with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIPromptCacheRetention with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAISystemMessageMode with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAISystemMessageMode with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAITruncation with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAITruncation with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIContextManagement with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIContextManagement with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIAllowedToolsMode with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIAllowedToolsMode with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIAllowedTools with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIAllowedTools with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIResponsesInclude with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIResponsesInclude with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAILanguageModelResponsesOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAILanguageModelChatOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAILanguageModelCompletionOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIEmbeddingModelOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIEmbeddingModelOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageQuality with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageQuality with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageBackground with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageBackground with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageOutputFormat with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageOutputFormat with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageStyle with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageStyle with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageModeration with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageModeration with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageInputFidelity with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageInputFidelity with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageModelOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageModelOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageModelGenerationOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageModelGenerationOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAIImageModelEditOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAIImageModelEditOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAISpeechModelOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAISpeechModelOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAITranscriptionTimestampGranularity with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAITranscriptionTimestampGranularity with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAITranscriptionStreamingDelay with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAITranscriptionStreamingDelay with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAITranscriptionStreamingOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAITranscriptionStreamingOptions with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend OpenAITranscriptionModelOptions with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend OpenAITranscriptionModelOptions with Eq::{not_equal, equal}

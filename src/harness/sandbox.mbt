@@ -229,3 +229,20 @@ pub impl HarnessV1SandboxProvider for CallbackHarnessV1SandboxProvider with fn r
 ) {
   (self.resume_callback)(session_id, cancellation_token)
 }
+
+///|
+#deprecated
+pub extend HarnessV1NetworkPolicy with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1NetworkPolicy with Eq::{not_equal, equal}
+
+///|
+pub extend CallbackHarnessV1SandboxProvider with HarnessV1SandboxProvider::{
+  resume_session,
+  create_session,
+  specification_version,
+  provider_id,
+  bridge_ports,
+}

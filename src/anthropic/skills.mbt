@@ -287,3 +287,10 @@ pub impl @provider.SkillsV4 for AnthropicSkills with fn upload_skill(
 ) -> @provider.SkillsV4UploadSkillResult {
   self.upload(options)
 }
+
+///|
+pub extend AnthropicSkills with @QuietlyChan/moonai/provider.SkillsV4::{
+  specification_version,
+  provider,
+  upload_skill,
+}

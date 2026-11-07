@@ -249,3 +249,13 @@ pub impl @provider.LanguageModelV4 for ZaiChatLanguageModel with fn do_stream(
   }
   (self.base as &@provider.LanguageModelV4).do_stream(effective, wrapped)
 }
+
+///|
+pub extend ZaiChatLanguageModel with @QuietlyChan/moonai/provider.LanguageModelV4::{
+  do_generate,
+  specification_version,
+  provider,
+  supported_urls,
+  do_stream,
+  model_id,
+}

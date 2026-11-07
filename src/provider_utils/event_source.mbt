@@ -128,3 +128,7 @@ pub fn EventSourceBuffer::flush(self : EventSourceBuffer) -> String? {
   self.data_lines.clear()
   Some(payload)
 }
+
+///|
+#deprecated
+pub extend SseDecodeBatch with Debug::{to_repr}

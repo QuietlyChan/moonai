@@ -237,3 +237,14 @@ pub fn MistralProvider::transcriptionModel(
 ) -> &@provider.TranscriptionModelV4 {
   self.transcription_model(model_id)
 }
+
+///|
+pub extend MistralEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  provider,
+  max_embeddings_per_call,
+  supports_parallel_calls,
+  max_input_bytes_per_call,
+  model_id,
+}

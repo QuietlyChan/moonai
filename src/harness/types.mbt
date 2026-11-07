@@ -382,3 +382,99 @@ pub(all) enum HarnessV1CallWarning {
 ///|
 /// Adapter-namespaced metadata attached to stream parts.
 pub type HarnessV1Metadata = Map[String, Json]
+
+///|
+#deprecated
+pub extend HarnessV1PermissionMode with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1PermissionMode with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1BuiltinToolUseKind with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1BuiltinToolUseKind with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1BuiltinToolName with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1BuiltinToolName with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1ToolSpec with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1ToolSpec with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1Prompt with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1Prompt with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1SkillFile with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1SkillFile with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1Skill with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1Skill with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1BootstrapFile with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1BootstrapFile with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1BootstrapCommand with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1BootstrapCommand with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1Bootstrap with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1Bootstrap with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1BuiltinToolFiltering with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1BuiltinToolFiltering with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HarnessV1CallWarning with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HarnessV1CallWarning with Eq::{not_equal, equal}

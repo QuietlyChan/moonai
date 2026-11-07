@@ -65,3 +65,15 @@ pub impl @provider.ProviderV4 for MoonshotAIProvider with fn files(_self) {
 pub impl @provider.ProviderV4 for MoonshotAIProvider with fn skills(_self) {
   None
 }
+
+///|
+pub extend MoonshotAIProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

@@ -310,3 +310,99 @@ pub(all) suberror ToolCallNotFoundForApprovalError {
     approval_id~ : String
   )
 }
+
+///|
+#deprecated
+pub extend GenerateTextToolCall with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GenerateTextToolCall with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GenerateTextToolResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GenerateTextToolResult with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GenerateTextToolApprovalRequestOutput with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GenerateTextToolApprovalRequestOutput with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GenerateTextToolApprovalResponseOutput with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GenerateTextToolApprovalResponseOutput with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GenerateTextContent with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GenerateTextContent with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GenerateTextStepPerformance with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GenerateTextStepPerformance with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend GenerateTextStep with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend GenerateTextResult with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend NoSuchToolError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend NoSuchToolError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend InvalidToolInputError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend InvalidToolInputError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend InvalidToolApprovalError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend InvalidToolApprovalError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend InvalidToolApprovalSignatureError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend InvalidToolApprovalSignatureError with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend ToolCallNotFoundForApprovalError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolCallNotFoundForApprovalError with Eq::{not_equal, equal}

@@ -134,3 +134,17 @@ pub impl @provider.ImageModelV4 for MockImageModel with fn do_generate(
     ),
   )
 }
+
+///|
+pub extend MockImageModel with @QuietlyChan/moonai/provider.ImageWireModel::{
+  provider,
+  generate,
+  model_id,
+  max_images_per_call,
+}
+
+///|
+pub extend MockImageModel with @QuietlyChan/moonai/provider.ImageModelV4::{
+  do_generate,
+  specification_version,
+}

@@ -141,8 +141,7 @@ fn validate_successful_json_response(
 ) -> Unit raise {
   guard validate_response is Some(validate) else { return }
   try validate(value) catch {
-    error if @async.is_cancellation_error(error) || @async.is_being_cancelled() =>
-      raise error
+    error if @async.is_being_cancelled() => raise error
     error =>
       match error {
         @provider.CancellationError => raise error
@@ -176,8 +175,7 @@ pub fn[T] handle_json_response(
   handler : (Json) -> T raise,
 ) -> T raise {
   handler(response.value) catch {
-    error if @async.is_cancellation_error(error) || @async.is_being_cancelled() =>
-      raise error
+    error if @async.is_being_cancelled() => raise error
     error =>
       match error {
         @provider.CancellationError => raise error
@@ -221,8 +219,7 @@ async fn fetch_buffered_with_timeout(
     transport.fetch(request) catch {
       DownloadError(url~, message~, status_code~, status_text~) =>
         raise DownloadError(url~, message~, status_code~, status_text~)
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error =>
         match error {
           @provider.CancellationError | @provider.APICallError(..) =>
@@ -388,8 +385,7 @@ pub async fn post_json(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -509,8 +505,7 @@ pub async fn post_json_binary(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -571,8 +566,7 @@ pub async fn post_multipart(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -708,8 +702,7 @@ pub async fn get_json(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -885,8 +878,7 @@ pub async fn download_file(
         safe_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -990,8 +982,7 @@ pub async fn get_bytes(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1130,8 +1121,7 @@ pub async fn delete_json(
         resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1324,8 +1314,7 @@ pub async fn get_json_protected(
         transport=resolved_transport,
       )
     catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1522,8 +1511,7 @@ pub async fn post_bytes(
       }
       http_response
     } catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1626,8 +1614,7 @@ pub async fn post_multipart_binary(
       }
       http_response
     } catch {
-      error if @async.is_cancellation_error(error) ||
-        @async.is_being_cancelled() => raise error
+      error if @async.is_being_cancelled() => raise error
       error if is_retryable_error(error) && retry_policy.can_retry(retry_number) => {
         retry_number = retry_number + 1
         if delay > 0 {
@@ -1648,3 +1635,27 @@ pub async fn post_multipart_binary(
     }
   }
 }
+
+///|
+#deprecated
+pub extend JsonHttpResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend BinaryHttpResponse with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend DownloadedFile with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend DownloadedFile with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend HttpTransportError with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend HttpTimeoutError with Debug::{to_repr}

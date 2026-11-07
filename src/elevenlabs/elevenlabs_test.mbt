@@ -1,6 +1,6 @@
 ///|
 test "elevenlabs provider exposes speech and transcription models" {
-  let provider = create_elevenlabs(api_key="el-test")
+  let provider = @elevenlabs.create_elevenlabs(api_key="el-test")
   let speech = provider.speech("eleven_multilingual_v2")
   assert_eq(speech.provider(), "elevenlabs.speech")
   assert_eq(speech.model_id(), "eleven_multilingual_v2")

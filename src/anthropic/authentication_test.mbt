@@ -38,7 +38,7 @@ async test "Anthropic loads its API key from the environment" {
   })
   @env.set_env_var(environment_name, "environment-key")
   let transport = AnthropicAuthenticationMockTransport::new()
-  let model = create_anthropic(
+  let model = @anthropic.create_anthropic(
     base_url="https://mock.anthropic.test/v1",
     http_transport=transport,
   ).messages("claude-test")
@@ -56,7 +56,9 @@ async test "Anthropic loads its API key from the environment" {
 
 ///|
 test "Anthropic rejects two explicit authentication methods" {
-  try create_anthropic(api_key="api-key", auth_token="auth-token") catch {
+  try
+    @anthropic.create_anthropic(api_key="api-key", auth_token="auth-token")
+  catch {
     @provider.InvalidArgumentError(argument~, message~) => {
       assert_eq(argument, "api_key/auth_token")
       assert_true(message.length() > 0)

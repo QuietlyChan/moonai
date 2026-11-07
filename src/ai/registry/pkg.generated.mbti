@@ -21,18 +21,36 @@ pub fn custom_provider(language_models? : Map[String, &@provider.LanguageModelV4
 pub(all) suberror InvalidRegistryModelIdError {
   InvalidRegistryModelIdError(value~ : String, separator~ : String, model_type~ : @model.ModelType)
 }
+#deprecated
+pub fn InvalidRegistryModelIdError::equal(Self, Self) -> Bool
+#deprecated
+pub fn InvalidRegistryModelIdError::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn InvalidRegistryModelIdError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror NoSuchProviderCapabilityError {
   NoSuchProviderCapabilityError(provider_id~ : String, capability~ : String)
 }
+#deprecated
+pub fn NoSuchProviderCapabilityError::equal(Self, Self) -> Bool
+#deprecated
+pub fn NoSuchProviderCapabilityError::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn NoSuchProviderCapabilityError::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug)
 pub(all) suberror NoSuchProviderError {
   NoSuchProviderError(provider_id~ : String, available_provider_ids~ : Array[String])
 }
 pub fn NoSuchProviderError::available_provider_ids(Self) -> Array[String]
+#deprecated
+pub fn NoSuchProviderError::equal(Self, Self) -> Bool
+#deprecated
+pub fn NoSuchProviderError::not_equal(Self, Self) -> Bool
 pub fn NoSuchProviderError::provider_id(Self) -> String
+#deprecated
+pub fn NoSuchProviderError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub struct CustomProvider {
@@ -44,6 +62,7 @@ pub fn CustomProvider::image_model(Self, String) -> &@provider.ImageModelV4 rais
 pub fn CustomProvider::language_model(Self, String) -> &@provider.LanguageModelV4 raise
 pub fn CustomProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4 raise
 pub fn CustomProvider::skills(Self) -> &@provider.SkillsV4 raise
+pub fn CustomProvider::specification_version(Self) -> String
 pub fn CustomProvider::speech_model(Self, String) -> &@provider.SpeechModelV4 raise
 pub fn CustomProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4 raise
 pub fn CustomProvider::video_model(Self, String) -> &@provider.VideoModelV4 raise

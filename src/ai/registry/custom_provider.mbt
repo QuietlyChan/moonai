@@ -386,3 +386,8 @@ pub impl @provider.ProviderV4 for CustomProvider with fn files(self) {
 pub impl @provider.ProviderV4 for CustomProvider with fn skills(self) {
   self.skills_or_fallback()
 }
+
+///|
+pub extend CustomProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  specification_version,
+}

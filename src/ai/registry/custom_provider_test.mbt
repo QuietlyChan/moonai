@@ -10,11 +10,13 @@ test "custom provider prefers registered models and delegates fallback models" {
     custom_model as &@provider.ChatModel,
   )
   let fallback = @openai.create_openai(api_key="test-key")
-  let custom = custom_provider(
+  let custom = @registry.custom_provider(
     language_models=Map([("local-chat", custom_language_model)]),
     fallback_provider=fallback,
   )
-  let registry = ProviderRegistry::new().with_provider("composed", custom)
+  let registry = @registry.ProviderRegistry::new().with_provider(
+    "composed", custom,
+  )
   assert_eq(custom.specification_version(), "v4")
   let local_model = registry.language_model("composed:local-chat")
   assert_eq(local_model.model_id(), "local-chat")
@@ -29,7 +31,7 @@ test "custom provider prefers registered models and delegates fallback models" {
 
 ///|
 test "custom provider exposes typed missing-model failures" {
-  let custom = custom_provider()
+  let custom = @registry.custom_provider()
   try custom.language_model("missing") catch {
     @provider.NoSuchModelError(model_id~, model_type~) => {
       assert_eq(model_id, "missing")
@@ -43,7 +45,7 @@ test "custom provider exposes typed missing-model failures" {
 
 ///|
 test "custom provider omits an unconfigured files capability" {
-  let custom = custom_provider()
+  let custom = @registry.custom_provider()
   let provider = custom as &@provider.ProviderV4
   match provider.files() {
     Some(_) => fail("files should be absent")

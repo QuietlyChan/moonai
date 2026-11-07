@@ -260,3 +260,7 @@ pub fn prepareLanguageModelCallOptions(
 ) -> LanguageModelCallOptions raise {
   prepare_language_model_call_options(options)
 }
+
+///|
+#deprecated
+pub extend LanguageModelCallOptions with Debug::{to_repr}

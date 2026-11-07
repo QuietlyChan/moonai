@@ -32,7 +32,7 @@ impl @provider_utils.HttpTransport for OpenAIFactoryMockTransport with fn fetch_
 ///|
 async test "OpenAI provider propagates its injected HTTP transport" {
   let transport = OpenAIFactoryMockTransport::new()
-  let provider = create_openai(
+  let provider = @openai.create_openai(
     api_key="test-key",
     base_url="https://mock.openai.test/v1",
     http_transport=transport,
@@ -70,7 +70,7 @@ async test "OpenAI provider loads its API key from the environment" {
   })
   @env.set_env_var(environment_name, "environment-key")
   let transport = OpenAIFactoryMockTransport::new()
-  let provider = create_openai(
+  let provider = @openai.create_openai(
     base_url="https://mock.openai.test/v1",
     http_transport=transport,
   )

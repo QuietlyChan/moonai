@@ -709,3 +709,19 @@ fn MoonshotStreamDecoder::response_metadata_snapshot(
 ) -> @provider.ResponseMetadata? {
   self.response_metadata
 }
+
+///|
+#deprecated
+pub extend MoonshotErrorDetail with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MoonshotErrorDetail with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend MoonshotErrorData with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend MoonshotErrorData with Eq::{not_equal, equal}

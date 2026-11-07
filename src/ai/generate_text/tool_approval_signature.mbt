@@ -310,3 +310,11 @@ fn validate_tool_approval_signature(
     )
   }
 }
+
+///|
+#deprecated
+pub extend ToolApprovalSecret with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend ToolApprovalSecret with Eq::{not_equal, equal}

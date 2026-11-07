@@ -1,6 +1,6 @@
 ///|
 test "EventSourceBuffer joins multiline data and ignores other fields" {
-  let buffer = EventSourceBuffer::new()
+  let buffer = @provider_utils.EventSourceBuffer::new()
   assert_eq(buffer.feed_line("event: message"), None)
   assert_eq(buffer.feed_line("data: {\"value\":"), None)
   assert_eq(buffer.feed_line("data: 1}"), None)
@@ -9,7 +9,7 @@ test "EventSourceBuffer joins multiline data and ignores other fields" {
 
 ///|
 test "EventSourceBuffer flushes an unterminated payload" {
-  let buffer = EventSourceBuffer::new()
+  let buffer = @provider_utils.EventSourceBuffer::new()
   assert_eq(buffer.feed_line("data: [DONE]"), None)
   assert_eq(buffer.flush(), Some("[DONE]"))
   assert_eq(buffer.flush(), None)
@@ -17,7 +17,7 @@ test "EventSourceBuffer flushes an unterminated payload" {
 
 ///|
 test "EventSourceBuffer follows SSE data whitespace rules" {
-  let buffer = EventSourceBuffer::new()
+  let buffer = @provider_utils.EventSourceBuffer::new()
   assert_eq(buffer.feed_line("data:  keep one leading space"), None)
   assert_eq(buffer.feed_line("data"), None)
   assert_eq(buffer.feed_line(""), Some(" keep one leading space\n"))

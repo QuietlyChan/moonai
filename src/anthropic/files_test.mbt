@@ -35,7 +35,7 @@ async test "official Anthropic Files uploads multipart data and maps metadata" {
         max_connections=1,
       )
     }
-    let files = create_anthropic(
+    let files = @anthropic.create_anthropic(
       api_key="test-key",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,
@@ -84,7 +84,7 @@ async test "Anthropic Files uses bearer auth and defaults the upload filename" {
         max_connections=1,
       )
     }
-    let files = anthropic_files(
+    let files = @anthropic.anthropic_files(
       auth_token="auth-token",
       base_url="http://127.0.0.1:\{server.addr.port()}/v1",
       idle_timeout_ms=2_000,

@@ -217,3 +217,12 @@ pub fn mistral(
     id_generator?,
   ).language_model(model_id)
 }
+
+///|
+pub extend MistralProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  reranking_model,
+  files,
+  skills,
+}

@@ -9,9 +9,12 @@ fn open_responses_test_model(
   url~ : String,
   api_key~ : String = "",
 ) -> &@provider.LanguageModelV4 {
-  create_open_responses(provider_name~, url~, api_key~, idle_timeout_ms=2_000).language_model(
-    "test-model",
-  )
+  @open_responses.create_open_responses(
+    provider_name~,
+    url~,
+    api_key~,
+    idle_timeout_ms=2_000,
+  ).language_model("test-model")
 }
 
 ///|
@@ -384,7 +387,7 @@ async test "V4 generate preserves raw usage and raw finish reason" {
       prompt="hello",
       top_k=20.0,
       seed=42,
-      provider_options=OpenResponsesLanguageModelOptions::new(
+      provider_options=@open_responses.OpenResponsesLanguageModelOptions::new(
         reasoning_summary=ReasoningSummaryDetailed,
       ).to_provider_options(provider_name="local-v4"),
     )

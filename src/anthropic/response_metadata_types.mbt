@@ -320,3 +320,55 @@ pub fn decode_anthropic_message_metadata(
 pub fn decodeAnthropicMessageMetadata(json : Json) -> AnthropicMessageMetadata? {
   decode_anthropic_message_metadata(json)
 }
+
+///|
+#deprecated
+pub extend AnthropicUsageIteration with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicUsageIteration with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AnthropicStopDetails with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicStopDetails with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AnthropicContainerSkillMetadata with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicContainerSkillMetadata with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AnthropicContainerMetadata with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicContainerMetadata with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AnthropicContextManagementEditMetadata with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicContextManagementEditMetadata with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AnthropicContextManagementMetadata with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend AnthropicContextManagementMetadata with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend AnthropicMessageMetadata with Debug::{to_repr}

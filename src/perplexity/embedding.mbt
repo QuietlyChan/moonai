@@ -220,3 +220,14 @@ pub impl @provider.EmbeddingModelV4 for PerplexityEmbeddingModel with fn do_embe
     response=response.response,
   )
 }
+
+///|
+pub extend PerplexityEmbeddingModel with @QuietlyChan/moonai/provider.EmbeddingModelV4::{
+  do_embed,
+  specification_version,
+  provider,
+  max_embeddings_per_call,
+  supports_parallel_calls,
+  max_input_bytes_per_call,
+  model_id,
+}

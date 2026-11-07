@@ -254,3 +254,14 @@ pub impl @provider.VideoModelV4 for XaiVideoModel with fn do_status(
     ),
   )
 }
+
+///|
+pub extend XaiVideoModel with @QuietlyChan/moonai/provider.VideoModelV4::{
+  do_generate,
+  do_status,
+  specification_version,
+  provider,
+  do_start,
+  model_id,
+  max_videos_per_call,
+}

@@ -68,3 +68,16 @@ pub impl @provider.ProviderV4 for ByteDanceProvider with fn files(_self) {
 pub impl @provider.ProviderV4 for ByteDanceProvider with fn skills(_self) {
   None
 }
+
+///|
+pub extend ByteDanceProvider with @QuietlyChan/moonai/provider.ProviderV4::{
+  image_model,
+  specification_version,
+  language_model,
+  reranking_model,
+  embedding_model,
+  speech_model,
+  files,
+  transcription_model,
+  skills,
+}

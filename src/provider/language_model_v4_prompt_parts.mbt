@@ -555,3 +555,59 @@ fn LanguageModelV4ToolApprovalResponsePart::to_legacy(
     provider_options=copy_provider_metadata(self.provider_options),
   )
 }
+
+///|
+#deprecated
+pub extend LanguageModelV4FileData with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4FileData with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolCallPart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolCallPart with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolResultContentPart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolResultContentPart with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolResultOutput with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolResultOutput with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolResultPart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolResultPart with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolApprovalResponsePart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4ToolApprovalResponsePart with Eq::{not_equal, equal}
+
+///|
+#deprecated
+pub extend LanguageModelV4PromptPart with Debug::{to_repr}
+
+///|
+#deprecated
+pub extend LanguageModelV4PromptPart with Eq::{not_equal, equal}
