@@ -204,7 +204,7 @@ async test "generateText drives an OpenAI-compatible JSON request" {
     assert_eq(response.usage.output_tokens.total, Some(2))
     match response.request {
       Some(request) => {
-        assert_true(request.url.contains("/v1/chat/completions"))
+        assert_eq(request.url, "http://127.0.0.1:\{server.addr.port()}")
         assert_false(request.body.contains("\"stream\""))
         assert_eq(request.headers["X-Request-Id"], "chat-generate")
       }

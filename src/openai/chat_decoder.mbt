@@ -86,12 +86,15 @@ fn openai_chat_finish_reason(value : String) -> @provider.FinishReason {
 ///|
 fn openai_chat_v4_finish_reason(
   raw : String?,
+  has_refusal~ : Bool = false,
 ) -> @provider.LanguageModelV4FinishReason {
   let unified = match raw {
+    Some("stop") if has_refusal => @provider.V4FinishContentFilter
     Some("stop") => @provider.V4FinishStop
     Some("length") => @provider.V4FinishLength
     Some("content_filter") => @provider.V4FinishContentFilter
     Some("function_call") | Some("tool_calls") => @provider.V4FinishToolCalls
+    Some("error") => @provider.V4FinishError
     _ => @provider.V4FinishOther
   }
   { unified, raw, }
@@ -193,9 +196,17 @@ fn decode_openai_chat_response(
   }
   let content : Array[@provider.LanguageModelV4Content] = []
   let generate_id = id_generator
+  let mut has_refusal = false
   match message {
     { "content": String(value), .. } if value != "" =>
       content.push(@provider.LanguageModelV4Content::text(value))
+    _ => ()
+  }
+  match message {
+    { "refusal": String(value), .. } if value != "" => {
+      has_refusal = true
+      content.push(@provider.LanguageModelV4Content::text(value))
+    }
     _ => ()
   }
   match message {
@@ -270,7 +281,7 @@ fn decode_openai_chat_response(
   )
   {
     content,
-    finish_reason: openai_chat_v4_finish_reason(raw_finish_reason),
+    finish_reason: openai_chat_v4_finish_reason(raw_finish_reason, has_refusal~),
     usage: openai_chat_v4_usage(raw_usage),
     provider_metadata,
     response: if response_metadata.is_empty() {
@@ -295,6 +306,7 @@ priv struct OpenAIChatStreamDecoder {
   mut raw_usage : Json?
   mut finish_reason : @provider.FinishReason
   mut finish_reason_raw : String?
+  mut has_refusal : Bool
   mut response_metadata : @provider.ResponseMetadata?
   mut source_index : Int32
   mut text_started : Bool
@@ -325,6 +337,7 @@ fn OpenAIChatStreamDecoder::new(
     raw_usage: None,
     finish_reason: @provider.Unknown(""),
     finish_reason_raw: None,
+    has_refusal: false,
     response_metadata: None,
     source_index: 0,
     text_started: false,
@@ -344,6 +357,7 @@ fn openai_chat_stream_has_output(json : Json) -> Bool {
           { "delta": Object(delta), .. } =>
             match delta {
               { "content": String(value), .. } if value != "" => true
+              { "refusal": String(value), .. } if value != "" => true
               { "tool_calls": Array(values), .. } if values.length() > 0 => true
               { "annotations": Array(values), .. } if values.length() > 0 =>
                 true
@@ -354,6 +368,22 @@ fn openai_chat_stream_has_output(json : Json) -> Bool {
       })
     _ => false
   }
+}
+
+///|
+fn OpenAIChatStreamDecoder::append_text(
+  self : OpenAIChatStreamDecoder,
+  value : String,
+  events : Array[@provider.LanguageModelV4StreamPart],
+) -> Unit {
+  if !self.text_started {
+    self.text_started = true
+    events.push(@provider.V4TextStart(id="0", provider_metadata=Map([])))
+  }
+  self.text.write_string(value)
+  events.push(
+    @provider.V4TextDelta(id="0", delta=value, provider_metadata=Map([])),
+  )
 }
 
 ///|
@@ -379,7 +409,22 @@ fn OpenAIChatStreamDecoder::record_json(
   let extracted = openai_chat_metadata_fields(json)
   for entry in extracted.iter2() {
     let (key, value) = entry
-    self.metadata_fields[key] = value
+    if key == "logprobs" {
+      let values : Array[Json] = match (self.metadata_fields.get(key), value) {
+        (Some(Array(previous)), Array(next)) => {
+          let combined = previous.copy()
+          for item in next {
+            combined.push(item)
+          }
+          combined
+        }
+        (_, Array(next)) => next.copy()
+        _ => []
+      }
+      self.metadata_fields[key] = Json::array(values)
+    } else {
+      self.metadata_fields[key] = value
+    }
   }
 }
 
@@ -469,21 +514,14 @@ fn OpenAIChatStreamDecoder::apply_json(
   match json {
     { "choices": [{ "delta": Object(delta), .. }, ..], .. } => {
       match delta {
-        { "content": String(value), .. } => {
-          if !self.text_started {
-            self.text_started = true
-            events.push(
-              @provider.V4TextStart(id="0", provider_metadata=Map([])),
-            )
-          }
-          self.text.write_string(value)
-          events.push(
-            @provider.V4TextDelta(
-              id="0",
-              delta=value,
-              provider_metadata=Map([]),
-            ),
-          )
+        { "content": String(value), .. } if value != "" =>
+          self.append_text(value, events)
+        _ => ()
+      }
+      match delta {
+        { "refusal": String(value), .. } if value != "" => {
+          self.has_refusal = true
+          self.append_text(value, events)
         }
         _ => ()
       }
@@ -655,9 +693,15 @@ fn OpenAIChatStreamDecoder::v4_usage(
 fn OpenAIChatStreamDecoder::v4_finish_reason(
   self : OpenAIChatStreamDecoder,
 ) -> @provider.LanguageModelV4FinishReason {
-  @provider.LanguageModelV4FinishReason::from_finish_reason(self.finish_reason).with_raw(
-    self.finish_reason_raw,
-  )
+  match self.finish_reason {
+    @provider.Error =>
+      { unified: @provider.V4FinishError, raw: self.finish_reason_raw, }
+    _ =>
+      openai_chat_v4_finish_reason(
+        self.finish_reason_raw,
+        has_refusal=self.has_refusal,
+      )
+  }
 }
 
 ///|

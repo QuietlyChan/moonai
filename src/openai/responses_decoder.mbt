@@ -1210,6 +1210,7 @@ fn openai_responses_output_content(
 fn openai_responses_v4_finish_reason(
   json : Json,
   has_function_call : Bool,
+  has_refusal : Bool,
 ) -> @provider.LanguageModelV4FinishReason {
   let raw = match json {
     { "incomplete_details": { "reason": String(value), .. }, .. } => Some(value)
@@ -1219,6 +1220,8 @@ fn openai_responses_v4_finish_reason(
     None =>
       if has_function_call {
         @provider.V4FinishToolCalls
+      } else if has_refusal {
+        @provider.V4FinishContentFilter
       } else {
         @provider.V4FinishStop
       }
@@ -1232,6 +1235,29 @@ fn openai_responses_v4_finish_reason(
       }
   }
   { unified, raw, }
+}
+
+///|
+/// Check terminal Responses payloads for refusal content while keeping this
+/// signal separate from tool-call detection.
+fn openai_responses_output_has_refusal(output : Array[Json]) -> Bool {
+  output.any(item => {
+    match item {
+      { "type": "message", "content": Array(parts), .. } =>
+        parts.any(part => part is { "type": "refusal", .. })
+      _ => false
+    }
+  })
+}
+
+///|
+fn openai_responses_json_has_refusal(json : Json) -> Bool {
+  match json {
+    { "output": Array(items), .. } => openai_responses_output_has_refusal(items)
+    { "response": { "output": Array(items), .. }, .. } =>
+      openai_responses_output_has_refusal(items)
+    _ => false
+  }
 }
 
 ///|
@@ -1308,7 +1334,11 @@ fn decode_openai_responses_response(
   )
   {
     content,
-    finish_reason: openai_responses_v4_finish_reason(json, has_function_call),
+    finish_reason: openai_responses_v4_finish_reason(
+      json,
+      has_function_call,
+      openai_responses_json_has_refusal(json),
+    ),
     usage: openai_responses_v4_usage(raw_usage),
     provider_metadata,
     response: if response_metadata.is_empty() {

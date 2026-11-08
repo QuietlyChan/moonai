@@ -582,6 +582,23 @@ fn download_same_origin(left : String, right : String) -> Bool {
 }
 
 ///|
+/// Prevent redirects from weakening an HTTPS download to an unencrypted hop.
+fn ensure_secure_download_redirect(
+  current_url : String,
+  next_url : String,
+) -> Unit raise DownloadError {
+  match (download_url_parts(current_url), download_url_parts(next_url)) {
+    (Some((current_scheme, _, _)), Some((next_scheme, _, _))) if current_scheme ==
+      "https" &&
+      next_scheme == "http" =>
+      raise download_error(
+        current_url, "Redirect from HTTPS to HTTP was blocked",
+      )
+    _ => ()
+  }
+}
+
+///|
 fn has_explicit_url_scheme(value : String) -> Bool {
   let bytes = @utf8.encode(value)
   guard bytes.length() > 0 else { return false }

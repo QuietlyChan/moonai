@@ -300,7 +300,13 @@ pub async fn generate_text(
     )
     let step_started_at = @env.now()
     let response_started_at = @env.now()
-    let provider_result = prepared_step.model.do_generate(call_options)
+    let raw_provider_result = prepared_step.model.do_generate(call_options)
+    let provider_result = {
+      ..raw_provider_result,
+      request: @provider_utils.sanitize_request_metadata(
+        raw_provider_result.request,
+      ),
+    }
     @provider.check_cancellation(cancellation_token)
     let response_time_ms = (@env.now() - response_started_at).to_int()
     let tool_calls = parse_tool_calls(provider_result.content, execution_tools)

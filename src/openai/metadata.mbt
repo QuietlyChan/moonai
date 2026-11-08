@@ -54,14 +54,66 @@ fn openai_chat_metadata_fields(json : Json) -> Map[String, Json] {
     } => fields["rejectedPredictionTokens"] = Json::number(value)
     _ => ()
   }
-  match json {
-    {
-      "choices": [{ "logprobs": { "content": Array(values), .. }, .. }, ..],
-      ..
-    } => fields["logprobs"] = Json::array(values)
-    _ => ()
+  match openai_chat_logprobs(json) {
+    Some(values) => fields["logprobs"] = Json::array(values)
+    None => ()
   }
   fields
+}
+
+///|
+/// Combine content and refusal token logprobs in the same order as emitted text.
+fn openai_chat_logprobs(json : Json) -> Array[Json]? {
+  let values : Array[Json] = []
+  let mut found = false
+  match json {
+    {
+      "choices": [
+        {
+          "logprobs": {
+            "content": Array(content),
+            "refusal": Array(refusal),
+            ..
+          },
+          ..
+        },
+        ..,
+      ],
+      ..
+    } => {
+      found = true
+      for value in content {
+        values.push(value)
+      }
+      for value in refusal {
+        values.push(value)
+      }
+    }
+    {
+      "choices": [{ "logprobs": { "content": Array(content), .. }, .. }, ..],
+      ..
+    } => {
+      found = true
+      for value in content {
+        values.push(value)
+      }
+    }
+    {
+      "choices": [{ "logprobs": { "refusal": Array(refusal), .. }, .. }, ..],
+      ..
+    } => {
+      found = true
+      for value in refusal {
+        values.push(value)
+      }
+    }
+    _ => ()
+  }
+  if found {
+    Some(values)
+  } else {
+    None
+  }
 }
 
 ///|

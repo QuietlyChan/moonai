@@ -53,6 +53,49 @@ fn resolve_official_openai_provider_options(
 }
 
 ///|
+/// Azure Chat accepts canonical OpenAI settings and Azure-scoped overrides.
+fn resolve_openai_chat_provider_options(
+  provider_options : Map[String, Json],
+  provider_name : String,
+  reserved_fields : Array[String],
+) -> @provider_utils.ProviderOptionsResolution {
+  if provider_name.contains("azure") {
+    @provider_utils.resolve_provider_options_merge(
+      provider_options,
+      ["openai", "azure"],
+      reserved_fields~,
+    )
+  } else {
+    resolve_official_openai_provider_options(provider_options, reserved_fields~)
+  }
+}
+
+///|
+/// Completion requests accept OpenAI defaults followed by provider overrides.
+fn resolve_openai_completion_provider_options(
+  provider_options : Map[String, Json],
+  provider_name : String,
+  reserved_fields : Array[String],
+) -> @provider_utils.ProviderOptionsResolution {
+  let segments = provider_name.trim().split(".").to_array()
+  let provider_key = if segments.length() == 0 {
+    "openai"
+  } else {
+    segments[0].trim().to_owned()
+  }
+  let namespaces = if provider_key == "openai" {
+    ["openai"]
+  } else {
+    ["openai", provider_key]
+  }
+  @provider_utils.resolve_provider_options_merge(
+    provider_options,
+    namespaces,
+    reserved_fields~,
+  )
+}
+
+///|
 priv struct OpenAIPreparedResponsesRequest {
   body : Json
   warnings : Array[@provider.Warning]
@@ -328,11 +371,12 @@ fn parse_openai_chat_logprobs(
 ///|
 fn parse_openai_chat_provider_options(
   provider_options : Map[String, Json],
-  _provider_name : String,
+  provider_name : String,
 ) -> ParsedOpenAIChatOptions {
-  let resolution = resolve_official_openai_provider_options(
+  let resolution = resolve_openai_chat_provider_options(
     provider_options,
-    reserved_fields=openai_chat_reserved_fields(),
+    provider_name,
+    openai_chat_reserved_fields(),
   )
   let reader = @provider_utils.ProviderOptionsReader::new(resolution)
   let logit_bias = reader.take_json("logitBias", aliases=["logit_bias"])
@@ -569,12 +613,16 @@ fn parse_openai_completion_logprobs(
 ///|
 fn parse_openai_completion_provider_options(
   provider_options : Map[String, Json],
-  _provider_name : String,
+  provider_name : String,
 ) -> ParsedOpenAICompletionOptions {
-  let resolution = resolve_official_openai_provider_options(provider_options, reserved_fields=[
-    "model", "prompt", "stream", "stream_options", "max_tokens", "temperature", "top_p",
-    "frequency_penalty", "presence_penalty", "seed", "stop",
-  ])
+  let resolution = resolve_openai_completion_provider_options(
+    provider_options,
+    provider_name,
+    [
+      "model", "prompt", "stream", "stream_options", "max_tokens", "temperature",
+      "top_p", "frequency_penalty", "presence_penalty", "seed", "stop",
+    ],
+  )
   let reader = @provider_utils.ProviderOptionsReader::new(resolution)
   {
     options: {

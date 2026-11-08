@@ -204,13 +204,9 @@ pub impl @provider.LanguageModelV4 for CohereChatLanguageModel with fn do_genera
   let value = response.value
   let content : Array[@provider.LanguageModelV4Content] = []
   let mut finish_raw : String? = None
-  let mut generation_id : String? = None
+  let response_id = cohere_chat_response_id(value)
   let mut usage_json : Json? = None
   if value is Object(fields) {
-    match fields.get("generation_id") {
-      Some(String(id)) => generation_id = Some(id)
-      _ => ()
-    }
     usage_json = fields.get("usage")
     match fields.get("finish_reason") {
       Some(String(reason)) => finish_raw = Some(reason)
@@ -263,20 +259,12 @@ pub impl @provider.LanguageModelV4 for CohereChatLanguageModel with fn do_genera
           }
         }
       }
-      if message.get("citations") is Some(Array(citations)) {
-        for citation in citations {
-          content.push(
-            @provider.V4SourceOutput(
-              @provider.V4DocumentSource(
-                id=(self.id_generator)(),
-                media_type="text/plain",
-                title="Document",
-                filename=None,
-                provider_metadata=Map([("cohere", citation)]),
-              ),
-            ),
-          )
-        }
+      for
+        source in cohere_citation_contents(
+          message.get("citations"),
+          self.id_generator,
+        ) {
+        content.push(source)
       }
     }
   }
@@ -294,7 +282,7 @@ pub impl @provider.LanguageModelV4 for CohereChatLanguageModel with fn do_genera
     ),
     response: Some({
       ..@provider.ResponseMetadata::empty(),
-      id: generation_id,
+      id: response_id,
       headers: response.response.headers,
       body: Some(value.stringify()),
     }),

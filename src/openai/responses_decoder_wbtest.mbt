@@ -91,6 +91,44 @@ test "OpenAI Responses selects Azure metadata only for Azure providers" {
 }
 
 ///|
+test "OpenAI Responses maps refusal content to content filter" {
+  let response = decode_test_openai_responses_response({
+    "id": "resp-refusal",
+    "status": "completed",
+    "output": [
+      {
+        "type": "message",
+        "id": "message-refusal",
+        "content": [{ "type": "refusal", "refusal": "Cannot help with that." }],
+      },
+    ],
+  })
+  assert_eq(response.finish_reason, @provider.ContentFilter)
+  assert_eq(response.text, "Cannot help with that.")
+}
+
+///|
+test "OpenAI Responses client tool calls remain executable with refusal text" {
+  let response = decode_test_openai_responses_response({
+    "status": "completed",
+    "output": [
+      {
+        "type": "message",
+        "content": [{ "type": "refusal", "refusal": "blocked" }],
+      },
+      {
+        "type": "function_call",
+        "id": "item-1",
+        "call_id": "call-1",
+        "name": "lookup",
+        "arguments": "{}",
+      },
+    ],
+  })
+  assert_eq(response.finish_reason, @provider.ToolCalls)
+}
+
+///|
 test "OpenAI Responses maps complete computer tool input" {
   let response = decode_test_openai_responses_response({
     "id": "resp-computer",

@@ -21,6 +21,7 @@ priv struct OpenAICompatibleStreamDecoder {
   mut raw_usage : Json?
   mut finish_reason : @provider.FinishReason
   mut finish_reason_raw : String?
+  mut has_refusal : Bool
   provider_name : String
   metadata_key : String
   error_structure : OpenAICompatibleErrorStructure
@@ -85,6 +86,7 @@ fn OpenAICompatibleStreamDecoder::new(
     raw_usage: None,
     finish_reason: @provider.Unknown(""),
     finish_reason_raw: None,
+    has_refusal: false,
     provider_name,
     metadata_key: resolved_metadata_key,
     error_structure,
@@ -370,6 +372,29 @@ fn OpenAICompatibleStreamDecoder::apply_json(
           ),
         )
       }
+      match delta {
+        { "refusal": String(refusal), .. } if refusal != "" => {
+          self.has_refusal = true
+          if !self.text_started {
+            self.text_started = true
+            events.push(
+              @provider.V4TextStart(
+                id=self.text_stream_id,
+                provider_metadata=Map([]),
+              ),
+            )
+          }
+          self.text.write_string(refusal)
+          events.push(
+            @provider.V4TextDelta(
+              id=self.text_stream_id,
+              delta=refusal,
+              provider_metadata=Map([]),
+            ),
+          )
+        }
+        _ => ()
+      }
       // Empty tool-call arrays must not close an active reasoning block.
       if delta is { "tool_calls": Array(calls), .. } && calls.length() > 0 {
         self.close_reasoning(events)
@@ -548,9 +573,14 @@ fn OpenAICompatibleStreamDecoder::v4_usage(
 fn OpenAICompatibleStreamDecoder::v4_finish_reason(
   self : OpenAICompatibleStreamDecoder,
 ) -> @provider.LanguageModelV4FinishReason {
-  @provider.LanguageModelV4FinishReason::from_finish_reason(self.finish_reason).with_raw(
-    self.finish_reason_raw,
-  )
+  let reason = @provider.LanguageModelV4FinishReason::from_finish_reason(
+    self.finish_reason,
+  ).with_raw(self.finish_reason_raw)
+  if self.has_refusal && reason.unified is @provider.V4FinishStop {
+    { ..reason, unified: @provider.V4FinishContentFilter, }
+  } else {
+    reason
+  }
 }
 
 ///|

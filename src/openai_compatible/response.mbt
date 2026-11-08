@@ -97,8 +97,10 @@ fn decode_openai_compatible_tool_call(
 ///|
 fn openai_compatible_v4_finish_reason(
   raw : String?,
+  has_refusal~ : Bool = false,
 ) -> @provider.LanguageModelV4FinishReason {
   let unified = match raw {
+    Some("stop") if has_refusal => @provider.V4FinishContentFilter
     Some("stop") => @provider.V4FinishStop
     Some("length") => @provider.V4FinishLength
     Some("content_filter") => @provider.V4FinishContentFilter
@@ -180,8 +182,16 @@ fn decode_chat_response(
   }
   let content : Array[@provider.LanguageModelV4Content] = []
   let generate_id = id_generator
+  let mut has_refusal = false
   if text != "" {
     content.push(@provider.LanguageModelV4Content::text(text))
+  }
+  match message {
+    { "refusal": String(value), .. } if value != "" => {
+      has_refusal = true
+      content.push(@provider.LanguageModelV4Content::text(value))
+    }
+    _ => ()
   }
   if reasoning != "" {
     content.push(@provider.LanguageModelV4Content::reasoning(reasoning))
@@ -214,7 +224,10 @@ fn decode_chat_response(
   )
   {
     content,
-    finish_reason: openai_compatible_v4_finish_reason(raw_finish_reason),
+    finish_reason: openai_compatible_v4_finish_reason(
+      raw_finish_reason,
+      has_refusal~,
+    ),
     usage,
     provider_metadata,
     response: if response_metadata.is_empty() {

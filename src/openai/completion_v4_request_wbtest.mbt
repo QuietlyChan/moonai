@@ -42,3 +42,29 @@ test "OpenAI completion V4 prepares the wire request directly" {
   assert_eq(prepared.warnings.length(), 1)
   assert_true(prepared.warnings[0] is @provider.Unsupported(feature="topK", ..))
 }
+
+///|
+test "OpenAI completion provider namespace overrides canonical options" {
+  let options = @provider.LanguageModelV4CallOptions::new(
+    @provider.LanguageModelV4Prompt::new([
+      @provider.V4UserMessage(
+        content=[@provider.V4PromptText(text="Hello", provider_options=Map([]))],
+        provider_options=Map([]),
+      ),
+    ]),
+    provider_options={
+      "openai": { "echo": false, "user": "default-user" },
+      "azure": { "echo": true },
+    },
+  )
+  let body = prepare_openai_completion_v4_request(
+      "gpt-3.5-turbo-instruct", options, "azure.completion", false, false,
+    ).body
+  json_inspect(body, content={
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "user:\nHello\n\nassistant:\n",
+    "echo": true,
+    "user": "default-user",
+    "stop": ["\nuser:"],
+  })
+}

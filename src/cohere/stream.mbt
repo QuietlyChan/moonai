@@ -8,10 +8,14 @@ priv struct CohereStreamDecoder {
   mut response_id : String?
   mut finalized : Bool
   mut pending_tool_call : (String, String, StringBuilder)?
+  id_generator : @provider_utils.IdGenerator
 }
 
 ///|
-fn CohereStreamDecoder::new(include_raw_chunks : Bool) -> CohereStreamDecoder {
+fn CohereStreamDecoder::new(
+  include_raw_chunks : Bool,
+  id_generator : @provider_utils.IdGenerator,
+) -> CohereStreamDecoder {
   {
     sse: @provider_utils.EventSourceBuffer::new(),
     include_raw_chunks,
@@ -20,6 +24,7 @@ fn CohereStreamDecoder::new(include_raw_chunks : Bool) -> CohereStreamDecoder {
     response_id: None,
     finalized: false,
     pending_tool_call: None,
+    id_generator,
   }
 }
 
@@ -157,6 +162,18 @@ fn CohereStreamDecoder::decode_data(
         provider_metadata=Map([]),
       ),
     )
+  } else if event_type == "citation-start" {
+    let citations = match delta {
+      Some({ "message": Object(message), .. }) => message.get("citations")
+      _ => None
+    }
+    for content in cohere_citation_contents(citations, self.id_generator) {
+      match content {
+        @provider.V4SourceOutput(source) =>
+          events.push(@provider.V4SourceReady(source))
+        _ => ()
+      }
+    }
   } else if event_type == "tool-call-start" {
     match delta {
       Some({ "message": { "tool_calls": Object(tool_calls), .. }, .. }) => {
@@ -318,7 +335,10 @@ pub impl @provider.LanguageModelV4 for CohereChatLanguageModel with fn do_stream
     }
     other => other
   }
-  let decoder = CohereStreamDecoder::new(options.include_raw_chunks)
+  let decoder = CohereStreamDecoder::new(
+    options.include_raw_chunks,
+    self.id_generator,
+  )
   let cancellation_token = options.cancellation_token
   let result = @provider_utils.post_json_sse_events(
     provider_name=self.provider_name,

@@ -179,7 +179,7 @@ test "typed OpenAI transcription options parse and report unsupported streaming"
 }
 
 ///|
-test "official OpenAI options ignore a custom provider display namespace" {
+test "official OpenAI options use the namespace defined for each model family" {
   let provider_options : Map[String, Json] = {
     "localOpenAI": {
       "user": "custom-user",
@@ -209,7 +209,7 @@ test "official OpenAI options ignore a custom provider display namespace" {
   let completion = parse_openai_completion_provider_options(
     provider_options, "localOpenAI.completion",
   )
-  assert_eq(completion.options.suffix, Some("openai-suffix"))
+  assert_eq(completion.options.suffix, Some("custom-suffix"))
   let embedding = parse_openai_embedding_provider_options(
     provider_options, "localOpenAI.embedding",
   )
@@ -244,6 +244,19 @@ test "official OpenAI options ignore a custom provider display namespace" {
   )
   assert_eq(transcription_stream.language, Some("en"))
   assert_eq(transcription_stream.delay, Some("low"))
+}
+
+///|
+test "Azure OpenAI Chat merges OpenAI defaults and Azure overrides" {
+  let parsed = parse_openai_chat_provider_options(
+    {
+      "openai": { "user": "default-user", "store": false },
+      "azure": { "user": "azure-user" },
+    },
+    "azure.chat",
+  )
+  assert_eq(parsed.options.user, Some("azure-user"))
+  assert_eq(parsed.options.store, Some(false))
 }
 
 ///|

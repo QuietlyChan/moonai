@@ -106,6 +106,35 @@ test "provider options prefer camel-case namespaces and protect request fields" 
 }
 
 ///|
+test "provider options merge matching namespaces in order" {
+  let resolution = @provider_utils.resolve_provider_options_merge(
+    {
+      "openai-compatible": { "temperature": 0.2, "legacy": true },
+      "openaiCompatible": { "temperature": 0.8, "modern": true },
+    },
+    ["openai-compatible", "openaiCompatible"],
+  )
+  assert_eq(resolution.values.get("temperature"), Some(0.8))
+  assert_eq(resolution.values.get("legacy"), Some(true))
+  assert_eq(resolution.values.get("modern"), Some(true))
+}
+
+///|
+test "provider options merge ignores duplicate namespaces and accepts none" {
+  let options : Map[String, Json] = { "openai": { "user": "test-user" } }
+  let duplicate = @provider_utils.resolve_provider_options_merge(options, [
+    "openai", "openai",
+  ])
+  assert_eq(duplicate.values.get("user"), Some("test-user"))
+  assert_eq(duplicate.warnings, [])
+  let empty = @provider_utils.resolve_provider_options_merge(options, [])
+  assert_eq(empty.values, Map([]))
+  assert_eq(empty.namespace_key, None)
+}
+
+///|
+
+///|
 test "provider options can preserve an exact configurable provider key" {
   let resolution = @provider_utils.resolve_provider_options(
     { "local-v4": { "reasoningSummary": "detailed" } },

@@ -117,3 +117,67 @@ pub fn url_authority(url : String) -> String? {
     Some(authority)
   }
 }
+
+///|
+/// Remove credentials, paths, queries, and fragments from an HTTP endpoint.
+/// Invalid or non-HTTP URLs are omitted instead of being returned verbatim.
+fn sanitize_http_url_origin(url : String) -> String? {
+  guard url.find("://") is Some(protocol_end) else { return None }
+  let scheme = url[:protocol_end].to_owned().to_lower()
+  guard scheme == "http" || scheme == "https" else { return None }
+  let remainder = url[protocol_end + 3:].to_owned()
+  let mut end = remainder.length()
+  for separator in ["/", "?", "#"] {
+    match remainder.find(separator) {
+      Some(index) if index < end => end = index
+      _ => ()
+    }
+  }
+  let raw_authority = remainder[:end].to_owned()
+  let authority = match raw_authority.rev_find("@") {
+    Some(index) => raw_authority[index + 1:].to_owned()
+    None => raw_authority
+  }
+  guard authority != "" else { return None }
+  for byte in @utf8.encode(authority) {
+    let value = byte.to_int()
+    guard (value >= 0x30 && value <= 0x39) ||
+      (value >= 0x41 && value <= 0x5a) ||
+      (value >= 0x61 && value <= 0x7a) ||
+      byte == b'.' ||
+      byte == b'-' ||
+      byte == b':' ||
+      byte == b'[' ||
+      byte == b']' else {
+      return None
+    }
+  }
+  let normalized_authority = authority.to_lower()
+  let normalized_authority = if (
+      scheme == "https" && normalized_authority.has_suffix(":443")
+    ) ||
+    (scheme == "http" && normalized_authority.has_suffix(":80")) {
+    normalized_authority[:-4].to_owned()
+  } else {
+    normalized_authority
+  }
+  Some("\{scheme}://\{normalized_authority}")
+}
+
+///|
+/// Preserve request diagnostics while stripping sensitive endpoint components.
+pub fn sanitize_request_metadata(
+  request : @provider.RequestMetadata?,
+) -> @provider.RequestMetadata? {
+  match request {
+    Some(value) =>
+      Some(
+        @provider.RequestMetadata::new(
+          url=sanitize_http_url_origin(value.url).unwrap_or(""),
+          headers=copy_headers(value.headers),
+          body=value.body,
+        ),
+      )
+    None => None
+  }
+}

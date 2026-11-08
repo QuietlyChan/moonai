@@ -47,28 +47,113 @@ fn cohere_map_finish_reason(
 }
 
 ///|
+/// Cohere v2 returns `id`; keep the v1 `generation_id` fallback for proxies.
+fn cohere_chat_response_id(value : Json) -> String? {
+  match value {
+    { "id": String(id), .. } => Some(id)
+    { "generation_id": String(id), .. } => Some(id)
+    _ => None
+  }
+}
+
+///|
+/// Map citations with document sources to normalized source content. Partial
+/// and tool-only citations are retained only when they identify a document.
+fn cohere_citation_contents(
+  citations : Json?,
+  id_generator : @provider_utils.IdGenerator,
+) -> Array[@provider.LanguageModelV4Content] {
+  let values : Array[Json] = match citations {
+    Some(Array(items)) => items
+    Some(Object(fields)) => [Json::object(fields)]
+    _ => []
+  }
+  let result : Array[@provider.LanguageModelV4Content] = []
+  for citation in values {
+    let source = match citation {
+      { "sources": Array(sources), .. } => {
+        let mut document : Json? = None
+        for item in sources {
+          match item {
+            { "document": Object(document_fields), .. } if document is None =>
+              document = Some(Json::object(document_fields))
+            _ => ()
+          }
+        }
+        document
+      }
+      _ => None
+    }
+    match source {
+      Some(document) => {
+        let title = match document {
+          { "title": String(value), .. } if value != "" => value
+          _ => "Document"
+        }
+        let metadata : Map[String, Json] = Map([])
+        match citation {
+          Object(fields) => {
+            for key in ["start", "end", "text", "sources"] {
+              if fields.get(key) is Some(value) && !(value is Null) {
+                metadata[key] = value
+              }
+            }
+            if fields.get("type") is Some(String(value)) {
+              metadata["citationType"] = Json::string(value)
+            }
+          }
+          _ => ()
+        }
+        result.push(
+          @provider.V4SourceOutput(
+            @provider.V4DocumentSource(
+              id=id_generator(),
+              media_type="text/plain",
+              title~,
+              filename=None,
+              provider_metadata=Map([("cohere", Json::object(metadata))]),
+            ),
+          ),
+        )
+      }
+      None => ()
+    }
+  }
+  result
+}
+
+///|
 /// Cohere reports usage under `billed_units`/`tokens` with plain totals.
 fn cohere_usage(value : Json?) -> @provider.LanguageModelV4Usage {
   match value {
     Some(object) if object is Object(fields) => {
       let input_tokens = match fields.get("tokens") {
-        Some({ "input_tokens": Number(value, ..), .. }) => value.to_int()
-        _ => 0
+        Some(tokens) =>
+          @provider_utils.json_int_field_opt(tokens, "input_tokens")
+        None => None
       }
       let output_tokens = match fields.get("tokens") {
-        Some({ "output_tokens": Number(value, ..), .. }) => value.to_int()
-        _ => 0
+        Some(tokens) =>
+          @provider_utils.json_int_field_opt(tokens, "output_tokens")
+        None => None
+      }
+      let cached_tokens = @provider_utils.json_int_field_opt(
+        object, "cached_tokens",
+      )
+      let no_cache_tokens = match input_tokens {
+        Some(total) => Some(total - cached_tokens.unwrap_or(0))
+        None => None
       }
       {
         input_tokens: {
-          total: Some(input_tokens),
-          no_cache: Some(input_tokens),
-          cache_read: None,
+          total: input_tokens,
+          no_cache: no_cache_tokens,
+          cache_read: cached_tokens,
           cache_write: None,
         },
         output_tokens: {
-          total: Some(output_tokens),
-          text: Some(output_tokens),
+          total: output_tokens,
+          text: output_tokens,
           reasoning: None,
         },
         raw: Some(object),

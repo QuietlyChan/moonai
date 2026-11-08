@@ -8,6 +8,7 @@ priv struct OpenAIResponsesStreamRuntime {
   v4_metadata : OpenAIResponsesV4StreamMetadata
   emit_raw_chunks : Bool
   mut raw_event : Json?
+  mut has_refusal : Bool
   /// Stable item id per output_index: OpenAI-compatible providers can rotate
   /// opaque item ids between events while output_index stays stable
   /// (AI SDK #18548).
@@ -68,6 +69,7 @@ fn openai_responses_stream_runtime(
     ),
     emit_raw_chunks,
     raw_event: None,
+    has_refusal: false,
     item_ids_by_index: Map([]),
   }
 }
@@ -163,6 +165,11 @@ fn OpenAIResponsesStreamRuntime::v4_batch(
       @provider.StreamStart | @provider.Warning(_) => ()
       @provider.Raw(value) => {
         self.raw_event = Some(value)
+        match @provider_utils.json_string_field(value, "type") {
+          Some("response.refusal.delta") | Some("response.refusal.done") =>
+            self.has_refusal = true
+          _ => ()
+        }
         if self.emit_raw_chunks {
           events.push(@provider.V4Raw(value))
         }
@@ -170,11 +177,21 @@ fn OpenAIResponsesStreamRuntime::v4_batch(
           events.push(part)
         }
       }
-      @provider.Finish(..) =>
+      @provider.Finish(reason~, ..) =>
         events.push(
           @provider.V4Finish(
             usage=self.decoder.v4_usage(),
-            reason=self.decoder.v4_finish_reason(),
+            reason=if reason is @provider.Stop &&
+              (
+                self.has_refusal ||
+                openai_responses_json_has_refusal(
+                  self.raw_event.unwrap_or(Json::null()),
+                )
+              ) {
+              { unified: @provider.V4FinishContentFilter, raw: None, }
+            } else {
+              self.decoder.v4_finish_reason()
+            },
             provider_metadata=self.decoder.provider_metadata_snapshot(),
           ),
         )

@@ -49,3 +49,33 @@ test "OpenAI Responses stream metadata uses Azure namespace" {
     "azure": { "itemId": "message-azure" },
   })
 }
+
+///|
+test "OpenAI Responses stream maps refusal content to content filter" {
+  let runtime = openai_responses_stream_runtime(
+    "openai.responses",
+    @provider_utils.ToolNameMapping::identity(),
+    false,
+    false,
+    store=true,
+    id_generator=() => "test-id",
+    approval_tool_call_ids=Map([]),
+  )
+  let _ = runtime.feed_line(
+    "data: {\"type\":\"response.refusal.delta\",\"item_id\":\"message-refusal\",\"delta\":\"Cannot help.\"}",
+  )
+  let _ = runtime.feed_line("")
+  let _ = runtime.feed_line(
+    "data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"output\":[{\"type\":\"message\",\"id\":\"message-refusal\",\"content\":[{\"type\":\"refusal\",\"refusal\":\"Cannot help.\"}]}]}}",
+  )
+  let terminal = runtime.feed_line("")
+  assert_true(
+    terminal.events.any(event => {
+      event
+      is @provider.V4Finish(
+        reason={ unified: @provider.V4FinishContentFilter, .. },
+        ..
+      )
+    }),
+  )
+}

@@ -64,6 +64,40 @@ test "perplexity citations extraction" {
 }
 
 ///|
+test "perplexity none tool choice overrides pass-through server tools" {
+  let model = perplexity_chat_value(
+    "sonar",
+    api_key="test-key",
+    base_url="https://api.perplexity.ai",
+    headers=Map([]),
+    idle_timeout_ms=120_000,
+    http_transport=@provider_utils.native_http_transport(),
+    id_generator=() => "test-id",
+  )
+  let options = @provider.LanguageModelV4CallOptions::new(
+    @provider.LanguageModelV4Prompt::new([
+      @provider.V4UserMessage(
+        content=[@provider.V4PromptText(text="hello", provider_options=Map([]))],
+        provider_options=Map([]),
+      ),
+    ]),
+    tool_choice=@provider.V4ToolChoiceNone,
+    provider_options={
+      "perplexity": {
+        "tools": [{ "type": "function", "name": "lookup" }],
+        "tool_choice": "auto",
+      },
+    },
+  )
+  let (body, _) = model.perplexity_prepare(options)
+  assert_true(body is { "tool_choice": "none", .. })
+  match body {
+    Object(fields) => assert_false(fields.contains("tools"))
+    _ => fail("expected a Perplexity request object")
+  }
+}
+
+///|
 test "perplexity embedding decode maps int8 and binary payloads" {
   // "AAE=" is bytes [0, 1]; "/wA=" is bytes [255, 0] => int8 [-1, 0].
   assert_eq(perplexity_decode_embedding("AAE=", false), [0.0, 1.0])

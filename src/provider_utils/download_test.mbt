@@ -208,7 +208,7 @@ async test "download rejects a redirect to a private address before requesting i
       "https://example.com/source": @provider_utils.HttpResponse::text(
         status_code=302,
         body="",
-        headers={ "location": "http://127.0.0.1/secret" },
+        headers={ "location": "https://127.0.0.1/secret" },
       ),
     },
     requests: [],

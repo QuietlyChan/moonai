@@ -107,6 +107,13 @@ fn PerplexityLanguageModel::perplexity_prepare(
   for entry in resolution.values.iter2() {
     fields[entry.0] = entry.1
   }
+  match options.tool_choice {
+    Some(@provider.V4ToolChoiceNone) => {
+      fields.remove("tools")
+      fields["tool_choice"] = Json::string("none")
+    }
+    _ => ()
+  }
   (Json::object(fields), warnings)
 }
 

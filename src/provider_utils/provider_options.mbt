@@ -48,6 +48,38 @@ fn copy_json_map(values : Map[String, Json]) -> Map[String, Json] {
 }
 
 ///|
+/// Resolve every matching namespace in order, allowing later aliases to
+/// override earlier fields. This mirrors AI SDK's `resolution: "merge"`
+/// behavior for providers that accept canonical and legacy option keys.
+pub fn resolve_provider_options_merge(
+  options : Map[String, Json],
+  namespaces : Array[String],
+  reserved_fields~ : Array[String] = [],
+) -> ProviderOptionsResolution {
+  let mut result : ProviderOptionsResolution? = None
+  let resolved_namespaces : Array[String] = []
+  for key in namespaces {
+    if contains_string(resolved_namespaces, key) {
+      continue
+    }
+    resolved_namespaces.push(key)
+    let layer = resolve_provider_options(
+      options,
+      provider_name=key,
+      reserved_fields~,
+      prefer_exact_provider_name=true,
+    )
+    result = Some(
+      match result {
+        Some(existing) => merge_provider_options_resolutions(existing, layer)
+        None => layer
+      },
+    )
+  }
+  result.unwrap_or({ values: Map([]), warnings: [], namespace_key: None, })
+}
+
+///|
 /// Extract the provider-options namespace from a provider identifier.
 ///
 /// AI SDK providers append model or implementation qualifiers after the first

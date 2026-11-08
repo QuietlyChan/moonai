@@ -802,6 +802,7 @@ async fn download_file_once(
         )
       }
       let next_url = resolve_download_redirect(current_url, location)
+      ensure_secure_download_redirect(current_url, next_url)
       request_headers = download_redirect_headers(
         request_headers, current_url, next_url,
       )
@@ -1209,6 +1210,7 @@ async fn get_json_protected_once(
         )
       }
       let next_url = resolve_download_redirect(current_url, location)
+      ensure_secure_download_redirect(current_url, next_url)
       request_headers = download_redirect_headers(
         request_headers, current_url, next_url,
       )

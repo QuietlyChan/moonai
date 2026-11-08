@@ -243,7 +243,7 @@ pub async fn stream_text(
       }
     }
 
-    let stream_result = prepared_step.model.do_stream(call_options, event => {
+    let raw_stream_result = prepared_step.model.do_stream(call_options, event => {
       accumulator.process(event)
       match event {
         @provider.V4TextDelta(delta~, ..) => deliver_output_delta(delta)
@@ -280,6 +280,10 @@ pub async fn stream_text(
         _ => ()
       }
     })
+    let stream_result = @provider.LanguageModelV4StreamResult::new(
+      @provider_utils.sanitize_request_metadata(raw_stream_result.request),
+      raw_stream_result.response,
+    )
     // Flush any buffered text once the provider stream ends.
     match smoother {
       Some(transformer) =>

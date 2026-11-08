@@ -61,6 +61,59 @@ test "decode the public OpenAI-compatible error data shape" {
 }
 
 ///|
+test "compatible refusal text changes stop finish reason to content filter" {
+  let decoded = decode_compatible_test_response({
+    "choices": [
+      {
+        "message": {
+          "role": "assistant",
+          "content": Json::null(),
+          "refusal": "Blocked",
+        },
+        "finish_reason": "stop",
+      },
+    ],
+  })
+  assert_eq(decoded.text, "Blocked")
+  assert_eq(decoded.finish_reason, @provider.ContentFilter)
+}
+
+///|
+test "compatible non-string refusal values are ignored" {
+  let decoded = decode_compatible_test_response({
+    "choices": [
+      {
+        "message": {
+          "role": "assistant",
+          "content": "answer",
+          "refusal": false,
+        },
+        "finish_reason": "stop",
+      },
+    ],
+  })
+  assert_eq(decoded.text, "answer")
+  assert_eq(decoded.finish_reason, @provider.Stop)
+}
+
+///|
+test "compatible streaming refusal is emitted as text and maps finish reason" {
+  let decoder = compatible_test_stream_decoder(text_stream_id="txt-0")
+  let _ = decoder.feed_line(
+    "data: {\"choices\":[{\"delta\":{\"refusal\":\"Blocked\"},\"finish_reason\":\"stop\"}]}",
+  )
+  let chunk = decoder.feed_line("")
+  assert_true(
+    chunk.events.any(event => {
+      event is @provider.V4TextDelta(id="txt-0", delta="Blocked", ..)
+    }),
+  )
+  assert_true(
+    decoder.v4_finish_reason().unified is @provider.V4FinishContentFilter,
+  )
+}
+
+///|
 test "stream usage converters receive omitted usage as None" {
   let decoder = compatible_test_stream_decoder(convert_usage=usage => {
     match usage {

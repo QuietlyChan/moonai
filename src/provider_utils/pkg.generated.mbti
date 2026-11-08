@@ -286,6 +286,8 @@ pub fn resolve_provider_options(Map[String, @json.Json], provider_name? : String
 
 pub fn resolve_provider_options_key(String, Map[String, @json.Json]) -> String
 
+pub fn resolve_provider_options_merge(Map[String, @json.Json], Array[String], reserved_fields? : Array[String]) -> ProviderOptionsResolution
+
 pub fn resolve_provider_reference(@provider.ProviderReference, String) -> String raise @provider.NoSuchProviderReferenceError
 
 pub fn resolve_transcription_audio(@provider.TranscriptionAudio) -> Bytes raise
@@ -305,6 +307,8 @@ pub fn[T] safe_validate_types(@json.Json, (@json.Json) -> T raise, context? : @p
 pub fn sanitizeRequestHeaders(Map[String, String]) -> Map[String, String]
 
 pub fn sanitize_request_headers(Map[String, String]) -> Map[String, String]
+
+pub fn sanitize_request_metadata(@provider.RequestMetadata?) -> @provider.RequestMetadata?
 
 pub fn serializeTranscriptionStreamAudioDoneFrame() -> String
 

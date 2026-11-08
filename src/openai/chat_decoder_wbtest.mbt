@@ -171,6 +171,102 @@ test "official OpenAI Chat decodes citations and detailed usage" {
 }
 
 ///|
+test "official OpenAI Chat exposes refusal text and maps stop to content filter" {
+  let decoded = decode_openai_chat_response(
+    {
+      "choices": [
+        {
+          "message": {
+            "role": "assistant",
+            "content": Json::null(),
+            "refusal": "Cannot help with that request.",
+          },
+          "finish_reason": "stop",
+        },
+      ],
+    },
+    "openai.chat",
+    () => "generated-id",
+  )
+  assert_true(decoded.finish_reason.unified is @provider.V4FinishContentFilter)
+  assert_true(
+    decoded.content.any(part => {
+      part
+      is @provider.V4TextOutput({ text: "Cannot help with that request.", .. })
+    }),
+  )
+}
+
+///|
+test "official OpenAI Chat combines content and refusal token logprobs" {
+  let decoded = decode_openai_chat_response(
+    {
+      "choices": [
+        {
+          "message": {
+            "role": "assistant",
+            "content": "answer",
+            "refusal": "blocked",
+          },
+          "finish_reason": "stop",
+          "logprobs": {
+            "content": [{ "token": "answer" }],
+            "refusal": [{ "token": "blocked" }],
+          },
+        },
+      ],
+    },
+    "openai.chat",
+    () => "generated-id",
+  )
+  json_inspect(decoded.provider_metadata["openai"], content={
+    "logprobs": [{ "token": "answer" }, { "token": "blocked" }],
+  })
+}
+
+///|
+test "official OpenAI Chat streams refusal chunks as text and content filter" {
+  let decoder = OpenAIChatStreamDecoder::new(
+    include_raw_chunks=false,
+    provider_name="openai.chat",
+    id_generator=() => "generated-id",
+  )
+  let _ = decoder.feed_line(
+    "data: {\"choices\":[{\"delta\":{\"refusal\":\"Blocked\"},\"finish_reason\":\"stop\"}]}",
+  )
+  let chunk = decoder.feed_line("")
+  assert_true(
+    chunk.events.any(event => {
+      event is @provider.V4TextDelta(id="0", delta="Blocked", ..)
+    }),
+  )
+  assert_true(
+    decoder.v4_finish_reason().unified is @provider.V4FinishContentFilter,
+  )
+}
+
+///|
+test "official OpenAI Chat stream maps stop after a refusal to content filter" {
+  let decoder = OpenAIChatStreamDecoder::new(
+    include_raw_chunks=false,
+    provider_name="openai.chat",
+    id_generator=() => "generated-id",
+  )
+  let _ = decoder.feed_line(
+    "data: {\"choices\":[{\"delta\":{\"refusal\":\"Blocked\"},\"finish_reason\":null}]}",
+  )
+  let _ = decoder.feed_line("")
+  let _ = decoder.feed_line(
+    "data: {\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\"}]}",
+  )
+  let _ = decoder.feed_line("")
+  assert_eq(decoder.v4_finish_reason().raw, Some("stop"))
+  assert_true(
+    decoder.v4_finish_reason().unified is @provider.V4FinishContentFilter,
+  )
+}
+
+///|
 test "official OpenAI Chat stream owns metadata citations tools and usage" {
   let decoder = OpenAIChatStreamDecoder::new(
     include_raw_chunks=true,

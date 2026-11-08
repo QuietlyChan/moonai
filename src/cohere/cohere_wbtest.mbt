@@ -32,6 +32,114 @@ test "cohere usage prefers tokens totals" {
 }
 
 ///|
+test "cohere usage leaves billed units out of token totals and preserves cache" {
+  let usage = cohere_usage(
+    Some({
+      "billed_units": { "input_tokens": 12, "output_tokens": 7 },
+      "cached_tokens": 4,
+    }),
+  )
+  assert_eq(usage.input_tokens.total, None)
+  assert_eq(usage.input_tokens.no_cache, None)
+  assert_eq(usage.input_tokens.cache_read, Some(4))
+  assert_eq(usage.output_tokens.total, None)
+}
+
+///|
+test "cohere chat response id prefers v2 id and falls back to v1 generation_id" {
+  assert_eq(
+    cohere_chat_response_id({ "id": "v2-id", "generation_id": "v1-id" }),
+    Some("v2-id"),
+  )
+  assert_eq(
+    cohere_chat_response_id({ "generation_id": "v1-id" }),
+    Some("v1-id"),
+  )
+  assert_eq(
+    cohere_chat_response_id({ "id": Json::null(), "generation_id": "v1-id" }),
+    Some("v1-id"),
+  )
+  assert_eq(cohere_chat_response_id({}), None)
+}
+
+///|
+test "cohere reranking accepts results without response metadata" {
+  assert_eq(
+    decode_cohere_rerank_response({
+      "results": [
+        { "index": 2, "relevance_score": 0.95 },
+        { "index": 0, "relevance_score": 0.42 },
+      ],
+    }),
+    [
+      @provider.RerankingModelV4Ranking::new(2, 0.95),
+      @provider.RerankingModelV4Ranking::new(0, 0.42),
+    ],
+  )
+}
+
+///|
+test "cohere citations preserve document metadata and skip tool-only sources" {
+  let sources = cohere_citation_contents(
+    Some(
+      Json::array([
+        {
+          "start": 1,
+          "end": 4,
+          "text": "Bit",
+          "sources": [
+            { "type": "document", "document": { "title": "guide.txt" } },
+          ],
+          "type": "TEXT_CONTENT",
+        },
+        { "sources": [{ "type": "tool", "tool_output": { "ok": true } }] },
+      ]),
+    ),
+    () => "citation-id",
+  )
+  assert_eq(sources.length(), 1)
+  assert_true(
+    sources[0]
+    is @provider.V4SourceOutput(
+      @provider.V4DocumentSource(
+        id="citation-id",
+        title="guide.txt",
+        provider_metadata={
+          "cohere": {
+            "start": 1,
+            "end": 4,
+            "text": "Bit",
+            "sources": [
+              {
+                "type": "document",
+                "document": { "title": "guide.txt", .. },
+                ..
+              },
+            ],
+            "citationType": "TEXT_CONTENT",
+            ..
+          },
+          ..
+        },
+        ..
+      )
+    ),
+  )
+}
+
+///|
+test "cohere citation stream emits document sources and tolerates missing citations" {
+  let decoder = CohereStreamDecoder::new(false, () => "stream-citation-id")
+  let _ = decoder.feed_line(
+    "data: {\"type\":\"citation-start\",\"index\":0,\"delta\":{\"message\":{\"citations\":{\"sources\":[{\"type\":\"document\",\"document\":{}}]}}}}",
+  )
+  let source_events = decoder.feed_line("").events
+  assert_true(source_events.any(event => event is @provider.V4SourceReady(_)))
+  let _ = decoder.feed_line("data: {\"type\":\"citation-start\",\"index\":0}")
+  assert_true(decoder.feed_line("").events.is_empty())
+}
+
+///|
 test "cohere tool call fields extraction" {
   assert_eq(
     cohere_tool_call_fields({
