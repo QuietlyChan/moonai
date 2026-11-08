@@ -22,6 +22,14 @@ pub fn gateway(String, api_key? : String, base_url? : String, headers? : Map[Str
 
 // Types and methods
 type GatewayBatch
+pub async fn GatewayBatch::do_cancel_batch(Self, @provider.BatchV4OperationOptions) -> @provider.BatchV4CancelResult
+pub async fn GatewayBatch::do_get_batch_results(Self, @provider.BatchV4OperationOptions) -> Array[@provider.BatchV4ItemResult]
+pub async fn GatewayBatch::do_get_batch_status(Self, @provider.BatchV4OperationOptions) -> @provider.BatchV4Status
+pub async fn GatewayBatch::do_list_batches(Self, @provider.BatchV4ListOptions) -> @provider.BatchV4ListResult
+pub async fn GatewayBatch::do_start_batch(Self, @provider.BatchV4StartOptions) -> @provider.BatchV4StartResult
+pub fn GatewayBatch::provider(Self) -> String
+pub fn GatewayBatch::specification_version(Self) -> String
+pub fn GatewayBatch::supported_urls(Self) -> Array[@provider.SupportedUrlRule]
 pub impl @provider.BatchV4 for GatewayBatch
 
 type GatewayEmbeddingModel
@@ -69,16 +77,14 @@ pub fn GatewayProvider::language_model(Self, String) -> &@provider.LanguageModel
 pub fn GatewayProvider::reranking(Self, String) -> &@provider.RerankingModelV4
 pub fn GatewayProvider::rerankingModel(Self, String) -> &@provider.RerankingModelV4
 pub fn GatewayProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4
+pub fn GatewayProvider::skills(Self) -> &@provider.SkillsV4? raise
+pub fn GatewayProvider::specification_version(Self) -> String
 pub fn GatewayProvider::speech(Self, String) -> &@provider.SpeechModelV4
 pub fn GatewayProvider::speechModel(Self, String) -> &@provider.SpeechModelV4
 pub fn GatewayProvider::speech_model(Self, String) -> &@provider.SpeechModelV4
 pub fn GatewayProvider::transcription(Self, String) -> &@provider.TranscriptionModelV4
 pub fn GatewayProvider::transcriptionModel(Self, String) -> &@provider.TranscriptionModelV4
 pub fn GatewayProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4
-pub fn GatewayProvider::skills(Self) -> &@provider.SkillsV4? raise
-pub fn GatewayProvider::specification_version(Self) -> String
-pub fn GatewayProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
-pub fn GatewayProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
 pub impl @provider.ProviderV4 for GatewayProvider
 
 type GatewayRerankingModel
@@ -89,8 +95,13 @@ pub fn GatewayRerankingModel::specification_version(Self) -> String
 pub impl @provider.RerankingModelV4 for GatewayRerankingModel
 
 type GatewaySpeechModel
+pub async fn GatewaySpeechModel::do_generate(Self, @provider.SpeechModelV4CallOptions) -> @provider.SpeechModelV4Result
+pub fn GatewaySpeechModel::model_id(Self) -> String
+pub fn GatewaySpeechModel::provider(Self) -> String
+pub fn GatewaySpeechModel::specification_version(Self) -> String
 pub impl @provider.SpeechModelV4 for GatewaySpeechModel
 
+#derive(Eq, @debug.Debug)
 pub(all) enum GatewaySpendGroupBy {
   SpendDay
   SpendUser
@@ -98,14 +109,18 @@ pub(all) enum GatewaySpendGroupBy {
   SpendTag
   SpendProvider
   SpendCredentialType
-} derive(Eq, @debug.Debug)
+}
+pub fn GatewaySpendGroupBy::equal(Self, Self) -> Bool
+pub fn GatewaySpendGroupBy::not_equal(Self, Self) -> Bool
+pub fn GatewaySpendGroupBy::to_repr(Self) -> @debug.Repr
 
 pub struct GatewaySpendReport {
   // private fields
 }
 pub async fn GatewaySpendReport::get_spend_report(Self, params~ : GatewaySpendReportParams) -> Array[GatewaySpendReportRow]
-pub fn GatewaySpendReport::new(api_key~ : String, base_url~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int, http_transport~ : &@provider_utils.HttpTransport) -> Self
+pub fn GatewaySpendReport::new(api_key~ : String, base_url~ : String, headers~ : Map[String, String], idle_timeout_ms~ : Int32, http_transport~ : &@provider_utils.HttpTransport) -> Self
 
+#derive(@debug.Debug)
 pub(all) struct GatewaySpendReportParams {
   start_date : String
   end_date : String
@@ -116,8 +131,10 @@ pub(all) struct GatewaySpendReportParams {
   provider : String?
   credential_type : String?
   tags : Array[String]?
-} derive(@debug.Debug)
+}
+pub fn GatewaySpendReportParams::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct GatewaySpendReportRow {
   day : String?
   hour : String?
@@ -128,15 +145,21 @@ pub(all) struct GatewaySpendReportRow {
   credential_type : String?
   total_cost : Double
   market_cost : Double?
-  input_tokens : Int?
-  output_tokens : Int?
-  cached_input_tokens : Int?
-  cache_creation_input_tokens : Int?
-  reasoning_tokens : Int?
-  request_count : Int?
-} derive(@debug.Debug)
+  input_tokens : Int32?
+  output_tokens : Int32?
+  cached_input_tokens : Int32?
+  cache_creation_input_tokens : Int32?
+  reasoning_tokens : Int32?
+  request_count : Int32?
+}
+pub fn GatewaySpendReportRow::to_repr(Self) -> @debug.Repr
 
 type GatewayTranscriptionModel
+pub async fn GatewayTranscriptionModel::do_generate(Self, @provider.TranscriptionModelV4CallOptions) -> @provider.TranscriptionModelV4Result
+pub async fn GatewayTranscriptionModel::do_stream(Self, @provider.TranscriptionModelV4StreamOptions, async (@provider.TranscriptionModelV4StreamPart) -> Unit) -> @provider.TranscriptionModelV4StreamResult
+pub fn GatewayTranscriptionModel::model_id(Self) -> String
+pub fn GatewayTranscriptionModel::provider(Self) -> String
+pub fn GatewayTranscriptionModel::specification_version(Self) -> String
 pub impl @provider.TranscriptionModelV4 for GatewayTranscriptionModel
 
 // Type aliases

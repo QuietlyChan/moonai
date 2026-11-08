@@ -275,7 +275,6 @@ pub extend XaiProvider with @QuietlyChan/moonai/provider.ProviderV4::{
   reranking_model,
   embedding_model,
   speech_model,
-  files,
   transcription_model,
   skills,
 }

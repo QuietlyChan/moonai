@@ -38,7 +38,7 @@ test "gateway provider exposes image models" {
 
 ///|
 test "gateway provider exposes speech and transcription models" {
-  let provider = create_gateway(api_key="gw-test")
+  let provider = @gateway.create_gateway(api_key="gw-test")
   let speech = provider.speech("elevenlabs/eleven_turbo_v2_5")
   assert_eq(speech.provider(), "gateway")
   assert_eq(speech.model_id(), "elevenlabs/eleven_turbo_v2_5")
@@ -49,7 +49,7 @@ test "gateway provider exposes speech and transcription models" {
 
 ///|
 test "gateway provider exposes batch surface" {
-  let provider = create_gateway(api_key="gw-test")
+  let provider = @gateway.create_gateway(api_key="gw-test")
   let batch = provider.batch()
   assert_eq(batch.provider(), "gateway.batch")
   assert_eq(batch.specification_version(), "v4")

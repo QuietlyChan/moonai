@@ -289,6 +289,9 @@ pub(all) struct LogWarningsOptions {
   provider : String?
   model : String?
 }
+pub fn LogWarningsOptions::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub(all) enum ObjectGenerationFailure {
   EmptyResponse
   InvalidJson(message~ : String)
@@ -389,10 +392,10 @@ pub struct UiMessageStream {
   // private fields
 }
 pub fn UiMessageStream::close(Self) -> Unit
-pub fn UiMessageStream::enqueue(Self, Json) -> Unit
-pub fn UiMessageStream::length(Self) -> Int
+pub fn UiMessageStream::enqueue(Self, @json.Json) -> Unit
+pub fn UiMessageStream::length(Self) -> Int32
 pub fn UiMessageStream::new() -> Self
-pub fn UiMessageStream::to_chunks(Self) -> Array[Json]
+pub fn UiMessageStream::to_chunks(Self) -> Array[@json.Json]
 pub fn UiMessageStream::to_sse(Self) -> String
 
 // Type aliases

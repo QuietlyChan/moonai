@@ -27,7 +27,7 @@ test "google provider exposes image generation models" {
 
 ///|
 test "google provider exposes video models (Veo)" {
-  let provider = create_google(api_key="g-test")
+  let provider = @google.create_google(api_key="g-test")
   let video = provider.video("veo-3.0-generate-001")
   assert_eq(video.provider(), "google.video")
   assert_eq(video.model_id(), "veo-3.0-generate-001")

@@ -32,6 +32,9 @@ pub(all) struct LogWarningsOptions {
 }
 
 ///|
+pub extend LogWarningsOptions with @debug.Debug::{to_repr}
+
+///|
 /// Log model-provider warnings through the default logger: warnings go to
 /// the warning sink, the informational first-call banner goes to the info
 /// sink (each emitted once per process, matching upstream

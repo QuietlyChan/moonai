@@ -139,3 +139,11 @@ pub impl @provider.SpeechModelV4 for GatewaySpeechModel with fn do_generate(
     ),
   )
 }
+
+///|
+pub extend GatewaySpeechModel with @provider.SpeechModelV4::{
+  specification_version,
+  provider,
+  model_id,
+  do_generate,
+}

@@ -11,6 +11,12 @@ pub(all) enum GatewaySpendGroupBy {
 }
 
 ///|
+pub extend GatewaySpendGroupBy with Eq::{equal, not_equal}
+
+///|
+pub extend GatewaySpendGroupBy with @debug.Debug::{to_repr}
+
+///|
 fn gateway_spend_group_by_name(group_by~ : GatewaySpendGroupBy) -> String {
   match group_by {
     SpendDay => "day"
@@ -38,6 +44,9 @@ pub(all) struct GatewaySpendReportParams {
 }
 
 ///|
+pub extend GatewaySpendReportParams with @debug.Debug::{to_repr}
+
+///|
 /// One spend-report row. Only the fields relevant to the chosen group_by
 /// dimension are present.
 #derive(Debug)
@@ -58,6 +67,9 @@ pub(all) struct GatewaySpendReportRow {
   reasoning_tokens : Int32?
   request_count : Int32?
 }
+
+///|
+pub extend GatewaySpendReportRow with @debug.Debug::{to_repr}
 
 ///|
 fn gateway_spend_origin(base_url~ : String) -> String? {

@@ -28,7 +28,7 @@ test "xai provider exposes video models" {
 
 ///|
 test "xai provider exposes files surface" {
-  let provider = create_xai(api_key="sk-test")
+  let provider = @xai.create_xai(api_key="sk-test")
   let files = provider.files()
   assert_eq(files.provider(), "xai")
   assert_eq(files.specification_version(), "v4")

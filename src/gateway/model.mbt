@@ -374,8 +374,6 @@ pub fn GatewayProvider::rerankingModel(
 ///|
 pub extend GatewayProvider with @QuietlyChan/moonai/provider.ProviderV4::{
   specification_version,
-  speech_model,
   files,
-  transcription_model,
   skills,
 }

@@ -503,3 +503,15 @@ pub impl @provider.BatchV4 for GatewayBatch with fn do_list_batches(
     functionality="gateway batch list",
   )
 }
+
+///|
+pub extend GatewayBatch with @provider.BatchV4::{
+  specification_version,
+  provider,
+  supported_urls,
+  do_start_batch,
+  do_get_batch_status,
+  do_get_batch_results,
+  do_cancel_batch,
+  do_list_batches,
+}

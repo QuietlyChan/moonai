@@ -65,17 +65,24 @@ pub fn GoogleProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn GoogleProvider::image_model(Self, String) -> &@provider.ImageModelV4
 pub fn GoogleProvider::languageModel(Self, String) -> &@provider.LanguageModelV4
 pub fn GoogleProvider::language_model(Self, String) -> &@provider.LanguageModelV4
-pub fn GoogleProvider::video(Self, String) -> &@provider.VideoModelV4
-pub fn GoogleProvider::videoModel(Self, String) -> &@provider.VideoModelV4
-pub fn GoogleProvider::video_model(Self, String) -> &@provider.VideoModelV4
 pub fn GoogleProvider::reranking_model(Self, String) -> &@provider.RerankingModelV4? raise
 pub fn GoogleProvider::skills(Self) -> &@provider.SkillsV4? raise
 pub fn GoogleProvider::specification_version(Self) -> String
 pub fn GoogleProvider::speech_model(Self, String) -> &@provider.SpeechModelV4? raise
 pub fn GoogleProvider::transcription_model(Self, String) -> &@provider.TranscriptionModelV4? raise
+pub fn GoogleProvider::video(Self, String) -> &@provider.VideoModelV4
+pub fn GoogleProvider::videoModel(Self, String) -> &@provider.VideoModelV4
+pub fn GoogleProvider::video_model(Self, String) -> &@provider.VideoModelV4
 pub impl @provider.ProviderV4 for GoogleProvider
 
 type GoogleVideoModel
+pub async fn GoogleVideoModel::do_generate(Self, @provider.VideoModelV4CallOptions) -> @provider.VideoModelV4Result
+pub async fn GoogleVideoModel::do_start(Self, @provider.VideoModelV4CallOptions) -> @provider.VideoModelV4OperationStartResult
+pub async fn GoogleVideoModel::do_status(Self, @provider.VideoModelV4OperationStatusCallOptions) -> @provider.VideoModelV4OperationStatusResult
+pub fn GoogleVideoModel::max_videos_per_call(Self) -> Int32?
+pub fn GoogleVideoModel::model_id(Self) -> String
+pub fn GoogleVideoModel::provider(Self) -> String
+pub fn GoogleVideoModel::specification_version(Self) -> String
 pub impl @provider.VideoModelV4 for GoogleVideoModel
 
 // Type aliases

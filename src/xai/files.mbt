@@ -261,3 +261,13 @@ pub impl @provider.FilesV4 for XaiFiles with fn delete_file(self, options) -> @p
   ignore(response)
   @provider.FilesV4DeleteFileResult::new(file_id=options.file_id, deleted=true)
 }
+
+///|
+pub extend XaiFiles with @provider.FilesV4::{
+  specification_version,
+  provider,
+  upload_file,
+  get_file_metadata,
+  download_file,
+  delete_file,
+}

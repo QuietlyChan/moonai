@@ -158,10 +158,10 @@ async test "rerank attributes runtime context through lifecycle events (#20583)"
 test "cosine similarity matches upstream semantics" {
   let a : Array[Double] = [0.1, 0.2, 0.3]
   let b : Array[Double] = [0.1, 0.2, 0.3]
-  let same = cosine_similarity(vector1=a, vector2=b)
+  let same = @ai.cosine_similarity(vector1=a, vector2=b)
   assert_true(same > 0.999)
-  assert_eq(cosine_similarity(vector1=[0.0, 0.0, 0.0], vector2=a), 0.0)
-  try cosine_similarity(vector1=[1.0], vector2=[1.0, 2.0]) catch {
+  assert_eq(@ai.cosine_similarity(vector1=[0.0, 0.0, 0.0], vector2=a), 0.0)
+  try @ai.cosine_similarity(vector1=[1.0], vector2=[1.0, 2.0]) catch {
     error => {
       let text = @debug.to_string(error)
       println("BB_PROBE=\{text}")
@@ -174,11 +174,11 @@ test "cosine similarity matches upstream semantics" {
 
 ///|
 test "split array chunks to the requested size" {
-  let chunks = split_array(array=["a", "b", "c", "d", "e"], chunk_size=2)
+  let chunks = @ai.split_array(array=["a", "b", "c", "d", "e"], chunk_size=2)
   assert_eq(chunks.length(), 3)
   assert_eq(chunks[0], ["a", "b"])
   assert_eq(chunks[2], ["e"])
-  try split_array(array=["a"], chunk_size=0) catch {
+  try @ai.split_array(array=["a"], chunk_size=0) catch {
     error => {
       let text = @debug.to_string(error)
       assert_true(text.contains("chunkSize"))
@@ -190,7 +190,7 @@ test "split array chunks to the requested size" {
 
 ///|
 test "ui message stream encodes sse frames and closes" {
-  let stream = UiMessageStream::new()
+  let stream = @ai.UiMessageStream::new()
   stream.enqueue({ "type": "text-start", "id": "t0" })
   stream.enqueue({ "type": "text-delta", "id": "t0", "delta": "hi" })
   stream.enqueue({ "type": "text-end", "id": "t0" })

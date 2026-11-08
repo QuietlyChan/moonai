@@ -174,3 +174,12 @@ pub impl @provider.TranscriptionModelV4 for GatewayTranscriptionModel with fn do
     functionality="gateway transcription realtime streaming",
   )
 }
+
+///|
+pub extend GatewayTranscriptionModel with @provider.TranscriptionModelV4::{
+  specification_version,
+  provider,
+  model_id,
+  do_generate,
+  do_stream,
+}

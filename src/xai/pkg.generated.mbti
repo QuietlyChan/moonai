@@ -41,6 +41,12 @@ pub fn XaiChatLanguageModel::supported_urls(Self) -> Array[@provider.SupportedUr
 pub impl @provider.LanguageModelV4 for XaiChatLanguageModel
 
 type XaiFiles
+pub async fn XaiFiles::delete_file(Self, @provider.FilesV4DeleteFileCallOptions) -> @provider.FilesV4DeleteFileResult
+pub async fn XaiFiles::download_file(Self, @provider.FilesV4DownloadFileCallOptions) -> @provider.FilesV4DownloadFileResult
+pub async fn XaiFiles::get_file_metadata(Self, @provider.FilesV4GetFileMetadataCallOptions) -> @provider.FilesV4FileMetadata
+pub fn XaiFiles::provider(Self) -> String
+pub fn XaiFiles::specification_version(Self) -> String
+pub async fn XaiFiles::upload_file(Self, @provider.FilesV4UploadFileCallOptions) -> @provider.FilesV4UploadFileResult
 pub impl @provider.FilesV4 for XaiFiles
 
 type XaiImageModel
@@ -56,9 +62,8 @@ pub struct XaiProvider {
 }
 pub fn XaiProvider::chat(Self, String) -> &@provider.LanguageModelV4
 pub fn XaiProvider::chatModel(Self, String) -> &@provider.LanguageModelV4
-pub fn XaiProvider::files(Self) -> &@provider.FilesV4
 pub fn XaiProvider::embedding_model(Self, String) -> &@provider.EmbeddingModelV4 raise
-pub fn XaiProvider::files(Self) -> &@provider.FilesV4? raise
+pub fn XaiProvider::files(Self) -> &@provider.FilesV4
 pub fn XaiProvider::image(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::imageModel(Self, String) -> &@provider.ImageModelV4
 pub fn XaiProvider::image_model(Self, String) -> &@provider.ImageModelV4

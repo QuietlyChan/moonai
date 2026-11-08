@@ -314,3 +314,14 @@ pub impl @provider.VideoModelV4 for GoogleVideoModel with fn do_status(
     ),
   )
 }
+
+///|
+pub extend GoogleVideoModel with @provider.VideoModelV4::{
+  specification_version,
+  provider,
+  model_id,
+  max_videos_per_call,
+  do_generate,
+  do_start,
+  do_status,
+}
