@@ -223,7 +223,7 @@ async test "download rejects a redirect to a private address before requesting i
     )
   catch {
     @provider_utils.DownloadError(url~, message~, ..) => {
-      assert_eq(url, "http://127.0.0.1/secret")
+      assert_eq(url, "https://127.0.0.1/secret")
       assert_true(message.contains("not allowed"))
     }
     error => fail("unexpected download error: \{@debug.to_string(error)}")
